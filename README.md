@@ -1,4 +1,4 @@
-ohi-deploywebapps
+ohi-webapps
 =================
 
 Deploy OHI web apps
