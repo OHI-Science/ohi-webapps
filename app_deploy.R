@@ -47,7 +47,7 @@ last_updated: %s
 
 if (action == 'deploy'){
   # deploy to web
-  deployApp(appDir=dir_app, appName=url_suffix, upload=T, launch.browser=T)
+  deployApp(appDir=dir_app, appName=url_suffix, upload=T, launch.browser=F, lint=F)
   # publishes to http://ohi-science.shinyapps.io/[url_suffix]  
 } else if (action == 'test-web') {
   # test locally, with just Data tab for web deployment
