@@ -101,56 +101,55 @@ OBJECTID,rgn_id,rgn_name,gadm_count,NAME_0
 152,161,Wallis and Futuna,6.0,Wallis and Futuna
 153,162,New Zealand,448.0,New Zealand
 154,163,United States,3150.0,United States
-155,163,United States,3150.0,United States
-156,164,Belize,6.0,Belize
-157,166,Jamaica,14.0,Jamaica
-158,167,Guyana,116.0,Guyana
-159,168,Suriname,62.0,Suriname
-160,169,French Guiana,21.0,French Guiana
-161,171,Brazil,10195.0,Brazil
-162,172,Argentina,503.0,Argentina
-163,173,Uruguay,204.0,Uruguay
-164,174,Finland,438.0,Finland
-165,175,Denmark,248.0,Denmark
-166,176,Germany,434.0,Germany
-167,177,Netherlands,491.0,Netherlands
-168,178,Poland,376.0,Poland
-169,179,France,36614.0,France
-170,180,United Kingdom,192.0,United Kingdom
-171,181,Ireland,26.0,Ireland
-172,182,Spain,8298.0,Spain
-173,183,Portugal,4260.0,Portugal
-174,184,Italy,8102.0,Italy
-175,185,Monaco,3.0,Monaco
-176,186,Montenegro,21.0,Montenegro
-177,187,Croatia,562.0,Croatia
-178,188,Slovenia,192.0,Slovenia
-179,189,Lithuania,48.0,Lithuania
-180,190,Qatar,9.0,Qatar
-181,191,Iran,268.0,Iran
-182,192,Iraq,102.0,Iraq
-184,194,Guinea,336.0,Guinea
-186,196,Nigeria,775.0,Nigeria
-187,197,Cameroon,58.0,Cameroon
-188,198,Gabon,37.0,Gabon
-189,199,Democratic Republic of the Congo,150.0,Democratic Republic of the Congo
-190,200,Angola,527.0,Angola
-191,202,Tanzania,2800.0,Tanzania
-192,203,India,2300.0,India
-193,204,Bangladesh,463.0,Bangladesh
-194,205,Myanmar,285.0,Myanmar
-195,206,Malaysia,160.0,Malaysia
-196,207,Vietnam,10805.0,Vietnam
-198,209,China,2413.0,China
-199,210,Japan,1813.0,Japan
-202,214,Egypt,26.0,Egypt
-203,215,Jordan,52.0,Jordan
-204,216,Indonesia,444.0,Indonesia
-205,218,Canada,5589.0,Canada
-206,219,Saint Pierre and Miquelon,2.0,Saint Pierre and Miquelon
-209,222,Sweden,286.0,Sweden
-210,223,Norway,438.0,Norway
-211,224,Chile,298.0,Chile
-214,231,East Timor,67.0,East Timor
-215,232,Bosnia and Herzegovina,141.0,Bosnia and Herzegovina
-219,247,Brunei,32.0,Brunei
+155,164,Belize,6.0,Belize
+156,166,Jamaica,14.0,Jamaica
+157,167,Guyana,116.0,Guyana
+158,168,Suriname,62.0,Suriname
+159,169,French Guiana,21.0,French Guiana
+160,171,Brazil,10195.0,Brazil
+161,172,Argentina,503.0,Argentina
+162,173,Uruguay,204.0,Uruguay
+163,174,Finland,438.0,Finland
+164,175,Denmark,248.0,Denmark
+165,176,Germany,434.0,Germany
+166,177,Netherlands,491.0,Netherlands
+167,178,Poland,376.0,Poland
+168,179,France,36614.0,France
+169,180,United Kingdom,192.0,United Kingdom
+170,181,Ireland,26.0,Ireland
+171,182,Spain,8298.0,Spain
+172,183,Portugal,4260.0,Portugal
+173,184,Italy,8102.0,Italy
+174,185,Monaco,3.0,Monaco
+175,186,Montenegro,21.0,Montenegro
+176,187,Croatia,562.0,Croatia
+177,188,Slovenia,192.0,Slovenia
+178,189,Lithuania,48.0,Lithuania
+179,190,Qatar,9.0,Qatar
+180,191,Iran,268.0,Iran
+181,192,Iraq,102.0,Iraq
+183,194,Guinea,336.0,Guinea
+185,196,Nigeria,775.0,Nigeria
+186,197,Cameroon,58.0,Cameroon
+187,198,Gabon,37.0,Gabon
+188,199,Democratic Republic of the Congo,150.0,Democratic Republic of the Congo
+189,200,Angola,527.0,Angola
+190,202,Tanzania,2800.0,Tanzania
+191,203,India,2300.0,India
+192,204,Bangladesh,463.0,Bangladesh
+193,205,Myanmar,285.0,Myanmar
+194,206,Malaysia,160.0,Malaysia
+195,207,Vietnam,10805.0,Vietnam
+197,209,China,2413.0,China
+198,210,Japan,1813.0,Japan
+201,214,Egypt,26.0,Egypt
+202,215,Jordan,52.0,Jordan
+203,216,Indonesia,444.0,Indonesia
+204,218,Canada,5589.0,Canada
+205,219,Saint Pierre and Miquelon,2.0,Saint Pierre and Miquelon
+208,222,Sweden,286.0,Sweden
+209,223,Norway,438.0,Norway
+210,224,Chile,298.0,Chile
+213,231,East Timor,67.0,East Timor
+214,232,Bosnia and Herzegovina,141.0,Bosnia and Herzegovina
+218,247,Brunei,32.0,Brunei

@@ -3,15 +3,32 @@
 # packages
 import arcpy, os, socket, numpy, numpy.lib.recfunctions, pandas, time, re, shutil
 
-# paths
-wd       = 'G:/ohi-webapps'
-dir_tmp  = r'C:\tmp\ohi-webapps'
-gdb      = dir_tmp + '/subcountry.gdb'
-gdb_rgn  = r'C:\tmp\Global\NCEAS-Regions_v2014\geodb.gdb'              # neptune_data:git-annex/Global/NCEAS-Regions_v2014/geodb.gdb
-fc_gadm  = r'C:\tmp\Global\GL-GADM-AdminAreas_v2\data\gadm2.gdb\gadm2' # neptune_data:stable/GL-GADM-AdminAreas_v2/data/gadm2.gdb
-dir_dest = r'\\neptune.nceas.ucsb.edu\data_edit\git-annex\clip-n-ship'
 
- # buffer units dictionary
+# download https://bootstrap.pypa.io/ez_setup.py
+# download https://bootstrap.pypa.io/git_pip.py
+# C:\Python27\ArcGIS10.2\python C:\Users\visitor\Downloads\ez_setup.py
+# C:\Python27\ArcGIS10.2\python C:\Users\visitor\Downloads\get-pip.py
+# C:\Python27\ArcGIS10.2\Scripts\pip install pandas
+# error: Microsoft Visual C++ 9.0 is required (Unable to find vcvarsall.bat). Get it from http://aka.ms/vcpython27
+# pip install pandas
+# cd "C:\Users\visitor\Downloads\dist\pandas-0.14.1"
+# C:\Python27\ArcGIS10.2\python setup.py install --user
+# WORKED: pandas‑0.14.1.win32‑py2.6.exe at http://www.lfd.uci.edu/~gohlke/pythonlibs/#pandas
+# import pandas -> ValueError: numpy.dtype has the wrong size, try recompiling
+# WORKED: numpy‑MKL‑1.9.0.win32‑py2.7.exe at http://www.lfd.uci.edu/~gohlke/pythonlibs/#pandas
+
+
+# paths on NCEAS vis lab machine BUMBLEBEE (and # salacia - BB's Vmware WinXP)
+# mapped N: to \\neptune\data_edit
+wd       = r'C:\Users\visitor\Documents\github\ohi-webapps'       # 'G:/ohi-webapps'
+dir_tmp  = r'C:\Users\visitor\bbest\ohi-webapps'                  # r'C:\tmp\ohi-webapps'
+gdb      = dir_tmp + '/subcountry.gdb'
+dir_rgn  = r'N:\git-annex\Global\NCEAS-Regions_v2014\data' 
+fc_gadm  = r'N:\stable\GL-GADM-AdminAreas_v2\data\gadm2.gdb\gadm2' # r'C:\tmp\Global\GL-GADM-AdminAreas_v2\data\gadm2.gdb\gadm2'
+#gdb_rgn  = r'C:\tmp\Global\NCEAS-Regions_v2014\geodb.gdb'        # neptune_data:git-annex/Global/NCEAS-Regions_v2014/geodb.gdb
+dir_dest = r'N:\git-annex\clip-n-ship'
+
+# buffer units dictionary
 buffers = ['offshore3nm','offshore1km','inland1km','inland25km']
 buf_units_d = {'nm':'NauticalMiles',
                'km':'Kilometers',
@@ -22,17 +39,21 @@ sr_mol = arcpy.SpatialReference('Mollweide (world)') # projected Mollweide (5400
 sr_gcs = arcpy.SpatialReference('WGS 1984')          # geographic coordinate system WGS84 (4326)
 
 # environment
+os.chdir(wd)
 if not os.path.exists('tmp'):  os.makedirs('tmp')
+#if not os.path.exists('data'): os.makedirs('data')
 if not os.path.exists(dir_tmp):  os.makedirs(dir_tmp)
-if not os.path.exists('data'): os.makedirs('data')
 if not arcpy.Exists(gdb):      arcpy.CreateFileGDB_management(os.path.dirname(gdb), os.path.basename(gdb))
 arcpy.env.overwriteOutput        = True
 arcpy.env.workspace              = gdb
-os.chdir(wd)
+
+# copy features to tmp gdb
+for fc in [fc_gadm, dir_rgn + '/rgn_gcs.shp']:
+  arcpy.CopyFeatures_management(fc, os.path.splitext(os.path.basename(fc))[0])
 
 # get list of rgn countries
 df_rgn = pandas.DataFrame(arcpy.da.TableToNumPyArray(
-    gdb_rgn + '/rgn_offshore_gcs',
+    'rgn_gcs',
     ['OBJECTID','rgn_id','rgn_name'],
     "rgn_type = 'eez'"))
 
@@ -40,7 +61,7 @@ df_rgn = pandas.DataFrame(arcpy.da.TableToNumPyArray(
 s_gadm = pandas.Series(
     pandas.DataFrame(
         arcpy.da.TableToNumPyArray(
-            fc_gadm,
+            'gadm2',
             ['NAME_0'])).groupby('NAME_0', as_index=False).size(),
     name = 'gadm_count')
 df_gadm = pandas.DataFrame(s_gadm)
