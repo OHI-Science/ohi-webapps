@@ -6,9 +6,10 @@
 # values$dirs_scenario <- grep('^scenario\\.', list.dirs(path=dir_scenarios, recursive=F), value=T)
 #dirs_scenario = reactiveValues()
 #sel_layer_choices = reactiveValues()
-  
+
 # shinyServer ----
 # Define server logic required to summarize and view the selected dataset
+
 shinyServer(function(input, output, session) {
   
   # scenario directories. monitor filesystem every 5 seconds for folders in dir.conf
@@ -16,6 +17,13 @@ shinyServer(function(input, output, session) {
     invalidateLater(5 * 1000, session)  # 5 seconds, in milliseconds
     dirs_scenario <<- grep('^[^\\.]', basename(list.dirs(path=dir_scenarios, recursive=F)), value=T)
   })
+  
+  output$ui_tabs_invisible = renderUI({
+    #tags$input(id='tabs_invisible', type='hidden', value=ifelse(is.null(tabs_invisible), '', tabs_invisible)) })
+    tags$input(id='tabs_invisible', type='hidden', value=ifelse(is.null(tabs_invisible), '', '')) })
+  
+  #browser()
+  output$showCalculateTab = renderUI({ tags$input(type='hidden', value=ifelse('Calculate' %in% strsplit(tabs_invisible, ', ')[[1]], 'FALSE', 'TRUE')) }) # id='showCalculateTab'
   
   # select layer ----
   observe({
@@ -108,11 +116,11 @@ shinyServer(function(input, output, session) {
       
       v$data  = d
       v$name  = x
-      
       attr(v$name, 'target') = lyr_target
-      v$description = paste0('<b>',lyr_label,'</b>: <em>', 
-                             subset(layers$meta, layer==lyr, description, drop=T),
-                             '</em>')# 'layer description coming soon'      
+      v$description = paste0('<b>',lyr_label,'</b>:', 
+                             #renderMarkdown(text=subset(layers$meta, layer==lyr, description, drop=T)))
+                             #markdownToHTML(text=subset(layers$meta, layer==lyr, description, drop=T), options=c('fragment_only')))
+                             renderMarkdown(file=NULL, text=as.character(subset(layers$meta, layer==lyr, description, drop=T))))
       v$details = ''
       m = subset(layers$meta, layer==input$sel_layer)
       v$layer = lyr
@@ -141,9 +149,6 @@ shinyServer(function(input, output, session) {
     v$summary = sprintf('%s\n\n  count, not NA: %s\n  min: %0.4g\n  mean: %0.4g\n  max: %0.4g\n\n', v$name, length(na.omit(v$data$val_num)), signif(min(v$data$val_num, na.rm=T), 4), mean(v$data$val_num, na.rm=T), max(v$data$val_num, na.rm=T))    
     return(v)
   })
-  
-  
-  
 
   # Data: info
   output$var_description = renderUI({ HTML(GetVar()$description) })
@@ -187,6 +192,250 @@ shinyServer(function(input, output, session) {
     d = cbind(d[,c('rgn_id','rgn_name')], d[,!names(d) %in% c('layer','rgn_id','rgn_name'), drop=F])
     d
   })
+
+  # Goals: aster ----
+  output$aster <- renderPlot(width=800, height=850, {
+    
+    # get rescaled weights from slider inputs
+    wts = get_wts(input)
+    goals.wts = names(wts)
+    cols.wts = cols.goals.all[goals.wts]
+    
+    # get data from results, so far assuming first line of results/regions_goals.csv
+    # TODO: add dropdowns for: 1) different regions, 2) different schemes (ie weights)
+    x = subset(scores, dimension=='score' & region_id==0)
+    scores.wts  = x$score[match(names(wts), as.character(x$goal))] # regions_goals[1, goals.wts]
+    index.score = weighted.mean(scores.wts, wts)
+    
+    # plot aster
+    aster(lengths=scores.wts,
+          max.length=100,
+          widths=wts,
+          disk=0.4,
+          main='Global',
+          fill.col=cols.wts,
+          center=round(index.score),
+          labels=paste(goals.wts, round(scores.wts), sep='\n'),
+          label.cex=1.0,
+          label.offset=0.1,
+          cex=2.2,
+          cex.main=2.5)
+    
+  })
+  
+  # Calculate: write ----
+  output$show_dir_scenario = renderText({ cat(dir_scenario) })
+  observe({
+    if (!'Calculate' %in% strsplit(tabs_invisible, ', ')[[1]]){
+      input$btn_write
+      output$dir_scenario_exists = renderText({file.exists(input$dir_scenario)})
+      output$show_dir_scenario   = renderText({input$dir_scenario})
+      if (input$btn_write == 0){
+        state_btn_write <<- 0
+        #output$dir_scenario_exists = as.character()
+      } else if (input$btn_write != state_btn_write){
+        #output$dir_scenario_exists = as.character(file.exists(dir_scenario))
+        isolate({
+          state_btn_write <<- input$btn_write
+          dir_scenario <<- input$dir_scenario
+          ohicore::WriteScenario(
+            scenario = list(
+              conf = conf, 
+              layers = layers, 
+              scores = scores,
+              spatial = dir_spatial,
+              dir    = dir_scenario))
+        })
+        # = file.exists(dir_scenario)
+      }
+    }
+  })  
+
+#   # Calculate: sel_scenario_dir ----
+#   output$sel_scenario_dir <- renderUI({
+#     selectInput("dir_scenario", sprintf("Select scenario (from %s):", dir_scenarios), 
+#                 values$dirs_scenario, selected=basename(dir_scenario))
+#   })
+   
+#   # Calculate: txt_conf_summary ----
+#   output$txt_conf_summary <- renderPrint({
+#     cat('Scenario:', input$dir_scenario,'\n')
+#     if (is.null(input$dir_scenario)){
+#       config.R = file.path(dir_scenarios, 'conf','config.R')  
+#     } else {
+#       config.R = file.path(dir_scenarios, input$dir_scenario, 'conf','config.R')  
+#     }    
+#     #config.check(config.R)
+#     #config.summary(config.R)
+#   })
+   
+   # Calculate: txt_calc_summary ----
+    observe({
+      
+      if (!'Calculate' %in% strsplit(tabs_invisible, ', ')[[1]]){
+        input$btn_calc      
+        if (input$btn_calc == 0){
+          state_btn_calc <<- 0
+          output$txt_calc_summary <- renderText({''})
+        } else if (input$btn_calc != state_btn_calc){
+          isolate({
+            state_btn_calc <<- input$btn_calc
+            output$txt_calc_summary <- renderText({
+              
+              #browser('server.R -- Calculate: txt_calc_summary')
+              
+              # set scenario vars (previously in scenario.R)
+              scenario=list(
+                conf    = ohicore::Conf(file.path(dir_scenario, "conf")),
+                layers  = ohicore::Layers(file.path(dir_scenario, "layers.csv"), file.path(dir_scenario, "layers")),
+                scores  = read.csv(file.path(dir_scenario, "scores.csv"), na.strings=""),
+                spatial = file.path(dir_scenario, "spatial"),
+                dir     = dir_scenario)
+              layers <<- scenario$layers
+              conf   <<- scenario$conf
+              
+              cat(sprintf('Checking layers: %s)\n  having conf/Config.R/layers_id_fields: %s', file.path(dir_scenario, 'layers.csv'),paste(conf$config$layers_id_fields, collapse=', ')))
+              cat(sprintf('   layers: %s)\n', file.path(dir_scenario, 'layers.csv')))
+              
+              # check and reload layers
+              CheckLayers(file.path(dir_scenario, 'layers.csv'), file.path(dir_scenario, 'layers'), conf$config$layers_id_fields)
+              scenario$layers = layers <<- ohicore::Layers(file.path(dir_scenario, 'layers.csv'), file.path(dir_scenario, 'layers'))            
+              
+              # calculate scores
+              setwd(dir_scenario)
+              scores <<- ohicore::CalculateAll(scenario$conf, scenario$layers, debug=F)
+              write.csv(scores, 'scores.csv', na='', row.names=F)
+              
+              sprintf('Scores calculated and output to: %s', file.path(dir_scenario, 'scores.csv'))
+            })
+          })
+          
+        }
+      }
+    })  
+  
+
+  # Report: ui_report ----
+  output$ui_report = renderUI({
+    if (!'Report' %in% strsplit(tabs_invisible, ', ')[[1]]){      
+      if (file.exists(dir_scenario)){
+        tabPanel(
+            'Report',
+            value='report',
+            p('Reports directory:', verbatimTextOutput(outputId='dir_reports')),
+            textInput('txt_report_fn', 'Report filename to output:', value='report.html'),
+            br('Include:'),
+            checkboxInput('ck_flowers'    , 'Flowers'   , value = T),
+            checkboxInput('ck_tables'     , 'Tables'    , value = T),
+            br('Options:'),
+            checkboxInput('ck_open_html'  , 'Open in new window', value = T),
+            checkboxInput('ck_global_only', 'Global only (vs all regions which takes time)', value = T),
+            checkboxInput('ck_overwrite'  , 'Overwrite existing figures', value = F),
+            # br('Not yet implemented...'),
+            # uiOutput('sel_compare'), # generates dir_conf              
+            # checkboxInput('ck_maps'       , 'Maps'      , value = F),
+            # checkboxInput('ck_histograms' , 'Histograms', value = F),
+            # checkboxInput('ck_equations'  , 'Equations' , value = F),             
+            # checkboxInput('ck_paths'      , 'Paths'     , value = F), 
+            actionButton('btn_report','Generate Report'),
+            verbatimTextOutput(outputId="txt_report_summary"))
+      } else {
+        tabPanel(
+          'Report',
+          value='report',
+          p('You must write this scenario to the filesystem (see Calculate tab) before generating a report.'))      
+      }
+    }
+  })
+      
+  # Report: sel_compare ----
+  output$sel_compare <- renderUI({
+    selectInput("dir_compare", "Compare with scenario:",                 
+                c('[None]',setdiff(dirs_scenario, basename(dir_scenario))), 
+                selected='[None]')
+  })
+  
+  # Report: btn_report ----
+  output$dir_reports  = renderText({ file.path(dir_scenario, 'reports') })
+  observe({
+    
+    if (!'Report' %in% strsplit(tabs_invisible, ', ')[[1]] & file.exists(dir_scenario) & 'btn_report' %in% names(input)){      
+        
+      input$btn_report      
+      if (input$btn_report == 0){
+        state_btn_report <<- 0
+        output$txt_report_summary <- renderText({''})
+      } else if (input$btn_report != state_btn_report){
+        isolate({
+          state_btn_report <<- input$btn_report
+          ohicore::ReportScores(scenario = list(
+                      conf = conf, 
+                      layers = layers, 
+                      scores = scores,
+                      spatial = ifelse(file.exists(system.file('extdata/spatial.www2013', package='ohicore')),
+                                             system.file('extdata/spatial.www2013', package='ohicore'),
+                                             system.file('inst/extdata/spatial.www2013', package='ohicore'))),
+                      directory = file.path(dir_scenario,'reports'),
+                      filename = input$txt_report_fn, 
+                      open_html=input$ck_open_html,
+                      do_flowers=input$ck_flowers, do_tables=input$ck_tables,
+                      overwrite=input$ck_overwrite, global_only=input$ck_global_only, 
+                      # TODO: implement...                         
+                      do_maps=input$ck_maps, do_histograms=input$ck_histograms, do_equations=input$ck_equations, do_paths=input$ck_paths, 
+                      debug=F) 
+          output$txt_report_summary <- renderText({
+            #browser()
+            cat('success')
+          })
+        })      
+      }
+      
+    }
+  })  
+  
+
+#    output$txt_calc_summary <- renderText({
+#      #cat('input$btn_conf_calc:',input$btn_conf_calc,'\n')
+#      
+#      if (input$btn_calc == 0 & length(input$dir_scenario)>0){
+#        return('')
+#        btn_calc_counter <<- 0
+#      } else {
+#        btn_calc_counter = btn_calc_counter + 1
+#        # outiside if and inside isolat()?
+#        return(c('Scenario:',input$dir_scenario,'\n',
+#                 'btn_calc_counter:',as.character(btn_calc_counter),
+#                 'TODO: integrate with execution of sequence of functions and display calculated summary.\n'))     
+#      }
+#    })
   
 
 })
+
+#                                                       tabPanel('Goals', value='goals', 
+#                                                                sidebarPanel(id='goal-sidbar', style='overflow:auto; height:850px; width:200px',                     
+#                                                                             strong('Food Provision:'),
+#                                                                             sliderInput("MAR","Mariculture:"                 , min=0, max=smax, value=0.5, step=0.1),br(),
+#                                                                             sliderInput("FIS","Fisheries:"                   , min=0, max=smax, value=0.5, step=0.1),br(),     
+#                                                                             sliderInput("AO",strong("Artisanal Opportunity:")  , min=0, max=smax, value=1, step=0.1),br(),
+#                                                                             sliderInput("NP",strong("Natural Products:")       , min=0, max=smax, value=1, step=0.1),br(),
+#                                                                             sliderInput("CS",strong("Carbon storage:")         , min=0, max=smax, value=1, step=0.1),br(),
+#                                                                             sliderInput("CP",strong("Coastal protection:")     , min=0, max=smax, value=1, step=0.1),br(),       
+#                                                                             sliderInput("TR",strong("Tourism & Recreation:")   , min=0, max=smax, value=1, step=0.1),br(),
+#                                                                             strong('Coastal Livelihoods & Economies:'),
+#                                                                             sliderInput("LIV","Livelihoods:"                 , min=0, max=smax, value=0.5, step=0.1),
+#                                                                             sliderInput("ECO","Economies:"                   , min=0, max=smax, value=0.5, step=0.1),br(),       
+#                                                                             strong('Sense of Place'),
+#                                                                             sliderInput("ICO","Iconic species:"              , min=0, max=smax, value=0.5, step=0.1),
+#                                                                             sliderInput("LSP","Lasting special places:"      , min=0, max=smax, value=0.5, step=0.1),br(),
+#                                                                             sliderInput("CW",strong("Clean waters:")           , min=0, max=smax, value=1, step=0.1),br(),
+#                                                                             strong('Biodiversity'),
+#                                                                             sliderInput("HAB","Habitats:"                    , min=0, max=smax, value=0.5, step=0.1),
+#                                                                             sliderInput("SPP","Species:"                     , min=0, max=smax, value=0.5, step=0.1)
+#                                                                ),
+#                                                                mainPanel(id='goal-main', style='overflow:auto; height:850px',
+#                                                                          plotOutput('aster', ))),
+#                                                       
+#                                                         tabPanel('Paths', value='paths', 
+#                                                           includeHTML('tree_body.html')),
+
