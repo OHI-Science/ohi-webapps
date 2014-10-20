@@ -3,7 +3,10 @@
 #     C:\Python27\ArcGISx6410.2\python.exe G:\ohi-webapps\create_subcountry_regions.py 
 #   bumblebee in NCEAS Viz Lab:
 #     C:\Python27\ArcGIS10.2\python.exe C:\Users\visitor\Documents\github\ohi-webapps\create_subcountry_regions.py
-# packages
+#
+# estimating completion:
+#   062 of 153: Indonesia (21:54:00) to 081 of 153: Mayotte (17:56:55) ~ 1 / hr, ~ 3 days left
+
 
 import arcpy, os, socket, numpy, numpy.lib.recfunctions, pandas, time, re, shutil
 
@@ -113,6 +116,10 @@ print 'looping over countries (n=%d)' % len(df_rgn)
 for i, rgn in enumerate(sorted(tuple(df_rgn['rgn_name']))): # i=0; rgn = sorted(tuple(df_rgn['rgn_name']))[i]
 #for i, rgn in enumerate(sorted(tuple(df_rgn['rgn_name']))[3:4]): # i=0; rgn = sorted(tuple(df_rgn['rgn_name']))[i]
 
+    # DEBUG! bypass ones already done
+    if i < 62:
+        continue
+
     # make output dir
     print '\n%03d of %d: %s (%s)' % (i,  len(df_rgn), rgn, time.strftime('%H:%M:%S'))
     dir_tmp_rgn = '%s/data/%s/spatial' % (dir_tmp, rgn.replace(' ', '_'))
@@ -184,7 +191,6 @@ for i, rgn in enumerate(sorted(tuple(df_rgn['rgn_name']))): # i=0; rgn = sorted(
                 arcpy.Merge_management(['c_states', 'c_states_t_d_e'], 'c_states_t_d_e_m')
                 arcpy.Dissolve_management('c_states_t_d_e_m', 'c_thiessen', 'NAME_1')
                 arcpy.RepairGeometry_management('c_thiessen')
-                arcpy.CopyFeatures_management('c_thiessen', c_thiessen_dest)
             
             if not arcpy.Exists(c_offshore_dest):
                 # rgn_offshore: rename NAME_1 to rgn_name
@@ -240,11 +246,16 @@ for i, rgn in enumerate(sorted(tuple(df_rgn['rgn_name']))): # i=0; rgn = sorted(
         # loop through buffers
         print '  buffer intersecting (%s)' % time.strftime('%H:%M:%S')
         for buf in buffers: # buf = buffers[0]
-                    
+                 
             rgn_buf_mol = '%s\\rgn_%s_mol' % (gdb, buf)
             buf_zone, buf_dist, buf_units = re.search('(\\D+)(\\d+)(\\D+)', buf).groups()    
-            c_buf_dest = '%s/rgn_%s_mol.shp' % (dir_dest_rgn, buf)
+            c_buf_dest = '%s/rgn_%s_mol.shp' % (dir_dest_rgn, buf)            
             
+            # get region ids from offshore sh
+            if not arcpy.Exists(c_offshore_dest):
+                print '    table missing, breaking out of buffering: %s' % os.path.basename(c_offshore_dest)
+                break
+            tbl_rgns = arcpy.da.TableToNumPyArray(c_offshore_dest, ['rgn_name','rgn_id'])
             
             # delete existing country specific feature classes, compact, refresh
             for fc in ['c_buf_t', 'c_buf_t_d']:
@@ -257,15 +268,13 @@ for i, rgn in enumerate(sorted(tuple(df_rgn['rgn_name']))): # i=0; rgn = sorted(
                     if buf_zone == 'inland':
                         arcpy.Intersect_analysis(['c_rgn_inland_mol', rgn_buf_mol], 'c_buf_t', 'NO_FID')
                     elif buf_zone == 'offshore':
-                        # arcpy.Intersect_analysis(['c_rgn_offshore_mol', rgn_buf_mol], 'c_buf_t', 'NO_FID')
-                        # c_rgn_offshore_mol #;C:\Users\visitor\bbest\ohi-webapps\subcountry.gdb/rgn_offshore3nm_mol # does not exist or is not supported
                         arcpy.Intersect_analysis(['c_rgn_offshore_mol', rgn_buf_mol], 'c_buf_t', 'NO_FID')
                     else:
                         stop('The buf_zone "%s" is not handled by this function.' % buf_zone)
                     arcpy.RepairGeometry_management('c_buf_t')
                     arcpy.Dissolve_management('c_buf_t', 'c_buf_t_d', 'rgn_name')
                     arcpy.RepairGeometry_management('c_buf_t_d')
-                    arcpy.da.ExtendTable('c_buf_t_d', 'rgn_name', a[['rgn_name','rgn_id']], 'rgn_name', append_only=False)
+                    arcpy.da.ExtendTable('c_buf_t_d', 'rgn_name', tbl_rgns[['rgn_name','rgn_id']], 'rgn_name', append_only=False)
                     arcpy.CopyFeatures_management('c_buf_t_d', c_buf_dest)
                 except Exception as e:
                     print e.message
@@ -281,8 +290,9 @@ for i, rgn in enumerate(sorted(tuple(df_rgn['rgn_name']))): # i=0; rgn = sorted(
                     continue
             else:
                 #print '      %s exists, skipping (%s)' % (os.path.basename(c_buf_dest), time.strftime('%H:%M:%S'))
+                pass
     else:
-        print '  all inland/offshore/buffers exist, skipping (%s)' % time.strftime('%H:%M:%S')
+        print '  all inland/offshore/buffers exist, skip copying to gdb (%s)' % time.strftime('%H:%M:%S')
 
     try:
         # project to raster, setting snap raster first to sp_[mol|gcs].tif
