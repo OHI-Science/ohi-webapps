@@ -402,9 +402,8 @@ last_updated: %s
     unlink('github', recursive=T, force=T)
   }
 
-  
-  # dir_app='/Volumes/data_edit/git-annex/clip-n-ship/lebanon/shinyapps.io'; app_name='algeria'
-  # shiny::runApp(dir_app)
+  # app_name='lebanon'; dir_app=sprintf('/Volumes/data_edit/git-annex/clip-n-ship/%s/shinyapps.io', app_name) 
+  # shiny::runApp(dir_app)    # test app locally; delete, ie unlink, github files before deploy
   shinyapps::deployApp(appDir=dir_app, appName=app_name, upload=T, launch.browser=T, lint=F)
     
 } # end for (cntry in cntries)
