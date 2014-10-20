@@ -20,6 +20,8 @@ dir_ohicore = sprintf('%s/ohicore', dirs['github'])
 dir_global  = sprintf('%s/ohi-global/eez2014', dirs['github'])
 sfx_global  = 'global2014'
 scenario    = 'subcountry2014'
+git_branch  = 'master'
+tabs_hide   = 'Calculate, Report, Compare'
 
 # load ohicore, development mode
 #devtools::load_all(dir_ohicore)# deploy error: The package was installed locally from source. Only packages installed from CRAN, BioConductor and GitHub are supported.
@@ -42,20 +44,20 @@ cntries = list.files(dir_data)
 
 # loop through countries
 #for (i in 1:length(cntries)){ # i=1
-for (i in 25:length(cntries)){ # i=25   # which(cntries=='Chile')
+for (i in 77:length(cntries)){ # i=76   # which(cntries=='Libya')
   
   # setup vars
   Country   = str_replace_all(cntries[i], '_', ' ')
   cntry     = tolower(cntries[i])
   repo_name = sprintf('ohi-%s', cntry)
-  url_repo  = sprintf('https://github.com/OHI-Science/%s', repo_name)
+  git_url  = sprintf('https://github.com/OHI-Science/%s', repo_name)
   dir_repo  = file.path(dir_repos, repo_name)
   dir_app   = file.path(dir_data, cntries[i], 'shinyapps.io')
   app_name  = cntry
-  cat(sprintf('%03d of %d: %s -- %s\n', i, length(cntries), Country, format(Sys.time(), '%X')))  
+  cat(sprintf('\n\n\n\n%03d of %d: %s -- %s\n', i, length(cntries), Country, format(Sys.time(), '%X')))  
   
-  if (Country %in% c('Brazil','Canada','China')){
-    cat('  Skipping!')
+  if (Country %in% c('Brazil','Canada','China','Fiji')){
+    cat('  Skipping!\n')
     next
   }
   
@@ -83,16 +85,12 @@ for (i in 25:length(cntries)){ # i=25   # which(cntries=='Chile')
     # intialize repo ----
     # system cmd line: touch README.md; git init; git add README.md; git commit -m "first commit"; git push -u origin master
     repo = init(dir_repo)
-    cat(sprintf('# Ocean Health Index - %s', cntry), file=file.path(dir_repo, 'README.md'))
-    add(repo, 'README.md')
-    commit(repo, 'add README.md')
     setwd(dir_repo)
-    #remote_add(repo, 'origin', 'https://github.com/OHI-Science/ohi-albania.git')    
-    system(sprintf('git remote add origin %s', url_repo))
+    cat(sprintf('# Ocean Health Index - %s', cntry), file='README.md')
+    add(repo, 'README.md')
+    commit(repo, 'add README.md')    
+    system(sprintf('git remote add origin %s', git_url))
     system('git push -u origin master')    
-    #system('git config branch.master.remote origin')
-    #system('git config branch.master.merge refs/heads/master')    
-    #system('git pull')
   }
   
   # populate repo ----
@@ -166,15 +164,15 @@ for (i in 25:length(cntries)){ # i=25   # which(cntries=='Chile')
 
   # bind single cntry_key
   if (length(unique(cntry_new$cntry_key)) > 1){
-    cat('  length(cntry_key) > 1 - not handled yet. NEXT')
-    dput(l$filename, sprintf('%s/%s_cntry-key-length-gt-1.txt', file.path(dir_repos, 'score_errors'), cntry))
+    cat('  length(cntry_key) > 1 - not handled yet. NEXT\n')
+    dput(unique(cntry_new$cntry_key), sprintf('%s/%s_cntry-key-length-gt-1.txt', file.path(dir_repos, 'score_errors'), cntry))
     next
   }    
   
   # write layers data files
-  for (i in 1:nrow(lyrs_c)){ # i=56
-    csv_in  = sprintf('%s/layers/%s', dir_global, lyrs_c$filename_old[i])
-    csv_out = sprintf('layers/%s', lyrs_c$filename[i])
+  for (j in 1:nrow(lyrs_c)){ # i=56
+    csv_in  = sprintf('%s/layers/%s', dir_global, lyrs_c$filename_old[j])
+    csv_out = sprintf('layers/%s', lyrs_c$filename[j])
     
     d = read.csv(csv_in, na.strings='')
     flds = names(d)
@@ -192,9 +190,9 @@ for (i in 25:length(cntries)){ # i=25   # which(cntries=='Chile')
         filter(cntry_key %in% cntry_new$cntry_key)
     }
       
-    if (lyrs_c$layer[i]=='rgn_labels'){
-      csv_out = sprintf('layers/%s.csv', lyrs_c$layer[i])
-      lyrs_c$filename[i] = basename(csv_out)
+    if (lyrs_c$layer[j]=='rgn_labels'){
+      csv_out = sprintf('layers/%s.csv', lyrs_c$layer[j])
+      lyrs_c$filename[j] = basename(csv_out)
       d = d %>%
         merge(rgn_new, by.x='rgn_id', by.y='rgn_id_new') %>%
         select(rgn_id, type, label=rgn_name_new)
@@ -203,7 +201,7 @@ for (i in 25:length(cntries)){ # i=25   # which(cntries=='Chile')
     # empty layers
     if (nrow(na.omit(d))==0) {      
       dir.create('tmp/layers-empty_global-values', showWarnings=F)
-      file.copy(csv_in, file.path('tmp/layers-empty_global-values', lyrs_c$filename[i]))            
+      file.copy(csv_in, file.path('tmp/layers-empty_global-values', lyrs_c$filename[j]))            
     }        
     
     # TODO: downweight: area_offshore, area_offshore_3nm, equal, equal , population_inland25km, 
@@ -277,7 +275,7 @@ for (i in 25:length(cntries)){ # i=25   # which(cntries=='Chile')
       
     # bind single cntry_key
     if ('cntry_key' %in% names(a)){
-      b$cntry_key = cntry_key
+      b$cntry_key = unique(cntry_new$cntry_key)
     }    
     
     # bind many rgn_ids
@@ -358,53 +356,55 @@ for (i in 25:length(cntries)){ # i=25   # which(cntries=='Chile')
     dir.create(dir_score_errors, showWarnings=F)
     dput(scores, sprintf('%s/%s_dput.txt', dir_score_errors, cntry))
     next
-  } else {
+  }
     
-    # write scores
-    write.csv(scores, 'scores.csv', na='', row.names=F)
-       
-    # save shortcut files not specific to operating system
-    write_shortcuts('.', os_files=0)  
-    # check app manually
-    #launch_app()
+  # write scores
+  write.csv(scores, 'scores.csv', na='', row.names=F)
+     
+  # save shortcut files not specific to operating system
+  write_shortcuts('.', os_files=0)  
+  # check app manually
+  #launch_app()
+  
+  # commit changes, push to github repo
+  repo = init(dir_repo)
+  if (sum(sapply(status(repo), length)) > 0){
+    pull(repo)
+    add(repo, scenario)
+    commit(repo, 'initial subcountry values all equal to global2014 country values')
+    #push(repo) # Error in 'git2r_push': HTTP parser error: the on_headers_complete callback failed
+    system('git push') # -u origin master')
+  }
     
-    # commit changes, push to github repo
-    repo = init(dir_repo)
-    if (sum(sapply(status(repo), length)) > 0){
-      pull(repo)
-      add(repo, scenario)
-      commit(repo, 'initial subcountry values all equal to global2014 country values')
-      #push(repo) # Error in 'git2r_push': HTTP parser error: the on_headers_complete callback failed
-      system('git push') # -u origin master')
-    }
-      
-    # create app dir to contain data and shiny files
-    dir.create(dir_app, showWarnings=F)
-    setwd(dir_app)
-      
-    # copy ohicore shiny app files
-    shiny_files = list.files(file.path(dir_ohicore, 'inst/shiny_app'), recursive=T)
-    for (f in shiny_files){ # f = shiny_files[1]
-      dir.create(dirname(f), showWarnings=F, recursive=T)
-      suppressWarnings(file.copy(file.path(dir_ohicore, 'inst/shiny_app', f), f, overwrite=T, recursive=T, copy.mode=T, copy.date=T))
-    }
+  # create app dir to contain data and shiny files
+  dir.create(dir_app, showWarnings=F)
+  setwd(dir_app)
     
-    # write config
-    cat(sprintf('# configuration for ohi-science.shinyapps.io/%s
-git_repo: %s
+  # copy ohicore shiny app files
+  shiny_files = list.files(file.path(dir_ohicore, 'inst/shiny_app'), recursive=T)
+  for (f in shiny_files){ # f = shiny_files[1]
+    dir.create(dirname(f), showWarnings=F, recursive=T)
+    suppressWarnings(file.copy(file.path(dir_ohicore, 'inst/shiny_app', f), f, overwrite=T, recursive=T, copy.mode=T, copy.date=T))
+  }
+  
+  # write config
+  cat(sprintf('# configuration for ohi-science.shinyapps.io/%s
+git_url: %s
+git_branch: %s
 dir_scenario: %s
-tabs_hide: Calculate, Report
+tabs_hide: %s
 debug: False
 last_updated: %s
-  ', app_name, url_repo, scenario, Sys.Date()), file='app_config.yaml')
-    
-    # allow app to populate github repo locally
-    if (file.exists('github')){
-      unlink('github', recursive=T, force=T)
-    }
+', app_name, git_url, git_branch, scenario, tabs_hide, Sys.Date()), file='app_config.yaml')
   
-    # dir_app='/Volumes/data_edit/git-annex/clip-n-ship/Algeria/shinyapps.io'; app_name='algeria'
-    shinyapps::deployApp(appDir=dir_app, appName=app_name, upload=T, launch.browser=T, lint=F)
-    
+  # allow app to populate github repo locally
+  if (file.exists('github')){
+    unlink('github', recursive=T, force=T)
   }
+
+  
+  # dir_app='/Volumes/data_edit/git-annex/clip-n-ship/lebanon/shinyapps.io'; app_name='algeria'
+  # shiny::runApp(dir_app)
+  shinyapps::deployApp(appDir=dir_app, appName=app_name, upload=T, launch.browser=T, lint=F)
+    
 } # end for (cntry in cntries)
