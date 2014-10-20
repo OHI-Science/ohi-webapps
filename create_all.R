@@ -1,13 +1,12 @@
-# create initial Baltic layers based on Global2013.www2013 layers
-# Requirements:
-#  1. spatial prep: create_subcountry_regions.py
-#  1. use RStudio to setup project
-#  1. install ohicore: http://ohi-science.org/pages/install.html
-#  1. clone of https://github.com/ohi-science/ohibaltic in ../ohicore
-
 library(stringr)
 library(git2r)
 library(dplyr)
+library(rgdal)
+library(shiny)
+library(shinyapps)
+library(stringr)
+merge = base::merge # override git2r::merge
+tags  = shiny::tags # override git2r::tags, otherwise get "Error in tags$head : object of type 'closure' is not subsettable"
 
 # vars
 # get paths based on host machine
@@ -15,13 +14,17 @@ dirs = list(
   neptune_data  = '/Volumes/data_edit', 
   github        = '~/github')
 
-dir_data    = sprintf('%s/git-annex/clip-n-ship/', dirs['neptune_data']) # 'N:/git-annex/clip-n-ship/data'
+dir_data    = sprintf('%s/git-annex/clip-n-ship', dirs['neptune_data']) # 'N:/git-annex/clip-n-ship/data'
 dir_repos   = sprintf('%s/clip-n-ship', dirs['github'])
 dir_ohicore = sprintf('%s/ohicore', dirs['github'])
 dir_global  = sprintf('%s/ohi-global/eez2014', dirs['github'])
 sfx_global  = 'global2014'
 scenario    = 'subcountry2014'
-  
+
+# load ohicore, development mode
+#devtools::load_all(dir_ohicore)# deploy error: The package was installed locally from source. Only packages installed from CRAN, BioConductor and GitHub are supported.
+library(ohicore)
+
 # read global layers, add clip_n_ship columns from Google version
 lyrs_g      = read.csv(file.path(dir_global, 'layers.csv'))
 lyrs_google = read.csv(file.path(dir_global, 'temp/layers_0-google.csv'))
@@ -31,9 +34,6 @@ lyrs_g = lyrs_g %>%
       select(layer, starts_with('clip_n_ship')),
     by='layer')
 
-# load ohicore, development mode
-devtools::load_all(dir_ohicore)
-
 # read in github token outside of repo, generated via https://help.github.com/articles/creating-an-access-token-for-command-line-use
 token = scan('~/.github-token', 'character')
 
@@ -41,27 +41,30 @@ token = scan('~/.github-token', 'character')
 cntries = list.files(dir_data)
 
 # loop through countries
-for (i in 1:length(cntries)){ # i=1
+#for (i in 1:length(cntries)){ # i=1
+for (i in 2:length(cntries)){ # i=2  
   
   # setup vars
   cntry = cntries[i]
-  repo     = sprintf('ohi-%s', tolower(str_replace_all(cntry,fixed(' '),'_')))
-  url_repo = sprintf('https://github.com/OHI-Science/%s', repo)
-  dir_repo = file.path(dir_repos, repo)
-  cat(sprintf('%03d of %d: %s -- %s\n', i, length(cntries), cntry, format(Sys.time(), '%X')))
-
+  repo_name = sprintf('ohi-%s', tolower(str_replace_all(cntry,fixed(' '),'_')))
+  url_repo  = sprintf('https://github.com/OHI-Science/%s', repo_name)
+  dir_repo  = file.path(dir_repos, repo_name)
+  dir_app   = file.path(dir_data, str_replace_all(cntry,fixed(' '),'_'), 'shinyapps.io')
+  app_name  = str_replace(repo_name, '^ohi-', '')
+  cat(sprintf('%03d of %d: %s -- %s\n', i, length(cntries), cntry, format(Sys.time(), '%X')))  
+  
   # create github repo ----
-  github_repo_exists = system(sprintf('git ls-remote git@github.com:ohi-science/%s.git', repo), ignore.stderr=T) != 128
+  github_repo_exists = system(sprintf('git ls-remote git@github.com:ohi-science/%s.git', repo_name), ignore.stderr=T) != 128
   if (!github_repo_exists){    
     cat(sprintf('  creating github repo -- %s\n', format(Sys.time(), '%X')))
     
     # create using Github API: https://developer.github.com/v3/repos/#create
-    cmd = sprintf('curl -u "bbest:%s" https://api.github.com/orgs/ohi-science/repos -d \'{"name":"%s"}\'', token, repo)
+    cmd = sprintf('curl -u "bbest:%s" https://api.github.com/orgs/ohi-science/repos -d \'{"name":"%s"}\'', token, repo_name)
     system(cmd)
   }
   
   # get existing repo
-  repo = try(repository(dir_repo))
+  repo = try(repository(dir_repo), silent=T)
   
   # create local repo ----
   if (class(repo)=='try-error'){
@@ -73,12 +76,17 @@ for (i in 1:length(cntries)){ # i=1
     
     # intialize repo ----
     # system cmd line: touch README.md; git init; git add README.md; git commit -m "first commit"; git push -u origin master
-    r = init(dir_repo)
+    repo = init(dir_repo)
     cat(sprintf('# Ocean Health Index - %s', cntry), file=file.path(dir_repo, 'README.md'))
-    add(r, 'README.md')
-    commit(r, 'add README.md')
-    remote_add(r, 'origin', 'https://github.com/OHI-Science/ohi-albania.git')
-    system('git push -u origin master')
+    add(repo, 'README.md')
+    commit(repo, 'add README.md')
+    setwd(dir_repo)
+    #remote_add(repo, 'origin', 'https://github.com/OHI-Science/ohi-albania.git')    
+    system(sprintf('git remote add origin %s', url_repo))
+    system('git push -u origin master')    
+    #system('git config branch.master.remote origin')
+    #system('git config branch.master.merge refs/heads/master')    
+    #system('git pull')
   }
   
   # populate repo ----
@@ -228,6 +236,7 @@ for (i in 1:length(cntries)){ # i=1
   
   # populate empty layers with global averages
   for (lyr in subset(lyrs, data_na, layer, drop=T)){ # lyr = subset(lyrs, data_na, layer, drop=T)[1]
+    #lyr = 'le_wage_sector_year'
 
     # get all global data for layer
     l = subset(lyrs, layer==lyr)
@@ -237,10 +246,10 @@ for (i in 1:length(cntries)){ # i=1
     # calculate global categorical means using non-standard evaluation, ie dplyr::*_()
     fld_key         = names(a)[1]
     fld_value       = names(a)[ncol(a)]
-    flds_categories = setdiff(names(a), c(fld_key, fld_value))    
-    if (length(flds_categories) > 0){
+    flds_other = setdiff(names(a), c(fld_key, fld_value))    
+    if (length(flds_other) > 0){
       b = a %>%
-        group_by_(flds_categories) %>%
+        group_by_(.dots=flds_other) %>%
         summarize_(
           .dots = setNames(
             sprintf('mean(%s)', fld_value),
@@ -268,7 +277,7 @@ for (i in 1:length(cntries)){ # i=1
           rgn_new %>%
             select(rgn_id = rgn_id_new), 
           all=T) %>%
-        select(one_of('rgn_id', flds_categories, fld_value)) %>%
+        select(one_of('rgn_id', flds_other, fld_value)) %>%
         arrange(rgn_id)
     }
     
@@ -297,9 +306,9 @@ for (i in 1:length(cntries)){ # i=1
       # var regions_group = new L.featureGroup(regions); map.fitBounds(regions_group.getBounds());
       p_shp  = file.path(dir_data, cntry, 'spatial', 'rgn_offshore_gcs.shp')
       p      = readOGR(dirname(p_shp), tools::file_path_sans_ext(basename(p_shp)))
-      p_bb   = data.frame(p@bbox)
+      p_bb   = data.frame(p@bbox) # max of 2.25
       p_ctr  = rowMeans(p_bb)
-      p_zoom = as.integer(cut(max(transmute(p_bb, range = max - min)), c(0, 0.25, 0.5, 1, 2.5, 5, 10, 20, 40, 80, 160, 320, 360)))
+      p_zoom = 12 - as.integer(cut(max(transmute(p_bb, range = max - min)), c(0, 0.25, 0.5, 1, 2.5, 5, 10, 20, 40, 80, 160, 320, 360)))
       
       # set map center and zoom level
       s = gsub(
@@ -328,16 +337,88 @@ for (i in 1:length(cntries)){ # i=1
   
   # calculate scores
   # devtools::load_all('~/github/ohicore'); setwd('/Users/bbest/github/clip-n-ship/ohi-albania/subcountry2014')
-  layers = Layers('layers.csv', 'layers')
-  conf   = Conf('conf') # load_all(dirs$ohicore)
+  layers = Layers('layers.csv', 'layers') # devtools::load_all(dir_ohicore)
+  conf   = Conf('conf')
   scores = CalculateAll(conf, layers, debug=T)
   write.csv(scores, 'scores.csv', na='', row.names=F)
      
   # save shortcut files not specific to operating system
-  write_shortcuts('.', os_files=0)
+  write_shortcuts('.', os_files=0)  
+  # check app manually
+  #launch_app()
   
-  # launch on Mac
-  system('open launch_app.command')
+  # commit changes, push to github repo
+  repo = init(dir_repo)
+  if (sum(sapply(status(repo), length)) > 0){
+    pull(repo)
+    add(repo, scenario)
+    commit(repo, 'initial subcountry values all equal to global2014 country values')
+    #push(repo) # Error in 'git2r_push': HTTP parser error: the on_headers_complete callback failed
+    system('git push') # -u origin master')
+  }
 
+  # deploy app ----
+  
+  # parameters
+#   action     = 'deploy' # action=deploy|test-web|test-full
+#   dir_root   = '~/github/ohi-webapps'
+#   dir_shiny  = '~/github/ohicore/inst/shiny_app'
+#   dir_data   = file.path('~/github', repo)
+#   dir_app    = file.path('~/github/ohi-webapps', repo)
+#   
+  
+  # create app dir to contain data and shiny files
+  dir.create(dir_app, showWarnings=F)
+  setwd(dir_app)
+    
+  # copy ohicore shiny app files
+  shiny_files = list.files(file.path(dir_ohicore, 'inst/shiny_app'), recursive=T)
+  for (f in shiny_files){ # f = shiny_files[1]
+    dir.create(dirname(f), showWarnings=F, recursive=T)
+    suppressWarnings(file.copy(file.path(dir_ohicore, 'inst/shiny_app', f), f, overwrite=T, recursive=T, copy.mode=T, copy.date=T))
+  }
+  
+  # write config
+  cat(sprintf('# configuration for ohi-science.shinyapps.io/%s
+git_repo: %s
+dir_scenario: %s
+tabs_hide: Calculate, Report
+debug: False
+last_updated: %s
+', app_name, url_repo, scenario, Sys.Date()), file='app_config.yaml')
+  
+  # allow app to populate github repo locally
+  if (file.exists('github')){
+    unlink('github', recursive=T, force=T)
+  }
 
-#} # end for (cntry in cntries)
+  #deployApp(appDir=dir_app, appName=url_suffix, upload=T, launch.browser=F, lint=F)
+  # dir_app='/Volumes/data_edit/git-annex/clip-n-ship/Algeria/shinyapps.io'; app_name='algeria'
+  shinyapps::deployApp(appDir=dir_app, appName=app_name, upload=T, launch.browser=T, lint=F)
+
+#   if (action == 'deploy'){
+#     # deploy to web
+#     deployApp(appDir=dir_app, appName=url_suffix, upload=T, launch.browser=F, lint=F)
+#     # publishes to http://ohi-science.shinyapps.io/[url_suffix]  
+#   } else if (action == 'test-web') {
+#     # test locally, with just Data tab for web deployment
+#     suppressWarnings(rm('dir_scenario'))
+#     runApp()
+#   } else if (action == 'test-full'){
+#     # test locally, with all tabs for desktop
+#     #devtools::load_all('~/github/ohicore')
+#     #devtools::install_github('ohi-science/ohicore')
+#     setwd('~/github/ohi-israel/med2014')
+#     require(methods)
+#     suppressWarnings(require(ohicore))
+#     launch_app()
+#   } else {
+#     stop('Parameter action needs to be one of: deploy, test-web, test-full')
+#   }
+  
+  
+  
+  
+  
+  
+} # end for (cntry in cntries)
