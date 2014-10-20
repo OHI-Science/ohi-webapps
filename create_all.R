@@ -42,16 +42,22 @@ cntries = list.files(dir_data)
 
 # loop through countries
 #for (i in 1:length(cntries)){ # i=1
-for (i in 2:length(cntries)){ # i=2  
+for (i in 25:length(cntries)){ # i=25   # which(cntries=='Chile')
   
   # setup vars
-  cntry = cntries[i]
-  repo_name = sprintf('ohi-%s', tolower(str_replace_all(cntry,fixed(' '),'_')))
+  Country   = str_replace_all(cntries[i], '_', ' ')
+  cntry     = tolower(cntries[i])
+  repo_name = sprintf('ohi-%s', cntry)
   url_repo  = sprintf('https://github.com/OHI-Science/%s', repo_name)
   dir_repo  = file.path(dir_repos, repo_name)
-  dir_app   = file.path(dir_data, str_replace_all(cntry,fixed(' '),'_'), 'shinyapps.io')
-  app_name  = str_replace(repo_name, '^ohi-', '')
-  cat(sprintf('%03d of %d: %s -- %s\n', i, length(cntries), cntry, format(Sys.time(), '%X')))  
+  dir_app   = file.path(dir_data, cntries[i], 'shinyapps.io')
+  app_name  = cntry
+  cat(sprintf('%03d of %d: %s -- %s\n', i, length(cntries), Country, format(Sys.time(), '%X')))  
+  
+  if (Country %in% c('Brazil','Canada','China')){
+    cat('  Skipping!')
+    next
+  }
   
   # create github repo ----
   github_repo_exists = system(sprintf('git ls-remote git@github.com:ohi-science/%s.git', repo_name), ignore.stderr=T) != 128
@@ -139,7 +145,7 @@ for (i in 2:length(cntries)){ # i=2
   # old to new regions
   rgn_new = read.csv(rgn_new_csv) %>%
     select(rgn_id_new=rgn_id, rgn_name_new=rgn_name) %>%
-    mutate(rgn_name_old = cntry) %>%
+    mutate(rgn_name_old = Country) %>%
     merge(
       read.csv(rgn_old_csv, na.strings='') %>%
         select(rgn_name_old=label, rgn_id_old=rgn_id),
@@ -158,8 +164,15 @@ for (i in 2:length(cntries)){ # i=2
     select(cntry_key, rgn_id_new) %>%
     as.data.frame()
 
+  # bind single cntry_key
+  if (length(unique(cntry_new$cntry_key)) > 1){
+    cat('  length(cntry_key) > 1 - not handled yet. NEXT')
+    dput(l$filename, sprintf('%s/%s_cntry-key-length-gt-1.txt', file.path(dir_repos, 'score_errors'), cntry))
+    next
+  }    
+  
   # write layers data files
-  for (i in 1:nrow(lyrs_c)){ # i=1
+  for (i in 1:nrow(lyrs_c)){ # i=56
     csv_in  = sprintf('%s/layers/%s', dir_global, lyrs_c$filename_old[i])
     csv_out = sprintf('layers/%s', lyrs_c$filename[i])
     
@@ -188,7 +201,7 @@ for (i in 2:length(cntries)){ # i=2
     }
     
     # empty layers
-    if (nrow(d)==0) {      
+    if (nrow(na.omit(d))==0) {      
       dir.create('tmp/layers-empty_global-values', showWarnings=F)
       file.copy(csv_in, file.path('tmp/layers-empty_global-values', lyrs_c$filename[i]))            
     }        
@@ -264,8 +277,6 @@ for (i in 2:length(cntries)){ # i=2
       
     # bind single cntry_key
     if ('cntry_key' %in% names(a)){
-      cntry_key = as.character(unique(cntry_new$cntry_key))
-      stopifnot(length(cntry_key)==1)
       b$cntry_key = cntry_key
     }    
     
@@ -339,86 +350,61 @@ for (i in 2:length(cntries)){ # i=2
   # devtools::load_all('~/github/ohicore'); setwd('/Users/bbest/github/clip-n-ship/ohi-albania/subcountry2014')
   layers = Layers('layers.csv', 'layers') # devtools::load_all(dir_ohicore)
   conf   = Conf('conf')
-  scores = CalculateAll(conf, layers, debug=T)
-  write.csv(scores, 'scores.csv', na='', row.names=F)
-     
-  # save shortcut files not specific to operating system
-  write_shortcuts('.', os_files=0)  
-  # check app manually
-  #launch_app()
+  scores = try(CalculateAll(conf, layers, debug=T))
   
-  # commit changes, push to github repo
-  repo = init(dir_repo)
-  if (sum(sapply(status(repo), length)) > 0){
-    pull(repo)
-    add(repo, scenario)
-    commit(repo, 'initial subcountry values all equal to global2014 country values')
-    #push(repo) # Error in 'git2r_push': HTTP parser error: the on_headers_complete callback failed
-    system('git push') # -u origin master')
-  }
-
-  # deploy app ----
-  
-  # parameters
-#   action     = 'deploy' # action=deploy|test-web|test-full
-#   dir_root   = '~/github/ohi-webapps'
-#   dir_shiny  = '~/github/ohicore/inst/shiny_app'
-#   dir_data   = file.path('~/github', repo)
-#   dir_app    = file.path('~/github/ohi-webapps', repo)
-#   
-  
-  # create app dir to contain data and shiny files
-  dir.create(dir_app, showWarnings=F)
-  setwd(dir_app)
+  # if problem calculating, log problem and move on to next one an
+  if (class(scores)=='try-error'){
+    dir_score_errors = file.path(dir_repos, 'score_errors')
+    dir.create(dir_score_errors, showWarnings=F)
+    dput(scores, sprintf('%s/%s_dput.txt', dir_score_errors, cntry))
+    next
+  } else {
     
-  # copy ohicore shiny app files
-  shiny_files = list.files(file.path(dir_ohicore, 'inst/shiny_app'), recursive=T)
-  for (f in shiny_files){ # f = shiny_files[1]
-    dir.create(dirname(f), showWarnings=F, recursive=T)
-    suppressWarnings(file.copy(file.path(dir_ohicore, 'inst/shiny_app', f), f, overwrite=T, recursive=T, copy.mode=T, copy.date=T))
-  }
-  
-  # write config
-  cat(sprintf('# configuration for ohi-science.shinyapps.io/%s
+    # write scores
+    write.csv(scores, 'scores.csv', na='', row.names=F)
+       
+    # save shortcut files not specific to operating system
+    write_shortcuts('.', os_files=0)  
+    # check app manually
+    #launch_app()
+    
+    # commit changes, push to github repo
+    repo = init(dir_repo)
+    if (sum(sapply(status(repo), length)) > 0){
+      pull(repo)
+      add(repo, scenario)
+      commit(repo, 'initial subcountry values all equal to global2014 country values')
+      #push(repo) # Error in 'git2r_push': HTTP parser error: the on_headers_complete callback failed
+      system('git push') # -u origin master')
+    }
+      
+    # create app dir to contain data and shiny files
+    dir.create(dir_app, showWarnings=F)
+    setwd(dir_app)
+      
+    # copy ohicore shiny app files
+    shiny_files = list.files(file.path(dir_ohicore, 'inst/shiny_app'), recursive=T)
+    for (f in shiny_files){ # f = shiny_files[1]
+      dir.create(dirname(f), showWarnings=F, recursive=T)
+      suppressWarnings(file.copy(file.path(dir_ohicore, 'inst/shiny_app', f), f, overwrite=T, recursive=T, copy.mode=T, copy.date=T))
+    }
+    
+    # write config
+    cat(sprintf('# configuration for ohi-science.shinyapps.io/%s
 git_repo: %s
 dir_scenario: %s
 tabs_hide: Calculate, Report
 debug: False
 last_updated: %s
-', app_name, url_repo, scenario, Sys.Date()), file='app_config.yaml')
+  ', app_name, url_repo, scenario, Sys.Date()), file='app_config.yaml')
+    
+    # allow app to populate github repo locally
+    if (file.exists('github')){
+      unlink('github', recursive=T, force=T)
+    }
   
-  # allow app to populate github repo locally
-  if (file.exists('github')){
-    unlink('github', recursive=T, force=T)
+    # dir_app='/Volumes/data_edit/git-annex/clip-n-ship/Algeria/shinyapps.io'; app_name='algeria'
+    shinyapps::deployApp(appDir=dir_app, appName=app_name, upload=T, launch.browser=T, lint=F)
+    
   }
-
-  #deployApp(appDir=dir_app, appName=url_suffix, upload=T, launch.browser=F, lint=F)
-  # dir_app='/Volumes/data_edit/git-annex/clip-n-ship/Algeria/shinyapps.io'; app_name='algeria'
-  shinyapps::deployApp(appDir=dir_app, appName=app_name, upload=T, launch.browser=T, lint=F)
-
-#   if (action == 'deploy'){
-#     # deploy to web
-#     deployApp(appDir=dir_app, appName=url_suffix, upload=T, launch.browser=F, lint=F)
-#     # publishes to http://ohi-science.shinyapps.io/[url_suffix]  
-#   } else if (action == 'test-web') {
-#     # test locally, with just Data tab for web deployment
-#     suppressWarnings(rm('dir_scenario'))
-#     runApp()
-#   } else if (action == 'test-full'){
-#     # test locally, with all tabs for desktop
-#     #devtools::load_all('~/github/ohicore')
-#     #devtools::install_github('ohi-science/ohicore')
-#     setwd('~/github/ohi-israel/med2014')
-#     require(methods)
-#     suppressWarnings(require(ohicore))
-#     launch_app()
-#   } else {
-#     stop('Parameter action needs to be one of: deploy, test-web, test-full')
-#   }
-  
-  
-  
-  
-  
-  
 } # end for (cntry in cntries)
