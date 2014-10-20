@@ -29,8 +29,13 @@ shinyUI(bootstrapPage(div(class='container-fluid',             # alternate to: p
     top=0, right=0, height=10, width=200, fixed=F,
     div(#style="padding: 8px; border-bottom: 1px solid #CCC; background: #FFFFEE;",
       HTML(markdownToHTML(fragment.only=TRUE, text=c(
-        sprintf('Scenario: %s/%s<br><font color="gray">Last updated: %s</font>', basename(dirname(normalizePath(dir_scenario))), basename(dir_scenario), last_updated )))))), 
+        sprintf('Scenario: %s/%s', basename(dirname(normalizePath(dir_scenario))), basename(dir_scenario))))))), 
 
+  uiOutput('ui_tabs_invisible'),
+  uiOutput('showCalculateTab'),
+  
+  uiOutput('ui_Main')
+  
   div(
     class = "row-fluid",
     tabsetPanel(id='tabsetFunction',
@@ -101,6 +106,37 @@ shinyUI(bootstrapPage(div(class='container-fluid',             # alternate to: p
                 value='data-histogram', 
                 plotOutput('histogram')),
               #tabPanel('Summary',   value='data-summary',   verbatimTextOutput('summary')),                     
-              tabPanel('Table',     value='data-table', dataTableOutput('table'))))))
-      ))
-  )))
+              tabPanel('Table',     value='data-table', dataTableOutput('table')))))),
+        
+      conditionalPanel(
+        condition='output.showCalculateTab',
+        tabPanel(
+          'Calculate',
+          value='configure',
+          p(
+            'Scenario path exists:', 
+            verbatimTextOutput(outputId='dir_scenario_exists')),
+          conditionalPanel(
+            condition="output.dir_scenario_exists == 'FALSE'",
+            textInput('dir_scenario', 'Scenario directory to output:', value=dir_scenario),
+            actionButton('btn_write','Write to disk')),
+          conditionalPanel(
+            condition='output.dir_scenario_exists == "TRUE"',
+            #uiOutput('sel_scenario_dir'), # generates dir_conf              
+            #verbatimTextOutput(outputId="txt_conf_summary"),
+            p(
+              'Scenario path', 
+              verbatimTextOutput(
+                outputId="show_dir_scenario")),
+                actionButton('btn_calc','Calculate'),
+                verbatimTextOutput(outputId="txt_calc_summary")))),
+        
+      # conditionalPanel(
+      #   condition="input.tabs_invisible.value.split(', ').indexOf('Report')*-1",
+      #   tabPanel(
+      #     'Report',
+      #     value='report', 
+      #     uiOutput('ui_report')))
+      # ))
+      uiOutput('ui_report')))
+)))

@@ -9,6 +9,7 @@ suppressPackageStartupMessages({
   require(markdown)
   require(yaml)
   require(ohicore)
+  rename = plyr::rename
 })
 
 options(stringsAsFactors = F)
@@ -23,6 +24,7 @@ if (!exists('dir_scenario')){
   for (o in ls(y)){
     assign(o, y[[o]], globalenv())
   }
+  if (!exists('tabs_invisible')) tabs_invisible <<- ''
   
   # check for files/directories
   stopifnot(file.exists(sprintf('%s/conf'      , dir_scenario)))
