@@ -117,7 +117,7 @@ for i, rgn in enumerate(sorted(tuple(df_rgn['rgn_name']))): # i=0; rgn = sorted(
 #for i, rgn in enumerate(sorted(tuple(df_rgn['rgn_name']))[3:4]): # i=0; rgn = sorted(tuple(df_rgn['rgn_name']))[i]
 
     # DEBUG! bypass ones already done
-    if i < 62:
+    if i < 93:
         continue
 
     # make output dir
@@ -301,12 +301,16 @@ for i, rgn in enumerate(sorted(tuple(df_rgn['rgn_name']))): # i=0; rgn = sorted(
         arcpy.env.snapRaster = m_mol
         arcpy.env.extent = m_mol
         arcpy.env.workspace = dir_dest_rgn
+        arcpy.env.scratchWorkspace = dir_tmp_rgn
         for fc in sorted(arcpy.ListFeatureClasses('rgn_*_mol.shp')):
 
             tif_mol = '%s.tif' % os.path.splitext(fc)[0]
             if not arcpy.Exists(tif_mol):
                 print '    %s (%s)' % (os.path.basename(fc), time.strftime('%H:%M:%S'))
-                arcpy.FeatureToRaster_conversion(fc, 'rgn_id', tif_mol, cellsize) # meters
+                tif_mol_tmp = '%s/%s' % (dir_tmp_rgn, os.path.basename(tif_mol))
+                arcpy.FeatureToRaster_conversion(fc, 'rgn_id', tif_mol_tmp, cellsize) # meters
+                arcpy.Copy_management(tif_mol_tmp, tif_mol)
+                arcpy.Delete_management(tif_mol_tmp)
             else:
                 #print '    %s found, skipping (%s)' % (os.path.basename(fc), time.strftime('%H:%M:%S'))
                 pass
@@ -322,15 +326,22 @@ for i, rgn in enumerate(sorted(tuple(df_rgn['rgn_name']))): # i=0; rgn = sorted(
             if not arcpy.Exists(fc_gcs):
                 print '    %s (%s)' % (os.path.basename(csv), time.strftime('%H:%M:%S'))
                 
+                fc_mol_tmp = '%s/%s' % (gdb, os.path.basename(fc_mol))
+                fc_gcs_tmp = '%s/%s' % (gdb, os.path.basename(fc_gcs))
                 arcpy.DefineProjection_management(fc_mol, sr_mol)
-                arcpy.Project_management(fc_mol, fc_gcs, sr_gcs)
-                arcpy.RepairGeometry_management(fc_gcs)
-                arcpy.AddField_management(fc_gcs, 'area_km2', 'FLOAT')
-                arcpy.CalculateField_management(fc_gcs, 'area_km2', '!shape.geodesicArea@squarekilometers!', 'PYTHON_9.3')
-                d = pandas.DataFrame(arcpy.da.TableToNumPyArray(fc_gcs, ['rgn_id','rgn_name','area_km2']))
-                d = d[d.rgn_id != 0]
+                arcpy.CopyFeatures(fc_mol, fc_mol_tmp)                
+                arcpy.Project_management(fc_mol_tmp, fc_gcs_tmp, sr_gcs)
+                arcpy.RepairGeometry_management(fc_gcs_tmp)
+                arcpy.AddField_management(fc_gcs_tmp, 'area_km2', 'FLOAT')
+                arcpy.CalculateField_management(fc_gcs_tmp, 'area_km2', '!shape.geodesicArea@squarekilometers!', 'PYTHON_9.3')
                 
+                d = pandas.DataFrame(arcpy.da.TableToNumPyArray(fc_gcs_tmp, ['rgn_id','rgn_name','area_km2']))
+                d = d[d.rgn_id != 0]                
                 d.to_csv(csv, index=False, encoding='utf-8')        
+                
+                arcpy.Copy_management(fc_gcs_tmp, fc_gcs)
+                arcpy.Delete_management(fc_mol_tmp)
+                arcpy.Delete_management(fc_gcs_tmp)
                 # DEBUG!
                 #shutil.copyfile(csv, '%s/%s' % (dir_dest_rgn, os.path.basename(csv)))
             else:
