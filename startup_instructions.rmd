@@ -1,0 +1,116 @@
+---
+title: "Startup Instructions"
+output:
+  pdf_document:
+    number_sections: T
+    toc: T
+    toc_depth: 3
+  md_document:
+    variant: markdown_github
+  html_document:
+    fig_caption: yes
+    keep_md: yes
+    number_sections: yes
+    toc: yes
+---
+
+```{r, eval=TRUE, message = FALSE, echo=FALSE}
+
+library(devtools)
+library(dplyr)
+library(ggplot2)
+library(stringr)
+library(reshape2)
+suppressWarnings(library(ohicore))
+```
+
+# Introduction
+
+Welcome to !repo.  
+
+!repo is repository: a folder of files and scripts required to run the Ocean Health Index (OHI) Toolbox and will be necessary to complete your regional assessment. Although the Toolbox is used to calculate Index scores after all data have been gathered and decisions have been made, it is important to understand the structure of the Toolbox file system, as this aids in bookkeeping, which is important for transparent and reproducible science.  
+
+Please refer to the **Ocean Health Index Toolbox Manual** for instructions on how to prepare to use the Toolbox, including how to download this repository using GitHub to facilitate collaboration. 
+
+# !repo has been extracted from the global repository
+
+This repository is a starting point for your assessment. It contains goal models and data used to calculate scores for !study_area, which were combined with scores from all other regions to create the overall global score in the global assessment. In your regional assessment for !study_area, you will calculate scores for each region within !study_area and combine them to better capture ocean health in !study_area.  
+
+**There are `!x` subcountry-scale coastal regions that have been created for !study_area: `!listed_here`.** These regions were identified by the [Global Administrative Areas](www.gadm.org) as being the largest unit of subdivision in the country (often states or provinces), and have been extended offshore to divide the entire !study_area's eez into portions for each region. It is possible to use different regions than the ones provided here; this is a suggested starting place based on previous experiences.
+
+Because your repository has been extracted from the global assessment, goal models and data files are the same as in the global assessment: they serve as a template and you will modify them to better represent the local charactistics of !study_area. 
+
+# File System
+
+Within the !repo repository is **subcountry2014**, the scenario folder. This contains all the data, functions and other files required to calculate the OHI scores for the `!x` regions within !study_area. You will modify the files within this folder to complete your assessment. 
+
+## Data
+
+All data used to calculate OHI scores are contained within the `layers` folder, and the `layers.csv` file acts as a registry for managing all data. In most cases, data provided within the `layers` folder are only place-holders and should be replaced by local, finer-resolution data for your assessment.  
+
+Values within the *.csv* files are based on values for all of !study_area and if data are available locally by region, this will allow for a much more precise assessment of ocean health in !study_area. Any data layers that did not have available values for !study_area have place-holder values based on the global mean and are listed in `layers-empty_swapping-global-mean.csv`.
+
+### *layers.csv*
+
+`layers.csv` is the registry that manages all data to be used in your assessment.
+
+Each row in this file represents a specific data layer that has been prepared and formatted properly for the Toolbox. The first columns contain information inputted by the user; other columns are generated later by the Toolbox App as it confirms data formatting and content. The first columns have the following information:
+
+ + ***targets*** indicates how the data layer related goals or dimensions. Goals are indicated with two-letter codes and sub-goals are indicated with three-letter codes, with pressures, resilience, and spatial layers indicated separately.
+ 
+```{r, results='asis', echo=F}
+knitr::kable(
+  read.csv('~/github/ohi-global/eez2014/conf/goals.csv') %>%
+    select(goal, name))
+```
+ 
+ + ***layer*** is the identifying name of the data layer, which will be used in R scripts like `functions.R` and *.csv* files like `pressures_matrix.csv` and `resilience_matrix.csv`. This is also displayed on the Toolbox App under the drop-down menu when the variable type is ‘input layer’.
+ + ***name*** is a longer title of the data layer; this is displayed on the Toolbox App under the drop-down menu when the variable type is ‘input layer’.
+ + ***description*** is further description of the data layer; this is also displayed on the Toolbox App under the drop-down menu when the variable type is ‘input layer’.
+ + ***fld_value*** indicates the units along with the units column.
+ + ***units*** some clarification about the unit of measure in which the data are reported
+ + ***filename*** is the *.csv* filename that holds the data layer information, and is located in the folder ‘layers’.
+ 
+ 
+### *layers* folder
+The `layers` folder contains every data layer as an individual *.csv* file. The names of the *.csv* files within the layers folder correspond to those listed in the *filename* column of the `layers.csv` file described above. Comma separated value files (*.csv* files) can be opened with text editor software, or will open by default by Microsoft Excel or similar software.
+
+Open any *.csv* file within `layers` and note two important things:
+
+1. There are `!x` numbers represented within the data file: these are unique region identifiers *rgn_id*s for each coastal region in your !study_area. The layer called `rgn_layers.csv` identifies which *rgn_id* is associated with which number.
+2. There is a specific format that the Toolbox expects and requires that every *.csv* file within the `layers` folder has. Note the unique region identifier (*rgn_id*) with a single associated *score* or *value*, and that the data are presented in ‘long format’ with minimal columns. See the *Formatting Data for the Toolbox* section of the OHI-Manual for more details.
+
+### layers-empty_swapping-global-mean.csv
+
+This is a list of data layers that did not have values for !study_area. This is because calculated scores of other nearby countries were used to gap-fill values for !study_area. These layers especially should be substituted with local data.  
+
+## *conf* folder
+The `conf` folder includes includes R functions (*config.R* and *functions.R*) and *.csv* files containing information that will be accessed by the R functions (*goals.csv*, *pressures_matrix.R*, *resilience_matrix.csv*, and *resilience_weights.csv*).
+
+
+### *config.r*
+`config.r` is an R script that configures labeling and constants appropriately.
+
+### *functions.r*
+`functions.r` contains functions for each goal and sub-goal model, which calculate the status and trend using data layers identified as ‘layers’ in `layers.csv`. 
+
+### *goals.csv* 
+`goals.csv` is a list of goals and sub-goals and their weights used to calculate the final score for each goal. Other information includes the goal description that is also presented in the Toolbox App. `goals.csv` also indicates the arguments passed to functions.R. These are indicated by two columns: *preindex_function* (functions for all goals that do not have sub-goals, and functions for all sub-goals) and *postindex_function* (functions for goals with sub-goals).  
+
+### *pressures_matrix.csv*
+`pressures_matrix.csv` describes the layers (‘layers’ column in layers.csv) needed to calculate pressure categories. The matrix has weights assigned that were determined by Halpern et al. 2012 (Nature) based on scientific literature and expert opinion.
+
+### *resilience_matrix.csv*
+`resilience_matrix.csv` describes the layers (‘layers’ column in layers.csv) needed to calculate resilience categories.
+
+### *resilience_weights.csv*
+`resilience_weights.csv` describes the weight of various resilience layers, were determined by Halpern et al. 2012 (Nature) based on scientific literature and expert opinion.
+
+## spatial folder 
+The spatial folder contains a single file, *regions_gcs.js*. This is a spatial file in the GeoJSON format; it has the appropriate study area and regions for the assessment. This file will be created by the OHI team for all regional assessments.
+
+## *calculate_scores.r*
+`calculate_scores.r` will run the Toolbox calculations using the *.csv* files in the *layers* folder that are registered in *layers.csv* and the configurations identified in *config.r*. Scores will be saved in *scores.csv*.
+
+## scores.csv
+`scores.csv` is a record of the calculated scores for the assessment (Global 2013 scores). Scores are reported for each dimension (future, pressures, resilience, score, status, trend) for each reporting region, and are presented in ‘long’ format. 
