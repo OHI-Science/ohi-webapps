@@ -324,12 +324,12 @@ for i, rgn in enumerate(sorted(tuple(df_rgn['rgn_name']))): # i=0; rgn = sorted(
             fc_gcs = fc_mol.replace('_mol', '_gcs')
             csv = '%s/%s_data.csv' % (dir_dest_rgn, os.path.splitext(fc_gcs.replace('_gcs.shp', ''))[0])
             if not arcpy.Exists(fc_gcs):
-                print '    %s (%s)' % (os.path.basename(csv), time.strftime('%H:%M:%S'))
+                print '    %s, %s (%s)' % (os.path.basename(fc_gcs), os.path.basename(csv), time.strftime('%H:%M:%S'))
                 
-                fc_mol_tmp = '%s/%s' % (gdb, os.path.basename(fc_mol))
-                fc_gcs_tmp = '%s/%s' % (gdb, os.path.basename(fc_gcs))
+                fc_mol_tmp = '%s/%s' % (gdb, os.path.splitext(os.path.basename(fc_mol))[0])
+                fc_gcs_tmp = '%s/%s' % (gdb, os.path.splitext(os.path.basename(fc_gcs))[0])
                 arcpy.DefineProjection_management(fc_mol, sr_mol)
-                arcpy.CopyFeatures(fc_mol, fc_mol_tmp)                
+                arcpy.CopyFeatures_management(fc_mol, fc_mol_tmp)                
                 arcpy.Project_management(fc_mol_tmp, fc_gcs_tmp, sr_gcs)
                 arcpy.RepairGeometry_management(fc_gcs_tmp)
                 arcpy.AddField_management(fc_gcs_tmp, 'area_km2', 'FLOAT')
@@ -339,7 +339,7 @@ for i, rgn in enumerate(sorted(tuple(df_rgn['rgn_name']))): # i=0; rgn = sorted(
                 d = d[d.rgn_id != 0]                
                 d.to_csv(csv, index=False, encoding='utf-8')        
                 
-                arcpy.Copy_management(fc_gcs_tmp, fc_gcs)
+                arcpy.CopyFeatures_management(fc_gcs_tmp, fc_gcs)
                 arcpy.Delete_management(fc_mol_tmp)
                 arcpy.Delete_management(fc_gcs_tmp)
                 # DEBUG!
