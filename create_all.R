@@ -42,9 +42,14 @@ token = scan('~/.github-token', 'character')
 # get list of countries with prepped data
 cntries = list.files(dir_data)
 
+gl_cntry = read.csv(cntry_old_csv)
+gl_rgn = read.csv(rgn_old_csv, na.strings='') %>%
+  mutate(
+    label = plyr::revalue(label, c('R_union'='Reunion'))) %>% arrange(label)
+
 # loop through countries
 #for (i in 1:length(cntries)){ # i=1
-for (i in 77:length(cntries)){ # i=76   # which(cntries=='Libya')
+for (i in 108:length(cntries)){ # i=76   # which(cntries=='Pakistan')
   
   # setup vars
   Country   = str_replace_all(cntries[i], '_', ' ')
@@ -139,20 +144,20 @@ for (i in 77:length(cntries)){ # i=76   # which(cntries=='Libya')
   rgn_new_csv   = file.path(dir_data, cntry, 'spatial', 'rgn_offshore_data.csv')
   rgn_old_csv   = sprintf('%s/layers/rgn_labels.csv', dir_global)
   cntry_old_csv = sprintf('%s/layers/cntry_rgn.csv', dir_global)
-
+  
   # old to new regions
   rgn_new = read.csv(rgn_new_csv) %>%
     select(rgn_id_new=rgn_id, rgn_name_new=rgn_name) %>%
     mutate(rgn_name_old = Country) %>%
     merge(
-      read.csv(rgn_old_csv, na.strings='') %>%
+      gl_rgn %>%
         select(rgn_name_old=label, rgn_id_old=rgn_id),
       by='rgn_name_old', all.x=T) %>%
     select(rgn_id_new, rgn_name_new, rgn_id_old, rgn_name_old) %>%
     arrange(rgn_name_new)
 
   # old to new countries
-  cntry_new = read.csv(cntry_old_csv) %>%
+  cntry_new = gl_cntry %>%
     select(cntry_key, rgn_id_old=rgn_id) %>%
     merge(
       rgn_new,
