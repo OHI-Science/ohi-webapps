@@ -1,0 +1,78 @@
+"","gl_rgn_name","gl_rgn_id","gl_cntry_key","gl_cntry_count","sc_rgn_id.x","sc_rgn_name.x","sc_rgn_inland_shp.x","sc_rgn_id.y","sc_rgn_name.y","sc_rgn_inland_shp.y","sc_rgn_id","sc_rgn_name","sc_rgn_inland_shp"
+"1","Ecuador",137,"ECU",2,1,"El Oro","/Volumes/data_edit/git-annex/clip-n-ship/Ecuador/spatial/rgn_inland_gcs.shp",NA,NA,NA,NA,NA,NA
+"2","Ecuador",137,"ECU",2,5,"Esmeraldas","/Volumes/data_edit/git-annex/clip-n-ship/Ecuador/spatial/rgn_inland_gcs.shp",NA,NA,NA,NA,NA,NA
+"3","Ecuador",137,"ECU",2,4,"Galápagos","/Volumes/data_edit/git-annex/clip-n-ship/Ecuador/spatial/rgn_inland_gcs.shp",NA,NA,NA,NA,NA,NA
+"4","Ecuador",137,"ECU",2,2,"Guayas","/Volumes/data_edit/git-annex/clip-n-ship/Ecuador/spatial/rgn_inland_gcs.shp",NA,NA,NA,NA,NA,NA
+"5","Ecuador",137,"ECU",2,3,"Manabi","/Volumes/data_edit/git-annex/clip-n-ship/Ecuador/spatial/rgn_inland_gcs.shp",NA,NA,NA,NA,NA,NA
+"6","Ecuador",137,"Galapagos Islands",2,1,"El Oro","/Volumes/data_edit/git-annex/clip-n-ship/Ecuador/spatial/rgn_inland_gcs.shp",NA,NA,NA,NA,NA,NA
+"7","Ecuador",137,"Galapagos Islands",2,5,"Esmeraldas","/Volumes/data_edit/git-annex/clip-n-ship/Ecuador/spatial/rgn_inland_gcs.shp",NA,NA,NA,NA,NA,NA
+"8","Ecuador",137,"Galapagos Islands",2,4,"Galápagos","/Volumes/data_edit/git-annex/clip-n-ship/Ecuador/spatial/rgn_inland_gcs.shp",NA,NA,NA,NA,NA,NA
+"9","Ecuador",137,"Galapagos Islands",2,2,"Guayas","/Volumes/data_edit/git-annex/clip-n-ship/Ecuador/spatial/rgn_inland_gcs.shp",NA,NA,NA,NA,NA,NA
+"10","Ecuador",137,"Galapagos Islands",2,3,"Manabi","/Volumes/data_edit/git-annex/clip-n-ship/Ecuador/spatial/rgn_inland_gcs.shp",NA,NA,NA,NA,NA,NA
+"11","United States",163,"Alaska",3,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"12","United States",163,"Hawaii",3,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"13","United States",163,"USA",3,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"14","Brazil",171,"BRA",2,NA,NA,NA,9,"Alagoas","/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp",NA,NA,NA
+"15","Brazil",171,"BRA",2,NA,NA,NA,17,"Amapá","/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp",NA,NA,NA
+"16","Brazil",171,"BRA",2,NA,NA,NA,7,"Bahia","/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp",NA,NA,NA
+"17","Brazil",171,"BRA",2,NA,NA,NA,13,"Ceará","/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp",NA,NA,NA
+"18","Brazil",171,"BRA",2,NA,NA,NA,6,"Espírito Santo","/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp",NA,NA,NA
+"19","Brazil",171,"BRA",2,NA,NA,NA,15,"Maranhão","/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp",NA,NA,NA
+"20","Brazil",171,"BRA",2,NA,NA,NA,16,"Pará","/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp",NA,NA,NA
+"21","Brazil",171,"BRA",2,NA,NA,NA,11,"Paraíba","/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp",NA,NA,NA
+"22","Brazil",171,"BRA",2,NA,NA,NA,3,"Paraná","/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp",NA,NA,NA
+"23","Brazil",171,"BRA",2,NA,NA,NA,10,"Pernambuco","/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp",NA,NA,NA
+"24","Brazil",171,"BRA",2,NA,NA,NA,12,"Piauí","/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp",NA,NA,NA
+"25","Brazil",171,"BRA",2,NA,NA,NA,5,"Rio de Janeiro","/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp",NA,NA,NA
+"26","Brazil",171,"BRA",2,NA,NA,NA,14,"Rio Grande do Norte","/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp",NA,NA,NA
+"27","Brazil",171,"BRA",2,NA,NA,NA,1,"Rio Grande do Sul","/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp",NA,NA,NA
+"28","Brazil",171,"BRA",2,NA,NA,NA,2,"Santa Catarina","/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp",NA,NA,NA
+"29","Brazil",171,"BRA",2,NA,NA,NA,4,"São Paulo","/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp",NA,NA,NA
+"30","Brazil",171,"BRA",2,NA,NA,NA,8,"Sergipe","/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp",NA,NA,NA
+"31","Brazil",171,"Trindade",2,NA,NA,NA,9,"Alagoas","/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp",NA,NA,NA
+"32","Brazil",171,"Trindade",2,NA,NA,NA,17,"Amapá","/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp",NA,NA,NA
+"33","Brazil",171,"Trindade",2,NA,NA,NA,7,"Bahia","/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp",NA,NA,NA
+"34","Brazil",171,"Trindade",2,NA,NA,NA,13,"Ceará","/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp",NA,NA,NA
+"35","Brazil",171,"Trindade",2,NA,NA,NA,6,"Espírito Santo","/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp",NA,NA,NA
+"36","Brazil",171,"Trindade",2,NA,NA,NA,15,"Maranhão","/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp",NA,NA,NA
+"37","Brazil",171,"Trindade",2,NA,NA,NA,16,"Pará","/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp",NA,NA,NA
+"38","Brazil",171,"Trindade",2,NA,NA,NA,11,"Paraíba","/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp",NA,NA,NA
+"39","Brazil",171,"Trindade",2,NA,NA,NA,3,"Paraná","/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp",NA,NA,NA
+"40","Brazil",171,"Trindade",2,NA,NA,NA,10,"Pernambuco","/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp",NA,NA,NA
+"41","Brazil",171,"Trindade",2,NA,NA,NA,12,"Piauí","/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp",NA,NA,NA
+"42","Brazil",171,"Trindade",2,NA,NA,NA,5,"Rio de Janeiro","/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp",NA,NA,NA
+"43","Brazil",171,"Trindade",2,NA,NA,NA,14,"Rio Grande do Norte","/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp",NA,NA,NA
+"44","Brazil",171,"Trindade",2,NA,NA,NA,1,"Rio Grande do Sul","/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp",NA,NA,NA
+"45","Brazil",171,"Trindade",2,NA,NA,NA,2,"Santa Catarina","/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp",NA,NA,NA
+"46","Brazil",171,"Trindade",2,NA,NA,NA,4,"São Paulo","/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp",NA,NA,NA
+"47","Brazil",171,"Trindade",2,NA,NA,NA,8,"Sergipe","/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp",NA,NA,NA
+"48","Chile",224,"CHL",2,NA,NA,NA,NA,NA,NA,2,"Aisén del General Carlos Ibáñez del Campo","/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp"
+"49","Chile",224,"CHL",2,NA,NA,NA,NA,NA,NA,11,"Antofagasta","/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp"
+"50","Chile",224,"CHL",2,NA,NA,NA,NA,NA,NA,4,"Araucanía","/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp"
+"51","Chile",224,"CHL",2,NA,NA,NA,NA,NA,NA,9,"Atacama","/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp"
+"52","Chile",224,"CHL",2,NA,NA,NA,NA,NA,NA,5,"Bío-Bío","/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp"
+"53","Chile",224,"CHL",2,NA,NA,NA,NA,NA,NA,8,"Coquimbo","/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp"
+"54","Chile",224,"CHL",2,NA,NA,NA,NA,NA,NA,7,"Libertador General Bernardo O'Higgins","/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp"
+"55","Chile",224,"CHL",2,NA,NA,NA,NA,NA,NA,3,"Los Lagos","/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp"
+"56","Chile",224,"CHL",2,NA,NA,NA,NA,NA,NA,1,"Magallanes y Antártica Chilena","/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp"
+"57","Chile",224,"CHL",2,NA,NA,NA,NA,NA,NA,6,"Maule","/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp"
+"58","Chile",224,"CHL",2,NA,NA,NA,NA,NA,NA,12,"Tarapacá","/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp"
+"59","Chile",224,"CHL",2,NA,NA,NA,NA,NA,NA,10,"Valparaíso","/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp"
+"60","Chile",224,"Easter Island",2,NA,NA,NA,NA,NA,NA,2,"Aisén del General Carlos Ibáñez del Campo","/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp"
+"61","Chile",224,"Easter Island",2,NA,NA,NA,NA,NA,NA,11,"Antofagasta","/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp"
+"62","Chile",224,"Easter Island",2,NA,NA,NA,NA,NA,NA,4,"Araucanía","/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp"
+"63","Chile",224,"Easter Island",2,NA,NA,NA,NA,NA,NA,9,"Atacama","/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp"
+"64","Chile",224,"Easter Island",2,NA,NA,NA,NA,NA,NA,5,"Bío-Bío","/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp"
+"65","Chile",224,"Easter Island",2,NA,NA,NA,NA,NA,NA,8,"Coquimbo","/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp"
+"66","Chile",224,"Easter Island",2,NA,NA,NA,NA,NA,NA,7,"Libertador General Bernardo O'Higgins","/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp"
+"67","Chile",224,"Easter Island",2,NA,NA,NA,NA,NA,NA,3,"Los Lagos","/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp"
+"68","Chile",224,"Easter Island",2,NA,NA,NA,NA,NA,NA,1,"Magallanes y Antártica Chilena","/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp"
+"69","Chile",224,"Easter Island",2,NA,NA,NA,NA,NA,NA,6,"Maule","/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp"
+"70","Chile",224,"Easter Island",2,NA,NA,NA,NA,NA,NA,12,"Tarapacá","/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp"
+"71","Chile",224,"Easter Island",2,NA,NA,NA,NA,NA,NA,10,"Valparaíso","/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp"
+"72","Puerto Rico and Virgin Islands of the United States",116,"PRI",2,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"73","Puerto Rico and Virgin Islands of the United States",116,"VIR",2,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"74","Guadeloupe and Martinique",140,"GLP",2,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"75","Guadeloupe and Martinique",140,"MTQ",2,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"76","Northern Mariana Islands and Guam",13,"MNP",2,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"77","Northern Mariana Islands and Guam",13,"GUM",2,NA,NA,NA,NA,NA,NA,NA,NA,NA
