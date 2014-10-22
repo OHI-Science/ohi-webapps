@@ -113,11 +113,11 @@ df_rgn.to_csv('tmp/rgn_ok_gadm.csv', index=False, encoding='utf-8')
 
 # iterate over regions
 print 'looping over countries (n=%d)' % len(df_rgn)
-for i, rgn in enumerate(sorted(tuple(df_rgn['rgn_name']))): # i=0; rgn = sorted(tuple(df_rgn['rgn_name']))[i]
+for i, rgn in enumerate(sorted(tuple(df_rgn['rgn_name']))): # i=129; rgn = sorted(tuple(df_rgn['rgn_name']))[i]
 #for i, rgn in enumerate(sorted(tuple(df_rgn['rgn_name']))[3:4]): # i=0; rgn = sorted(tuple(df_rgn['rgn_name']))[i]
 
     # DEBUG! bypass ones already done
-    if i < 93:
+    if i < 95:
         continue
 
     # make output dir
@@ -133,7 +133,7 @@ for i, rgn in enumerate(sorted(tuple(df_rgn['rgn_name']))): # i=0; rgn = sorted(
     arcpy.env.workspace = gdb
     arcpy.env.extent = 'rgn_gcs'
     arcpy.env.outputCoordinateSystem = sr_mol
-    
+
     # skip if have all desired outputs: theissen, offshore, inland, buffers
     c_buffers = ['%s/rgn_%s_mol.shp' % (dir_dest_rgn, buf) for buf in buffers]
     if sum([not arcpy.Exists(x) for x in [c_offshore_dest, c_inland_dest] + c_buffers]) > 0:
@@ -262,41 +262,40 @@ for i, rgn in enumerate(sorted(tuple(df_rgn['rgn_name']))): # i=0; rgn = sorted(
                 if arcpy.Exists(fc):
                     arcpy.Delete_management(fc)
 
-            if not arcpy.Exists(c_buf_dest):
-                print '    %s %s %s (%s)' % (buf_zone, buf_dist, buf_units, time.strftime('%H:%M:%S'))
-                try:
-                    if buf_zone == 'inland':
-                        arcpy.Intersect_analysis(['c_rgn_inland_mol', rgn_buf_mol], 'c_buf_t', 'NO_FID')
-                    elif buf_zone == 'offshore':
-                        arcpy.Intersect_analysis(['c_rgn_offshore_mol', rgn_buf_mol], 'c_buf_t', 'NO_FID')
-                    else:
-                        stop('The buf_zone "%s" is not handled by this function.' % buf_zone)
-                    arcpy.RepairGeometry_management('c_buf_t')
-                    arcpy.Dissolve_management('c_buf_t', 'c_buf_t_d', 'rgn_name')
-                    arcpy.RepairGeometry_management('c_buf_t_d')
-                    arcpy.da.ExtendTable('c_buf_t_d', 'rgn_name', tbl_rgns[['rgn_name','rgn_id']], 'rgn_name', append_only=False)
-                    arcpy.CopyFeatures_management('c_buf_t_d', c_buf_dest)
-                except Exception as e:
-                    print e.message
+            if arcpy.Exists(c_buf_dest):
+                continue
                 
-                    print '      buf intersect FAILED! copying buffer inputs (%s)' % time.strftime('%H:%M:%S')
+            print '    %s %s %s (%s)' % (buf_zone, buf_dist, buf_units, time.strftime('%H:%M:%S'))
+            try:
+                if buf_zone == 'inland':
+                    arcpy.Intersect_analysis(['c_rgn_inland_mol', rgn_buf_mol], 'c_buf_t', 'NO_FID')
+                elif buf_zone == 'offshore':
+                    arcpy.Intersect_analysis(['c_rgn_offshore_mol', rgn_buf_mol], 'c_buf_t', 'NO_FID')
+                else:
+                    stop('The buf_zone "%s" is not handled by this function.' % buf_zone)
+                arcpy.RepairGeometry_management('c_buf_t')
+                arcpy.Dissolve_management('c_buf_t', 'c_buf_t_d', 'rgn_name')
+                arcpy.RepairGeometry_management('c_buf_t_d')
+                arcpy.da.ExtendTable('c_buf_t_d', 'rgn_name', tbl_rgns[['rgn_name','rgn_id']], 'rgn_name', append_only=False)
+                arcpy.CopyFeatures_management('c_buf_t_d', c_buf_dest)
+            except Exception as e:
+                print e.message
+            
+                print '      buf intersect FAILED! copying buffer inputs (%s)' % time.strftime('%H:%M:%S')
 
-                    # copy failed buffer inputs
-                    for fc in ('c_buf_t','c_buf_t_d'):
-                        fc_f = 'f_%s_%s_%s' % (rgn.replace(' ', '_'), buf, fc[2:])
-                        if arcpy.Exists(fc) and not arcpy.Exists(fc_f):
-                            arcpy.CopyFeatures_management(fc, fc_f)
-                
-                    continue
-            else:
-                #print '      %s exists, skipping (%s)' % (os.path.basename(c_buf_dest), time.strftime('%H:%M:%S'))
-                pass
+                # copy failed buffer inputs
+                for fc in ('c_buf_t','c_buf_t_d'):
+                    fc_f = 'f_%s_%s_%s' % (rgn.replace(' ', '_'), buf, fc[2:])
+                    if arcpy.Exists(fc) and not arcpy.Exists(fc_f):
+                        arcpy.CopyFeatures_management(fc, fc_f)
+            
+                continue
     else:
         print '  all inland/offshore/buffers exist, skip copying to gdb (%s)' % time.strftime('%H:%M:%S')
 
     try:
         # project to raster, setting snap raster first to sp_[mol|gcs].tif
-        print '  rasterizing (%s)' % time.strftime('%H:%M:%S')
+        print '  rasterizing to ... (%s)' % time.strftime('%H:%M:%S')
         arcpy.env.outputCoordinateSystem = m_mol
         arcpy.env.snapRaster = m_mol
         arcpy.env.extent = m_mol
@@ -306,7 +305,7 @@ for i, rgn in enumerate(sorted(tuple(df_rgn['rgn_name']))): # i=0; rgn = sorted(
 
             tif_mol = '%s.tif' % os.path.splitext(fc)[0]
             if not arcpy.Exists(tif_mol):
-                print '    %s (%s)' % (os.path.basename(fc), time.strftime('%H:%M:%S'))
+                print '    %s (%s)' % (os.path.basename(tif_mol), time.strftime('%H:%M:%S'))
                 tif_mol_tmp = '%s/%s' % (dir_tmp_rgn, os.path.basename(tif_mol))
                 arcpy.FeatureToRaster_conversion(fc, 'rgn_id', tif_mol_tmp, cellsize) # meters
                 arcpy.Copy_management(tif_mol_tmp, tif_mol)
@@ -318,7 +317,7 @@ for i, rgn in enumerate(sorted(tuple(df_rgn['rgn_name']))): # i=0; rgn = sorted(
         # project shapefiles to gcs, calculate area and export csv
         arcpy.env.workspace = dir_dest_rgn
         arcpy.env.outputCoordinateSystem = sr_gcs
-        print '  projecting (%s)' % time.strftime('%H:%M:%S')
+        print '  projecting to ...(%s)' % time.strftime('%H:%M:%S')
         for fc_mol in sorted(arcpy.ListFeatureClasses('rgn_*_mol.shp')):
 
             fc_gcs = fc_mol.replace('_mol', '_gcs')
@@ -326,8 +325,8 @@ for i, rgn in enumerate(sorted(tuple(df_rgn['rgn_name']))): # i=0; rgn = sorted(
             if not arcpy.Exists(fc_gcs):
                 print '    %s, %s (%s)' % (os.path.basename(fc_gcs), os.path.basename(csv), time.strftime('%H:%M:%S'))
                 
-                fc_mol_tmp = '%s/%s' % (gdb, os.path.splitext(os.path.basename(fc_mol))[0])
-                fc_gcs_tmp = '%s/%s' % (gdb, os.path.splitext(os.path.basename(fc_gcs))[0])
+                fc_mol_tmp = '%s/tmp_%s' % (gdb, os.path.splitext(os.path.basename(fc_mol))[0])
+                fc_gcs_tmp = '%s/tmp_%s' % (gdb, os.path.splitext(os.path.basename(fc_gcs))[0])
                 arcpy.DefineProjection_management(fc_mol, sr_mol)
                 arcpy.CopyFeatures_management(fc_mol, fc_mol_tmp)                
                 arcpy.Project_management(fc_mol_tmp, fc_gcs_tmp, sr_gcs)
