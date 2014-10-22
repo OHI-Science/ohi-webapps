@@ -1,3 +1,4 @@
+setwd('~/github/ohi-webapps')
 library(dplyr)
 
 # vars
@@ -24,10 +25,12 @@ d = gl_cntries %>%
     gl_rgn_id    = rgn_id,
     gl_rgn_name  = label,
     gl_cntry_key = cntry_key,
-    gl_cntry_count = n)
+    gl_cntry_count = n) %>%
+  ungroup()
+d_cols = names(d)
 
 # iterate through global regions, getting available subcountry regions
-for (gl_rgn_name in unique(as.character(d$gl_rgn_name))){ # gl_rgn_name = unique(as.character(d$gl_rgn_name))[1]
+for (gl_rgn_n in unique(as.character(d$gl_rgn_name))){ # gl_rgn_n = unique(as.character(d$gl_rgn_name))[1]
   
   # get subcountry regions
   sc_rgns_offshore_csv = file.path(dir_data, gl_rgn_name, 'spatial', 'rgn_offshore_data.csv')
@@ -44,14 +47,23 @@ for (gl_rgn_name in unique(as.character(d$gl_rgn_name))){ # gl_rgn_name = unique
         sc_rgn_id   = rgn_id,
         sc_rgn_name = rgn_name) %>%
       mutate(
-        gl_rgn_name = gl_rgn_name,
+        gl_rgn_name = gl_rgn_n,
         sc_rgn_inland_shp = sc_rgns_inland_shp)
     
-    # join with data
-    d = d %>%
+    # insert data
+    d_gl_sc = d %>%
+      select(one_of(d_cols)) %>%
+      filter(gl_rgn_name == gl_rgn_n) %>%
       left_join(
         d_sc,
-        by='gl_rgn_name')    
+        by='gl_rgn_name')
+    d = rbind_list(
+      d %>%
+        anti_join(
+          d_gl_sc,
+          by='gl_rgn_name'),
+      d_gl_sc)
+          
   }  
 }
 
