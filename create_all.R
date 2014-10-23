@@ -87,31 +87,31 @@ for (i in 1:length(cntries)){ # i=1
   # catalog status ----
   # uncomment below to quickly capture table of status
   
-#   txt_cntry_err = sprintf('%s/score_errors/%s_cntry-key-length-gt-1.txt', dir_repos, cntry)
-#   if (file.exists(txt_cntry_err)){
-#     cat('  multi cntry\n')
-#     y$finished[i] = F
-#     y$status[i]   = 'cntry_key multiple'
-#     next        
-#   }
-#   
-#   txt_calc_err = sprintf('%s/score_errors/%s_calc-scores.txt', dir_repos, cntry)
-#   if (file.exists(txt_calc_err)){
-#     cat('  calc error\n')
-#     y$finished[i] = F
-#     y$status[i]   = 'calc'
-#     y$error[i]    = paste(readLines(txt_calc_err), collapse='    ')
-#     next    
-#   }   
-#   
-#   txt_shp_err = sprintf('%s/score_errors/%s_shp_to_geojson.txt', dir_repos, cntry)
-#   if (file.exists(txt_shp_err)){
-#     cat('  shp error\n')
-#     y$finished[i] = F
-#     y$status[i]   = 'shp_to_geojson'
-#     y$error[i]    = paste(readLines(txt_shp_err), collapse='    ')
-#     next        
-#   }  
+  txt_cntry_err = sprintf('%s/score_errors/%s_cntry-key-length-gt-1.txt', dir_repos, cntry)
+  if (file.exists(txt_cntry_err)){
+    cat('  multi cntry\n')
+    y$finished[i] = F
+    y$status[i]   = 'cntry_key multiple'
+    next        
+  }
+  
+  txt_calc_err = sprintf('%s/score_errors/%s_calc-scores.txt', dir_repos, cntry)
+  if (file.exists(txt_calc_err)){
+    cat('  calc error\n')
+    y$finished[i] = F
+    y$status[i]   = 'calc'
+    y$error[i]    = paste(readLines(txt_calc_err), collapse='    ')
+    next    
+  }   
+  
+  txt_shp_err = sprintf('%s/score_errors/%s_shp_to_geojson.txt', dir_repos, cntry)
+  if (file.exists(txt_shp_err)){
+    cat('  shp error\n')
+    y$finished[i] = F
+    y$status[i]   = 'shp_to_geojson'
+    y$error[i]    = paste(readLines(txt_shp_err), collapse='    ')
+    next        
+  }  
     
   # create github repo ----
   github_repo_exists = system(sprintf('git ls-remote git@github.com:ohi-science/%s.git', repo_name), ignore.stderr=T) != 128
@@ -472,5 +472,11 @@ y = y %>%
   select(Country, finished, status, error) %>%
   arrange(desc(finished), status, error, Country)
 
-table(y$error)
 write.csv(y, '~/github/ohi-webapps/tmp/webapp_status.csv', row.names=F, na='')
+
+table(y$error) %>%
+  as.data.frame() %>% 
+  select(error = Var1, count=Freq) %>%
+  filter(error != '') %>%
+  arrange(desc(count)) %>%
+  knitr::kable()
