@@ -33,8 +33,8 @@ d_cols = names(d)
 for (gl_rgn_n in unique(as.character(d$gl_rgn_name))){ # gl_rgn_n = unique(as.character(d$gl_rgn_name))[1]
   
   # get subcountry regions
-  sc_rgns_offshore_csv = file.path(dir_data, gl_rgn_name, 'spatial', 'rgn_offshore_data.csv')
-  sc_rgns_inland_shp   = file.path(dir_data, gl_rgn_name, 'spatial', 'rgn_inland_gcs.shp')
+  sc_rgns_offshore_csv = file.path(dir_data, gl_rgn_n, 'spatial', 'rgn_offshore_data.csv')
+  sc_rgns_inland_shp   = file.path(dir_data, gl_rgn_n, 'spatial', 'rgn_inland_gcs.shp')
   
   if (file.exists(sc_rgns_offshore_csv)){
     
@@ -67,5 +67,8 @@ for (gl_rgn_n in unique(as.character(d$gl_rgn_name))){ # gl_rgn_n = unique(as.ch
   }  
 }
 
+# arrange
+d = arrange(d, gl_rgn_name, gl_cntry_key, sc_rgn_name)
+
 # write out csv of lookups
-write.csv(d, csv_out)
+write.csv(d, csv_out, row.names=F, na='')
