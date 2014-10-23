@@ -1,44 +1,44 @@
-gl_rgn_id,gl_rgn_name,gl_cntry_key,gl_cntry_count,sc_rgn_id,sc_rgn_name,sc_rgn_inland_shp
-171,Brazil,BRA,2,9,Alagoas,/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp
-171,Brazil,BRA,2,17,Amapá,/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp
-171,Brazil,BRA,2,7,Bahia,/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp
-171,Brazil,BRA,2,13,Ceará,/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp
-171,Brazil,BRA,2,15,Maranhão,/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp
-171,Brazil,BRA,2,3,Paraná,/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp
-171,Brazil,BRA,2,11,Paraíba,/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp
-171,Brazil,BRA,2,16,Pará,/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp
-171,Brazil,BRA,2,10,Pernambuco,/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp
-171,Brazil,BRA,2,12,Piauí,/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp
-171,Brazil,BRA,2,14,Rio Grande do Norte,/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp
-171,Brazil,BRA,2,1,Rio Grande do Sul,/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp
-171,Brazil,BRA,2,5,Rio de Janeiro,/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp
-171,Brazil,BRA,2,2,Santa Catarina,/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp
-171,Brazil,BRA,2,8,Sergipe,/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp
-171,Brazil,BRA,2,4,São Paulo,/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp
-171,Brazil,Trindade,2,6,Espírito Santo,/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp
-224,Chile,CHL,2,2,Aisén del General Carlos Ibáñez del Campo,/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp
-224,Chile,CHL,2,11,Antofagasta,/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp
-224,Chile,CHL,2,4,Araucanía,/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp
-224,Chile,CHL,2,9,Atacama,/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp
-224,Chile,CHL,2,5,Bío-Bío,/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp
-224,Chile,CHL,2,8,Coquimbo,/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp
-224,Chile,CHL,2,7,Libertador General Bernardo O'Higgins,/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp
-224,Chile,CHL,2,3,Los Lagos,/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp
-224,Chile,CHL,2,1,Magallanes y Antártica Chilena,/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp
-224,Chile,CHL,2,6,Maule,/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp
-224,Chile,CHL,2,12,Tarapacá,/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp
-224,Chile,Easter Island,2,10,Valparaíso,/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp
-137,Ecuador,ECU,2,1,El Oro,/Volumes/data_edit/git-annex/clip-n-ship/Ecuador/spatial/rgn_inland_gcs.shp
-137,Ecuador,ECU,2,5,Esmeraldas,/Volumes/data_edit/git-annex/clip-n-ship/Ecuador/spatial/rgn_inland_gcs.shp
-137,Ecuador,ECU,2,2,Guayas,/Volumes/data_edit/git-annex/clip-n-ship/Ecuador/spatial/rgn_inland_gcs.shp
-137,Ecuador,ECU,2,3,Manabi,/Volumes/data_edit/git-annex/clip-n-ship/Ecuador/spatial/rgn_inland_gcs.shp
-137,Ecuador,Galapagos Islands,2,4,Galápagos,/Volumes/data_edit/git-annex/clip-n-ship/Ecuador/spatial/rgn_inland_gcs.shp
-140,Guadeloupe and Martinique,GLP,2,,,
-140,Guadeloupe and Martinique,MTQ,2,,,
-13,Northern Mariana Islands and Guam,GUM,2,,,
-13,Northern Mariana Islands and Guam,MNP,2,,,
-116,Puerto Rico and Virgin Islands of the United States,PRI,2,,,
-116,Puerto Rico and Virgin Islands of the United States,VIR,2,,,
-163,United States,Alaska,3,,,
-163,United States,Hawaii,3,,,
-163,United States,USA,3,,,
+gl_rgn_id,gl_rgn_name,gl_cntry_key,sc_rgn_name,sc_rgn_id,sc_rgn_inland_shp
+171,Brazil,BRA,Alagoas,9,/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp
+171,Brazil,BRA,Amapá,17,/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp
+171,Brazil,BRA,Bahia,7,/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp
+171,Brazil,BRA,Ceará,13,/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp
+171,Brazil,BRA,Maranhão,15,/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp
+171,Brazil,BRA,Paraná,3,/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp
+171,Brazil,BRA,Paraíba,11,/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp
+171,Brazil,BRA,Pará,16,/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp
+171,Brazil,BRA,Pernambuco,10,/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp
+171,Brazil,BRA,Piauí,12,/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp
+171,Brazil,BRA,Rio Grande do Norte,14,/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp
+171,Brazil,BRA,Rio Grande do Sul,1,/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp
+171,Brazil,BRA,Rio de Janeiro,5,/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp
+171,Brazil,BRA,Santa Catarina,2,/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp
+171,Brazil,BRA,Sergipe,8,/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp
+171,Brazil,BRA,São Paulo,4,/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp
+171,Brazil,Trindade,Espírito Santo,6,/Volumes/data_edit/git-annex/clip-n-ship/Brazil/spatial/rgn_inland_gcs.shp
+224,Chile,CHL,Aisén del General Carlos Ibáñez del Campo,2,/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp
+224,Chile,CHL,Antofagasta,11,/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp
+224,Chile,CHL,Araucanía,4,/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp
+224,Chile,CHL,Atacama,9,/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp
+224,Chile,CHL,Bío-Bío,5,/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp
+224,Chile,CHL,Coquimbo,8,/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp
+224,Chile,CHL,Libertador General Bernardo O'Higgins,7,/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp
+224,Chile,CHL,Los Lagos,3,/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp
+224,Chile,CHL,Magallanes y Antártica Chilena,1,/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp
+224,Chile,CHL,Maule,6,/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp
+224,Chile,CHL,Tarapacá,12,/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp
+224,Chile,Easter Island,Valparaíso,10,/Volumes/data_edit/git-annex/clip-n-ship/Chile/spatial/rgn_inland_gcs.shp
+137,Ecuador,ECU,El Oro,1,/Volumes/data_edit/git-annex/clip-n-ship/Ecuador/spatial/rgn_inland_gcs.shp
+137,Ecuador,ECU,Esmeraldas,5,/Volumes/data_edit/git-annex/clip-n-ship/Ecuador/spatial/rgn_inland_gcs.shp
+137,Ecuador,ECU,Guayas,2,/Volumes/data_edit/git-annex/clip-n-ship/Ecuador/spatial/rgn_inland_gcs.shp
+137,Ecuador,ECU,Manabi,3,/Volumes/data_edit/git-annex/clip-n-ship/Ecuador/spatial/rgn_inland_gcs.shp
+137,Ecuador,Galapagos Islands,Galápagos,4,/Volumes/data_edit/git-annex/clip-n-ship/Ecuador/spatial/rgn_inland_gcs.shp
+140,Guadeloupe and Martinique,GLP,,,
+140,Guadeloupe and Martinique,MTQ,,,
+13,Northern Mariana Islands and Guam,GUM,,,
+13,Northern Mariana Islands and Guam,MNP,,,
+116,Puerto Rico and Virgin Islands of the United States,PRI,,,
+116,Puerto Rico and Virgin Islands of the United States,VIR,,,
+163,United States,Alaska,,,
+163,United States,Hawaii,,,
+163,United States,USA,,,
