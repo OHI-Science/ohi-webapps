@@ -24,7 +24,7 @@ suppressWarnings(library(ohicore))
 
 Welcome to !repo.  
 
-!repo is repository: a folder of files and scripts required to run the Ocean Health Index (OHI) Toolbox and will be necessary to complete your regional assessment. Although the Toolbox is used to calculate Index scores after all data have been gathered and decisions have been made, it is important to understand the structure of the Toolbox file system, as this aids in bookkeeping, which is important for transparent and reproducible science.  
+!repo is repository: a folder of files and scripts required to run the Ocean Health Index (OHI) Toolbox and will be necessary to complete your regional assessment. Although the Toolbox is used to calculate Index scores after all data have been gathered and decisions have been made, it is important to understand the structure of the Toolbox file system, as this aids in bookkeeping, which is important for transparent and reproducible science. You will find that although data preparation and model modification will require knowledge of the software program R, most data management and bookkeeping within the Toolbox file system can be done without any programming knowledge.  
 
 Please refer to the **Ocean Health Index Toolbox Manual** for instructions on how to prepare to use the Toolbox, including how to download this repository using GitHub to facilitate collaboration. 
 
@@ -120,7 +120,7 @@ The `conf` folder includes includes R functions (*config.R* and *functions.R*) a
 
 
 ### *config.r*
-`config.r` has important information for the proper calculation and display of goal scores. Briefly, it sets several constants, sets the proper map orientation, and provides labeling for dimension descriptions for the Toolbox Application.  
+`config.r` is written in the software program R and has important information for the proper calculation and display of goal scores. Briefly, it sets several constants, sets the proper map orientation, and provides labeling for dimension descriptions for the Toolbox Application.  
 
 `config.r` also identifies how to aggregate resilience and pressures matrices for goals with categories (natural products, livelihoods & economies, and habitat-based goals). This portion of `config.r` may need to be modifed if entire goals with categories are removed from the assessment. Otherwise, you will likely not modify this file at all. 
 
@@ -130,18 +130,20 @@ The `conf` folder includes includes R functions (*config.R* and *functions.R*) a
 * *description* describes the goal and is the text that will be displayed in the Toolbox App. If you modify what the goal captures, this description will need to be updated. 
 * *weight* indicates how the goals are weighted when they are combined into an Index score. Currently, all 10 goals are weighted equally (1), and subgoals are weighted as half of a full goal (0.5). If you choose to weight the goals unequally, you will need to modify this column. Weights are set proportionally to each other; goals do not need to add to 10. Goal weights were set equally in the global assessment because no information was available at the global scale to indicate otherwise; in your region there may be local priorities that could inform how to change the weights. 
 * *preindex_function* indicates how models are called in `functions.r` for all sub-goals and goals that do not have sub-goals. Each goal is calculated with a model identified with the goal's 2- or 3-letter code. The model's inputs are identified in this column, so as you modify goal models or inputs it is important to check this column and modify accordingly. This is called 'preindex' because it refers to . 
-*postindex_function* indicates how models are called in `functions.r` for all goals that have sub-goals.
+* *postindex_function* indicates how models are called in `functions.r` for all goals that have sub-goals.
 
 
 ### *functions.r*
-`functions.r` contains functions for each goal and sub-goal model, which calculate the status and trend using data layers identified as ‘layers’ in `layers.csv`. 
+`functions.r` is written in the software program R and contains models for each goal and sub-goal model, which are called using the inputs in `goals.csv`. Each model calculate the status and trend for the goal or sub-goal using data layers identified in `layers.csv`.  
+
+Models will be modified individually, by goal or sub-goal, if you incorporate new data layers or interactions. To do this will require proficiency in the software program R, and ease with learning new user-created packages. The primary R package used is called `dplyr` by Hadley Wickham. The `dplyr` package allows for 'chaining' between functions, which is represented with a `%>%`. See [github.com/hadley/dplyr#dplyr](https://github.com/hadley/dplyr#dplyr) for documentation.  
 
 
 ### *pressures_matrix.csv*
-`pressures_matrix.csv` describes the layers (‘layers’ column in layers.csv) needed to calculate pressure categories. The matrix has weights assigned that were determined by Halpern et al. 2012 (Nature) based on scientific literature and expert opinion.
+`pressures_matrix.csv` describes the layers (from `layers.csv`) needed to calculate pressure categories. The matrix has weights assigned that were determined by Halpern *et al*. 2012 (*Nature*) based on scientific literature and expert opinion.
 
 ### *resilience_matrix.csv*
-`resilience_matrix.csv` describes the layers (‘layers’ column in layers.csv) needed to calculate resilience categories.
+`resilience_matrix.csv` describes the layers (from `layers.csv`) needed to calculate resilience categories.
 
 ### *resilience_weights.csv*
 `resilience_weights.csv` describes the weight of various resilience layers, were determined by Halpern et al. 2012 (Nature) based on scientific literature and expert opinion.
