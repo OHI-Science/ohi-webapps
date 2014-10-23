@@ -42,14 +42,24 @@ token = scan('~/.github-token', 'character')
 # get list of countries with prepped data
 cntries = list.files(dir_data)
 
-gl_cntry = read.csv(cntry_old_csv)
-gl_rgn = read.csv(rgn_old_csv, na.strings='') %>%
+gl_cntry = read.csv(sprintf('%s/layers/cntry_rgn.csv', dir_global))
+gl_rgn = read.csv(sprintf('%s/layers/rgn_labels.csv', dir_global), na.strings='') %>%
   mutate(
     label = plyr::revalue(label, c('R_union'='Reunion'))) %>% arrange(label)
 
+# capture status
+n = length(cntries)
+y = data.frame(
+  Country  = str_replace_all(cntries, '_', ' '),
+  finished = logical(n),
+  status   = character(n),
+  error    = character(n),
+  stringsAsFactors=F)
+
 # loop through countries
 #for (i in 1:length(cntries)){ # i=1
-for (i in 108:length(cntries)){ # i=76   # which(cntries=='Pakistan')
+for (i in 1:length(cntries)){ # i=1
+#for (i in 3){ # i=76   # which(cntries=='American_Samoa')
   
   # setup vars
   Country   = str_replace_all(cntries[i], '_', ' ')
@@ -59,13 +69,50 @@ for (i in 108:length(cntries)){ # i=76   # which(cntries=='Pakistan')
   dir_repo  = file.path(dir_repos, repo_name)
   dir_app   = file.path(dir_data, cntries[i], 'shinyapps.io')
   app_name  = cntry
-  cat(sprintf('\n\n\n\n%03d of %d: %s -- %s\n', i, length(cntries), Country, format(Sys.time(), '%X')))  
+  cat(sprintf('\n\n\n\n%03d of %d: %s -- %s\n', i, length(cntries), Country, format(Sys.time(), '%X')))    
   
   if (Country %in% c('Brazil','Canada','China','Fiji')){
-    cat('  Skipping!\n')
+    cat('  excepted, skipping!\n')    
+    y$finished[i] = F
+    y$status[i]   = 'excepted'
     next
   }
   
+  if (file.exists(file.path(dir_app, 'app_config.yaml'))){
+    cat('  done, skipping!\n')
+    y$finished[i] = T
+    next    
+  }
+  
+  # catalog status ----
+  # uncomment below to quickly capture table of status
+  
+#   txt_cntry_err = sprintf('%s/score_errors/%s_cntry-key-length-gt-1.txt', dir_repos, cntry)
+#   if (file.exists(txt_cntry_err)){
+#     cat('  multi cntry\n')
+#     y$finished[i] = F
+#     y$status[i]   = 'cntry_key multiple'
+#     next        
+#   }
+#   
+#   txt_calc_err = sprintf('%s/score_errors/%s_calc-scores.txt', dir_repos, cntry)
+#   if (file.exists(txt_calc_err)){
+#     cat('  calc error\n')
+#     y$finished[i] = F
+#     y$status[i]   = 'calc'
+#     y$error[i]    = paste(readLines(txt_calc_err), collapse='    ')
+#     next    
+#   }   
+#   
+#   txt_shp_err = sprintf('%s/score_errors/%s_shp_to_geojson.txt', dir_repos, cntry)
+#   if (file.exists(txt_shp_err)){
+#     cat('  shp error\n')
+#     y$finished[i] = F
+#     y$status[i]   = 'shp_to_geojson'
+#     y$error[i]    = paste(readLines(txt_shp_err), collapse='    ')
+#     next        
+#   }  
+    
   # create github repo ----
   github_repo_exists = system(sprintf('git ls-remote git@github.com:ohi-science/%s.git', repo_name), ignore.stderr=T) != 128
   if (!github_repo_exists){    
@@ -121,8 +168,17 @@ for (i in 108:length(cntries)){ # i=76   # which(cntries=='Pakistan')
   f_geojson = file.path(dir_data, cntry, 'regions_gcs.geojson')
   if (!file.exists(f_js)){
     f_shp = file.path(dir_data, cntry, 'spatial', 'rgn_offshore_gcs.shp')
-    cat(sprintf('  shp_to_geojson -- %s\n', format(Sys.time(), '%X')))
-    shp_to_geojson(f_shp, f_js, f_geojson)
+    #f_lyr = tools::file_path_sans_ext(basename(f_shp))
+    #x = rgdal::readOGR(dsn=f_shp, layer=f_lyr, drop_unsupported_fields=T) #  proj4string=sp::CRS('+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
+    #ogrInfo(f_shp, f_lyr)        
+    cat(sprintf('  shp_to_geojson -- %s\n', format(Sys.time(), '%X')))    
+    v = try(shp_to_geojson(f_shp, f_js, f_geojson))
+    if (class(v)=='try-error'){
+      dir_score_errors = file.path(dir_repos, 'score_errors')
+      dir.create(dir_score_errors, showWarnings=F)
+      cat(as.character(traceback(v)), file=sprintf('%s/%s_shp_to_geojson.txt', dir_score_errors, cntry))
+      next
+    }
   }
   for (f in c(f_js, f_geojson)){ # f = f_spatial[1]
     file.copy(f, sprintf('spatial/%s', basename(f)), overwrite=T)
@@ -142,8 +198,6 @@ for (i in 108:length(cntries)){ # i=76   # which(cntries=='Pakistan')
 
   # csvs for regions and countries
   rgn_new_csv   = file.path(dir_data, cntry, 'spatial', 'rgn_offshore_data.csv')
-  rgn_old_csv   = sprintf('%s/layers/rgn_labels.csv', dir_global)
-  cntry_old_csv = sprintf('%s/layers/cntry_rgn.csv', dir_global)
   
   # old to new regions
   rgn_new = read.csv(rgn_new_csv) %>%
@@ -170,7 +224,7 @@ for (i in 108:length(cntries)){ # i=76   # which(cntries=='Pakistan')
   # bind single cntry_key
   if (length(unique(cntry_new$cntry_key)) > 1){
     cat('  length(cntry_key) > 1 - not handled yet. NEXT\n')
-    dput(unique(cntry_new$cntry_key), sprintf('%s/%s_cntry-key-length-gt-1.txt', file.path(dir_repos, 'score_errors'), cntry))
+    dput(unique(cntry_new$cntry_key), sprintf('%s/%s_cntry-key-length-gt-1.txt', file.path(dir_repos, 'score_errors'), cntry))    
     next
   }    
   
@@ -359,7 +413,8 @@ for (i in 108:length(cntries)){ # i=76   # which(cntries=='Pakistan')
   if (class(scores)=='try-error'){
     dir_score_errors = file.path(dir_repos, 'score_errors')
     dir.create(dir_score_errors, showWarnings=F)
-    dput(scores, sprintf('%s/%s_dput.txt', dir_score_errors, cntry))
+    unlink(sprintf('%s/%s_dput.txt', dir_score_errors, cntry))
+    cat(as.character(traceback(scores)), file=sprintf('%s/%s_calc-scores.txt', dir_score_errors, cntry))
     next
   }
     
@@ -410,5 +465,12 @@ last_updated: %s
   # app_name='lebanon'; dir_app=sprintf('/Volumes/data_edit/git-annex/clip-n-ship/%s/shinyapps.io', app_name) 
   # shiny::runApp(dir_app)    # test app locally; delete, ie unlink, github files before deploy
   shinyapps::deployApp(appDir=dir_app, appName=app_name, upload=T, launch.browser=T, lint=F)
-    
+  
 } # end for (cntry in cntries)
+
+y = y %>%
+  select(Country, finished, status, error) %>%
+  arrange(desc(finished), status, error, Country)
+
+table(y$error)
+write.csv(y, '~/github/ohi-webapps/tmp/webapp_status.csv', row.names=F, na='')
