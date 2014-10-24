@@ -1,28 +1,31 @@
-OBJECTID,rgn_id,rgn_name,gadm_count,NAME_0
-1,1,Cocos Islands,1.0,Cocos Islands
-2,2,Christmas Island,1.0,Christmas Island
-3,3,Norfolk Island,1.0,Norfolk Island
-11,11,Marshall Islands,1.0,Marshall Islands
-28,31,Seychelles,1.0,Seychelles
-35,38,British Indian Ocean Territory,1.0,British Indian Ocean Territory
-36,39,Maldives,1.0,Maldives
-57,60,Gibraltar,1.0,Gibraltar
-65,68,Malta,1.0,Malta
-84,89,South Georgia and the South Sandwich Islands,1.0,South Georgia and the South Sandwich Islands
-90,95,Falkland Islands,1.0,Falkland Islands
-100,105,Bouvet Island,1.0,Bouvet Island
-102,107,Clipperton Island,1.0,Clipperton Island
-111,117,British Virgin Islands,1.0,British Virgin Islands
-112,118,Anguilla,1.0,Anguilla
-115,121,Montserrat,1.0,Montserrat
-139,147,French Polynesia,1.0,French Polynesia
-145,153,Cook Islands,1.0,Cook Islands
-146,154,Niue,1.0,Niue
-174,185,Monaco,1.0,Monaco
-196,208,Singapore,1.0,Singapore
-199,212,Kiribati,1.0,Kiribati
-200,213,Antarctica,1.0,Antarctica
-206,220,Sint Maarten,1.0,Sint Maarten
-211,227,Jersey,1.0,Jersey
-212,228,Guernsey,1.0,Guernsey
-221,250,Aruba,1.0,Aruba
+OBJECTID,rgn_id,rgn_name,gadm_name,gadm_count
+1,1,Cocos Islands,Cocos Islands,1.0
+2,2,Christmas Island,Christmas Island,1.0
+3,3,Norfolk Island,Norfolk Island,1.0
+11,11,Marshall Islands,Marshall Islands,1.0
+28,31,Seychelles,Seychelles,1.0
+35,38,British Indian Ocean Territory,British Indian Ocean Territory,1.0
+36,39,Maldives,Maldives,1.0
+57,60,Gibraltar,Gibraltar,1.0
+65,68,Malta,Malta,1.0
+84,89,South Georgia and the South Sandwich Islands,South Georgia and the South Sandwich Islands,1.0
+90,95,Falkland Islands,Falkland Islands,1.0
+100,105,Bouvet Island,Bouvet Island,1.0
+102,107,Clipperton Island,Clipperton Island,1.0
+111,117,British Virgin Islands,British Virgin Islands,1.0
+112,118,Anguilla,Anguilla,1.0
+115,121,Montserrat,Montserrat,1.0
+139,147,French Polynesia,French Polynesia,1.0
+145,153,Cook Islands,Cook Islands,1.0
+146,154,Niue,Niue,1.0
+174,185,Monaco,Monaco,1.0
+196,208,Singapore,Singapore,1.0
+199,212,Kiribati,Kiribati,1.0
+200,213,Antarctica,Antarctica,1.0
+206,220,Sint Maarten,Sint Maarten,1.0
+211,227,Jersey,Jersey,1.0
+212,228,Guernsey,Guernsey,1.0
+221,250,Aruba,Aruba,1.0
+89,94,Heard and McDonald Islands,Heard Island and McDonald Islands,1.0
+207,221,Northern Saint-Martin,Saint-Martin,1.0
+216,244,Curacao,Curaçao,1.0
