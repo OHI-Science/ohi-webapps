@@ -20,6 +20,7 @@ fc_gadm  = r'N:\stable\GL-GADM-AdminAreas_v2\data\gadm2.gdb\gadm2' # r'C:\tmp\Gl
 #gdb_rgn  = r'C:\tmp\Global\NCEAS-Regions_v2014\geodb.gdb'        # neptune_data:git-annex/Global/NCEAS-Regions_v2014/geodb.gdb
 dir_dest = r'N:\git-annex\clip-n-ship'
 mask_mol = r'N:\model\GL-NCEAS-Halpern2008\data\masked_model.tif'
+csv_rgn_to_gadm = wd + r'\tmp\rgn_notmatching_gadm_manual_utf-8.csv'
 
 # buffer units dictionary
 buffers = ['offshore3nm','offshore1km','inland1km','inland25km']
@@ -77,51 +78,67 @@ df_rgn = pandas.DataFrame(arcpy.da.TableToNumPyArray(
     "rgn_type = 'eez'"))
 
 # get list of gadm countries with counts of polygons
-s_gadm = pandas.Series(
+df_gadm = pandas.DataFrame(pandas.Series(
     pandas.DataFrame(
         arcpy.da.TableToNumPyArray(
             'gadm2_admin1',
-            ['NAME_0'])).groupby('NAME_0', as_index=False).size(),
-    name = 'gadm_count')
-df_gadm = pandas.DataFrame(s_gadm)
-df_gadm['NAME_0'] = df_gadm.index
+            ['NAME_0'])).rename(columns={'NAME_0': 'gadm_name'}).groupby('gadm_name', as_index=False).size(),
+    name = 'gadm_count'))
+df_gadm['gadm_name'] = df_gadm.index
 
 # left join gadm and rgns
 df_rgn = pandas.merge(
-    df_rgn, df_gadm,
-    how='left', left_on='rgn_name', right_on='NAME_0')
+    df_rgn, df_gadm.drop('gadm_count', 1),
+    how='left', left_on='rgn_name', right_on='gadm_name')
 
 # track regions missing gadm
-df_rgn[~df_rgn.rgn_name.isin(df_rgn.NAME_0)].to_csv('tmp/rgn_notmatching_gadm.csv', index=False, encoding='utf-8')
-df_rgn = df_rgn[df_rgn.rgn_name.isin(df_rgn.NAME_0)]
+df_rgn[~df_rgn.gadm_name.isnull()].to_csv('tmp/rgn_notmatching_gadm.csv', index=False, encoding='utf-8')
 
+# read manual lookup for regions missing gadm, skipping lumpers and splitters for now
+df_rgn_to_gadm = pandas.read_csv(csv_rgn_to_gadm, encoding='utf-8')
+df_rgn_to_gadm = df_rgn_to_gadm[
+    (~df_rgn_to_gadm.gadm_name.isnull()) & 
+    (df_rgn_to_gadm.rgn_to_gadm_lumping != True) & 
+    (df_rgn_to_gadm.rgn_to_gadm_splitting != True)][['rgn_name','gadm_name']]
+    
+# concat automatic matches and lookups to gadm
+df_rgn = pandas.concat([
+    df_rgn[~df_rgn.gadm_name.isnull()],
+    pandas.merge(
+        df_rgn[df_rgn.gadm_name.isnull()].drop('gadm_name',1), 
+        df_rgn_to_gadm,
+        how='left', left_on='rgn_name', right_on='rgn_name')])
+        
+# left join gadm counts
+df_rgn = pandas.merge(
+    df_rgn, df_gadm[['gadm_name','gadm_count']],
+    how='left', left_on='gadm_name', right_on='gadm_name')
+        
 # track regions with no sub-country gadm provinces, ie gadm_count = 1 
 df_rgn[df_rgn.gadm_count == 1].to_csv('tmp/rgn_only1_gadm.csv', index=False, encoding='utf-8')
-df_rgn = df_rgn[df_rgn.gadm_count > 1]
+#df_rgn = df_rgn[df_rgn.gadm_count > 1]
 
 # regions to not do for various reasons, eg already done
-rgn_skip = ['Israel']
+rgn_skip = ['Israel','Antarctica']
 df_rgn = df_rgn[~df_rgn.rgn_name.isin(rgn_skip)]
-df_rgn.to_csv('tmp/rgn_ok_gadm.csv', index=False, encoding='utf-8')
 
-# skip region if already folder in local output directory
-##rgns_do = [] # ['Canada']
-##rgns_done = [x.replace('_',' ') for x in os.listdir(dir_tmp + '/data') if x not in rgns_do]
-##df_rgn = df_rgn[~df_rgn.rgn_name.isin(rgns_done)]
-# DEBUG to REDO
-#df_rgn = df_rgn[df_rgn.rgn_name.isin(rgns_done)]
+# drop regions if finally no matching gadm, including lumpers and splitters for now
+df_rgn[df_rgn.gadm_name.isnull()].to_csv('tmp/rgn_no_gadm.csv', index=False, encoding='utf-8')
+df_rgn = df_rgn[~df_rgn.gadm_name.isnull()]
 
 # iterate over regions
 print 'looping over countries (n=%d)' % len(df_rgn)
 for i, rgn in enumerate(sorted(tuple(df_rgn['rgn_name']))): # i=129; rgn = sorted(tuple(df_rgn['rgn_name']))[i]
-#for i, rgn in enumerate(sorted(tuple(df_rgn['rgn_name']))[3:4]): # i=0; rgn = sorted(tuple(df_rgn['rgn_name']))[i]
+#for i, rgn in enumerate(sorted(tuple(df_rgn['rgn_name']))[3:4]): # i=4; rgn = sorted(tuple(df_rgn['rgn_name']))[i]
 
     # DEBUG! bypass ones already done
-    if i < 95:
-        continue
+    #if i < 151:
+    #    continue
 
     # make output dir
-    print '\n%03d of %d: %s (%s)' % (i,  len(df_rgn), rgn, time.strftime('%H:%M:%S'))
+    gadm       = df_rgn[df_rgn.rgn_name == rgn]['gadm_name'].values[0]
+    gadm_count = df_rgn[df_rgn.rgn_name == rgn]['gadm_count'].values[0]
+    print '\n%03d of %d: %s [%s] (%s)' % (i,  len(df_rgn), rgn, gadm, time.strftime('%H:%M:%S'))
     dir_tmp_rgn = '%s/data/%s/spatial' % (dir_tmp, rgn.replace(' ', '_'))
     dir_dest_rgn = '%s/%s/spatial' % (dir_dest, rgn.replace(' ', '_'))
     if not os.path.exists(dir_tmp_rgn): os.makedirs(dir_tmp_rgn)
@@ -141,155 +158,181 @@ for i, rgn in enumerate(sorted(tuple(df_rgn['rgn_name']))): # i=129; rgn = sorte
         # DEBUG!!!
         #if rgn != 'Canada':
         # delete existing country specific feature classes, compact, refresh
+        print '  deleting existing c_* and compacting gdb (%s)' % time.strftime('%H:%M:%S')
         for fc in arcpy.ListFeatureClasses('c_*') + arcpy.ListFeatureClasses('lyr_*'):
-            arcpy.Delete_management(fc)
+            arcpy.Delete_management(fc)            
+        arcpy.Compact_management(gdb)
+            
+        # shorten up process if no subcountry regions
+        if gadm_count == 1:
+            print '  single subcountry region outputs (%s)' % time.strftime('%H:%M:%S')
 
-        try:
-            print '  compacting gdb (%s)' % time.strftime('%H:%M:%S')
-            arcpy.Compact_management(gdb)
-        
-            if not arcpy.Exists(c_offshore_dest) or not arcpy.Exists(c_inland_dest):
-                print '  select (%s)' % time.strftime('%H:%M:%S')
-                            
-                # select rgn to country only, now in Mollweide projection
-                arcpy.Select_analysis('rgn_gcs'    , 'c_eezland' ,                       "rgn_name = '%s'" % rgn)
-                n = int(arcpy.GetCount_management('c_eezland').getOutput(0))
-                if n == 0: 
-                    print  '  EMPTY! skipping...'
-                    continue
-                arcpy.Select_analysis('rgn_gcs'     , 'c_eez'    , "rgn_type = 'eez'  AND rgn_name = '%s'" % rgn)
-                arcpy.Select_analysis('rgn_gcs'     , 'c_land'   , "rgn_type = 'land' AND rgn_name = '%s'" % rgn)
-                arcpy.Select_analysis('gadm2_admin1', 'c_gadm'   ,                         "NAME_0 = '%s'" % rgn)
-                
+            # get offshore, inland
+            arcpy.Select_analysis('rgn_gcs'     , 'c_offshore_mol', "rgn_type = 'eez'  AND rgn_name = '%s'" % rgn)
+            arcpy.Select_analysis('rgn_gcs'     , 'c_inland_mol'  , "rgn_type = 'land' AND rgn_name = '%s'" % rgn)
+
+            # loop through buffers
+            for buf in buffers: # buf = buffers[0]
+                arcpy.Select_analysis('rgn_%s_mol' % buf, 'c_%s_mol' % buf, "rgn_name = '%s'" % rgn)
+
+            # loop through all c_* feature classes    
+            for fc in arcpy.ListFeatureClasses('c_*'):
+
+                # update region id   
+                arcpy.CalculateField_management(fc, 'rgn_id', '1')
+
                 # remove fields which are from global analysis, not to be confused with subcountry fields
-                for fld in ['rgn_type','rgn_id','rgn_name','rgn_key','area_km2']:
-                    for fc in ['c_eezland','c_eez','c_land']:
-                        if fld in [x.name for x in arcpy.ListFields(fc)]:
-                            arcpy.DeleteField_management(fc, fld)
-            
-                # get administrative land
-                arcpy.Clip_analysis('c_gadm', 'c_land', 'c_states')
-                 
-                # create theissen polygons used to split slivers
-                arcpy.Densify_edit('c_states', 'DISTANCE', '1 Kilometers')
-                arcpy.FeatureVerticesToPoints_management('c_states', 'c_states_pts', 'ALL')
-                 
-                # delete interior points for faster thiessen rendering
-                arcpy.Dissolve_management('c_states', 'c_states_d')
-                arcpy.MakeFeatureLayer_management('c_states_pts', 'lyr_c_states_pts')
-                arcpy.SelectLayerByLocation_management('lyr_c_states_pts', 'WITHIN_CLEMENTINI', 'c_states_d')
-                arcpy.DeleteFeatures_management('lyr_c_states_pts')
-                 
-                # generate thiessen polygons of gadm for intersecting with land slivers
-                arcpy.env.extent = 'c_eezland'
-                arcpy.CreateThiessenPolygons_analysis('c_states_pts', 'c_states_t', 'ALL')
-                arcpy.Dissolve_management('c_states_t', 'c_states_t_d', 'NAME_1')
-                arcpy.RepairGeometry_management('c_states_t_d')
+                for fld in [x.name for x in arcpy.ListFields(fc) if x.name not in ('OBJECTID', 'Shape', 'rgn_id', 'rgn_name', 'area_km2', 'Shape_Length', 'Shape_Area')]:
+                    arcpy.DeleteField_management(fc, fld)  
 
-                # add detailed interior back
-                arcpy.Erase_analysis('c_states_t_d', 'c_states', 'c_states_t_d_e')
-                arcpy.Merge_management(['c_states', 'c_states_t_d_e'], 'c_states_t_d_e_m')
-                arcpy.Dissolve_management('c_states_t_d_e_m', 'c_thiessen', 'NAME_1')
-                arcpy.RepairGeometry_management('c_thiessen')
-            
-            if not arcpy.Exists(c_offshore_dest):
-                # rgn_offshore: rename NAME_1 to rgn_name
-                print '  rgn_offshore, rgn_inland (%s)' % time.strftime('%H:%M:%S') 
-                arcpy.Intersect_analysis(['c_eez', 'c_thiessen'], 'c_eez_t', 'NO_FID')
-                arcpy.RepairGeometry_management('c_eez_t')
-                arcpy.Dissolve_management('c_eez_t', 'c_rgn_offshore_mol', 'NAME_1')
-                arcpy.RepairGeometry_management('c_rgn_offshore_mol')
-                arcpy.AddField_management('c_rgn_offshore_mol', 'rgn_name', 'TEXT')
-                arcpy.CalculateField_management('c_rgn_offshore_mol', 'rgn_name', '!NAME_1!', 'PYTHON_9.3')
-                arcpy.DeleteField_management('c_rgn_offshore_mol', 'NAME_1')
-                 
-                # rgn_offshore: assign rgn_id by ascending y coordinate
-                arcpy.AddField_management('c_rgn_offshore_mol', 'centroid_y', 'FLOAT')
-                arcpy.CalculateField_management('c_rgn_offshore_mol', 'centroid_y', '!shape.centroid.y!', 'PYTHON_9.3')
-                a = arcpy.da.TableToNumPyArray('c_rgn_offshore_mol', ['centroid_y','rgn_name'])
-                a.sort(order=['centroid_y'], axis=0)
-                a = numpy.lib.recfunctions.append_fields(a, 'rgn_id', range(1, a.size+1), usemask=False)
-                arcpy.da.ExtendTable('c_rgn_offshore_mol', 'rgn_name', a[['rgn_name','rgn_id']], 'rgn_name', append_only=False)
-                arcpy.DeleteField_management('c_rgn_offshore_mol', 'centroid_y')
-                arcpy.CopyFeatures_management('c_rgn_offshore_mol', c_offshore_dest)
-            else:
-                print '  %s exists, copying into gdb (%s)' % (os.path.basename(c_offshore_dest), time.strftime('%H:%M:%S'))
-                arcpy.CopyFeatures_management(c_offshore_dest, 'c_rgn_offshore_mol')
-                
-            if not arcpy.Exists(c_inland_dest):
-                # rgn_inland
-                arcpy.Intersect_analysis(['c_land', 'c_thiessen'], 'c_land_t', 'NO_FID')
-                arcpy.RepairGeometry_management('c_land_t')
-                arcpy.Dissolve_management('c_land_t', 'c_rgn_inland_mol', 'NAME_1')
-                arcpy.RepairGeometry_management('c_rgn_inland_mol')
-                arcpy.AddField_management('c_rgn_inland_mol', 'rgn_name', 'TEXT')
-                arcpy.CalculateField_management('c_rgn_inland_mol', 'rgn_name', '!NAME_1!', 'PYTHON_9.3')
-                arcpy.DeleteField_management('c_rgn_inland_mol', 'NAME_1')
-                # rgn_inland: assign rgn_id
-                arcpy.da.ExtendTable('c_rgn_inland_mol', 'rgn_name', a[['rgn_name','rgn_id']], 'rgn_name', append_only=False)
-                arcpy.CopyFeatures_management('c_rgn_inland_mol', c_inland_dest)
-            else:
-                print '  %s exists, copying into gdb (%s)' % (os.path.basename(c_inland_dest), time.strftime('%H:%M:%S'))
-                arcpy.CopyFeatures_management(c_inland_dest, 'c_rgn_inland_mol')
-
-        except Exception as e:
-            print e.message
-            
-            print '  prep FAILED! skipping to next country (%s)' % time.strftime('%H:%M:%S')
-            
-            # copy failed thiessen inputs
-            for fc in set(arcpy.ListFeatureClasses('c_*')) - set(('c_buf_t','c_buf_t_d')):
-                fc_f = 'f_%s_%s' % (rgn.replace(' ', '_'), fc[2:])
-                if arcpy.Exists(fc) and not arcpy.Exists(fc_f):
-                    arcpy.CopyFeatures_management(fc, fc_f)
-                
-        # loop through buffers
-        print '  buffer intersecting (%s)' % time.strftime('%H:%M:%S')
-        for buf in buffers: # buf = buffers[0]
-                 
-            rgn_buf_mol = '%s\\rgn_%s_mol' % (gdb, buf)
-            buf_zone, buf_dist, buf_units = re.search('(\\D+)(\\d+)(\\D+)', buf).groups()    
-            c_buf_dest = '%s/rgn_%s_mol.shp' % (dir_dest_rgn, buf)            
-            
-            # get region ids from offshore sh
-            if not arcpy.Exists(c_offshore_dest):
-                print '    table missing, breaking out of buffering: %s' % os.path.basename(c_offshore_dest)
-                break
-            tbl_rgns = arcpy.da.TableToNumPyArray(c_offshore_dest, ['rgn_name','rgn_id'])
-            
-            # delete existing country specific feature classes, compact, refresh
-            for fc in ['c_buf_t', 'c_buf_t_d']:
-                if arcpy.Exists(fc):
-                    arcpy.Delete_management(fc)
-
-            if arcpy.Exists(c_buf_dest):
-                continue
-                
-            print '    %s %s %s (%s)' % (buf_zone, buf_dist, buf_units, time.strftime('%H:%M:%S'))
+                # copy to shp
+                shp_dest = '%s/%s.shp' % (dir_dest_rgn, fc.replace('c_', 'rgn_'))        
+                arcpy.CopyFeatures_management(fc, shp_dest)
+        else:
             try:
-                if buf_zone == 'inland':
-                    arcpy.Intersect_analysis(['c_rgn_inland_mol', rgn_buf_mol], 'c_buf_t', 'NO_FID')
-                elif buf_zone == 'offshore':
-                    arcpy.Intersect_analysis(['c_rgn_offshore_mol', rgn_buf_mol], 'c_buf_t', 'NO_FID')
+            
+                if not arcpy.Exists(c_offshore_dest) or not arcpy.Exists(c_inland_dest):
+                    print '  select (%s)' % time.strftime('%H:%M:%S')
+                                
+                    # select rgn to country only, now in Mollweide projection
+                    arcpy.Select_analysis('rgn_gcs'    , 'c_eezland' ,                       "rgn_name = '%s'" % rgn)
+                    n = int(arcpy.GetCount_management('c_eezland').getOutput(0))
+                    if n == 0: 
+                        print  '  EMPTY! skipping...'
+                        continue
+                    arcpy.Select_analysis('rgn_gcs'     , 'c_eez'    , "rgn_type = 'eez'  AND rgn_name = '%s'" % rgn)
+                    arcpy.Select_analysis('rgn_gcs'     , 'c_land'   , "rgn_type = 'land' AND rgn_name = '%s'" % rgn)
+                    arcpy.Select_analysis('gadm2_admin1', 'c_gadm'   ,                         "NAME_0 = '%s'" % gadm)
+                    
+                    # remove fields which are from global analysis, not to be confused with subcountry fields
+                    for fld in ['rgn_type','rgn_id','rgn_name','rgn_key','area_km2']:
+                        for fc in ['c_eezland','c_eez','c_land']:
+                            if fld in [x.name for x in arcpy.ListFields(fc)]:
+                                arcpy.DeleteField_management(fc, fld)                    
+                    
+                    # get administrative land
+                    arcpy.Clip_analysis('c_gadm', 'c_land', 'c_states')
+                     
+                    # create theissen polygons used to split slivers
+                    arcpy.Densify_edit('c_states', 'DISTANCE', '1 Kilometers')
+                    arcpy.FeatureVerticesToPoints_management('c_states', 'c_states_pts', 'ALL')
+                     
+                    # delete interior points for faster thiessen rendering
+                    arcpy.Dissolve_management('c_states', 'c_states_d')
+                    arcpy.MakeFeatureLayer_management('c_states_pts', 'lyr_c_states_pts')
+                    arcpy.SelectLayerByLocation_management('lyr_c_states_pts', 'WITHIN_CLEMENTINI', 'c_states_d')
+                    arcpy.DeleteFeatures_management('lyr_c_states_pts')
+                     
+                    # generate thiessen polygons of gadm for intersecting with land slivers
+                    arcpy.env.extent = 'c_eezland'
+                    arcpy.CreateThiessenPolygons_analysis('c_states_pts', 'c_states_t', 'ALL')
+                    arcpy.Dissolve_management('c_states_t', 'c_states_t_d', 'NAME_1')
+                    arcpy.RepairGeometry_management('c_states_t_d')
+
+                    # add detailed interior back
+                    arcpy.Erase_analysis('c_states_t_d', 'c_states', 'c_states_t_d_e')
+                    arcpy.Merge_management(['c_states', 'c_states_t_d_e'], 'c_states_t_d_e_m')
+                    arcpy.Dissolve_management('c_states_t_d_e_m', 'c_thiessen', 'NAME_1')
+                    arcpy.RepairGeometry_management('c_thiessen')
+                
+                if not arcpy.Exists(c_offshore_dest):
+                    # rgn_offshore: rename NAME_1 to rgn_name
+                    print '  rgn_offshore, rgn_inland (%s)' % time.strftime('%H:%M:%S') 
+                    arcpy.Intersect_analysis(['c_eez', 'c_thiessen'], 'c_eez_t', 'NO_FID')
+                    arcpy.RepairGeometry_management('c_eez_t')
+                    arcpy.Dissolve_management('c_eez_t', 'c_rgn_offshore_mol', 'NAME_1')
+                    arcpy.RepairGeometry_management('c_rgn_offshore_mol')
+                    arcpy.AddField_management('c_rgn_offshore_mol', 'rgn_name', 'TEXT')
+                    arcpy.CalculateField_management('c_rgn_offshore_mol', 'rgn_name', '!NAME_1!', 'PYTHON_9.3')
+                    arcpy.DeleteField_management('c_rgn_offshore_mol', 'NAME_1')
+                     
+                    # rgn_offshore: assign rgn_id by ascending y coordinate
+                    arcpy.AddField_management('c_rgn_offshore_mol', 'centroid_y', 'FLOAT')
+                    arcpy.CalculateField_management('c_rgn_offshore_mol', 'centroid_y', '!shape.centroid.y!', 'PYTHON_9.3')
+                    a = arcpy.da.TableToNumPyArray('c_rgn_offshore_mol', ['centroid_y','rgn_name'])
+                    a.sort(order=['centroid_y'], axis=0)
+                    a = numpy.lib.recfunctions.append_fields(a, 'rgn_id', range(1, a.size+1), usemask=False)
+                    arcpy.da.ExtendTable('c_rgn_offshore_mol', 'rgn_name', a[['rgn_name','rgn_id']], 'rgn_name', append_only=False)
+                    arcpy.DeleteField_management('c_rgn_offshore_mol', 'centroid_y')
+                    arcpy.CopyFeatures_management('c_rgn_offshore_mol', c_offshore_dest)
                 else:
-                    stop('The buf_zone "%s" is not handled by this function.' % buf_zone)
-                arcpy.RepairGeometry_management('c_buf_t')
-                arcpy.Dissolve_management('c_buf_t', 'c_buf_t_d', 'rgn_name')
-                arcpy.RepairGeometry_management('c_buf_t_d')
-                arcpy.da.ExtendTable('c_buf_t_d', 'rgn_name', tbl_rgns[['rgn_name','rgn_id']], 'rgn_name', append_only=False)
-                arcpy.CopyFeatures_management('c_buf_t_d', c_buf_dest)
+                    print '  %s exists, copying into gdb (%s)' % (os.path.basename(c_offshore_dest), time.strftime('%H:%M:%S'))
+                    arcpy.CopyFeatures_management(c_offshore_dest, 'c_rgn_offshore_mol')
+                    
+                if not arcpy.Exists(c_inland_dest):
+                    # rgn_inland
+                    arcpy.Intersect_analysis(['c_land', 'c_thiessen'], 'c_land_t', 'NO_FID')
+                    arcpy.RepairGeometry_management('c_land_t')
+                    arcpy.Dissolve_management('c_land_t', 'c_rgn_inland_mol', 'NAME_1')
+                    arcpy.RepairGeometry_management('c_rgn_inland_mol')
+                    arcpy.AddField_management('c_rgn_inland_mol', 'rgn_name', 'TEXT')
+                    arcpy.CalculateField_management('c_rgn_inland_mol', 'rgn_name', '!NAME_1!', 'PYTHON_9.3')
+                    arcpy.DeleteField_management('c_rgn_inland_mol', 'NAME_1')
+                    # rgn_inland: assign rgn_id
+                    arcpy.da.ExtendTable('c_rgn_inland_mol', 'rgn_name', a[['rgn_name','rgn_id']], 'rgn_name', append_only=False)
+                    arcpy.CopyFeatures_management('c_rgn_inland_mol', c_inland_dest)
+                else:
+                    print '  %s exists, copying into gdb (%s)' % (os.path.basename(c_inland_dest), time.strftime('%H:%M:%S'))
+                    arcpy.CopyFeatures_management(c_inland_dest, 'c_rgn_inland_mol')
+
             except Exception as e:
                 print e.message
-            
-                print '      buf intersect FAILED! copying buffer inputs (%s)' % time.strftime('%H:%M:%S')
-
-                # copy failed buffer inputs
-                for fc in ('c_buf_t','c_buf_t_d'):
-                    fc_f = 'f_%s_%s_%s' % (rgn.replace(' ', '_'), buf, fc[2:])
+                
+                print '  prep FAILED! skipping to next country (%s)' % time.strftime('%H:%M:%S')
+                
+                # copy failed thiessen inputs
+                for fc in set(arcpy.ListFeatureClasses('c_*')) - set(('c_buf_t','c_buf_t_d')):
+                    fc_f = 'f_%s_%s' % (rgn.replace(' ', '_'), fc[2:])
                     if arcpy.Exists(fc) and not arcpy.Exists(fc_f):
                         arcpy.CopyFeatures_management(fc, fc_f)
-            
-                continue
+                    
+            # loop through buffers
+            print '  buffer intersecting (%s)' % time.strftime('%H:%M:%S')
+            for buf in buffers: # buf = buffers[0]
+                     
+                rgn_buf_mol = '%s\\rgn_%s_mol' % (gdb, buf)
+                buf_zone, buf_dist, buf_units = re.search('(\\D+)(\\d+)(\\D+)', buf).groups()    
+                c_buf_dest = '%s/rgn_%s_mol.shp' % (dir_dest_rgn, buf)            
+                
+                # get region ids from offshore sh
+                if not arcpy.Exists(c_offshore_dest):
+                    print '    table missing, breaking out of buffering: %s' % os.path.basename(c_offshore_dest)
+                    break
+                tbl_rgns = arcpy.da.TableToNumPyArray(c_offshore_dest, ['rgn_name','rgn_id'])
+                
+                # delete existing country specific feature classes, compact, refresh
+                for fc in ['c_buf_t', 'c_buf_t_d']:
+                    if arcpy.Exists(fc):
+                        arcpy.Delete_management(fc)
+
+                if arcpy.Exists(c_buf_dest):
+                    continue
+                    
+                print '    %s %s %s (%s)' % (buf_zone, buf_dist, buf_units, time.strftime('%H:%M:%S'))
+                try:
+                    if buf_zone == 'inland':
+                        arcpy.Intersect_analysis(['c_rgn_inland_mol', rgn_buf_mol], 'c_buf_t', 'NO_FID')
+                    elif buf_zone == 'offshore':
+                        arcpy.Intersect_analysis(['c_rgn_offshore_mol', rgn_buf_mol], 'c_buf_t', 'NO_FID')
+                    else:
+                        stop('The buf_zone "%s" is not handled by this function.' % buf_zone)
+                    arcpy.RepairGeometry_management('c_buf_t')
+                    arcpy.Dissolve_management('c_buf_t', 'c_buf_t_d', 'rgn_name')
+                    arcpy.RepairGeometry_management('c_buf_t_d')
+                    arcpy.da.ExtendTable('c_buf_t_d', 'rgn_name', tbl_rgns[['rgn_name','rgn_id']], 'rgn_name', append_only=False)
+                    arcpy.CopyFeatures_management('c_buf_t_d', c_buf_dest)
+                except Exception as e:
+                    print e.message
+                
+                    print '      buf intersect FAILED! copying buffer inputs (%s)' % time.strftime('%H:%M:%S')
+
+                    # copy failed buffer inputs
+                    for fc in ('c_buf_t','c_buf_t_d'):
+                        fc_f = 'f_%s_%s_%s' % (rgn.replace(' ', '_'), buf, fc[2:])
+                        if arcpy.Exists(fc) and not arcpy.Exists(fc_f):
+                            arcpy.CopyFeatures_management(fc, fc_f)
+                
+                    continue
     else:
         print '  all inland/offshore/buffers exist, skip copying to gdb (%s)' % time.strftime('%H:%M:%S')
 
@@ -331,8 +374,9 @@ for i, rgn in enumerate(sorted(tuple(df_rgn['rgn_name']))): # i=129; rgn = sorte
                 arcpy.CopyFeatures_management(fc_mol, fc_mol_tmp)                
                 arcpy.Project_management(fc_mol_tmp, fc_gcs_tmp, sr_gcs)
                 arcpy.RepairGeometry_management(fc_gcs_tmp)
-                arcpy.AddField_management(fc_gcs_tmp, 'area_km2', 'FLOAT')
-                arcpy.CalculateField_management(fc_gcs_tmp, 'area_km2', '!shape.geodesicArea@squarekilometers!', 'PYTHON_9.3')
+                if 'area_km2' not in [x.name for x in arcpy.ListFields(fc_gcs_tmp)]:
+                    arcpy.AddField_management(fc_gcs_tmp, 'area_km2', 'FLOAT')
+                    arcpy.CalculateField_management(fc_gcs_tmp, 'area_km2', '!shape.geodesicArea@squarekilometers!', 'PYTHON_9.3')
                 
                 d = pandas.DataFrame(arcpy.da.TableToNumPyArray(fc_gcs_tmp, ['rgn_id','rgn_name','area_km2']))
                 d = d[d.rgn_id != 0]                

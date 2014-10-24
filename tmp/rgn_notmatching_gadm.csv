@@ -1,41 +1,182 @@
-OBJECTID,rgn_id,rgn_name,gadm_count,NAME_0
-4,4,Macquarie Island,,
-12,12,Wake Island,,
-13,13,Northern Mariana Islands and Guam,,
-24,26,Andaman and Nicobar,,
-25,28,Comoro Islands,,
-27,30,Glorioso Islands,,
-30,33,Juan de Nova Island,,
-31,34,Bassas da India,,
-32,35,Ile Europa,,
-33,36,Ile Tromelin,,
-52,55,Azores,,
-54,57,Madeira,,
-55,58,Canary Islands,,
-81,85,Ascension,,
-83,88,Tristan da Cunha,,
-85,90,Prince Edward Islands,,
-86,91,Crozet Islands,,
-87,92,Amsterdam Island and Saint Paul Island,,
-88,93,Kerguelen Islands,,
-89,94,Heard and McDonald Islands,,
-95,100,Republique du Congo,,
-110,116,Puerto Rico and Virgin Islands of the United States,,
-133,140,Guadeloupe and Martinique,,
-134,141,Faeroe Islands,,
-136,144,Jan Mayen,,
-138,146,Pitcairn,,
-140,148,Line Group,,
-141,149,Jarvis Island,,
-142,150,Palmyra Atoll,,
-149,157,Phoenix Group,,
-150,158,Howland Island and Baker Island,,
-151,159,Johnston Atoll,,
-182,193,Guinea Bissau,,
-184,195,Ivory Coast,,
-207,221,Northern Saint-Martin,,
-215,237,Oecussi Ambeno,,
-216,244,Curacao,,
-217,245,Bonaire,,
-219,248,Saba,,
-220,249,Sint Eustatius,,
+OBJECTID,rgn_id,rgn_name,gadm_name
+1,1,Cocos Islands,Cocos Islands
+2,2,Christmas Island,Christmas Island
+3,3,Norfolk Island,Norfolk Island
+5,5,New Caledonia,New Caledonia
+6,6,Vanuatu,Vanuatu
+7,7,Solomon Islands,Solomon Islands
+8,8,Palau,Palau
+9,9,Micronesia,Micronesia
+10,10,Nauru,Nauru
+11,11,Marshall Islands,Marshall Islands
+14,14,Taiwan,Taiwan
+15,15,Philippines,Philippines
+16,16,Australia,Australia
+17,17,Papua New Guinea,Papua New Guinea
+18,18,Fiji,Fiji
+19,19,Tuvalu,Tuvalu
+20,20,South Korea,South Korea
+21,21,North Korea,North Korea
+22,24,Cambodia,Cambodia
+23,25,Thailand,Thailand
+26,29,Mayotte,Mayotte
+28,31,Seychelles,Seychelles
+29,32,Reunion,Reunion
+34,37,Mauritius,Mauritius
+35,38,British Indian Ocean Territory,British Indian Ocean Territory
+36,39,Maldives,Maldives
+37,40,Sri Lanka,Sri Lanka
+38,41,Mozambique,Mozambique
+39,42,Madagascar,Madagascar
+40,43,Kenya,Kenya
+41,44,Somalia,Somalia
+42,45,Eritrea,Eritrea
+43,46,Djibouti,Djibouti
+44,47,Yemen,Yemen
+45,48,Oman,Oman
+46,49,Sudan,Sudan
+47,50,Saudi Arabia,Saudi Arabia
+48,51,Kuwait,Kuwait
+49,52,Bahrain,Bahrain
+50,53,Pakistan,Pakistan
+51,54,United Arab Emirates,United Arab Emirates
+53,56,Cape Verde,Cape Verde
+56,59,Belgium,Belgium
+57,60,Gibraltar,Gibraltar
+58,61,Tunisia,Tunisia
+59,62,Morocco,Morocco
+60,63,Western Sahara,Western Sahara
+61,64,Mauritania,Mauritania
+62,65,Gambia,Gambia
+63,66,Senegal,Senegal
+64,67,Libya,Libya
+65,68,Malta,Malta
+66,69,Latvia,Latvia
+67,70,Estonia,Estonia
+68,71,Bulgaria,Bulgaria
+69,72,Romania,Romania
+70,73,Russia,Russia
+71,74,Georgia,Georgia
+72,75,Ukraine,Ukraine
+73,76,Turkey,Turkey
+74,77,Syria,Syria
+75,78,Lebanon,Lebanon
+76,79,Israel,Israel
+77,80,Greece,Greece
+78,81,Cyprus,Cyprus
+79,82,Albania,Albania
+80,84,Algeria,Algeria
+82,86,Saint Helena,Saint Helena
+84,89,South Georgia and the South Sandwich Islands,South Georgia and the South Sandwich Islands
+90,95,Falkland Islands,Falkland Islands
+91,96,Sierra Leone,Sierra Leone
+92,97,Liberia,Liberia
+93,98,Togo,Togo
+94,99,Benin,Benin
+96,101,Namibia,Namibia
+97,102,South Africa,South Africa
+98,103,Sao Tome and Principe,Sao Tome and Principe
+99,104,Equatorial Guinea,Equatorial Guinea
+100,105,Bouvet Island,Bouvet Island
+101,106,Ghana,Ghana
+102,107,Clipperton Island,Clipperton Island
+103,108,Bermuda,Bermuda
+104,110,Bahamas,Bahamas
+105,111,Turks and Caicos Islands,Turks and Caicos Islands
+106,112,Cuba,Cuba
+107,113,Cayman Islands,Cayman Islands
+108,114,Haiti,Haiti
+109,115,Dominican Republic,Dominican Republic
+111,117,British Virgin Islands,British Virgin Islands
+112,118,Anguilla,Anguilla
+113,119,Saint Kitts and Nevis,Saint Kitts and Nevis
+114,120,Antigua and Barbuda,Antigua and Barbuda
+115,121,Montserrat,Montserrat
+116,122,Saint Lucia,Saint Lucia
+117,123,Dominica,Dominica
+118,124,Barbados,Barbados
+119,125,Grenada,Grenada
+120,126,Trinidad and Tobago,Trinidad and Tobago
+121,127,Saint Vincent and the Grenadines,Saint Vincent and the Grenadines
+122,129,Panama,Panama
+123,130,Costa Rica,Costa Rica
+124,131,Nicaragua,Nicaragua
+125,132,Colombia,Colombia
+126,133,Honduras,Honduras
+127,134,El Salvador,El Salvador
+128,135,Mexico,Mexico
+129,136,Guatemala,Guatemala
+130,137,Ecuador,Ecuador
+131,138,Peru,Peru
+132,139,Venezuela,Venezuela
+135,143,Iceland,Iceland
+137,145,Greenland,Greenland
+139,147,French Polynesia,French Polynesia
+143,151,American Samoa,American Samoa
+144,152,Samoa,Samoa
+145,153,Cook Islands,Cook Islands
+146,154,Niue,Niue
+147,155,Tonga,Tonga
+148,156,Tokelau,Tokelau
+152,161,Wallis and Futuna,Wallis and Futuna
+153,162,New Zealand,New Zealand
+154,163,United States,United States
+155,164,Belize,Belize
+156,166,Jamaica,Jamaica
+157,167,Guyana,Guyana
+158,168,Suriname,Suriname
+159,169,French Guiana,French Guiana
+160,171,Brazil,Brazil
+161,172,Argentina,Argentina
+162,173,Uruguay,Uruguay
+163,174,Finland,Finland
+164,175,Denmark,Denmark
+165,176,Germany,Germany
+166,177,Netherlands,Netherlands
+167,178,Poland,Poland
+168,179,France,France
+169,180,United Kingdom,United Kingdom
+170,181,Ireland,Ireland
+171,182,Spain,Spain
+172,183,Portugal,Portugal
+173,184,Italy,Italy
+174,185,Monaco,Monaco
+175,186,Montenegro,Montenegro
+176,187,Croatia,Croatia
+177,188,Slovenia,Slovenia
+178,189,Lithuania,Lithuania
+179,190,Qatar,Qatar
+180,191,Iran,Iran
+181,192,Iraq,Iraq
+183,194,Guinea,Guinea
+185,196,Nigeria,Nigeria
+186,197,Cameroon,Cameroon
+187,198,Gabon,Gabon
+188,199,Democratic Republic of the Congo,Democratic Republic of the Congo
+189,200,Angola,Angola
+190,202,Tanzania,Tanzania
+191,203,India,India
+192,204,Bangladesh,Bangladesh
+193,205,Myanmar,Myanmar
+194,206,Malaysia,Malaysia
+195,207,Vietnam,Vietnam
+196,208,Singapore,Singapore
+197,209,China,China
+198,210,Japan,Japan
+199,212,Kiribati,Kiribati
+200,213,Antarctica,Antarctica
+201,214,Egypt,Egypt
+202,215,Jordan,Jordan
+203,216,Indonesia,Indonesia
+204,218,Canada,Canada
+205,219,Saint Pierre and Miquelon,Saint Pierre and Miquelon
+206,220,Sint Maarten,Sint Maarten
+208,222,Sweden,Sweden
+209,223,Norway,Norway
+210,224,Chile,Chile
+211,227,Jersey,Jersey
+212,228,Guernsey,Guernsey
+213,231,East Timor,East Timor
+214,232,Bosnia and Herzegovina,Bosnia and Herzegovina
+218,247,Brunei,Brunei
+221,250,Aruba,Aruba
