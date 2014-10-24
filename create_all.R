@@ -57,10 +57,8 @@ y = data.frame(
   stringsAsFactors=F)
 
 # loop through countries
-#for (i in 1:length(cntries)){ # i=1
 for (i in 1:length(cntries)){ # i=1
-#for (i in 3){ # i=76   # which(cntries=='American_Samoa')
-  
+    
   # setup vars
   Country   = str_replace_all(cntries[i], '_', ' ')
   cntry     = tolower(cntries[i])
@@ -74,7 +72,7 @@ for (i in 1:length(cntries)){ # i=1
   if (Country %in% c('Brazil','Canada','China','Fiji')){
     cat('  excepted, skipping!\n')    
     y$finished[i] = F
-    y$status[i]   = 'excepted'
+    y$status[i]   = 'excepted b/c existing repo'
     next
   }
   
@@ -85,6 +83,11 @@ for (i in 1:length(cntries)){ # i=1
   }
   
   # catalog status ----
+  
+  #   # fixing calc errors
+  #   txt_calc_err = sprintf('%s/score_errors/%s_calc-scores.txt', dir_repos, cntry)
+  #   if (file.exists(txt_calc_err)) unlink(txt_calc_err)
+  
   # uncomment below to quickly capture table of status
   
   txt_cntry_err = sprintf('%s/score_errors/%s_cntry-key-length-gt-1.txt', dir_repos, cntry)
@@ -94,14 +97,14 @@ for (i in 1:length(cntries)){ # i=1
     y$status[i]   = 'cntry_key multiple'
     next        
   }
-  
+   
   txt_calc_err = sprintf('%s/score_errors/%s_calc-scores.txt', dir_repos, cntry)
   if (file.exists(txt_calc_err)){
-    cat('  calc error\n')
-    y$finished[i] = F
-    y$status[i]   = 'calc'
-    y$error[i]    = paste(readLines(txt_calc_err), collapse='    ')
-    next    
+     cat('  calc error\n')
+     y$finished[i] = F
+     y$status[i]   = 'calc'
+     y$error[i]    = paste(readLines(txt_calc_err), collapse='    ')
+     next    
   }   
   
   txt_shp_err = sprintf('%s/score_errors/%s_shp_to_geojson.txt', dir_repos, cntry)
@@ -257,12 +260,6 @@ for (i in 1:length(cntries)){ # i=1
         select(rgn_id, type, label=rgn_name_new)
     }
     
-    # empty layers
-    if (nrow(na.omit(d))==0) {      
-      dir.create('tmp/layers-empty_global-values', showWarnings=F)
-      file.copy(csv_in, file.path('tmp/layers-empty_global-values', lyrs_c$filename[j]))            
-    }        
-    
     # TODO: downweight: area_offshore, area_offshore_3nm, equal, equal , population_inland25km, 
     # shp = '/Volumes/data_edit/git-annex/clip-n-ship/data/Albania/rgn_inland25km_mol.shp'    
     # handle: raster, raster | area_inland1km, raster | area_offshore, raster | area_offshore3nm, raster | equal
@@ -298,40 +295,67 @@ for (i in 1:length(cntries)){ # i=1
   # check for empty layers
   CheckLayers('layers.csv', 'layers', 
               flds_id=c('rgn_id','cntry_key','country_id','saup_id','fao_id','fao_saup_id'))
-  lyrs = read.csv('layers.csv')  
+  lyrs = read.csv('layers.csv', na='')  
   lyrs_empty = filter(lyrs, data_na==T)
   if (nrow(lyrs_empty) > 0){
+    dir.create('tmp/layers-empty_global-values', showWarnings=F)
     write.csv(lyrs_empty, 'layers-empty_swapping-global-mean.csv', row.names=F, na='')
   }
   
   # populate empty layers with global averages
   for (lyr in subset(lyrs, data_na, layer, drop=T)){ # lyr = subset(lyrs, data_na, layer, drop=T)[1]
-    #lyr = 'le_wage_sector_year'
+    
+    # copy global layer
+    #lyr == 'mar_harvest_tonnes'
 
     # get all global data for layer
     l = subset(lyrs, layer==lyr)
-    a = read.csv(file.path('tmp/layers-empty_global-values', l$filename))
+    csv_gl  = sprintf('%s/layers/%s', dir_global, as.character(subset(lyrs_c, layer==lyr, 'filename_old', drop=T)))
+    csv_tmp = sprintf('tmp/layers-empty_global-values/%s', l$filename)
     csv_out = sprintf('layers/%s', l$filename)
-    
+    file.copy(csv_gl, csv_tmp, overwrite=T)    
+    a = read.csv(csv_tmp)    
+
     # calculate global categorical means using non-standard evaluation, ie dplyr::*_()
     fld_key         = names(a)[1]
     fld_value       = names(a)[ncol(a)]
-    flds_other = setdiff(names(a), c(fld_key, fld_value))    
+    flds_other = setdiff(names(a), c(fld_key, fld_value))
+    
+    if (class(a[[fld_value]]) %in% c('factor','character') & l$fld_val_num == fld_value){
+      cat(sprintf('  DOH! For empty layer "%s" field "%s" is factor/character but registered as [fld_val_num] not [fld_val_chr].\n', lyr, fld_value))
+    }
+    
+    # exceptions
+    if (lyr == 'mar_trend_years'){
+      rgn_new %>%
+        mutate(trend_yrs = '5_yr') %>%
+        select(rgn_id = rgn_id_new, trend_yrs) %>%
+        arrange(rgn_id) %>%
+        write.csv(csv_out, row.names=F, na='')
+      
+      next
+    }
+
+    if (class(a[[fld_value]]) %in% c('factor','character')){
+      cat(sprintf('  DOH! For empty layer "%s" field "%s" is factor/character but continuing with presumption of numeric.\n', lyr, fld_value))
+    }
+    
+    # presuming numeric...
     if (length(flds_other) > 0){
       b = a %>%
         group_by_(.dots=flds_other) %>%
         summarize_(
           .dots = setNames(
-            sprintf('mean(%s)', fld_value),
+            sprintf('mean(%s, na.rm=T)', fld_value),
             fld_value))
     } else {
       b = a %>%
         summarize_(
           .dots = setNames(
-            sprintf('mean(%s)', fld_value),
+            sprintf('mean(%s, na.rm=T)', fld_value),
             fld_value))
     }
-      
+    
     # bind single cntry_key
     if ('cntry_key' %in% names(a)){
       b$cntry_key = unique(cntry_new$cntry_key)
@@ -349,6 +373,7 @@ for (i in 1:length(cntries)){ # i=1
         arrange(rgn_id)
     }
     
+    #if (lyr == 'mar_harvest_tonnes') browser()
     write.csv(b, csv_out, row.names=F, na='')    
   }  
   
@@ -404,16 +429,22 @@ for (i in 1:length(cntries)){ # i=1
   #   }
   
   # calculate scores
-  # devtools::load_all('~/github/ohicore'); setwd('/Users/bbest/github/clip-n-ship/ohi-albania/subcountry2014')
-  layers = Layers('layers.csv', 'layers') # devtools::load_all(dir_ohicore)
-  conf   = Conf('conf')
+  #browser()
+  # devtools::install_github('ohi-science/ohicore', ref='dev')
+  #options(error=browser)
+  #devtools::load_all(dir_ohicore); setwd('/Users/bbest/github/clip-n-ship/ohi-anguilla/subcountry2014')
+  #scores = CalculateAll(conf, layers, debug=T)
+  library(ohicore)
+  layers = Layers('layers.csv', 'layers')
+  conf   = Conf('conf')  
   scores = try(CalculateAll(conf, layers, debug=T))
+  
   
   # if problem calculating, log problem and move on to next one an
   if (class(scores)=='try-error'){
     dir_score_errors = file.path(dir_repos, 'score_errors')
     dir.create(dir_score_errors, showWarnings=F)
-    unlink(sprintf('%s/%s_dput.txt', dir_score_errors, cntry))
+    #unlink(sprintf('%s/%s_dput.txt', dir_score_errors, cntry))
     cat(as.character(traceback(scores)), file=sprintf('%s/%s_calc-scores.txt', dir_score_errors, cntry))
     next
   }
@@ -429,11 +460,11 @@ for (i in 1:length(cntries)){ # i=1
   # commit changes, push to github repo
   repo = init(dir_repo)
   if (sum(sapply(status(repo), length)) > 0){
-    pull(repo)
+    #pull(repo)
     add(repo, scenario)
     commit(repo, 'initial subcountry values all equal to global2014 country values')
     #push(repo) # Error in 'git2r_push': HTTP parser error: the on_headers_complete callback failed
-    system('git push') # -u origin master')
+    system('git push origin master') # -u origin master')
   }
     
   # create app dir to contain data and shiny files
