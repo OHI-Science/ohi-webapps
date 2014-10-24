@@ -50,10 +50,12 @@ gl_rgn = read.csv(sprintf('%s/layers/rgn_labels.csv', dir_global), na.strings=''
 # capture status
 n = length(cntries)
 y = data.frame(
-  Country  = str_replace_all(cntries, '_', ' '),
-  finished = logical(n),
-  status   = character(n),
-  error    = character(n),
+  Country         = str_replace_all(cntries, '_', ' '),
+  finished        = logical(n),
+  status          = character(n),
+  url_github_repo = character(n),
+  url_shiny_app   = character(n),
+  error           = character(n),
   stringsAsFactors=F)
 
 # loop through countries
@@ -68,7 +70,7 @@ for (i in 1:length(cntries)){ # i=1
   dir_app   = file.path(dir_data, cntries[i], 'shinyapps.io')
   app_name  = cntry
   cat(sprintf('\n\n\n\n%03d of %d: %s -- %s\n', i, length(cntries), Country, format(Sys.time(), '%X')))    
-  
+    
   if (Country %in% c('Brazil','Canada','China','Fiji')){
     cat('  excepted, skipping!\n')    
     y$finished[i] = F
@@ -79,6 +81,8 @@ for (i in 1:length(cntries)){ # i=1
   if (file.exists(file.path(dir_app, 'app_config.yaml'))){
     cat('  done, skipping!\n')
     y$finished[i] = T
+    y$url_github_repo[i] = git_url
+    y$url_shiny_app[i]   = sprintf('https://ohi-science.shinyapps.io/%s', app_name)
     next    
   }
   
@@ -500,7 +504,7 @@ last_updated: %s
 } # end for (cntry in cntries)
 
 y = y %>%
-  select(Country, finished, status, error) %>%
+  select(Country, finished, status, url_github_repo, url_shiny_app, error) %>%
   arrange(desc(finished), status, error, Country)
 
 write.csv(y, '~/github/ohi-webapps/tmp/webapp_status.csv', row.names=F, na='')
