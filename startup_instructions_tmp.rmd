@@ -16,7 +16,7 @@ library(dplyr)
 library(ggplot2)
 library(stringr)
 library(reshape2)
-suppressWarnings(require(ohicore))
+suppressWarnings(library(ohicore))
 
 ```
 
