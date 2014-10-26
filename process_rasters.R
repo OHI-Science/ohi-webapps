@@ -2,7 +2,7 @@ library(raster)
 library(dplyr)
 
 # set temporary directory to folder on neptune disk big enough to handle it
-tmpdir='~/big/R_raster_tmp'
+tmpdir='~/ssd/R_raster_tmp'
 dir.create(tmpdir, showWarnings=F)
 rasterOptions(tmpdir=tmpdir)
 
@@ -15,6 +15,7 @@ dir_data    = sprintf('%s/git-annex/clip-n-ship', dirs['neptune_data']) # 'N:/gi
 dir_repos   = sprintf('%s/clip-n-ship', dirs['github'])
 dir_ohicore = sprintf('%s/ohicore', dirs['github'])
 dir_global  = sprintf('%s/ohi-global/eez2014', dirs['github'])
+redo        = T
 
 # get list of countries with prepped data
 cntries = list.files(dir_data)
@@ -27,6 +28,11 @@ for (i in 1:length(cntries)){ # cntry = 'Albania'
   cat(sprintf('%03d (of %d): %s\n', i, length(cntries), cntry))
   csv_lyr = sprintf('%s/%s/layers/mar_coastalpopn_inland25km_lyr.csv', dir_data, cntry)
   
+  if (file.exists(csv_lyr) & !redo){
+    cat('  already done\n')
+    next
+  } 
+  
   # loop through years
   for (yr in 2005:2015){
     tif_g = sprintf('%s/model/GL-NCEAS-CoastalPopulation_v2013/data/popdensity_%d_mol.tif', dirs['neptune_data'], yr)
@@ -37,7 +43,7 @@ for (i in 1:length(cntries)){ # cntry = 'Albania'
   
     cat(sprintf('  %d\n', yr, Sys.time()))
     
-    if (file.exists(csv_lyr)){
+    if (file.exists(csv_y)){
       cat('    already done\n')
       next
     } 
@@ -58,6 +64,7 @@ for (i in 1:length(cntries)){ # cntry = 'Albania'
       tif_g_p = sprintf('%s/model/GL-NCEAS-CoastalPopulation_v2013/data/popdensity_%d_projected_mol.tif', dirs['neptune_data'], yr)
       if (!file.exists(tif_g_p)){
         cat(sprintf('    projecting %s -> %s (%s)\n', basename(tif_g), basename(tif_g_p), Sys.time()))
+        # SLOW!: took 7 hrs for popdensity_2005_mol.tif -> popdensity_2005_projected_mol.tif
         r_g = projectRaster(r_g, r_c, method='bilinear', filename=tif_g_p)   
       } else {
         r_g = raster(tif_g_p)
