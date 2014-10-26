@@ -1,6 +1,11 @@
 library(raster)
 library(dplyr)
 
+# set temporary directory to folder on neptune disk big enough to handle it
+tmpdir='~/big/R_raster_tmp'
+dir.create(tmpdir, showWarnings=F)
+rasterOptions(tmpdir=tmpdir)
+
 # get paths based on host machine, now on neptune
 dirs = list(
   neptune_data  = '/var/data/ohi', 
@@ -23,8 +28,15 @@ for (i in 1:length(cntries)){ # cntry = 'Albania'
   tif_g = sprintf('%s/model/GL-NCEAS-CoastalPopulation_v2013/data/popdensity_2014_mol.tif', dirs['neptune_data'])
   tif_c = file.path(dir_data, cntry, 'spatial/rgn_inland25km_mol.tif')
   csv_a = file.path(dir_data, cntry, 'spatial/rgn_inland25km_data.csv')
-  csv   = file.path(dir_data, cntry, 'layers/mar_coastalpopn_inland25mi.csv')
+  csv_old = file.path(dir_data, cntry, 'layers/mar_coastalpopn_inland25mi.csv')
+  csv   = file.path(dir_data, cntry, 'layers/mar_coastalpopn_inland25km.csv')
   fxn   = 'mean'
+  
+  if (file.exists(csv_old)){
+    cat(sprintf('  renaming %s -> %s', basename(csv_old), basename(csv)))
+    file.rename(csv_old, csv)
+    next    
+  } 
   
   dir.create(file.path(dir_data, cntry, 'layers'), showWarnings=FALSE)
   
