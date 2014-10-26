@@ -25,63 +25,73 @@ for (i in 1:length(cntries)){ # cntry = 'Albania'
   # setup vars
   cntry = cntries[i]
   cat(sprintf('%03d (of %d): %s\n', i, length(cntries), cntry))
-  tif_g = sprintf('%s/model/GL-NCEAS-CoastalPopulation_v2013/data/popdensity_2014_mol.tif', dirs['neptune_data'])
-  tif_c = file.path(dir_data, cntry, 'spatial/rgn_inland25km_mol.tif')
-  csv_a = file.path(dir_data, cntry, 'spatial/rgn_inland25km_data.csv')
-  csv_old = file.path(dir_data, cntry, 'layers/mar_coastalpopn_inland25mi.csv')
-  csv   = file.path(dir_data, cntry, 'layers/mar_coastalpopn_inland25km.csv')
-  fxn   = 'mean'
+  csv_lyr = sprintf('%s/%s/layers/mar_coastalpopn_inland25km_lyr.csv', dir_data, cntry)
   
-  if (file.exists(csv_old)){
-    cat(sprintf('  renaming %s -> %s', basename(csv_old), basename(csv)))
-    file.rename(csv_old, csv)
-    next    
-  } 
+  # loop through years
+  for (yr in 2005:2015){
+    tif_g = sprintf('%s/model/GL-NCEAS-CoastalPopulation_v2013/data/popdensity_%d_mol.tif', dirs['neptune_data'], yr)
+    tif_c = file.path(dir_data, cntry, 'spatial/rgn_inland25km_mol.tif')
+    csv_a = file.path(dir_data, cntry, 'spatial/rgn_inland25km_data.csv')
+    csv_y = sprintf('%s/%s/layers/mar_coastalpopn_inland25km_%s.csv', dir_data, cntry, yr)
+    fxn   = 'mean'
   
-  dir.create(file.path(dir_data, cntry, 'layers'), showWarnings=FALSE)
-  
-  # check for files
-  csv_orig = file.path(dir_data, cntry, 'layers/rgn_popnsum_inland25km.csv')
-  if (file.exists(csv_orig)){
-    cat(sprintf('  moving %s -> %s\n', 'rgn_popnsum_inland25km.csv', 'mar_coastalpopn_inland25mi.csv'))
-    file.copy(csv_orig, csv, overwrite=T)    
-    unlink(csv_orig)
-    next  
-  } 
-  if (file.exists(csv)){
-    cat('  already done\n')
-    next  
-  }
-  if (!all(file.exists(tif_g), file.exists(tif_c), file.exists(csv_a))){
-    cat('  SKIPPING! not all needed input files found\n')
-    next  
-  }
-  
-  cat(sprintf('  zonal %s x %s -> %s (%s)\n', basename(tif_g), basename(tif_c), basename(csv), Sys.time()))
-  #cat('  files in cntry/layers: ', paste(list.files(file.path(dir_data, cntry, 'layers/mar_coastalpopn_inland25mi.csv')), collapse=', '))
+    cat(sprintf('  %d\n', yr, Sys.time()))
     
-  # perform (time consuming) raster op
-  r_g = raster(tif_g)
-  r_c = raster(tif_c)
-  a   = read.csv(csv_a)
-  z   = zonal(r_g, r_c, fun=fxn, na.rm=T)
+    if (file.exists(csv_lyr)){
+      cat('    already done\n')
+      next
+    } 
   
-  # calculate population per subregion
-  d = z %>% as.data.frame() %>%
-    filter(zone != 0) %>%                              # regions without a coast are in zone 0
-    select(rgn_id=zone, popn_mean_per_km2 = mean) %>%
-    mutate(
-      rgn_id = as.integer(rgn_id)) %>%                 # convert to integer so rgn_id's match
-    inner_join(
-      a %>%
-        mutate(
-          rgn_id = as.integer(rgn_id)), 
-      by='rgn_id') %>%
-    mutate(
-      popn_sum  = popn_mean_per_km2 * area_km2) %>%    # calculate population sum
-    arrange(rgn_id)
+    dir.create(file.path(dir_data, cntry, 'layers'), showWarnings=FALSE)
   
-  # write csv
-  write.csv(d, csv, row.names=F, na='')
+    if (!all(file.exists(tif_g), file.exists(tif_c), file.exists(csv_a))){
+      cat('    SKIPPING! not all needed input files found\n')
+      next  
+    }
+  
+    cat(sprintf('    zonal %s x %s -> %s (%s)\n', basename(tif_g), basename(tif_c), basename(csv_y), Sys.time()))
+      
+    # perform (time consuming) raster op
+    r_g = raster(tif_g)
+    r_c = raster(tif_c)
+    if (!compareRaster(r_g, r_c, stopiffalse=F)){
+      tif_g_p = sprintf('%s/model/GL-NCEAS-CoastalPopulation_v2013/data/popdensity_%d_projected_mol.tif', dirs['neptune_data'], yr)
+      if (!file.exists(tif_g_p)){
+        cat(sprintf('    projecting %s -> %s (%s)\n', basename(tif_g), basename(tif_g_p), Sys.time()))
+        r_g = projectRaster(r_g, r_c, method='bilinear', filename=tif_g_p)   
+      } else {
+        r_g = raster(tif_g_p)
+      }
+    }
+    z   = zonal(r_g, r_c, fun=fxn, na.rm=T)    
+    
+    # calculate population per subregion
+    a   = read.csv(csv_a)
+    d = z %>% as.data.frame() %>%
+      filter(zone != 0) %>%                              # regions without a coast are in zone 0
+      select(rgn_id=zone, popn_mean_per_km2 = mean) %>%
+      mutate(
+        rgn_id = as.integer(rgn_id)) %>%                 # convert to integer so rgn_id's match
+      inner_join(
+        a %>%
+          mutate(
+            rgn_id = as.integer(rgn_id)), 
+        by='rgn_id') %>%
+      mutate(
+        year      = yr,
+        popn_sum  = popn_mean_per_km2 * area_km2) %>%    # calculate population sum
+      arrange(rgn_id)
+    
+    # write csv with region names
+    write.csv(d, csv_y, row.names=F, na='')
+  }
+  
+  # write layer csv
+  rbind_all(
+    lapply(2013:2014, function(yr){
+      csv_y = sprintf('%s/%s/layers/mar_coastalpopn_inland25km_%s.csv', dir_data, cntry, yr)
+      read.csv(csv_y) %>%
+        select(rgn_id, year, popn_sum)})) %>%
+    write.csv(csv_lyr, row.names=F, na='')
   
 }
