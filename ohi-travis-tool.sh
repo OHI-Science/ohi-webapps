@@ -10,7 +10,7 @@ CalculateScores() {
     Rscript ./subcountry2014/calculate_scores.R
 }
 
-PushScores() {   
+PushChanges() {   
     if [ "${TRAVIS_PULL_REQUEST}" == "false" ]; then
         git config user.name "${GIT_NAME}"
         git config user.email "${GIT_EMAIL}"
@@ -33,8 +33,8 @@ case $COMMAND in
         
     ##
     ## Push OHI scores back to github
-    "push_scores")
-        PushScores
+    "push_changes")
+        PushChanges
         ;;
 
 esac
