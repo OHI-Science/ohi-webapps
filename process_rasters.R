@@ -1,5 +1,6 @@
 library(raster)
 library(dplyr)
+library(parallel)
 
 # set temporary directory to folder on neptune disk big enough to handle it
 tmpdir='~/ssd/R_raster_tmp'
@@ -15,59 +16,56 @@ dir_data    = sprintf('%s/git-annex/clip-n-ship', dirs['neptune_data']) # 'N:/gi
 dir_repos   = sprintf('%s/clip-n-ship', dirs['github'])
 dir_ohicore = sprintf('%s/ohicore', dirs['github'])
 dir_global  = sprintf('%s/ohi-global/eez2014', dirs['github'])
+log         = sprintf('%s/git-annex/clip-n-ship/make_sc_coastpop_lyr_log.txt', dirs['neptune_data'])
 redo        = T
+years       = 2005:2015
 
-# get list of countries with prepped data
-cntries = list.files(dir_data)
-
-# loop through countries
-for (i in 1:length(cntries)){ # cntry = 'Albania'  
+# function to parallelize
+make_sc_coastpop_lyr = function(cntry, redo=F){
   
-  # setup vars
-  cntry = cntries[i]
-  cat(sprintf('%03d (of %d): %s\n', i, length(cntries), cntry))
+  #cat(sprintf('%03d (of %d): %s\n', i, length(cntries), cntry))
   csv_lyr = sprintf('%s/%s/layers/mar_coastalpopn_inland25km_lyr.csv', dir_data, cntry)
   
   if (file.exists(csv_lyr) & !redo){
-    cat('  already done\n')
+    browser()
+    cat(sprintf('%s: %s already done\n', cntry, csv_lyr), file=log, append=T)
     next
   } 
   
   # loop through years
-  for (yr in 2005:2015){
+  for (yr in years){
     tif_g = sprintf('%s/model/GL-NCEAS-CoastalPopulation_v2013/data/popdensity_%d_mol.tif', dirs['neptune_data'], yr)
     tif_c = file.path(dir_data, cntry, 'spatial/rgn_inland25km_mol.tif')
     csv_a = file.path(dir_data, cntry, 'spatial/rgn_inland25km_data.csv')
     csv_y = sprintf('%s/%s/layers/mar_coastalpopn_inland25km_%s.csv', dir_data, cntry, yr)
     fxn   = 'mean'
-  
-    cat(sprintf('  %d\n', yr, Sys.time()))
     
     if (file.exists(csv_y)){
-      cat('    already done\n')
       next
     } 
-  
-    dir.create(file.path(dir_data, cntry, 'layers'), showWarnings=FALSE)
-  
+    
     if (!all(file.exists(tif_g), file.exists(tif_c), file.exists(csv_a))){
-      cat('    SKIPPING! not all needed input files found\n')
+      cat(sprintf('%s - %d: SKIPPING! not all needed input files found\n', cntry, yr), file=log, append=T)
       next  
     }
-  
-    cat(sprintf('    zonal %s x %s -> %s (%s)\n', basename(tif_g), basename(tif_c), basename(csv_y), Sys.time()))
-      
+    
     # perform (time consuming) raster op
+    cat(sprintf('%s - %d: zonal %s x %s -> %s (%s)\n', cntry, yr, basename(tif_g), basename(tif_c), basename(csv_y), Sys.time()), file=log, append=T)
+    dir.create(file.path(dir_data, cntry, 'layers'), showWarnings=FALSE)
     r_g = raster(tif_g)
     r_c = raster(tif_c)
     if (!compareRaster(r_g, r_c, stopiffalse=F)){
-      tif_g_p = sprintf('%s/model/GL-NCEAS-CoastalPopulation_v2013/data/popdensity_%d_projected_mol.tif', dirs['neptune_data'], yr)
+      tif_g_p = sprintf('%s/model/GL-NCEAS-CoastalPopulation_v2013/data/popdensity_%d_projected_mol.tif', dirs['neptune_data'], yr)      
       if (!file.exists(tif_g_p)){
-        cat(sprintf('    projecting %s -> %s (%s)\n', basename(tif_g), basename(tif_g_p), Sys.time()))
-        # SLOW!: took 7 hrs for popdensity_2005_mol.tif -> popdensity_2005_projected_mol.tif
+        cat(sprintf('    projecting %s -> %s (%s)\n', basename(tif_g), basename(tif_g_p), Sys.time()), file=log, append=T)
+        # SLOW!: took 7 hrs for popdensity_2005_mol.tif -> popdensity_2005_projected_mol.tif VS 1.5 min in ArcGIS!
         r_g = projectRaster(r_g, r_c, method='bilinear', filename=tif_g_p)   
       } else {
         r_g = raster(tif_g_p)
+      }
+      if (!compareRaster(r_g, r_c, stopiffalse=F)){
+        cat(sprintf('    cropping r_g (%s)\n', Sys.time()), file=log, append=T)
+        r_g = crop(r_g, r_c)
       }
     }
     z   = zonal(r_g, r_c, fun=fxn, na.rm=T)    
@@ -94,11 +92,30 @@ for (i in 1:length(cntries)){ # cntry = 'Albania'
   }
   
   # write layer csv
+  cat(sprintf('%s: concat to layer file %s (%s)\n', cntry, csv_lyr, Sys.time()), file=log, append=T)  
   rbind_all(
-    lapply(2013:2014, function(yr){
+    lapply(years, function(yr){
       csv_y = sprintf('%s/%s/layers/mar_coastalpopn_inland25km_%s.csv', dir_data, cntry, yr)
       read.csv(csv_y) %>%
-        select(rgn_id, year, popn_sum)})) %>%
-    write.csv(csv_lyr, row.names=F, na='')
+        select(rgn_id, year, popsum=popn_sum)})) %>%
+    write.csv(csv_lyr, row.names=F, na='')  
   
+  return(csv_y)
 }
+
+# get list of countries with prepped data
+cntries = list.files(dir_data)
+
+# loop through countries on max detected cores - 1
+# debug with lapply: 
+#lapply(cntries, make_sc_coastpop_lyr, redo=T)  
+cat(sprintf('\n\nlog starting for parallell::mclapply (%s)\n\n', Sys.time()), file=log)
+res = mclapply(cntries, make_sc_coastpop_lyr, redo=T, mc.cores = detectCores() - 1, mc.preschedule=F)  
+
+# to kill processes from terminal
+# after running from https://neptune.nceas.ucsb.edu/rstudio/:
+#   kill $(ps -U bbest | grep rsession | awk '{print $1}')
+# after running from terminal: Rscript ~/github/ohi-webapps/process_rasters.R &
+#   kill $(ps -U bbest | grep R | awk '{print $1}')
+# tracking progress:
+#   log=/var/data/ohi/git-annex/clip-n-ship/make_sc_coastpop_lyr_log.txt; cat $log
