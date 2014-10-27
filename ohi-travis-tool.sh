@@ -14,8 +14,11 @@ PushScores() {
     if [ "${TRAVIS_PULL_REQUEST}" == "false" ]; then
         git config user.name ${GIT_NAME}
         git config user.email ${GIT_EMAIL}
+        git status
         gid add -all
+        git status
         git commit -m "auto-calculate of scores from ${TRAVIS_COMMIT}"
+        git status
         git push https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG} ${TRAVIS_BRANCH}
     fi
 }
