@@ -145,14 +145,43 @@ The `conf` folder includes includes R functions (*config.R* and *functions.R*) a
 
 Models will be modified individually, by goal or sub-goal, if you incorporate new data layers or interactions. To do this will require proficiency in the software program R, and ease with learning new user-created packages. The primary R package used is called `dplyr` by Hadley Wickham. The `dplyr` package allows for 'chaining' between functions, which is represented with a `%>%`. See [github.com/hadley/dplyr#dplyr](https://github.com/hadley/dplyr#dplyr) for documentation.  
 
+### Pressures and resilience
 
-### *pressures_matrix.csv*
-`pressures_matrix.csv` describes the layers (from `layers.csv`) needed to calculate pressure categories. The matrix has weights assigned that were determined by Halpern *et al*. 2012 (*Nature*) based on scientific literature and expert opinion.
+There are three files that the Toolbox uses to calculate calculate pressures and resilience components for goal scores. The pressures and resilience matrices are probably more complicated for the global assessment than for any regional assessments, so it is likely that you will simplify these matrices as you complete your study.  
 
-### *resilience_matrix.csv*
+Pressures and resilience are calculated for goals without subgoals and for subgoals, but NOT calculated for goals with subgoals. Notice that there are not pressures or resilience scores for LE, SP, FP or BD, but there are scores for LIV, ECO, LSP, ICO, FIS, MAR, HAB, and SPP. This is because combining the pressures scores from subgoals to 'supra' goals don't really make sense conceptually (although obviously very easy technically).  
+
+**Based on the local characteristics and priorities of your study area, you must consider several things, in this order:**
+
+1.  whether all local pressures are represented in `pressures_matrix.csv`, and if not, add them
+2.  which pressure ranks/weights are appropriate (i.e. which pressures matter and how much)
+3.  whether all necessary resilience measures have been included: you will need a resilience measure for each of the pressures ranked as 2 or 3 in the`pressures_matrix.csv`
+4.  find data to measure additional pressures and resilience; substitute local data for existing data layers (e.g. a data source for chemical pollution, how to assess fishing regulation, etc.)
+5.	convert all the values to a scale from 0 to 1. To do this, you need to set a reference point (e.g. for chemical pollution, when there is no pollution, the pressure is 0, and you might decide that the highest pollution, that gets a 1, is the highest value measured across all regions in your study area).
+
+
+#### *pressures_matrix.csv*
+`pressures_matrix.csv` describes the layers (from `layers.csv`) needed to calculate pressure categories. The matrix has ranks (weights) assigned that were determined by Halpern *et al*. 2012 (*Nature*) based on scientific literature and expert opinion.  
+
+Pressures (columns in `pressures_matrix.csv`), are matched with different goals and subgoals (rows) to indicate which pressures will be included when goal scores are calculated. In some cases the goals are further divided into components (e.g. habitats are divided by habitat type, natural products by product type). 
+
+Ranks (weights) are assigned on a scale from 1-3, based on expert judgment of how important the pressure in that column is for the delivery of the goal, sub-goal, or component, in that row. For example, coastal nutrient pollution (`po_nutrients_3nm`) affects both Mariculture (MAR) and Artisanal Fishing Opportunity (AO) But it affects MAR more: MAR has a 3 and AO just a 1. Another example is intertidal habitat destruction (`hd_intertidal`), which has a 3 for *seagrasses* in the Habitats sub-goal because such a pressure has a strong effect on the health of seagrasses. 
+
+It is important to note that the matrix identifies the pressures relevant to each goal, and which weight it will get. But each pressure is a data layer, located in the `subcountry2014/layers` folder. This means that pressures layers need information for each region in the study area, and some layers will need to be updated with local data.  
+
+Here is some background on the reasoning behind nutrient and chemical pollution in the global `pressures_matrix.csv`. Nutrient and chemical pollution were calculated from the global cumulative impact maps (spatial data). These data were clipped to each global region's EEZ: 200 km from the coast.  
+
+* For some goals, these data clipped to the EEZ would affect goals that far from shore, so `po_chemicals` apply to goals relevant offshore: FIS, MAR, ECO, and SPP. 
+* However, some goals are really only nearshore, and so we clipped the spatial data to 3nm from shore and used this as a separate input. So `po_chemicals_3nm` apply to goals nearshore: AO, CS, CP, TR, ICO, LSP, HAB. 
+
+These distinctions don't always apply for smaller-scale assessments. For example, in the US West Coast study (Halpern et al. 2014), only a single `po_chemicals` layer was used: we did not distinguish between offshore and 3nm.
+
+#### *resilience_matrix.csv*
 `resilience_matrix.csv` describes the layers (from `layers.csv`) needed to calculate resilience categories.
 
-### *resilience_weights.csv*
+`resilience_matrix.csv`, in similar way to `pressures_matrix.csv`, shows which kind of regulations and social measures apply to each of the goals and goal components. There must be a resilience measure that could directly affect any pressure with a rank/weight above 1.
+
+#### *resilience_weights.csv*
 `resilience_weights.csv` describes the weight of various resilience layers, were determined by Halpern et al. 2012 (Nature) based on scientific literature and expert opinion.
 
 ## spatial folder 
