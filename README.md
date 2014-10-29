@@ -5,7 +5,6 @@ Deploy OHI web apps
 
 ## Discussion
 * [ohi-webapps/gh-pages_sketch.png at master · OHI-Science/ohi-webapps](https://github.com/OHI-Science/ohi-webapps/blob/master/tmp/gh-pages_sketch.png)
-* [ohi-webapps/tmp at master · OHI-Science/ohi-webapps](https://github.com/OHI-Science/ohi-webapps/tree/master/tmp)
 * [Home](http://ohi-science.org/)
 * [ESM 296-4f](http://ucsb-bren.github.io/esm296-4f/)
 * [Week 4 • ESM 296-4f](http://ucsb-bren.github.io/esm296-4f/wk4/)
