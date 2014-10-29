@@ -5,6 +5,7 @@ output:
     number_sections: T
     toc: F
     toc_depth: 3
+    fig_caption: T
   md_document:
     variant: markdown_github
 ---
@@ -20,82 +21,46 @@ suppressWarnings(require(ohicore))
 
 ```
 
-As you are starting a regional assessment, it is important to be familiar with the Ocean Health Index Toolbox, which will be the organizational structure and data template for your assessment. Your starting point will be a web-based version of the Toolbox Application (a **Web Application**, or **WebApp**). Your WebApp can be found at a URL with your study area's name, for example: 
+As you begin a regional assessment, it is important to become familiar with your study area's web-based Toolbox Application (a **Web Application**, or **WebApp**). This will be the organizational structure and data template for your assessment.
 
-> **[ohi-science.shinyapps.io/ecuador](https://ohi-science.shinyapps.io/ecuador/)**. 
-
-See the lookup table below if you have trouble finding your study area's WebApp.
-
-
-# Orientation
-
-## Data Page
+# Data page
 
 The Toolbox WebApp will be on the **Data page** upon loading and will look like this:
 
-![](./fig/webapps1.png)  
+![example: **[ohi-science.shinyapps.io/ecuador](https://ohi-science.shinyapps.io/ecuador/)**](./fig/webapps1.png)  
 
-The *Map* tab shows the study area (Ecuador) with its subcountry regions as identified by the Global Administrative Areas [gadm.org](www.gadm.org): El Oro, Guayas, Manabi, Galápagos and Esmeraldas. When you move your cursor over the map's regions, the region's name will appear in the top right corner of the map.  
+The *Map* tab shows the study area with subcountry regions (as identified by [gadm.org](www.gadm.org)). When you move your cursor over each region on the map, the region's name (with unique numerical identifier in parentheses) will appear in the top right corner of the map. A value will also appear, which is determined by the display options on the left (either Output Score or Input Layer). 
 
-It is also possible to see each region in a distribution on the *Histogram* tab and numerically on the *Table* tab.  
+You may view each region as a distribution on the *Histogram* tab and numerically on the *Table* tab.  
  
-### Display options
+## Display options
   
-The left panel has several drop-down menus that indicate the information being displayed: 
+The left panel has several drop-down menus that indicate the information being displayed. The primary distinction is whether information is prepared data (**Input Layers**) or calculated scores (**Output Scores**). 
 
-* choose between calculated Output Scores or prepared Input Layers from the first drop-down menu ('Choose variable type')
-* select the target goal or Index to display from the second drop-down menu ('Choose target (index or goal)')
-* choose the output score's dimension or the input layer's data, depending on which has been selected in the first drop-down menu. 
-* additional drop-down menus will appear, depending on the selections in the first two pull-down menus. 
-
-After selecting, you will be able to view these data in any of the three tabs (*Map, Histogram, Table*). The following figure describes the drop-down menu options you will encounter:
-
-![](./fig/overview_variable_options2.png)  
+1. choose between Output Scores or Input Layers ('Choose variable type')
+2. choose the target to display ('Choose target (index or goal)')
+3. choose the output score's dimension or the input layer's data (depending on previous selections)
+4. additional drop-down menus will appear, depending on previous selections 
   
 Information is presented just below the drop-down menus, including a description of the score or data, with a summary of the data and a source, in the case of Data Layers. 
  
  
-### Template data and scores
+## Template data and scores
  
-**Input data and calculated scores provided in your WebApp are a template and should be updated with local information wherever possible**. This will provide a much more accurate picture of ocean health in your study area, including comparisons between subcountry regions. 
+**Template data provided in your WebApp should be updated with local data when possible**.
+Using local data and targets will provide a much more accurate picture of ocean health in your study area, including comparisons between subcountry regions. 
  
 Data from the global assessment have been extracted for your study area and assigned to the subcountry regions within your study area, and scores have been calculated using these data. In most cases, data have been applied equally across all regions within your study area, except for some layers that were based on spatial data and were extracted individually by region. For example, compare these two input data layers:
 
-> `Input Layer > Mariculture > Coastal population inland 25 kilometers`
+> - `Input Layer > Mariculture > Coastal population inland 25 kilometers`
 
-and
+> - `Input Layer > Mariculture > Mariculture sustainability score`
 
-> `Input Layer > Mariculture > Mariculture sustainability score`
-
-and notice that *Coastal population inland 25 kilometers* has different values across all regions and *Mariculture sustainability score* has the same value across all regions. This is because of nature of the data used in the global assessment: *Coastal population inland 25 kilometers* was spatial data that could be extracted at any scale (i.e. subcountry regions) and *Mariculture sustainability score* was tabular data that has been applied equally across all regions.  
+and notice that *Coastal population inland 25 kilometers* has different values across all regions and *Mariculture sustainability score* has the same value across all regions. This is because of the type of the data used in the global assessment: *Coastal population inland 25 kilometers* was spatial data that could be extracted at any scale (i.e. subcountry regions) and *Mariculture sustainability score* was tabular data that has been applied equally across all regions.  
 
 The highest priority for substituting local data for these template data should be the data layers that were applied equally across all regions. 
  
-## Compare page
+# Compare page
 
 The **Compare page** allows you to visually track updates to data layers and scores as you modify the input layers and recalculate the scores by running the Toolbox. While not useful initially as you are just beginning your assessment, this will become very valuable to check your progress and to share with collaborators. 
- 
-# Lookup table of WebApp URLs
- 
-WebApps have been created for most coastal countries and territories. If you do not see your study area, please contact lowndes@nceas.ucsb.edu.
-
-```{r, results='asis', echo=F}
-knitr::kable(
-  read.csv('~/github/ohi-webapps/tmp/webapp_status.csv') %>%
-    filter(finished == 'TRUE') %>%
-    
-    # shorten names slightly for display
-    mutate(Country = str_replace_all(Country, 
-                                     fixed('South Georgia and the South Sandwich Islands'), 
-                                     fixed('S. Georgia & the S. Sandwich Islands')), 
-           Country = str_replace_all(Country, fixed(' and '), fixed(' & '))) %>%
-    
-    select(Country, URL_webapps = url_shiny_app))
-```
- 
- 
- 
- 
- 
- 
  
