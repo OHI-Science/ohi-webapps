@@ -18,7 +18,7 @@ Main elements:
 
 TODO next round:
 
-- While downweighting by area_offshore, area_offshore\_3nm, and population\_inland25km have been handled, as listed in the clip\_n\_ship\_disag column of [layers\_global](https://docs.google.com/a/nceas.ucsb.edu/spreadsheet/ccc?key=0At9FvPajGTwJdEJBeXlFU2ladkR6RHNvbldKQjhiRlE&usp=drive_web&pli=1#gid=0), the following categories are still unhandled: raster, raster | area\_inland1km, raster | area\_offshore, raster | area\_offshore3nm, raster | equal (see [create\_all.R]( https://github.com/OHI-Science/ohi-webapps/blob/612f31da32ae66165a27f5f3132fb05b268fd027/create_all.R#L370))
+- While downweighting by area_offshore, area_offshore_3nm, and population_inland25km have been handled, as listed in the clip_n_ship_disag column of [layers_global](https://docs.google.com/a/nceas.ucsb.edu/spreadsheet/ccc?key=0At9FvPajGTwJdEJBeXlFU2ladkR6RHNvbldKQjhiRlE&usp=drive_web&pli=1#gid=0), the following categories are still unhandled: raster, raster | area_inland1km, raster | area_offshore, raster | area_offshore3nm, raster | equal (see [create_all.R]( https://github.com/OHI-Science/ohi-webapps/blob/612f31da32ae66165a27f5f3132fb05b268fd027/create_all.R#L370))
 
 TODO seperately:
 
