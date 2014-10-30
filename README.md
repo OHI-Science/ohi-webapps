@@ -6,8 +6,8 @@ Deploy OHI web apps
 ## Discussion
 
 Main elements:
-- [Subcountry front page sketch](https://github.com/OHI-Science/ohi-webapps/blob/master/tmp/gh-pages_sketch.png) - front page sketch
-    - banner like [Adv GIS course site](http://ucsb-bren.github.io/esm296-4f/), except image of country map having buffers like [OHI-Israel regions https://github.com/OHI-Science/ohi-israel#regions] using ggmap with stamen gray background (see [create_map_banner.R](https://github.com/OHI-Science/ohi-webapps/blob/master/create_map_banner.R) and a [tiltshift effect](http://www.fmwconcepts.com/imagemagick/tiltshift/index.php) applied for snazz
+- [Subcountry front page sketch](https://github.com/OHI-Science/ohi-webapps/blob/master/tmp/gh-pages_sketch.png)
+    - banner like [Adv GIS course site](http://ucsb-bren.github.io/esm296-4f/), except image of country map having buffers like [OHI-Israel regions](https://github.com/OHI-Science/ohi-israel#regions) using ggmap with stamen gray background (see [create_map_banner.R](https://github.com/OHI-Science/ohi-webapps/blob/master/create_map_banner.R) and a [tiltshift effect](http://www.fmwconcepts.com/imagemagick/tiltshift/index.php) applied for snazz
     - use snazzy sizable icons from [Font Awesome](http://fortawesome.github.io/Font-Awesome/) and [Octicons](https://octicons.github.com/) to describe components wrapped in tidy boxes
     - use tidy boxes. see clean gh-pages examples from [P2PU course templates](http://howto.p2pu.org/modules/start/your-own-course/): [Intro to Python](http://mechanicalmooc.org/), [LCL](http://learn.media.mit.edu/lcl/)
     - use [Jekyll variables](http://jekyllrb.com/docs/github-pages/) and [Metadata from Github](https://help.github.com/articles/repository-metadata-on-github-pages/) to template the pages
