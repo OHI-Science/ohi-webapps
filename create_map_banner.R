@@ -6,8 +6,9 @@ suppressWarnings(suppressPackageStartupMessages({
   library(rgeos)
   library(dismo)
   library(ggplot2)
-  library(ggmap)
+  library(ggmap) # devtools::install_github('dkahle/ggmap') # want 2.4 for stamen toner-lite
   library(dplyr)
+  library(grid) # for unit
 }))
 
 # meta-paths
@@ -16,19 +17,18 @@ dir_github  = '~/github'
 
 # paths and vars
 dir_data  = file.path(dir_neptune, 'git-annex/clip-n-ship')
-buffers   = c('offshore'=0.5, 'inland'=0.5, 'inland1km'=0.5, 'inland25km'=0.5, 'offshore3nm'=0.5, 'offshore1km'=0.5) # and transparency
-
+buffers   = c('offshore'=0.2, 'inland'=0.2, 'inland1km'=0.8, 'inland25km'=0.4, 'offshore3nm'=0.4, 'offshore1km'=0.8) # and transparency
   
 # iterate through countries
 cntries = list.files(dir_data)
-for (Cntry in cntries){ # Cntry     = 'Ecuador'
+for (Cntry in cntries){ # Cntry = 'Ecuador'
 
   # country vars
   i           = which(Cntry==cntries)
   dir_spatial = file.path(dir_data, Cntry, 'spatial')
   dir_pages   = file.path(dir_data, Cntry, 'gh-pages')
   png_map     = file.path(dir_pages, 'img/map.png')
-  png_banner  = file.path(dir_pages, 'img/banner.png')
+  png_effect  = file.path(dir_pages, 'img/map_effect.png')
   
   # create output directory if don't exist
   dir.create(dirname(png_map), recursive=T, showWarnings=F)
@@ -37,53 +37,73 @@ for (Cntry in cntries){ # Cntry     = 'Ecuador'
   shps = setNames(sprintf('%s/rgn_%s_gcs', dir_spatial, names(buffers)), names(buffers))
   plys = lapply(shps, function(x) readOGR(dirname(x), basename(x)))
   
-  # get first two buffers, inland and offshore, for extent
+  # fortify and set rgn_names as factor of all inland rgns
+  rgn_names = factor(plys[['inland']][['rgn_name']])
+  plys.df = lapply(plys, function(x){
+    x = fortify(x, region='rgn_name')
+    x$id = factor(as.character(x$id), rgn_names)
+    return(x)
+  })
+  ids_offshore = unique(plys.df[['offshore']][['id']])
   
-  bbox(plys[['inland']])
-  bbox(plys[['offshore']])
+  # get extent from inland and offshore, expanded 10%
+  bb_inland25km = bbox(plys[['inland25km']])
+  bb_offshore   = bbox(plys[['offshore']])
+  x  = extendrange(c(bb_inland25km['x',], bb_offshore['x',]), f=0.1)
+  y  = extendrange(c(bb_inland25km['y',], bb_offshore['y',]), f=0.1)
   
-  for (j in 1:2){
-    
-    # get bounding box extent, with extended range
-    x = extendrange(bbox(ply_abs)['x',], f=0.25)
-    y = extendrange(bbox(ply_abs)['y',], f=0.25)
-    bb = c(x[1], y[1], x[2], y[2])
-    
-    
-      
+  # make bbox proportional to desired output image dimensions of 1600 x 800, ie 2 x 1
+  if (diff(x) < 2 * diff(y)){
+    x = c(-1, 1) * diff(y) + mean(x)
+  } else {
+    y = c(-1, 1) * diff(x)/2 + mean(y)
   }
+  bb = c(x[1], y[1], x[2], y[2])
   
-  buf = 'offshore'
-
+  # plot
+  m = get_map(location=bb, source='stamen', maptype='toner-lite', crop=T)
   
+  unlink(png_map)
+  png(png_map, width=1600, height=800, res=150, type='cairo-png')
+  ggmap(m, extent='device') + 
+    # offshore
+    geom_polygon(
+      aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['offshore']], 
+      data=plys.df[['offshore']]) +
+    # offshore3nm
+    geom_polygon(
+      aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['offshore3nm']], 
+      data=plys.df[['offshore3nm']]) +  
+    # offshore1km
+    geom_polygon(
+      aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['offshore1km']], 
+      data=plys.df[['offshore1km']]) +  
+    # inland
+    geom_polygon(
+      aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['inland']], 
+      data=subset(plys.df[['inland']], id %in% ids_offshore)) +  
+    # inland25km
+    geom_polygon(
+      aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['inland25km']], 
+      data=subset(plys.df[['inland25km']], id %in% ids_offshore)) +  
+    # inland1km
+    geom_polygon(
+      aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['inland1km']], 
+      data=subset(plys.df[['inland1km']], id %in% ids_offshore)) +
+    # tweaks
+    labs(fill='', xlab='', ylab='') + 
+    theme(
+      legend.position='none')
+  #     legend.justification = c(1,0),   # anchor legend to max x, min y of graph
+  #     legend.position      = c(1,0),   # from anchor position max x, min y
+  #     legend.key.size      = unit(2.5, 'cm'),
+  #     legend.text          = element_text(size = 20),
+  #     axis.line            = element_line(color = NA))
+  dev.off()
+  system(sprintf('open %s', png_map))
   
-  pts_sp = readOGR(dirname(shp_presence), basename(shp_presence))
+  toycamera_options = '-i 5 -o 150 -d 5 -h -3 -t yellow -a 10 -I 0.75 -O 5'
+  system(sprintf('./toycamera %s %s %s', toycamera_options, png_map, png_effect))
+  system(sprintf('open %s', png_effect))
   
-  
-# prep data for plotting with ggplot2
-xy_sp  = as.data.frame(coordinates(pts_sp))
-xy_abs = as.data.frame(coordinates(pts_abs))
-names(xy_sp)  = c('lon','lat')
-names(xy_abs) = c('lon','lat')
-ply_abs@data$id = rownames(ply_abs@data)
-ply_abs.points  = fortify(ply_abs, region='id')
-ply_abs.df      = inner_join(ply_abs.points, ply_abs@data, by='id')
-
-# get bounding box extent, with extended range
-x = extendrange(bbox(ply_abs)['x',], f=0.25)
-y = extendrange(bbox(ply_abs)['y',], f=0.25)
-bb = c(x[1], y[1], x[2], y[2])
-
-# get map
-m = suppressWarnings(get_map(location=bb, source='google', maptype='terrain', crop=T))
-
-# plot
-png(map_png, width=1000, height=800, res=72)
-ggmap(m, extent='device', darken=c(0.4,'white')) + 
-  geom_point(
-    data=xy_sp, aes(x=lon, y=lat), color='darkgreen', alpha=0.5) +
-  geom_polygon(
-    data=ply_abs.df, aes(x=long, y=lat, group=group), color='darkblue', fill=NA) +
-  geom_point(
-    data=xy_abs, aes(x=lon, y=lat), color='red', alpha=0.5)
-dev.off()
+}

@@ -1,5 +1,6 @@
 setwd('~/github/ohi-webapps')
 library(dplyr)
+library(stringr)
 
 # vars
 dir_neptune = '/Volumes/data_edit'
@@ -30,11 +31,12 @@ d = gl_cntries %>%
 d_cols = names(d)
 
 # iterate through global regions, getting available subcountry regions
-for (gl_rgn_n in unique(as.character(d$gl_rgn_name))){ # gl_rgn_n = unique(as.character(d$gl_rgn_name))[1]
+for (gl_rgn_n in unique(as.character(d$gl_rgn_name))){ # gl_rgn_n = unique(as.character(d$gl_rgn_name))[1] # gl_rgn_n = 'United States'
   
   # get subcountry regions
-  sc_rgns_offshore_csv = file.path(dir_data, gl_rgn_n, 'spatial', 'rgn_offshore_data.csv')
-  sc_rgns_inland_shp   = file.path(dir_data, gl_rgn_n, 'spatial', 'rgn_inland_gcs.shp')
+  cntry = str_replace(gl_rgn_n, ' ', '_')
+  sc_rgns_offshore_csv = file.path(dir_data, cntry, 'spatial', 'rgn_offshore_data.csv')
+  sc_rgns_inland_shp   = file.path(dir_data, cntry, 'spatial', 'rgn_inland_gcs.shp')
   
   if (file.exists(sc_rgns_offshore_csv)){
     
