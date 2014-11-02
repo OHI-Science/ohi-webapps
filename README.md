@@ -23,3 +23,9 @@ TODO next round:
 TODO seperately:
 
 - fix broken links now reported by html-proofer in new [travis-ci build of ohi-science.org](https://travis-ci.org/OHI-Science/ohi-science.github.io)
+
+
+Other cool icons for potential use:
+
+- Fonts Awesome: [rocket](http://fortawesome.github.io/Font-Awesome/icon/rocket/), [pencil edit](http://fortawesome.github.io/Font-Awesome/icon/pencil-square-o/), [gamepad](http://fortawesome.github.io/Font-Awesome/icon/gamepad/), [puzzle-piece/](http://fortawesome.github.io/Font-Awesome/icon/puzzle-piece/), [wrench](http://fortawesome.github.io/Font-Awesome/icon/wrench/), [bolt](http://fortawesome.github.io/Font-Awesome/icon/bolt/), [eye](http://fortawesome.github.io/Font-Awesome/icon/eye/), [fire](http://fortawesome.github.io/Font-Awesome/icon/fire/), [beaker flask](http://fortawesome.github.io/Font-Awesome/icon/flask/), [?](http://fortawesome.github.io/Font-Awesome/icon/question/), [water drop](http://fortawesome.github.io/Font-Awesome/icon/tint/) 
+- Octicons: [forked](https://octicons.github.com/icon/repo-forked/), [cloud-upload](https://octicons.github.com/icon/cloud-upload/), [cloud-download](https://octicons.github.com/icon/cloud-download/), [repo-clone](https://octicons.github.com/icon/repo-clone/), [rocket](https://octicons.github.com/icon/rocket/)
