@@ -1,165 +1,41 @@
-library(stringr)
-library(git2r)
-library(dplyr)
-library(rgdal)
-library(shiny)
-library(shinyapps)
-library(stringr)
-merge = base::merge # override git2r::merge
-tags  = shiny::tags # override git2r::tags, otherwise get "Error in tags$head : object of type 'closure' is not subsettable"
 
-# vars
-# get paths based on host machine
-dirs = list(
-  neptune_data  = '/Volumes/data_edit', 
-  github        = '~/github')
-
-dir_data    = sprintf('%s/git-annex/clip-n-ship', dirs['neptune_data']) # 'N:/git-annex/clip-n-ship/data'
-dir_repos   = sprintf('%s/clip-n-ship', dirs['github'])
-dir_ohicore = sprintf('%s/ohicore', dirs['github'])
-dir_global  = sprintf('%s/ohi-global/eez2014', dirs['github'])
-csv_mcntry  = sprintf('%s/ohi-webapps/tmp/gl-rgn_multiple-cntry_sc-rgn_manual.csv', dirs['github'])
-sfx_global  = 'gl2014'
-scenario    = 'subcountry2014'
-dw_year     = 2014
-git_branch  = 'master'
-tabs_hide   = 'Calculate, Report' # , Compare'
-commit_msg  = "downweighted layers based on popn-inland25km, area-offshore, area-offshore3nm"
-redo        = T
-redo_app    = T
-
-# load ohicore, development mode
-#devtools::load_all(dir_ohicore)# deploy error: The package was installed locally from source. Only packages installed from CRAN, BioConductor and GitHub are supported.
-library(ohicore)
-
-# read global layers, add clip_n_ship columns from Google version
-lyrs_gl     = read.csv(file.path(dir_global, 'layers.csv'), stringsAsFactors=F)
-lyrs_google = read.csv(file.path(dir_global, 'temp/layers_0-google.csv'), stringsAsFactors=F)
-lyrs_gl = lyrs_gl %>%
-  left_join(
-    lyrs_google %>%
-      select(layer, starts_with('clip_n_ship')),
-    by='layer')
-
-# read in github token outside of repo, generated via https://help.github.com/articles/creating-an-access-token-for-command-line-use
-token = scan('~/.github-token', 'character')
-
-# get list of countries with prepped data
-cntries = list.files(dir_data)
-mcntry = read.csv(csv_mcntry)
-
-cntry_gl = read.csv(sprintf('%s/layers/cntry_rgn.csv', dir_global))
-rgn_gl   = read.csv(sprintf('%s/layers/rgn_labels.csv', dir_global), na.strings='') %>%
-  mutate(
-    label = plyr::revalue(label, c('R_union'='Reunion'))) %>% arrange(label)
-
-# capture status
-n = length(cntries)
-y = data.frame(
-  Country         = str_replace_all(cntries, '_', ' '),
-  init_app        = logical(n),
-  pop_inland25km  = logical(n),
-  status          = character(n),
-  url_github_repo = character(n),
-  url_shiny_app   = character(n),
-  error           = character(n),
-  stringsAsFactors=F)
+# set vars and get functions
+setwd('~/github/ohi-webapps')
+source('create_init.R')
+source('create_functions.R')
 
 # loop through countries
-for (i in 1:length(cntries)){ # which(cntries == 'Ecuador') # i=49
+for (key in sc_studies$sc_key){
   
-# DEBUG
-  if (i != 49) next
+  # set vars by subcountry key
+  source('create_init_sc.R')
+      
+  # create / rename github repo ----
   
-  # setup vars
-  Country   = str_replace_all(cntries[i], '_', ' ')
-  cntry     = tolower(cntries[i])
-  repo_name = sprintf('ohi-%s', cntry)
-  git_url  = sprintf('https://github.com/OHI-Science/%s', repo_name)
-  dir_repo  = file.path(dir_repos, repo_name)
-  dir_app   = file.path(dir_data, cntries[i], 'shinyapps.io')
-  app_name  = cntry
-  cat(sprintf('\n\n\n\n%03d of %d: %s -- %s\n', i, length(cntries), Country, format(Sys.time(), '%X')))    
-    
-  if (Country %in% c('Brazil','Canada','China','Fiji')){
-    cat('  excepted, skipping!\n')    
-    y$init_app[i] = F
-    y$status[i]   = 'excepted b/c existing repo'
-    next
-  }
-  
-  if (file.exists(file.path(dir_app, 'app_config.yaml')) & !redo){
-    #cat('  done, skipping!\n')
-    y$init_app[i] = T
-    y$url_github_repo[i] = git_url
-    y$url_shiny_app[i]   = sprintf('https://ohi-science.shinyapps.io/%s', app_name)
-    #next    
-  }
-
-  csv_pop_inland25km = file.path(dirs['neptune_data'], 'git-annex/clip-n-ship', cntry, 'layers/mar_coastalpopn_inland25km_lyr.csv')
-  if (file.exists(csv_pop_inland25km)){
-    d = read.csv(csv_pop_inland25km)
-    if ('year' %in% names(d)){
-      y$pop_inland25km[i] = T
-    }
-# TODO: fix this FAKE ECUADOR marpop data!
-    if (Country=='Ecuador' & !'year' %in% names(d)){
-      d %>%
-        merge(
-          data.frame(year=2005:2015)) %>%
-        select(rgn_id, year, popsum = popn_sum) %>%
-        write.csv(csv_pop_inland25km, row.names=F, na='')
-      y$pop_inland25km[i] = T
-    }
-  }  
-  if (!y$pop_inland25km[i]){
-    cat('  mar_coastalpopn_inland25km_lyr.csv NOT READY, skipping!')
-    next
-  }
-  
-  # catalog status ----
-  
-  #   # fixing calc errors
-  #   txt_calc_err = sprintf('%s/score_errors/%s_calc-scores.txt', dir_repos, cntry)
-  #   if (file.exists(txt_calc_err)) unlink(txt_calc_err)
-  
-  # uncomment below to quickly capture table of status
-  
-  # txt_cntry_err = sprintf('%s/score_errors/%s_cntry-key-length-gt-1.txt', dir_repos, cntry)
-  # if (file.exists(txt_cntry_err)){
-  #   cat('  multi cntry\n')
-  #   y$init_app[i] = F
-  #   y$status[i]   = 'cntry_key multiple'
-  #   next        
-  # }
-  #  
-  # txt_calc_err = sprintf('%s/score_errors/%s_calc-scores.txt', dir_repos, cntry)
-  # if (file.exists(txt_calc_err)){
-  #    cat('  calc error\n')
-  #    y$init_app[i] = F
-  #    y$status[i]   = 'calc'
-  #    y$error[i]    = paste(readLines(txt_calc_err), collapse='    ')
-  #    next    
-  # }   
-  # 
-  # txt_shp_err = sprintf('%s/score_errors/%s_shp_to_geojson.txt', dir_repos, cntry)
-  # if (file.exists(txt_shp_err)){
-  #   cat('  shp error\n')
-  #   y$init_app[i] = F
-  #   y$status[i]   = 'shp_to_geojson'
-  #   y$error[i]    = paste(readLines(txt_shp_err), collapse='    ')
-  #   next        
-  # }  
-    
-  # create github repo ----
-  github_repo_exists = system(sprintf('git ls-remote git@github.com:ohi-science/%s.git', repo_name), ignore.stderr=T) != 128
+  github_repo_exists = system(sprintf('git ls-remote git@github.com:ohi-science/%s.git', repo_name), ignore.stderr=T) != 128    
+  # create repo. using Github API: https://developer.github.com/v3/repos/#create
   if (!github_repo_exists){    
-    cat(sprintf('  creating github repo -- %s\n', format(Sys.time(), '%X')))
+    edit_gh_repo(key, default_branch='master')
     
-    # create using Github API: https://developer.github.com/v3/repos/#create
-    cmd = sprintf('curl -u "bbest:%s" https://api.github.com/orgs/ohi-science/repos -d \'{"name":"%s"}\'', token, repo_name)
-    system(cmd)
   }
+  
+# TODO: automate later
+git checkout dev
+Rscript create_figures
+
+cd /github/ecu
+cp -r subcountry2014 ~/tmp/subcountry2014
+git checkout gh-pages
+mkdir _data/dev
+cp -r ~/tmp/subcountry2014 _data/dev/subcountry2014
+
+  
+  # reclone locally
+  cat(sprintf('  re-cloning github repo -- %s\n', format(Sys.time(), '%X')))
+  setwd(dir_repos)
+  unlink(dir_repo, recursive=T, force=T)  
+  system(sprintf('git clone %s %s', git_url, dir_repo))
+  setwd(dir_repo)
   
   # get existing repo
   repo = try(repository(dir_repo), silent=T)
@@ -176,29 +52,31 @@ for (i in 1:length(cntries)){ # which(cntries == 'Ecuador') # i=49
     # system cmd line: touch README.md; git init; git add README.md; git commit -m "first commit"; git push -u origin master
     repo = init(dir_repo)
     setwd(dir_repo)
-    cat(sprintf('# Ocean Health Index - %s', cntry), file='README.md')
+    cat(sprintf('# Ocean Health Index - %s', Country), file='README.md')
     add(repo, 'README.md')
     commit(repo, 'add README.md')    
     system(sprintf('git remote add origin %s', git_url))
     system('git push -u origin master')    
   }
   
-  # reclone repo
-  cat(sprintf('  re-cloning github repo -- %s\n', format(Sys.time(), '%X')))
-  setwd(dir_repos)
-  unlink(dir_repo, recursive=T, force=T)  
-  system(sprintf('git clone %s %s', git_url, dir_repo))
-  setwd(dir_repo)
   
-  # populate repo ----
-  cat(sprintf('  populating local repo with scenario files -- %s\n', format(Sys.time(), '%X')))
+  # populate dev repo ----
+  
+  cat(sprintf('  populating local dev repo with scenario files -- %s\n', format(Sys.time(), '%X')))
+    
+  # switch to dev branch
+  system('git checkout -b dev')
+  system('git push -u origin dev')
   
   # recreate empty dir, except hidden .git and README.md
   del_except = 'README.md'
   for (f in setdiff(list.files(dir_repo), del_except)) unlink(file.path(dir_repo, f), recursive=T, force=T)
 
-  # add Rstudio project file
-  devtools::add_rstudio_project()
+  # add Rstudio project files. cannabalized devtools::add_rstudio_project() which only works for full R packages.
+  cat('  adding RStudio project files\n')
+  (sprintf('Ocean Health Index - %s', Country))
+  file.copy(system.file('templates/template.Rproj', package='devtools'), sprintf('%s.Rproj', cntry_key))
+  writeLines(c('.Rproj.user', '.Rhistory', '.RData'), '.gitignore')  
 
   # create and cd to scenario
   dir_scenario = file.path(dir_repo, scenario)
@@ -212,10 +90,10 @@ for (i in 1:length(cntries)){ # which(cntries == 'Ecuador') # i=49
   write.csv(lyrs_gl, sprintf('tmp/layers_%s.csv', sfx_global), na='', row.names=F)
 
   # create spatial if needed
-  f_js      = file.path(dir_data, cntry, 'regions_gcs.js')
-  f_geojson = file.path(dir_data, cntry, 'regions_gcs.geojson')
+  f_js      = file.path(dir_annex, country, 'regions_gcs.js')
+  f_geojson = file.path(dir_annex, country, 'regions_gcs.geojson')
   if (!file.exists(f_js)){
-    f_shp = file.path(dir_data, cntry, 'spatial', 'rgn_offshore_gcs.shp')
+    f_shp = file.path(dir_annex, country, 'spatial', 'rgn_offshore_gcs.shp')
     #f_lyr = tools::file_path_sans_ext(basename(f_shp))
     #x = rgdal::readOGR(dsn=f_shp, layer=f_lyr, drop_unsupported_fields=T) #  proj4string=sp::CRS('+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
     #ogrInfo(f_shp, f_lyr)        
@@ -246,7 +124,7 @@ for (i in 1:length(cntries)){ # which(cntries == 'Ecuador') # i=49
     arrange(targets, layer)
   
   # csvs for regions and countries
-  rgn_sc_csv   = file.path(dir_data, cntry, 'spatial', 'rgn_offshore_data.csv')
+  rgn_sc_csv   = file.path(dir_annex, cntry, 'spatial', 'rgn_offshore_data.csv')
   
   # old global to new subcountry regions
   rgn_sc = read.csv(rgn_sc_csv) %>%
@@ -297,23 +175,23 @@ for (i in 1:length(cntries)){ # which(cntries == 'Ecuador') # i=49
   # swap out custom mar_coastalpopn_inland25mi for mar_coastalpopn_inland25km (NOTE: mi -> km)
   ix = which(lyrs_sc$layer=='mar_coastalpopn_inland25mi')
   lyrs_sc$layer[ix]       = 'mar_coastalpopn_inland25km'
-  lyrs_sc$path_in[ix]     = file.path(dir_data, cntries[i], 'layers', 'mar_coastalpopn_inland25km_lyr.csv')
+  lyrs_sc$path_in[ix]     = file.path(dir_annex, cntries[i], 'layers', 'mar_coastalpopn_inland25km_lyr.csv')
   lyrs_sc$name[ix]        = str_replace(lyrs_sc$name[ix]       , fixed('miles'), 'kilometers')
   lyrs_sc$description[ix] = str_replace(lyrs_sc$description[ix], fixed('miles'), 'kilometers')
   lyrs_sc$filename[ix]    = 'mar_coastalpopn_inland25km_sc2014-raster.csv'
   lyrs_sc$rgns_in[ix]     = 'subcountry'
   
   # get layers used to downweight from global: area_offshore, area_offshore_3nm, equal, equal , population_inland25km, 
-  population_inland25km = read.csv(file.path(dir_data, cntries[i], 'layers' , 'mar_coastalpopn_inland25km_lyr.csv')) %>%
+  population_inland25km = read.csv(file.path(dir_annex, cntries[i], 'layers' , 'mar_coastalpopn_inland25km_lyr.csv')) %>%
     filter(year == dw_year) %>%
     mutate(
       dw = popsum / sum(popsum)) %>%
     select(rgn_id, dw)
-  area_offshore         = read.csv(file.path(dir_data, cntries[i], 'spatial', 'rgn_offshore_data.csv')) %>%
+  area_offshore         = read.csv(file.path(dir_annex, cntries[i], 'spatial', 'rgn_offshore_data.csv')) %>%
     mutate(
       dw = area_km2 / sum(area_km2)) %>%
     select(rgn_id, dw)
-  area_offshore_3nm     = read.csv(file.path(dir_data, cntries[i], 'spatial', 'rgn_offshore3nm_data.csv')) %>%
+  area_offshore_3nm     = read.csv(file.path(dir_annex, cntries[i], 'spatial', 'rgn_offshore3nm_data.csv')) %>%
     mutate(
       dw = area_km2 / sum(area_km2)) %>%
     select(rgn_id, dw)
@@ -327,7 +205,7 @@ for (i in 1:length(cntries)){ # which(cntries == 'Ecuador') # i=49
     csv = area_layers[lyr]
     ix = which(lyrs_sc$layer==lyr)
     lyrs_sc$rgns_in[ix]     = 'subcountry'
-    lyrs_sc$path_in[ix]     = file.path(dir_data, cntries[i], 'spatial', csv)
+    lyrs_sc$path_in[ix]     = file.path(dir_annex, cntries[i], 'spatial', csv)
     lyrs_sc$filename[ix]    = str_replace(lyrs_sc$filename[ix], fixed('_gl2014.csv'), '_sc2014-area.csv')
   }    
 
@@ -394,7 +272,7 @@ for (i in 1:length(cntries)){ # which(cntries == 'Ecuador') # i=49
   }
 
   #   # copy custom layers
-  #   dir_layers_in = file.path(dir_data, cntry, 'layers')
+  #   dir_layers_in = file.path(dir_annex, cntry, 'layers')
   #   for (f in list.files(dir_layers_in, full.names=T)){ # f = list.files(dir_layers_in, full.names=T)[1]
   #     
   #     # update layer
@@ -519,7 +397,7 @@ for (i in 1:length(cntries)){ # which(cntries == 'Ecuador') # i=49
       # get map centroid and zoom level
       # TODO: http://gis.stackexchange.com/questions/76113/dynamically-set-zoom-level-based-on-a-bounding-box
       # var regions_group = new L.featureGroup(regions); map.fitBounds(regions_group.getBounds());
-      p_shp  = file.path(dir_data, cntry, 'spatial', 'rgn_offshore_gcs.shp')
+      p_shp  = file.path(dir_annex, cntry, 'spatial', 'rgn_offshore_gcs.shp')
       p      = readOGR(dirname(p_shp), tools::file_path_sans_ext(basename(p_shp)))
       p_bb   = data.frame(p@bbox) # max of 2.25
       p_ctr  = rowMeans(p_bb)
