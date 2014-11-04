@@ -163,6 +163,8 @@ Pressures and resilience are calculated for goals without subgoals and for subgo
 #### *pressures_matrix.csv*
 `pressures_matrix.csv` describes the layers (from `layers.csv`) needed to calculate pressure categories. The matrix has ranks (weights) assigned that were determined by Halpern *et al*. 2012 (*Nature*) based on scientific literature and expert opinion.  
 
+Pressures are grouped by category, indicated by a prefix (for example: *po_* for the pollution category). Each category is calculated separately before being combined with the others, so it is important to register the new pressure with the appropriate category prefix decided by your regional assessment team.
+
 Pressures (columns in `pressures_matrix.csv`), are matched with different goals and subgoals (rows) to indicate which pressures will be included when goal scores are calculated. In some cases the goals are further divided into components (e.g. habitats are divided by habitat type, natural products by product type). 
 
 Ranks (weights) are assigned on a scale from 1-3, based on expert judgment of how important the pressure in that column is for the delivery of the goal, sub-goal, or component, in that row. For example, coastal nutrient pollution (`po_nutrients_3nm`) affects both Mariculture (MAR) and Artisanal Fishing Opportunity (AO) But it affects MAR more: MAR has a 3 and AO just a 1. Another example is intertidal habitat destruction (`hd_intertidal`), which has a 3 for *seagrasses* in the Habitats sub-goal because such a pressure has a strong effect on the health of seagrasses. 
