@@ -5,77 +5,48 @@ source('create_init.R')
 source('create_functions.R')
 
 # loop through countries
-for (key in sc_studies$sc_key){
+for (key in sc_studies$sc_key){ # key = 'alb'
   
   # set vars by subcountry key
   source('create_init_sc.R')
       
-  # create / rename github repo ----
+  # create github repo
+  #create_gh_repo(key)
   
-  github_repo_exists = system(sprintf('git ls-remote git@github.com:ohi-science/%s.git', repo_name), ignore.stderr=T) != 128    
-  # create repo. using Github API: https://developer.github.com/v3/repos/#create
-  if (!github_repo_exists){    
-    edit_gh_repo(key, default_branch='master')
-    
-  }
-  
-# TODO: automate later
-git checkout dev
-Rscript create_figures
-
-cd /github/ecu
-cp -r subcountry2014 ~/tmp/subcountry2014
-git checkout gh-pages
-mkdir _data/dev
-cp -r ~/tmp/subcountry2014 _data/dev/subcountry2014
-
-  
-  # reclone locally
-  cat(sprintf('  re-cloning github repo -- %s\n', format(Sys.time(), '%X')))
+  # clone clean local repo
   setwd(dir_repos)
-  unlink(dir_repo, recursive=T, force=T)  
-  system(sprintf('git clone %s %s', git_url, dir_repo))
+  unlink(dir_repo, recursive=T, force=T)
+  repo = clone(git_url, normalizePath(dir_repo, mustWork=F))
   setwd(dir_repo)
   
-  # get existing repo
-  repo = try(repository(dir_repo), silent=T)
-  
-  # create local repo ----
-  if (class(repo)=='try-error'){
-    cat(sprintf('  creating local repo -- %s\n', format(Sys.time(), '%X')))
-    
-    # recreate empty dir
-    unlink(dir_repo, recursive=T, force=T)    
-    dir.create(dir_repo, recursive=T, showWarnings=F)
-    
-    # intialize repo ----
-    # system cmd line: touch README.md; git init; git add README.md; git commit -m "first commit"; git push -u origin master
-    repo = init(dir_repo)
-    setwd(dir_repo)
-    cat(sprintf('# Ocean Health Index - %s', Country), file='README.md')
-    add(repo, 'README.md')
-    commit(repo, 'add README.md')    
-    system(sprintf('git remote add origin %s', git_url))
-    system('git push -u origin master')    
+  # rename/create branches: draft, published
+  remote_branches = sapply(branches(repo, 'remote'), function(x) str_split(x@name, '/')[[1]][2])
+  if (length(setdiff(c('draft','published'), remote_branches)) > 0){
+    rename_branches(key)
   }
-  
-  
-  # populate dev repo ----
-  
-  cat(sprintf('  populating local dev repo with scenario files -- %s\n', format(Sys.time(), '%X')))
-    
   # switch to dev branch
-  system('git checkout -b dev')
-  system('git push -u origin dev')
+  #system('git checkout -b dev')
+  #system('git pushd -u origin dev')
+    
+  # populate draft repo ----
+  checkout(repo, 'draft')
   
-  # recreate empty dir, except hidden .git and README.md
-  del_except = 'README.md'
-  for (f in setdiff(list.files(dir_repo), del_except)) unlink(file.path(dir_repo, f), recursive=T, force=T)
+  dir_errors = file.path(dir_repos, '_errors')
+  dir.create(dir_errors, showWarnings=F)
+  
+  #cat(sprintf('  populating local dev repo with scenario files -- %s\n', format(Sys.time(), '%X')))
+  
+  # recreate empty dir, except hidden .git
+  del_except = ''
+  for (f in setdiff(list.files(dir_repo, all.files=F), del_except)) unlink(file.path(dir_repo, f), recursive=T, force=T)
 
+  # README
+  brew(
+    text='# Ocean Health Index for <%=name%> (<%=toupper(key)%>)\n\n[![](https://travis-ci.org/OHI-Science/<%=key%>/svg?branch=draft)](https://travis-ci.org/OHI-Science/<%=key%>)\n',
+    output='README.md')
+  
   # add Rstudio project files. cannabalized devtools::add_rstudio_project() which only works for full R packages.
-  cat('  adding RStudio project files\n')
-  (sprintf('Ocean Health Index - %s', Country))
-  file.copy(system.file('templates/template.Rproj', package='devtools'), sprintf('%s.Rproj', cntry_key))
+  file.copy(system.file('templates/template.Rproj', package='devtools'), sprintf('%s.Rproj', key))
   writeLines(c('.Rproj.user', '.Rhistory', '.RData'), '.gitignore')  
 
   # create and cd to scenario
@@ -89,20 +60,21 @@ cp -r ~/tmp/subcountry2014 _data/dev/subcountry2014
   # copy layers from global
   write.csv(lyrs_gl, sprintf('tmp/layers_%s.csv', sfx_global), na='', row.names=F)
 
-  # create spatial if needed
-  f_js      = file.path(dir_annex, country, 'regions_gcs.js')
-  f_geojson = file.path(dir_annex, country, 'regions_gcs.geojson')
+  # spatial
+  f_js_old      = file.path(dir_annex_sc, 'regions_gcs.js')
+  f_geojson_old = file.path(dir_annex_sc, 'regions_gcs.geojson')
+  f_js          = file.path(dir_annex_sc, 'spatial', 'regions_gcs.js')
+  f_geojson     = file.path(dir_annex_sc, 'spatial', 'regions_gcs.geojson')
+  if (file.exists(f_js_old)) file.rename(f_js_old, f_js)
+  if (file.exists(f_geojson_old)) file.rename(f_geojson_old, f_geojson)
+  txt_shp_error = sprintf('%s/%s_shp_to_geojson.txt', dir_errors, key)
+  unlink(txt_shp_error)
   if (!file.exists(f_js)){
-    f_shp = file.path(dir_annex, country, 'spatial', 'rgn_offshore_gcs.shp')
-    #f_lyr = tools::file_path_sans_ext(basename(f_shp))
-    #x = rgdal::readOGR(dsn=f_shp, layer=f_lyr, drop_unsupported_fields=T) #  proj4string=sp::CRS('+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
-    #ogrInfo(f_shp, f_lyr)        
+    f_shp = file.path(dir_annex, key, 'spatial', 'rgn_offshore_gcs.shp')
     cat(sprintf('  shp_to_geojson -- %s\n', format(Sys.time(), '%X')))    
     v = try(shp_to_geojson(f_shp, f_js, f_geojson))
     if (class(v)=='try-error'){
-      dir_score_errors = file.path(dir_repos, 'score_errors')
-      dir.create(dir_score_errors, showWarnings=F)
-      cat(as.character(traceback(v)), file=sprintf('%s/%s_shp_to_geojson.txt', dir_score_errors, cntry))
+      cat(as.character(traceback(v)), file=txt_shp_error)
       next
     }
   }
@@ -124,58 +96,57 @@ cp -r ~/tmp/subcountry2014 _data/dev/subcountry2014
     arrange(targets, layer)
   
   # csvs for regions and countries
-  rgn_sc_csv   = file.path(dir_annex, cntry, 'spatial', 'rgn_offshore_data.csv')
+  sc_rgns_csv = file.path(dir_annex, key, 'spatial', 'rgn_offshore_data.csv')
   
   # old global to new subcountry regions
-  rgn_sc = read.csv(rgn_sc_csv) %>%
-    select(rgn_id_sc=rgn_id, rgn_name_sc=rgn_name) %>%
-    mutate(rgn_name_gl = Country) %>%
+  # rgn_id_sc->sc_rgn_id, rgn_name_sc->sc_rgn_name, rgn_id_gl-> gl_rgn_id, rgn_name_gl-> gl_rgn_name
+  sc_rgns = read.csv(sc_rgns_csv) %>%
+    select(sc_rgn_id=rgn_id, sc_rgn_name=rgn_name) %>%
+    mutate(gl_rgn_name = name) %>%
     merge(
-      rgn_gl %>%
-        select(rgn_name_gl=label, rgn_id_gl=rgn_id),
-      by='rgn_name_gl', all.x=T) %>%
-    select(rgn_id_sc, rgn_name_sc, rgn_id_gl, rgn_name_gl) %>%
-    arrange(rgn_name_sc)
+      gl_rgns %>%
+        select(gl_rgn_name, gl_rgn_id),
+      by='gl_rgn_name', all.x=T) %>%
+    select(sc_rgn_id, sc_rgn_name, gl_rgn_id, gl_rgn_name) %>%
+    arrange(sc_rgn_name)
 
   # old global to new subcountry countries
-  cntry_sc = cntry_gl %>%
-    select(cntry_key, rgn_id_gl=rgn_id) %>%
+  sc_cntry = gl_cntries %>%
+    select(gl_cntry_key, gl_rgn_id) %>%
     merge(
-      rgn_sc,
-      by='rgn_id_gl') %>%
-    group_by(cntry_key, rgn_id_sc) %>%
+      sc_rgns,
+      by='gl_rgn_id') %>%
+    group_by(gl_cntry_key, sc_rgn_id) %>%
     summarise(n=n()) %>%
-    select(cntry_key, rgn_id_sc) %>%
+    select(cntry_key = gl_cntry_key, sc_rgn_id) %>%
     as.data.frame()
 
   # bind single cntry_key
-  if (length(unique(cntry_sc$cntry_key)) > 1){
-    
-    # remove old error
-    mcntry_error = sprintf('%s/score_errors/%s_cntry-key-length-gt-1.txt', dir_repos, cntry)
-    unlink(mcntry_error)
-    
+  if (length(unique(sc_cntry$gl_cntry_key)) > 1){
+        
     # extract non-na rows from lookup
-    d_mcntry = mcntry %>% filter(gl_rgn_name == Country & !is.na(sc_rgn_name))
+    d_mcntry = gl_sc_mcntry %>% filter(gl_rgn_name == name & !is.na(sc_rgn_name))
     
     # log error if no rows defined
+    txt_mcntry_error = sprintf('%s/%s_cntry-key-length-gt-1.txt', dir_errors, key)
+    unlink(txt_mcntry_error)
     if (nrow(d_mcntry) == 0){
       cat(sprintf('  multi-country lookup not registered yet in %s. NEXT!\n', csv_mcntry))
-      write.csv(d_mcntry, mcntry_error, row.names=F, na='')
+      write.csv(d_mcntry, txt_mcntry_error, row.names=F, na='')
       next
     }
     
     # update cntry key
-    cntry_sc = d_mcntry %>%
+    sc_cntry = d_mcntry %>%
       select(
         cntry_key = gl_cntry_key,
-        rgn_id_sc = sc_rgn_id)    
+        sc_rgn_id = sc_rgn_id)    
   }    
   
   # swap out custom mar_coastalpopn_inland25mi for mar_coastalpopn_inland25km (NOTE: mi -> km)
   ix = which(lyrs_sc$layer=='mar_coastalpopn_inland25mi')
   lyrs_sc$layer[ix]       = 'mar_coastalpopn_inland25km'
-  lyrs_sc$path_in[ix]     = file.path(dir_annex, cntries[i], 'layers', 'mar_coastalpopn_inland25km_lyr.csv')
+  lyrs_sc$path_in[ix]     = file.path(dir_annex, key, 'layers', 'mar_coastalpopn_inland25km_lyr.csv')
   lyrs_sc$name[ix]        = str_replace(lyrs_sc$name[ix]       , fixed('miles'), 'kilometers')
   lyrs_sc$description[ix] = str_replace(lyrs_sc$description[ix], fixed('miles'), 'kilometers')
   lyrs_sc$filename[ix]    = 'mar_coastalpopn_inland25km_sc2014-raster.csv'
@@ -224,23 +195,23 @@ cp -r ~/tmp/subcountry2014 _data/dev/subcountry2014
     
       if ('rgn_id' %in% names(d)){
         d = d %>%
-          filter(rgn_id %in% rgn_sc$rgn_id_gl) %>%
-          merge(rgn_sc, by.x='rgn_id', by.y='rgn_id_gl') %>%
-          mutate(rgn_id=rgn_id_sc) %>%
+          filter(rgn_id %in% sc_rgns$gl_rgn_id) %>%
+          merge(sc_rgns, by.x='rgn_id', by.y='gl_rgn_id') %>%
+          mutate(rgn_id=sc_rgn_id) %>%
           subset(select=flds)
       }
       
       if ('cntry_key' %in% names(d)){
         d = d %>%
-          filter(cntry_key %in% cntry_sc$cntry_key)
+          filter(cntry_key %in% sc_cntry$cntry_key)
       }
         
       if (lyrs_sc$layer[j]=='rgn_labels'){
         csv_out = 'layers/rgn_labels.csv'
         lyrs_sc$filename[j] = basename(csv_out)
         d = d %>%
-          merge(rgn_sc, by.x='rgn_id', by.y='rgn_id_sc') %>%
-          select(rgn_id, type, label=rgn_name_sc)
+          merge(sc_rgns, by.x='rgn_id', by.y='sc_rgn_id') %>%
+          select(rgn_id, type, label=sc_rgn_name)
       }
       
       # downweight: area_offshore, area_offshore_3nm, equal, equal , population_inland25km, 
@@ -323,9 +294,9 @@ cp -r ~/tmp/subcountry2014 _data/dev/subcountry2014
     
     # exceptions
     if (lyr == 'mar_trend_years'){
-      rgn_sc %>%
+      sc_rgns %>%
         mutate(trend_yrs = '5_yr') %>%
-        select(rgn_id = rgn_id_sc, trend_yrs) %>%
+        select(rgn_id = sc_rgn_id, trend_yrs) %>%
         arrange(rgn_id) %>%
         write.csv(csv_out, row.names=F, na='')
       
@@ -354,11 +325,11 @@ cp -r ~/tmp/subcountry2014 _data/dev/subcountry2014
     
     # bind single cntry_key
     if ('cntry_key' %in% names(a)){
-      #b$cntry_key = unique(cntry_sc$cntry_key)
+      #b$cntry_key = unique(sc_cntry$cntry_key)
       b = b %>%
         merge(
           data.frame(
-            cntry_key = as.character(unique(cntry_sc$cntry_key))))      
+            cntry_key = as.character(unique(sc_cntry$cntry_key))))      
     }    
     
     # bind many rgn_ids
@@ -366,8 +337,8 @@ cp -r ~/tmp/subcountry2014 _data/dev/subcountry2014
       # get outer join, aka Cartesian product
       b = b %>%
         merge(
-          rgn_sc %>%
-            select(rgn_id = rgn_id_sc), 
+          sc_rgns %>%
+            select(rgn_id = sc_rgn_id), 
           all=T) %>%
         select(one_of('rgn_id', flds_other, fld_value)) %>%
         arrange(rgn_id)
@@ -459,11 +430,10 @@ cp -r ~/tmp/subcountry2014 _data/dev/subcountry2014
 #   }
   
   # if problem calculating, log problem and move on to next one an
+  txt_calc_error = sprintf('%s/%s_calc-scores.txt', dir_errors, cntry)
+  unlink(txt_calc_error)
   if (class(scores)=='try-error'){
-    dir_score_errors = file.path(dir_repos, 'score_errors')
-    dir.create(dir_score_errors, showWarnings=F)
-    #unlink(sprintf('%s/%s_dput.txt', dir_score_errors, cntry))
-    cat(as.character(traceback(scores)), file=sprintf('%s/%s_calc-scores.txt', dir_score_errors, cntry))
+    cat(as.character(traceback(scores)), file=txt_calc_error)
     next
   }
     
@@ -475,6 +445,19 @@ cp -r ~/tmp/subcountry2014 _data/dev/subcountry2014
   # check app manually
   #launch_app()
   
+# create figures
+git checkout dev
+Rscript create_figures
+
+# copy dev scenarios to tmp before switching to other branches
+cd /github/ecu
+cp -r subcountry2014 ~/tmp/subcountry2014
+git checkout gh-pages
+mkdir _data/dev
+cp -r ~/tmp/subcountry2014 _data/dev/subcountry2014
+
+
+
   # commit changes, push to github repo
   setwd(dir_repo)
   repo = repository(dir_repo)

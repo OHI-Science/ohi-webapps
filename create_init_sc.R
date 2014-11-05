@@ -15,13 +15,14 @@ dir_repo      = file.path(dir_repos, repo_name)
 #  scenario_old  = 'subcountry2014'
 scenario      = sprintf('%s2014', key)
 #  dir_ap_old    = file.path(dir_annex, cntries[i], 'shinyapps.io')
-dir_app       = file.path(dir_annex, key, 'shinyapps.io')
+dir_annex_sc  = file.path(dir_annex, key)
+dir_app       = file.path(dir_annex_sc, 'shinyapps.io')
 app_name      = key
 csv_pop_inland25km = file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'layers/mar_coastalpopn_inland25km_lyr.csv')
 # dir_annex_old  = str_replace_all(Country, ' ', '_')
 
-message(sprintf('\n\n\n\n%03d of %d: %s [%s] -- %s\n', i, nrow(sc_studies), name, key, format(Sys.time(), '%X')))    
-stopifnot(!is.na(cntry_key))
+message(sprintf('\n%03d of %d: %s [%s] -- %s', i, nrow(sc_studies), name, key, format(Sys.time(), '%X')))    
+stopifnot(!is.na(key))
 
 
 # TODO: get status of subcountry key ----

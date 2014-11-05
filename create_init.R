@@ -6,11 +6,9 @@ library(shiny)
 library(shinyapps)
 library(stringr)
 library(jsonlite)
+library(brew)
 merge <- base::merge # override git2r::merge
 tags  <- shiny::tags # override git2r::tags, otherwise get "Error in tags$head : object of type 'closure' is not subsettable"
-
-setwd('~/github/ohi-webapps')
-source('create_functions.R')
 
 # vars
 # get paths based on host machine
