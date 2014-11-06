@@ -29,6 +29,14 @@ commit_msg  <- "downweighted layers based on popn-inland25km, area-offshore, are
 redo_layers <- T
 redo_app    <- T
 sc_names_existing_repos <- c('Canada','China','Fiji','Israel') # for avoiding renaming
+fxn_swap    <- c(
+  'LIV_ECO' = file.path(dir_github, 'ohi-webapps/functions/functions_LIV_ECO.R'),
+  'LE'      = file.path(dir_github, 'ohi-webapps/functions/functions_LE.R'))
+goal_swap   <- list(
+  'LIV' = list(preindex_function="LIV_ECO(layers, subgoal='LIV')"),
+  'ECO' = list(preindex_function="LIV_ECO(layers, subgoal='ECO')"))
+
+/Users/bbest/github/ohi-webapps/functions/functions_LIV_ECO.R
 
 # load ohicore
 library(ohicore) # devtools::load_all(dir_ohicore)

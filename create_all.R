@@ -96,7 +96,7 @@ for (key in sc_studies$sc_key){ # key = 'alb'
     arrange(targets, layer)
   
   # csvs for regions and countries
-  sc_rgns_csv = file.path(dir_annex, key, 'spatial', 'rgn_offshore_data.csv')
+  sc_rgns_csv = file.path(dir_annex_key, 'spatial', 'rgn_offshore_data.csv')
   
   # old global to new subcountry regions
   # rgn_id_sc->sc_rgn_id, rgn_name_sc->sc_rgn_name, rgn_id_gl-> gl_rgn_id, rgn_name_gl-> gl_rgn_name
@@ -153,16 +153,16 @@ for (key in sc_studies$sc_key){ # key = 'alb'
   lyrs_sc$rgns_in[ix]     = 'subcountry'
   
   # get layers used to downweight from global: area_offshore, area_offshore_3nm, equal, equal , population_inland25km, 
-  population_inland25km = read.csv(file.path(dir_annex, cntries[i], 'layers' , 'mar_coastalpopn_inland25km_lyr.csv')) %>%
+  population_inland25km = read.csv(file.path(dir_annex_sc, 'layers' , 'mar_coastalpopn_inland25km_lyr.csv')) %>%
     filter(year == dw_year) %>%
     mutate(
       dw = popsum / sum(popsum)) %>%
     select(rgn_id, dw)
-  area_offshore         = read.csv(file.path(dir_annex, cntries[i], 'spatial', 'rgn_offshore_data.csv')) %>%
+  area_offshore         = read.csv(file.path(dir_annex_sc, 'spatial', 'rgn_offshore_data.csv')) %>%
     mutate(
       dw = area_km2 / sum(area_km2)) %>%
     select(rgn_id, dw)
-  area_offshore_3nm     = read.csv(file.path(dir_annex, cntries[i], 'spatial', 'rgn_offshore3nm_data.csv')) %>%
+  area_offshore_3nm     = read.csv(file.path(dir_annex_sc, 'spatial', 'rgn_offshore3nm_data.csv')) %>%
     mutate(
       dw = area_km2 / sum(area_km2)) %>%
     select(rgn_id, dw)
@@ -176,7 +176,7 @@ for (key in sc_studies$sc_key){ # key = 'alb'
     csv = area_layers[lyr]
     ix = which(lyrs_sc$layer==lyr)
     lyrs_sc$rgns_in[ix]     = 'subcountry'
-    lyrs_sc$path_in[ix]     = file.path(dir_annex, cntries[i], 'spatial', csv)
+    lyrs_sc$path_in[ix]     = file.path(dir_annex_sc, 'spatial', csv)
     lyrs_sc$filename[ix]    = str_replace(lyrs_sc$filename[ix], fixed('_gl2014.csv'), '_sc2014-area.csv')
   }    
 
@@ -193,17 +193,18 @@ for (key in sc_studies$sc_key){ # key = 'alb'
     
     if (rgns_in == 'global'){
     
+      if ('cntry_key' %in% names(d)){
+        browser()
+        d = d %>%
+          filter(cntry_key %in% sc_cntry$cntry_key)
+      }
+      
       if ('rgn_id' %in% names(d)){
         d = d %>%
           filter(rgn_id %in% sc_rgns$gl_rgn_id) %>%
           merge(sc_rgns, by.x='rgn_id', by.y='gl_rgn_id') %>%
           mutate(rgn_id=sc_rgn_id) %>%
           subset(select=flds)
-      }
-      
-      if ('cntry_key' %in% names(d)){
-        d = d %>%
-          filter(cntry_key %in% sc_cntry$cntry_key)
       }
         
       if (lyrs_sc$layer[j]=='rgn_labels'){
@@ -243,7 +244,7 @@ for (key in sc_studies$sc_key){ # key = 'alb'
   }
 
   #   # copy custom layers
-  #   dir_layers_in = file.path(dir_annex, cntry, 'layers')
+  #   dir_layers_in = file.path(dir_annex_sc, 'layers')
   #   for (f in list.files(dir_layers_in, full.names=T)){ # f = list.files(dir_layers_in, full.names=T)[1]
   #     
   #     # update layer
@@ -354,7 +355,7 @@ for (key in sc_studies$sc_key){ # key = 'alb'
 
   # copy configuration files
   conf_files = c('config.R','functions.R','goals.csv','pressures_matrix.csv','resilience_matrix.csv','resilience_weights.csv')
-  for (f in conf_files){ # f = conf_files[1]
+  for (f in conf_files){ # f = conf_files[2]
     
     f_in  = sprintf('%s/conf/%s', dir_global, f)
     f_out = sprintf('conf/%s', f)
@@ -368,7 +369,7 @@ for (key in sc_studies$sc_key){ # key = 'alb'
       # get map centroid and zoom level
       # TODO: http://gis.stackexchange.com/questions/76113/dynamically-set-zoom-level-based-on-a-bounding-box
       # var regions_group = new L.featureGroup(regions); map.fitBounds(regions_group.getBounds());
-      p_shp  = file.path(dir_annex, cntry, 'spatial', 'rgn_offshore_gcs.shp')
+      p_shp  = file.path(dir_annex_sc, 'spatial', 'rgn_offshore_gcs.shp')
       p      = readOGR(dirname(p_shp), tools::file_path_sans_ext(basename(p_shp)))
       p_bb   = data.frame(p@bbox) # max of 2.25
       p_ctr  = rowMeans(p_bb)
@@ -382,7 +383,30 @@ for (key in sc_studies$sc_key){ # key = 'alb'
       # use just rgn_labels (not rgn_global)
       s = gsub('rgn_global', 'rgn_labels', s)
     }
+    
+    # swap out custom functions
+    if (f=='functions.R'){
+            
+      # iterate over goals with functions to swap
+      for (g in names(fxn_swap)){ # g = names(fxn_swap)[1]
         
+        # get goal=line# index for functions.R
+        fxn_idx = setNames(
+          grep('= function', s),
+          str_trim(str_replace(grep('= function', s, value=T), '= function.*', '')))
+
+        # read in new goal function
+        s_g = readLines(fxn_swap[g], warn=F, encoding='UTF-8')
+                
+        # get line numbers for current and next goal to begin and end excision
+        ln_beg = fxn_idx[g] - 1
+        ln_end = fxn_idx[which(names(fxn_idx)==g) + 1]
+        
+        # inject new goal function
+        s = c(s[1:ln_beg], s_g, '\n', s[ln_end:length(s)])
+      }      
+    }
+            
     # substitute old layer names with new
     lyrs_dif = lyrs_sc %>% filter(layer!=layer_gl)
     for (i in 1:nrow(lyrs_dif)){ # i=1
@@ -391,15 +415,16 @@ for (key in sc_studies$sc_key){ # key = 'alb'
     
     writeLines(s, f_out)
   }
-  
-  # append custom functions to overwrite others
-  #   cat(
-  #     paste(c(
-  #       '\n\n\n# CUSTOM FUNCTIONS ----\n',
-  #       readLines('tmp/functions_custom.R', warn=F, encoding='UTF-8')), 
-  #       collapse='\n'), 
-  #     file='conf/functions.R', append=T)
-      
+
+  # swap fields in goals.csv
+  goals = read.csv('conf/goals.csv', stringsAsFactors=F)
+  for (g in names(goal_swap)){ # g = names(goal_swap)[1]
+    for (fld in names(goal_swap[[g]])){
+      goals[goals$goal==g, fld] = goal_swap[[g]][[fld]]
+    }
+  }
+  write.csv(goals, 'conf/goals.csv', row.names=F, na='')
+
   #   # DEBUG: copy custom layers
   #   for (f in list.files('tmp/layers_custom', full.names=T)){ # f = list.files('tmp/layers_custom', full.names=T)[1]
   #     file.copy(f, file.path('layers', basename(f)), overwrite=T)  
@@ -414,10 +439,6 @@ for (key in sc_studies$sc_key){ # key = 'alb'
   library(ohicore)
   layers = Layers('layers.csv', 'layers')
   conf   = Conf('conf')  
-  
-  # Doh! Need to get coastal population for every year 2005 to 2015!
-#   browser()
-#   conf   = Conf('conf')  
 #   scores = CalculateAll(conf, layers, debug=T)
   
   scores = try(CalculateAll(conf, layers, debug=T))
