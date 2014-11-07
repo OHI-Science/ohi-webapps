@@ -4,19 +4,19 @@ LIV_ECO = function(layers, subgoal){
   
   # gdp, wages, jobs and workforce_size data 
   le_gdp   = SelectLayersData(layers, layers='le_gdp')  %>%
-    select(cntry_key = id_num, year, usd = val_num)
+    select(rgn_id = id_num, year, gdp_usd = val_num)
   
   le_wages = SelectLayersData(layers, layers='le_wage_sector_year') %>%
-    select(cntry_key = id_num, year, sector = category, usd = val_num)
+    select(rgn_id = id_num, year, sector = category, wage_usd = val_num)
   
   le_jobs  = SelectLayersData(layers, layers='le_jobs_sector_year') %>%
-    select(cntry_key = id_num, year, sector = category, value = val_num)
+    select(rgn_id = id_num, year, sector = category, jobs = val_num)
   
   le_workforce_size = SelectLayersData(layers, layers='le_workforcesize_adj') %>%
-    select(cntry_key = id_num, year, workforce_size = val_num)
+    select(rgn_id = id_num, year, jobs_all = val_num)
   
   le_unemployment = SelectLayersData(layers, layers='le_unemployment') %>%
-    select(cntry_key = id_num, year, percent = val_num)
+    select(rgn_id = id_num, year, percent = val_num)
   
   # debug
   #     le_gdp            = read.csv('eez2014/layers/le_gdp.csv')
@@ -33,9 +33,9 @@ LIV_ECO = function(layers, subgoal){
   
   # calculate employment counts
   le_employed = le_workforce_size %>%
-    left_join(le_unemployment, by = c('cntry_key', 'year')) %>%
+    left_join(le_unemployment, by = c('rgn_id', 'year')) %>%
     mutate(proportion_employed = (100 - percent) / 100, 
-           employed            = jobs * proportion_employed)
+           employed            = jobs_all * proportion_employed)
   
   # reworded from SOM p.26-27
   #reference point for wages is the reference region (r) with the highest average wages across all sectors. 
@@ -49,21 +49,21 @@ LIV_ECO = function(layers, subgoal){
     # adjust jobs
     le_jobs %>%
     left_join(multipliers_jobs, by = 'sector') %>%
-    mutate(jobs_mult = value * multiplier) %>%  # adjust jobs by multipliers
-    left_join(le_employed, by= c('cntry_key', 'year')) %>%
+    mutate(jobs_mult = jobs * multiplier) %>%  # adjust jobs by multipliers
+    left_join(le_employed, by= c('rgn_id', 'year')) %>%
     mutate(jobs_adj = jobs_mult / proportion_employed) %>% # adjust jobs by proportion employed
     select(rgn_id, year, sector, jobs_adj) %>%
     
     left_join(le_wages) %>%      
-    left_join(le_jobs, by = c('cntry_key', 'year', 'sector')) %>% # left_join le_jobs and le_wages
-    arrange(year, sector, cntry_key)
+    left_join(le_jobs, by = c('rgn_id', 'year', 'sector')) %>% # left_join le_jobs and le_wages
+    arrange(year, sector, rgn_id)
   
   
   ## LIV calculations
   
   # LIV status
   liv_status = liv %>%
-    filter(!is.na(jobs_adj) & !is.na(wages_adj)) %>%
+    filter(!is.na(jobs_adj) & !is.na(wage_usd)) %>%
     filter(year >= max(year, na.rm=T) - 4) %>% # reference point is 5 years ago
     arrange(rgn_id, year, sector) %>%
     # summarize across sectors
@@ -72,7 +72,7 @@ LIV_ECO = function(layers, subgoal){
       # across sectors, jobs are summed
       jobs_sum  = sum(jobs_adj, na.rm=T),
       # across sectors, wages are averaged
-      wages_avg = mean(wages_adj, na.rm=T)) %>%
+      wages_avg = mean(wage_usd, na.rm=T)) %>%
     group_by(rgn_id) %>%
     mutate(
       # reference for jobs [j]: value in the current year (or most recent year) [c], relative to the value in a recent moving reference period [r] defined as 5 years prior to [c]
@@ -104,7 +104,7 @@ LIV_ECO = function(layers, subgoal){
   
   # get trend across years as slope of individual sectors for jobs and wages
   liv_trend = liv %>%
-    filter(!is.na(jobs_adj) & !is.na(wages_adj)) %>%
+    filter(!is.na(jobs_adj) & !is.na(wage_usd)) %>%
     # TODO: consider "5 year time spans" as having 5 [(max(year)-4):max(year)] or 6 [(max(year)-5):max(year)] member years
     filter(year >= max(year, na.rm=T) - 4) %>% # reference point is 5 years ago 
     # get sector weight as total jobs across years for given region
@@ -113,7 +113,7 @@ LIV_ECO = function(layers, subgoal){
     mutate(
       weight = sum(jobs_adj, na.rm=T)) %>%
     # reshape into jobs and wages columns into single metric to get slope of both with one do() call
-    reshape2::melt(id=c('rgn_id','year','sector','weight'), variable='metric') %>%
+    reshape2::melt(id=c('rgn_id','year','sector','weight'), variable='metric', value.name='value') %>%
     mutate(
       sector = as.character(sector),
       metric = as.character(metric)) %>%
@@ -148,9 +148,9 @@ LIV_ECO = function(layers, subgoal){
   # ECO calculations ----
   eco = le_gdp %>%
     mutate(
-      rev_adj = usd,
+      rev_adj = gdp_usd,
       sector = 'gdp') %>% 
-    # adjust rev with national GDP rates if available. Example: (rev_adj = usd / ntl_gdp) 
+    # adjust rev with national GDP rates if available. Example: (rev_adj = gdp_usd / ntl_gdp) 
     select(rgn_id, year, sector, rev_adj)
   
   # ECO status

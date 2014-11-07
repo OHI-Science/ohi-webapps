@@ -36,8 +36,6 @@ goal_swap   <- list(
   'LIV' = list(preindex_function="LIV_ECO(layers, subgoal='LIV')"),
   'ECO' = list(preindex_function="LIV_ECO(layers, subgoal='ECO')"))
 
-/Users/bbest/github/ohi-webapps/functions/functions_LIV_ECO.R
-
 # load ohicore
 library(ohicore) # devtools::load_all(dir_ohicore)
 
