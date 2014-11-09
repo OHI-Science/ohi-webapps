@@ -11,7 +11,7 @@ install:
 - ./travis-tool.sh install_r zoo
 - ./travis-tool.sh install_r psych
 - ./travis-tool.sh install_github ohi-science/rCharts
-- ./travis-tool.sh install_github ohi-science/ohicore ref='master' # ref='2f7a3d7' to specify by https://github.com/OHI-Science/ohicore/commits/master
+- ./travis-tool.sh install_github ohi-science/ohicore ref='dev' # ref='2f7a3d7' to specify by https://github.com/OHI-Science/ohicore/commits/master
 
 script:
 - Rscript ohi-travis-functions.R calculate_scores
