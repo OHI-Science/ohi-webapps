@@ -30,6 +30,15 @@ for (key in sc_studies$sc_key){ # key = 'alb'
   # create flower plot and table
   create_results()
   
+  # push draft branch
+  push_branch('draft')
+  
+  # publish draft branch
+  push_branch('published')
+  
+  # p
+  create_pages()
+  
 # switch to dev branch
 #system('git checkout -b dev')
 #system('git pushd -u origin dev')

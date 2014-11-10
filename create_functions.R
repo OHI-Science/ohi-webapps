@@ -556,5 +556,9 @@ populate_draft_branch <- function(){
   write.csv(goals, 'conf/goals.csv', row.names=F, na='')
   
   # save shortcut files not specific to operating system
-  write_shortcuts('.', os_files=0)  
+  write_shortcuts('.', os_files=0)
+  
+  # add travis.yml file
+  brew(travis_yaml_brew, '.travis.yml')
+  
 }

@@ -42,6 +42,7 @@ create_results <- function(res=72){
   system('git checkout draft')
   
   # iterate through all scenarios (by finding layers.csv)
+  wd = getwd() # presumably in top level folder of repo containing scenario folders 
   dirs_scenario = normalizePath(dirname(list.files('.', 'layers.csv', recursive=T, full.names=T)))
   for (dir_scenario in dirs_scenario){ # dir_scenario = '~/github/clip-n-ship/alb/alb2014'
   
@@ -136,14 +137,99 @@ create_results <- function(res=72){
         write.csv(scores_csv, row.names=F, na='')
     }
   }
+  setwd(wd)
 }
 
-generate_pages <- function(){
+create_pages <- function(){
+  
+  library(yaml)
+  library(brew)
+  
+  # get results brew files from ohi-webapps
+  
+  # copy draft branch scenarios
+  system('git checkout draft; git pull')
+  system('rm -rf ~/tmp_draft; mkdir ~/tmp_draft; cp -R * ~/tmp_draft/.')
+
+  # get default_scenario set by .travis.yml
+  default_scenario = Sys.getenv('default_scenario')
+  if (default_scenario == ''){    
+    # if not set, then running locally so read in yaml
+    travis_yaml = yaml.load_file('.travis.yml')
+    default_scenario = travis_yaml$env$global$default_scenario
+  }
+  
+  # copy published branch scenarios
+  system('git checkout published; git pull')
+  system('rm -rf ~/tmp_published; mkdir ~/tmp_published; cp -R * ~/tmp_published/.')
+  
+  # switch to gh-pages branch
+  system('git checkout gh-pages')
+  
+  # iterate over branches
+  for (branch in c('published','draft')){ # branch='published'
+    
+    # per branch vars
+    dir_data_branch  = sprintf('~/tmp_%s', branch)
+    dir_pages_branch = c(published='.', draft='./draft')[[branch]]
+    
+    # iterate through all scenarios (by finding scores.csv)
+    dirs_scenario = normalizePath(dirname(list.files(dir_data_branch, 'scores.csv', recursive=T, full.names=T)))
+    for (dir_scenario in dirs_scenario){ # dir_scenario = dirs_scenario[1]
+      
+      scenario = basename(dir_scenario)
+      
+      # copy results: figures and tables
+      dir_data_results  =  file.path(dir_data_branch, scenario, 'reports')
+      dir_pages_results =  file.path('results', branch, scenario)
+      dir.create(dir_pages_results, showWarnings=F, recursive=T)
+      file.copy(list.files(dir_data_results, full.names=T), dir_pages_results, recursive=T)
+      
+      # brew markdown files
+      dir_pages_md = ifelse(
+        scenario == default_scenario, 
+        dir_pages_branch, 
+        file.path(dir_pages_branch, scenario))
+      
+      for (f in )
+      
+      
+      
+      rgns = file.path(dir_scenario, 'scores.csv') %>% read.csv %>% select(region_id) %>% unique %>% getElement('region_id')
+      dir_results = 
+      
+    }
+  }
+  
+    
+    
+  
+  }
+  brew()
+  Sys.getenv
+  
   
 }
 
-push_changes <- function(){
-  
+push_branch <- function(branch='draft'){  
+  # set message with [ci skip] to skip travis-ci build for next time
+
+  if (all(Sys.getenv('GH_TOKEN') > '', Sys.getenv('TRAVIS_COMMIT') > '', Sys.getenv('TRAVIS_REPO_SLUG') > '')){
+    
+    # working on travis-ci
+    system('git commit -a -m "auto-calculate from commit ${TRAVIS_COMMIT}\n[ci skip]"')
+    system('git remote set-url origin "https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git"')
+    system(sprintf('git push origin HEAD:%s', branch))
+    
+  } else {
+    
+    # working locally, gh_token set in create_init.R, repo_name set in create_init_sc.Rs
+    owner_repo = sprintf('ohi-science/%s', repo_name)
+    system('git commit -a -m "auto-calculate from commit `git rev-parse HEAD`\n[ci skip]"')
+    system(sprintf('git remote set-url origin "https://%s@github.com/%s.git"', gh_token, owner_repo))
+    system(sprintf('git push origin HEAD:%s', branch))
+    
+  }
 }
 
 # main

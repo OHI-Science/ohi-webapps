@@ -15,8 +15,9 @@ install:
 
 script:
 - Rscript ohi-travis-functions.R calculate_scores
-- Rscript ohi-travis-functions.R generate_pages
-- Rscript ohi-travis-functions.R push_changes
+- Rscript ohi-travis-functions.R create_results
+- Rscript ohi-travis-functions.R push_branch draft
+- Rscript ohi-travis-functions.R push_branch published
 
 after_success:
 - ./ohi-travis-tool.sh push_changes
@@ -28,10 +29,17 @@ notifications:
   email:
     recipients:
     - bbest@nceas.ucsb.edu
-    - bbest@nceas.ucsb.edu
     on_success: change
     on_failure: always
+
+matrix:
+  fast_finish: true # finish at first failure
+
+branches:
+  only:
+    - draft
 
 env:
   global:
     secure: MxndVJugIbNZOL/5Tqy9dBX1WQMSbIT4rjq+zByq3aURQ4w9DOuR4I6LD4rYuLtXnaBqE1m2ocAf5WuQ5uA0R/JwiDL688NpVoIAuHDXtUxoXbgX3uHRS6espQmMzs+4MuVkliXld4/68GQpKWUkCbI/HEdvR4SXN40Uba4/Ptc=
+    default_scenario: "<%=scenario%>"
