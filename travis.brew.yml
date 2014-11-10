@@ -4,7 +4,6 @@ before_install:
 - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
 - curl -OL http://raw.github.com/OHI-Science/ohi-webapps/master/ohi-travis-functions.R
 - chmod 755 ./travis-tool.sh
-- chmod 755 ./ohi-travis-tool.sh
 - ./travis-tool.sh bootstrap
 
 install:
@@ -41,5 +40,6 @@ branches:
 
 env:
   global:
-    secure: MxndVJugIbNZOL/5Tqy9dBX1WQMSbIT4rjq+zByq3aURQ4w9DOuR4I6LD4rYuLtXnaBqE1m2ocAf5WuQ5uA0R/JwiDL688NpVoIAuHDXtUxoXbgX3uHRS6espQmMzs+4MuVkliXld4/68GQpKWUkCbI/HEdvR4SXN40Uba4/Ptc=
-    default_scenario: "<%=scenario%>"
+  - secure: MxndVJugIbNZOL/5Tqy9dBX1WQMSbIT4rjq+zByq3aURQ4w9DOuR4I6LD4rYuLtXnaBqE1m2ocAf5WuQ5uA0R/JwiDL688NpVoIAuHDXtUxoXbgX3uHRS6espQmMzs+4MuVkliXld4/68GQpKWUkCbI/HEdvR4SXN40Uba4/Ptc=
+  - default_scenario="<%=scenario%>"
+  - study_area="<%=study_area%>"

@@ -36,6 +36,9 @@ for (key in sc_studies$sc_key){ # key = 'alb'
   # publish draft branch
   push_branch('published')
   
+  # populate website
+  populate_website()
+  
   # p
   create_pages()
   

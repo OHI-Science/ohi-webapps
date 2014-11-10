@@ -144,8 +144,10 @@ create_pages <- function(){
   
   library(yaml)
   library(brew)
+  library(ohicore)
   
   # get results brew files from ohi-webapps
+  dir_brew = '~/github/ohi-webapps/results'
   
   # copy draft branch scenarios
   system('git checkout draft; git pull')
@@ -153,10 +155,16 @@ create_pages <- function(){
 
   # get default_scenario set by .travis.yml
   default_scenario = Sys.getenv('default_scenario')
-  if (default_scenario == ''){    
+  study_area       = Sys.getenv('study_area')
+  if (default_scenario == '' | study_area == ''){    
     # if not set, then running locally so read in yaml
-    travis_yaml = yaml.load_file('.travis.yml')
-    default_scenario = travis_yaml$env$global$default_scenario
+    travis_yaml = yaml.load_file('.travis.yml')    
+    for (var in travis_yaml$env$global){ # var = travis_yaml$env$global[[2]]
+      if (is.null(names(var))){
+        var_parts = str_trim(str_split(var, '=')[[1]])
+        assign(var_parts[1], str_replace_all(var_parts[2], '\"',''))
+      }
+    }
   }
   
   # copy published branch scenarios
@@ -177,7 +185,25 @@ create_pages <- function(){
     dirs_scenario = normalizePath(dirname(list.files(dir_data_branch, 'scores.csv', recursive=T, full.names=T)))
     for (dir_scenario in dirs_scenario){ # dir_scenario = dirs_scenario[1]
       
+      # scenario vars
       scenario = basename(dir_scenario)
+      rgns     = file.path(dir_scenario, 'scores.csv') %>% read.csv %>% select(region_id) %>% unique %>% getElement('region_id')
+      layers   = ohicore::Layers(file.path(dir_scenario, 'layers.csv'), file.path(dir_scenario, 'layers'))
+      conf     = ohicore::Conf(file.path(dir_scenario, 'conf'))
+      # region names, ordered by GLOBAL and alphabetical
+      rgns = rbind(
+        data.frame(
+          id    = 0, 
+          name  = 'GLOBAL',
+          title = study_area,
+          stringsAsFactors=F),
+        ohicore::SelectLayersData(layers, layers=conf$config$layer_region_labels, narrow=T) %>%
+          select(
+            id    = id_num, 
+            name  = val_chr) %>%
+          mutate(
+            title = name)  %>% 
+          arrange(title))
       
       # copy results: figures and tables
       dir_data_results  =  file.path(dir_data_branch, scenario, 'reports')
@@ -189,26 +215,14 @@ create_pages <- function(){
       dir_pages_md = ifelse(
         scenario == default_scenario, 
         dir_pages_branch, 
-        file.path(dir_pages_branch, scenario))
-      
-      for (f in )
-      
-      
-      
-      rgns = file.path(dir_scenario, 'scores.csv') %>% read.csv %>% select(region_id) %>% unique %>% getElement('region_id')
-      dir_results = 
-      
+        file.path(dir_pages_branch, scenario))      
+      for (f_brew in list.files(dir_brew, '.*\\.brew\\.md', full.names=T)){ # f_brew = list.files(dir_brew, '.*\\.brew\\.md', full.names=T)[4]
+        f_md = file.path(dir_pages_md, str_replace(basename(f_brew), fixed('.brew.md'), ''), 'index.md')
+        dir.create(dirname(f_md), showWarnings=F, recursive=T)
+        brew(f_brew, f_md)
+      }      
     }
-  }
-  
-    
-    
-  
-  }
-  brew()
-  Sys.getenv
-  
-  
+  }  
 }
 
 push_branch <- function(branch='draft'){  

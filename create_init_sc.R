@@ -2,6 +2,7 @@ stopifnot(exists('key'))
 i             = which(sc_studies$sc_key==key)
 sc            = sc_studies[i,]
 name          = sc$sc_name
+study_area    = name
 #  Country       = Countries[i](cntries[i], '_', ' ')
 #  country       = tolower(str_replace_all(cntries[i], ' ', '_')
 #  cntry         = tolower(as.character(subset(rgn_keys_gl, rgn_name==Country, rgn_key, drop=T)))  

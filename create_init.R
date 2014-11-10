@@ -10,6 +10,9 @@ library(brew)
 merge <- base::merge # override git2r::merge
 tags  <- shiny::tags # override git2r::tags, otherwise get "Error in tags$head : object of type 'closure' is not subsettable"
 
+#
+setwd('~/github/ohi-webapps') # setwd('~/github/clip-n-ship/alb')
+
 # vars
 # get paths based on host machine
 dir_neptune <- '/Volumes/data_edit'
