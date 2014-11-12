@@ -7,6 +7,7 @@ library(shinyapps)
 library(stringr)
 library(jsonlite)
 library(brew)
+library(yaml)
 merge <- base::merge # override git2r::merge
 tags  <- shiny::tags # override git2r::tags, otherwise get "Error in tags$head : object of type 'closure' is not subsettable"
 
@@ -27,7 +28,7 @@ csv_gl_rgn  <- sprintf('%s/ohiprep/Global/NCEAS-Regions_v2014/manual_output/sp_r
 sfx_global  <- 'gl2014'
 dw_year     <- 2014
 git_branch  <- 'master'
-tabs_hide   <- 'Calculate, Report' # , Compare'
+tabs_hide   <- c('Calculate','Report') # , Compare'
 commit_msg  <- "downweighted layers based on popn-inland25km, area-offshore, area-offshore3nm"
 redo_layers <- T
 redo_app    <- T

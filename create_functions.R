@@ -186,9 +186,7 @@ populate_draft_branch <- function(){
   for (f in setdiff(list.files(dir_repo, all.files=F), del_except)) unlink(file.path(dir_repo, f), recursive=T, force=T)
   
   # README
-  brew(
-    text='# Ocean Health Index for <%=name%> (<%=toupper(key)%>)\n\n[![](https://travis-ci.org/OHI-Science/<%=key%>/svg?branch=draft)](https://travis-ci.org/OHI-Science/<%=key%>)\n',
-    output='README.md')
+  brew(sprintf('%s/ohi-webapps/README.brew.md', dir_github), 'README.md')
   
   # add Rstudio project files. cannabalized devtools::add_rstudio_project() which only works for full R packages.
   file.copy(system.file('templates/template.Rproj', package='devtools'), sprintf('%s.Rproj', key))
@@ -565,5 +563,73 @@ populate_draft_branch <- function(){
 
 populate_website <- function(){
   
+  # README
+  brew(sprintf('%s/ohi-webapps/README.brew.md', dir_github), 'README.md')
   
 }
+
+deploy_app <- function(key){ # key='ecu'
+  
+  source('create_init_sc.R')
+  
+  # delete old
+  dir_app_old <- sprintf('%s/git-annex/clip-n-ship/%s/shinyapps.io', dir_neptune, git_repo)
+  if file.exists(dir_app_old) unlink(dir_app_old, recursive=T)
+  
+  # cd into repo, checkout app
+  wd = getwd()
+  if (!file.exists(dir_repo)) system(sprintf('git clone %s %s', git_url, dir_repo))
+  setwd(dir_repo)
+  repo = repository(dir_repo)
+  remote_branches = sapply(branches(repo, 'remote'), function(x) str_split(x@name, '/')[[1]][2])
+  if (!'app' %in% remote_branches){
+    system('git checkout --orphan app')
+    system('git rm -rf .')
+  } else {
+    system('git checkout app')
+    system('rm -rf *')
+  }  
+  
+  # copy installed ohicore shiny app files
+  # good to have latest dev ohicore first: devtools::install_github('ohi-science/ohicore@dev') 
+  dir_ohicore_app = file.path(system.file(package='ohicore'), 'shiny_app')
+  shiny_files = list.files(dir_ohicore_app, recursive=T)  
+  for (f in shiny_files){ # f = shiny_files[1]
+    dir.create(dirname(f), showWarnings=F, recursive=T)
+    suppressWarnings(file.copy(file.path(dir_ohicore_app, f), f, overwrite=T, recursive=T, copy.mode=T, copy.date=T))
+  }
+    
+  # get commit version of ohicore app files
+  lns = readLines(file.path(dir_ohicore_app, '../DESCRIPTION'))
+  g = sapply(str_split(lns[grepl('^Github', lns)], ': '), function(x) setNames(x[2], x[1]))
+  #ohicore_app_commit = sprintf('%s/%s@%s,%.7s', g[['GithubUsername']], g[['GithubRepo']], , g[['GithubSHA1']])
+  ohicore_app = list(ohicore_app=list(
+    git_owner  = g[['GithubUsername']],
+    git_repo   = g[['GithubRepo']],
+    git_branch = g[['GithubRef']],      
+    git_commit = g[['GithubSHA1']]))
+  
+  # write config
+  brew(file.path(dir_github, 'ohi-webapps/app.brew.yml'), 'app.yml')
+    
+  # add Rstudio project files. cannabalized devtools::add_rstudio_project() which only works for full R packages.
+  file.copy(system.file('templates/template.Rproj', package='devtools'), sprintf('%s.Rproj', key))
+  writeLines(c('.Rproj.user', '.Rhistory', '.RData', 'github', git_repo), '.gitignore')  
+  
+  # shiny::runApp()    # test app locally
+  
+  # clean up cloned / archived repos which get populated if testing app
+  unlink(git_repo, recursive=T, force=T)
+  unlink('github', recursive=T, force=T)
+  
+  # deploy
+  deployApp(appDir='.', appName=app_name, upload=T, launch.browser=T, lint=F)
+  
+  # push files to github app branch
+  system('git add -A; git commit -a -m "deployed app"')
+  push_branch('app')
+  
+  # restore wd
+  setwd(wd)
+}
+
