@@ -39,12 +39,12 @@ create_results <- function(res=72){
   suppressWarnings(require(ohicore))
   
   # ensure draft repo
-  system('git checkout draft')
+  system('git checkout draft --force')
   
-  # iterate through all scenarios (by finding layers.csv)
+  # iterate through all scenarios (by finding scores.csv)
   wd = getwd() # presumably in top level folder of repo containing scenario folders 
-  dirs_scenario = normalizePath(dirname(list.files('.', 'layers.csv', recursive=T, full.names=T)))
-  for (dir_scenario in dirs_scenario){ # dir_scenario = '~/github/clip-n-ship/alb/alb2014'
+  dirs_scenario = normalizePath(dirname(list.files('.', 'scores.csv', recursive=T, full.names=T)))
+  for (dir_scenario in dirs_scenario){ # dir_scenario = '~/github/clip-n-ship/alb/alb2014' # dir_scenario = dirs_scenario[1]
   
     # load scenario configuration, layers and scores
     setwd(dir_scenario)
@@ -128,7 +128,7 @@ create_results <- function(res=72){
       dev.off()
       #system(sprintf('convert -density 150x150 %s %s', fig_pdf, fig_png)) # imagemagick's convert
       
-      # table csv ---- 
+      # table csv ----
       scores %>% 
         filter(region_id == rgn_id) %>%
         select(goal_label, dimension_label, score) %>%
@@ -145,18 +145,29 @@ create_pages <- function(){
   library(yaml)
   library(brew)
   library(ohicore)
+  library(dplyr)
+  library(knitr)
+  library(stringr)
+  library(rmarkdown)
+  
+  # TODO: cd to proper dir whether local or on Travis
+  # setwd('~/github/clip-n-ship/ecu')
   
   # get results brew files from ohi-webapps
+  # TODO: clone ohi-webapps/results
   dir_brew = '~/github/ohi-webapps/results'
   
   # copy draft branch scenarios
-  system('git checkout draft; git pull')
-  system('rm -rf ~/tmp_draft; mkdir ~/tmp_draft; cp -R * ~/tmp_draft/.')
+  #system('git checkout draft; git pull')
+  #system('rm -rf ~/tmp_draft; mkdir ~/tmp_draft; cp -R * ~/tmp_draft/.')
 
   # get default_scenario set by .travis.yml
+  repo = repository(getwd())
+  checkout(repo, 'draft', force=T)  
+  default_branch   = Sys.getenv('default_branch')
   default_scenario = Sys.getenv('default_scenario')
   study_area       = Sys.getenv('study_area')
-  if (default_scenario == '' | study_area == ''){    
+  if (default_branch == '' | default_scenario == '' | study_area == ''){    
     # if not set, then running locally so read in yaml
     travis_yaml = yaml.load_file('.travis.yml')    
     for (var in travis_yaml$env$global){ # var = travis_yaml$env$global[[2]]
@@ -167,19 +178,33 @@ create_pages <- function(){
     }
   }
   
-  # copy published branch scenarios
-  system('git checkout published; git pull')
-  system('rm -rf ~/tmp_published; mkdir ~/tmp_published; cp -R * ~/tmp_published/.')
+  # archive branches
+  dir_archive <- '~/tmp_repo_archive'
+  unlink(dir_archive, recursive=T)
+  git_branches   = setdiff(sapply(git2r::branches(repo, flags='remote'), function(x) str_replace(x@name, 'origin/', '')), c('HEAD','gh-pages','app'))
+  branch_commits = list()
+  for (branch in git_branches){ # branch = 'published'
+    
+    checkout(repo, branch=branch, force=T)
+    pull(repo)
+    branch_commits[[branch]] = commits(repo)
+    
+    dir_branch = file.path(dir_archive, branch)    
+    files = list.files(dir_repo, recursive=T)
+    for (f in files){ # f = shiny_files[1]
+      dir.create(dirname(file.path(dir_branch, f)), showWarnings=F, recursive=T)
+      file.copy(file.path(dir_repo, f), file.path(dir_branch, f), overwrite = T, copy.mode=T, copy.date=T) # suppressWarnings)
+    }
+  }
   
   # switch to gh-pages branch
-  system('git checkout gh-pages')
+  checkout(repo, branch='gh-pages', force=T)
   
   # iterate over branches
-  for (branch in c('published','draft')){ # branch='published'
+  for (branch in git_branches){ # branch='draft'
     
     # per branch vars
-    dir_data_branch  = sprintf('~/tmp_%s', branch)
-    dir_pages_branch = c(published='.', draft='./draft')[[branch]]
+    dir_data_branch  = file.path(dir_archive, branch)
     
     # iterate through all scenarios (by finding scores.csv)
     dirs_scenario = normalizePath(dirname(list.files(dir_data_branch, 'scores.csv', recursive=T, full.names=T)))
@@ -210,19 +235,36 @@ create_pages <- function(){
       dir_pages_results =  file.path('results', branch, scenario)
       dir.create(dir_pages_results, showWarnings=F, recursive=T)
       file.copy(list.files(dir_data_results, full.names=T), dir_pages_results, recursive=T)
+
+      # get output dir for given branch/scenario
+      dir_pages_md = ifelse(
+        scenario == default_scenario & branch == default_branch, 
+        '.', 
+        file.path(branch, scenario))      
+      
+      # render Rmarkdown files and prepend with frontmatter, ie for Goal equations
+      for (f_rmd in list.files(dir_brew, '.*\\.html\\.Rmd', full.names=T)){ # f_rmd = list.files(dir_brew, '.*\\.html\\.Rmd', full.names=T)[1]
+        f_out_html = file.path(dir_pages_md, str_replace(basename(f_rmd), fixed('.html.Rmd'), ''), 'index.html')
+        f_in_front = sprintf('%s/%s_frontmatter.brew.html', dir_brew, str_replace(basename(f_rmd), fixed('.html.Rmd'), ''))
+        stopifnot(file.exists(f_in_front))
+        dir.create(dirname(f_out_html), showWarnings=F, recursive=T)
+        brew(f_in_front, f_out_html)
+        f_tmp = tempfile()
+        render(f_rmd, 'html_document', output_file=f_tmp)
+        cat(readLines(f_tmp), file=f_out_html, append=T)
+        unlink(f_tmp)
+      }
       
       # brew markdown files
-      dir_pages_md = ifelse(
-        scenario == default_scenario, 
-        dir_pages_branch, 
-        file.path(dir_pages_branch, scenario))      
-      for (f_brew in list.files(dir_brew, '.*\\.brew\\.md', full.names=T)){ # f_brew = list.files(dir_brew, '.*\\.brew\\.md', full.names=T)[4]
+      for (f_brew in list.files(dir_brew, '.*\\.brew\\.md', full.names=T)){ # f_brew = list.files(dir_brew, '.*\\.brew\\.md', full.names=T)[1]
         f_md = file.path(dir_pages_md, str_replace(basename(f_brew), fixed('.brew.md'), ''), 'index.md')
         dir.create(dirname(f_md), showWarnings=F, recursive=T)
+        print(f_md)
         brew(f_brew, f_md)
       }      
     }
-  }  
+  } # end for (branch in git_branches)
+  
 }
 
 push_branch <- function(branch='draft'){  
@@ -231,6 +273,7 @@ push_branch <- function(branch='draft'){
   if (all(Sys.getenv('GH_TOKEN') > '', Sys.getenv('TRAVIS_COMMIT') > '', Sys.getenv('TRAVIS_REPO_SLUG') > '')){
     
     # working on travis-ci
+    system('git add -A')
     system('git commit -a -m "auto-calculate from commit ${TRAVIS_COMMIT}\n[ci skip]"')
     system('git remote set-url origin "https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git"')
     system(sprintf('git push origin HEAD:%s', branch))
@@ -238,9 +281,9 @@ push_branch <- function(branch='draft'){
   } else {
     
     # working locally, gh_token set in create_init.R, repo_name set in create_init_sc.Rs
-    owner_repo = sprintf('ohi-science/%s', repo_name)
+    system('git add -A')
     system('git commit -a -m "auto-calculate from commit `git rev-parse HEAD`\n[ci skip]"')
-    system(sprintf('git remote set-url origin "https://%s@github.com/%s.git"', gh_token, owner_repo))
+    system(sprintf('git remote set-url origin "https://%s@github.com/%s.git"', gh_token, git_slug))
     system(sprintf('git push origin HEAD:%s', branch))
     
   }

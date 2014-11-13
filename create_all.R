@@ -6,7 +6,7 @@ source('create_functions.R')
 source('ohi-travis-functions.R')
 
 # loop through countries
-for (key in sc_studies$sc_key){ # key = 'alb'
+for (key in sc_studies$sc_key){ # key = 'ecu'
   
   # set vars by subcountry key
   source('create_init_sc.R')
@@ -15,8 +15,13 @@ for (key in sc_studies$sc_key){ # key = 'alb'
   #create_gh_repo(key)
   
   # populate draft branch
-  populate_draft_branch()
+  #populate_draft_branch()
 
+  # move into draft branch
+  setwd(dir_repo)
+  repo=repository(dir_repo)
+  checkout(repo, 'draft')
+  
   # calculate_scores
   res = try(calculate_scores())
   # if problem calculating, log problem and move on to next subcountry key
@@ -42,16 +47,14 @@ for (key in sc_studies$sc_key){ # key = 'alb'
   # create pages based on results
   create_pages()
 
-  # install latest ohicore, with DESCRPTION having commit etc
+  # install latest ohicore, with DESCRIPTION having commit etc to add to app
   #devtools::install_github('ohi-science/ohicore@dev')
   
   # deploy app
-  deploy_app
+  deploy_app()
   
 
-# 
-#   } # end redo_app
-# } # end for (key in keys)
+} # end for (key in keys)
 # 
 # y = y %>%
 #   select(Country, init_app, status, url_github_repo, url_shiny_app, error) %>%

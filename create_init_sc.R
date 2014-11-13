@@ -19,13 +19,14 @@ pages_url     = sprintf('http://ohi-science.org/%s', git_repo)
 dir_repo      = file.path(dir_repos, repo_name)
 #  scenario_old  = 'subcountry2014'
 scenario      = 'subcountry2014' # sprintf('%s2014', key)
-app_default_scenario = scenario
-app_default_branch   = 'published'
+default_scenario = scenario
+default_branch   = 'published'
 #  dir_ap_old    = file.path(dir_annex, cntries[i], 'shinyapps.io')
 dir_annex_sc  = file.path(dir_annex, key)
 app_name      = sprintf('%s_app', key)
 csv_pop_inland25km = file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'layers/mar_coastalpopn_inland25km_lyr.csv')
 # dir_annex_old  = str_replace_all(Country, ' ', '_')
+study_area = subset(sc_studies, sc_key==key, sc_name, drop=T)
 
 message(sprintf('\n%03d of %d: %s [%s] -- %s', i, nrow(sc_studies), name, key, format(Sys.time(), '%X')))    
 stopifnot(!is.na(key))

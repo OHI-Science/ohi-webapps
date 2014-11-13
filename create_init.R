@@ -39,7 +39,8 @@ fxn_swap    <- c(
 goal_swap   <- list(
   'LIV' = list(preindex_function="LIV_ECO(layers, subgoal='LIV')"),
   'ECO' = list(preindex_function="LIV_ECO(layers, subgoal='ECO')"))
-travis_yaml_brew <- sprintf('%s/ohi-webapps/travis.brew.yml', dir_github)
+travis_draft_yaml_brew <- sprintf('%s/ohi-webapps/travis_draft.brew.yml', dir_github)
+travis_pages_yaml_brew <- sprintf('%s/ohi-webapps/travis_gh-pages.brew.yml', dir_github)
 
 # load ohicore
 library(ohicore) # devtools::load_all(dir_ohicore)

@@ -557,7 +557,7 @@ populate_draft_branch <- function(){
   write_shortcuts('.', os_files=0)
   
   # add travis.yml file
-  brew(travis_yaml_brew, '.travis.yml')
+  brew(travis_draft_yaml_brew, '.travis.yml')
   
 }
 
@@ -565,6 +565,12 @@ populate_website <- function(){
   
   # README
   brew(sprintf('%s/ohi-webapps/README.brew.md', dir_github), 'README.md')
+  
+  # TODO: copy ecu/gh-pages, brew template pages and store in ohi-webapps/gh-pages
+  
+  # add Rstudio project files, plus _site to ignore if testing with local jekyll serve --baseurl ''
+  file.copy(system.file('templates/template.Rproj', package='devtools'), sprintf('%s.Rproj', key))
+  writeLines(c('.Rproj.user', '.Rhistory', '.RData', '_site','_asset_bundler_cache','.sass','.sass-cache','.DS_Store'), '.gitignore')  
   
 }
 
@@ -574,7 +580,7 @@ deploy_app <- function(key){ # key='ecu'
   
   # delete old
   dir_app_old <- sprintf('%s/git-annex/clip-n-ship/%s/shinyapps.io', dir_neptune, git_repo)
-  if file.exists(dir_app_old) unlink(dir_app_old, recursive=T)
+  unlink(dir_app_old, recursive=T)
   
   # cd into repo, checkout app
   wd = getwd()
