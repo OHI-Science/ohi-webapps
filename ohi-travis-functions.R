@@ -5,6 +5,7 @@ calculate_scores <- function(){
   suppressWarnings(require(ohicore))
 
   # ensure on draft repo
+  library(git2r)
   repo = repository('.')
   checkout(repo, 'draft')
   
