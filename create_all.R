@@ -17,10 +17,12 @@ for (key in sc_studies$sc_key){ # key = 'ecu'
   # populate draft branch
   #populate_draft_branch()
 
+  # push draft branch
+  push_branch('draft')
+  
   # move into draft branch
   setwd(dir_repo)
-  repo=repository(dir_repo)
-  checkout(repo, 'draft')
+  system('git checkout draft --force')
   
   # calculate_scores
   res = try(calculate_scores())
@@ -42,11 +44,15 @@ for (key in sc_studies$sc_key){ # key = 'ecu'
   push_branch('published')
   
   # populate website
-  populate_website()
+  #populate_website()
   
   # create pages based on results
   create_pages()
 
+  
+  # publish draft branch
+  # TODO: push_branch('gh-pages') BAD: currently pushing draft to gh-pages
+  
   # install latest ohicore, with DESCRIPTION having commit etc to add to app
   #devtools::install_github('ohi-science/ohicore@dev')
   

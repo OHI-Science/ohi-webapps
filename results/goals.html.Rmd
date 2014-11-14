@@ -1,3 +1,12 @@
+---
+title: ""
+output:
+  html_document:
+    self_contained: false
+---
+
+{% include_relative branch_scenario_navbar.html %}
+
 ## Food Provision: Fisheries
 Amount of sustainable wild-caught seafood compared to the max sustainable
 

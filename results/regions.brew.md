@@ -1,12 +1,13 @@
 ---
 layout: article
-title: "Layers"
-excerpt: "OHI layers for <%=study_area%>"
+title: "Regions"
+excerpt: "OHI regions for <%=study_area%>"
 share: false
 ads: false
-branch: <%=branch%>
-scenario: <%=scenario%>
+branch_scenario: <%=branch%>/<%=scenario%>
 toc: true
 ---
 
-<% read.csv('layers.csv') -%>
+<%= branch_scenario_navbar %>
+
+<script src="https://embed.github.com/view/geojson/<%=git_owner%>/<%=git_repo%>/<%=branch%>/<%=scenario%>/spatial/regions_gcs.geojson"></script>

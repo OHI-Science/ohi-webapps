@@ -161,6 +161,8 @@ rename_branches <- function(key, verbosity=1){ # key='ecu'
 
 populate_draft_branch <- function(){
   
+  wd = getwd()
+  
   # clone repo
   setwd(dir_repos)
   unlink(dir_repo, recursive=T, force=T)
@@ -193,7 +195,7 @@ populate_draft_branch <- function(){
   writeLines(c('.Rproj.user', '.Rhistory', '.RData'), '.gitignore')  
   
   # create and cd to scenario
-  dir_scenario = file.path(dir_repo, scenario)
+  dir_scenario = file.path(dir_repo, basename(default_branch_scenario))
   dir.create(dir_scenario, showWarnings=F)
   setwd(dir_scenario)
   
@@ -265,7 +267,7 @@ populate_draft_branch <- function(){
     as.data.frame()
   
   # bind single cntry_key
-  if (length(unique(sc_cntry$gl_cntry_key)) > 1){
+  if (length(unique(sc_cntry$cntry_key)) > 1){
     
     # extract non-na rows from lookup
     d_mcntry = gl_sc_mcntry %>% filter(gl_rgn_name == name & !is.na(sc_rgn_name))
@@ -325,6 +327,14 @@ populate_draft_branch <- function(){
   
   # drop cntry_* layers
   lyrs_sc = filter(lyrs_sc, !grepl('^cntry_', layer))
+  
+  # drop LE layers no longer being used
+  lyrs_le_rm = c(
+    'le_gdp_pc_ppp','le_jobs_cur_adj_value','le_jobs_cur_base_value','le_jobs_ref_adj_value','le_jobs_ref_base_value',
+    'le_rev_cur_adj_value','le_rev_cur_base_value','le_rev_cur_base_value','le_rev_ref_adj_value','le_rev_ref_base_value',
+    'le_rev_sector_year','le_revenue_adj','le_wage_cur_adj_value','le_wage_cur_base_value','le_wage_ref_adj_value',
+    'le_wage_ref_base_value','liveco_status','liveco_trend')
+  lyrs_sc = filter(lyrs_sc, !layer %in% lyrs_le_rm)
   
   # write layers data files
   for (j in 1:nrow(lyrs_sc)){ # i=56
@@ -559,6 +569,7 @@ populate_draft_branch <- function(){
   # add travis.yml file
   brew(travis_draft_yaml_brew, '.travis.yml')
   
+  setwd(wd)  
 }
 
 populate_website <- function(){

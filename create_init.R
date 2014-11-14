@@ -21,6 +21,7 @@ dir_github  <- '~/github'
 
 dir_annex   <- sprintf('%s/git-annex/clip-n-ship', dir_neptune) # 'N:/git-annex/clip-n-ship/data'
 dir_repos   <- sprintf('%s/clip-n-ship', dir_github)
+dir_errors  <- sprintf('%s/clip-n-ship/_errors', dir_github)
 dir_ohicore <- sprintf('%s/ohicore', dir_github)
 dir_global  <- sprintf('%s/ohi-global/eez2014', dir_github)
 csv_mcntry  <- sprintf('%s/ohi-webapps/tmp/gl-rgn_multiple-cntry_sc-rgn_manual.csv', dir_github)
