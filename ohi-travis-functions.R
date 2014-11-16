@@ -42,6 +42,7 @@ calculate_scores <- function(){
 
 create_results <- function(res=72){
   
+  library(methods)
   library(ohicore)
   library(tidyr)
   library(dplyr)
@@ -49,14 +50,19 @@ create_results <- function(res=72){
   # load required libraries
   suppressWarnings(require(ohicore))
   
+  # get env
+  for (v in c('study_area','default_branch_scenario')){
+    if (!exists(v)) assign(v, Sys.getenv(v))
+  }
+  
   # ensure draft repo
   system('git checkout draft --force')
   
   # iterate through all scenarios (by finding scores.csv)
-  wd = getwd() # presumably in top level folder of repo containing scenario folders 
+  wd = getwd() # presumably in top level folder of repo containing scenario folders
   dirs_scenario = normalizePath(dirname(list.files('.', 'scores.csv', recursive=T, full.names=T)))
   for (dir_scenario in dirs_scenario){ # dir_scenario = '~/github/clip-n-ship/alb/alb2014' # dir_scenario = dirs_scenario[1]
-  
+    
     # load scenario configuration, layers and scores
     setwd(dir_scenario)
     conf = Conf('conf')
@@ -79,13 +85,13 @@ create_results <- function(res=72){
     # region names, ordered by GLOBAL and alphabetical
     rgn_names = rbind(
       data.frame(
-        region_id=0, 
+        region_id=0,
         rgn_name='GLOBAL',
         rgn_title=study_area),
       SelectLayersData(layers, layers=conf$config$layer_region_labels, narrow=T) %>%
         select(
-          region_id=id_num, 
-          rgn_name=val_chr)  %>% 
+          region_id=id_num,
+          rgn_name=val_chr)  %>%
         mutate(
           rgn_title=rgn_name) %>%
         arrange(rgn_name))
@@ -95,7 +101,7 @@ create_results <- function(res=72){
     # use factors to sort by goal and dimension in scores
     conf$goals = arrange(conf$goals, order_hierarchy)
     scores$goal_label = factor(
-      scores$goal, 
+      scores$goal,
       levels = c('Index', conf$goals$goal),
       labels = c('Index', ifelse(!is.na(conf$goals$parent),
                                  sprintf('. %s', conf$goals$name),
@@ -108,21 +114,21 @@ create_results <- function(res=72){
     
     # loop through regions
     for (rgn_id in unique(scores$region_id)){ # rgn_id=0
-
+      
       # rgn vars
       rgn_name    = subset(rgn_names, region_id==rgn_id, rgn_name, drop=T)
       flower_png  = sprintf('reports/figures/flower_%s.png', gsub(' ','_', rgn_name))
       scores_csv  = sprintf('reports/tables/scores_%s.csv', gsub(' ','_', rgn_name))
-            
+      
       # create directories, if needed
       dir.create(dirname(flower_png), showWarnings=F)
       dir.create(dirname(scores_csv), showWarnings=F)
-
-      # region scores    
+      
+      # region scores
       g_x = with(subset(scores, dimension=='score' & region_id==rgn_id ),
                  setNames(score, goal))[names(wts)]
       x   = subset(scores, dimension=='score' & region_id==rgn_id & goal == 'Index', score, drop=T)
-            
+      
       # flower plot ----
       png(flower_png, width=res*7, height=res*7)
       PlotFlower(
@@ -133,12 +139,12 @@ create_results <- function(res=72){
           g_x),
         widths=wts,
         fill.col=ifelse(
-          is.na(g_x), 
-          'grey80', 
+          is.na(g_x),
+          'grey80',
           cols.goals.all[names(wts)]),
         labels  =ifelse(
-          is.na(g_x), 
-          paste(goal_labels, '-', sep='\n'), 
+          is.na(g_x),
+          paste(goal_labels, '-', sep='\n'),
           paste(goal_labels, round(x), sep='\n')),
         center=round(x),
         max.length = 100, disk=0.4, label.cex=0.9, label.offset=0.155, cex=2.2, cex.main=2.5)
@@ -146,7 +152,7 @@ create_results <- function(res=72){
       #system(sprintf('convert -density 150x150 %s %s', fig_pdf, fig_png)) # imagemagick's convert
       
       # table csv ----
-      scores %>% 
+      scores %>%
         filter(region_id == rgn_id) %>%
         select(goal_label, dimension_label, score) %>%
         spread(dimension_label, score) %>%

@@ -1,5 +1,18 @@
 language: c
 
+branches:
+  only:
+    - draft
+
+env:
+  global:
+  - secure: MxndVJugIbNZOL/5Tqy9dBX1WQMSbIT4rjq+zByq3aURQ4w9DOuR4I6LD4rYuLtXnaBqE1m2ocAf5WuQ5uA0R/JwiDL688NpVoIAuHDXtUxoXbgX3uHRS6espQmMzs+4MuVkliXld4/68GQpKWUkCbI/HEdvR4SXN40Uba4/Ptc=
+  - default_branch_scenario="<%=default_branch_scenario%>"
+  - study_area="<%=study_area%>"
+
+matrix:
+  fast_finish: true # finish at first failure
+
 before_install:
 - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
 - curl -OL http://raw.github.com/OHI-Science/ohi-webapps/master/ohi-travis-functions.R
@@ -18,11 +31,11 @@ install:
 
 script:
 # execute as a sequence, so if any fail, none of the subsequent commands are executed
-- Rscript ohi-travis-functions.R calculate_scores && \
-  Rscript ohi-travis-functions.R create_results && \
-  Rscript ohi-travis-functions.R push_branch draft && \
-  Rscript ohi-travis-functions.R push_branch published && \
-  Rscript ohi-travis-functions.R create_pages && \
+- Rscript ohi-travis-functions.R calculate_scores && 
+  Rscript ohi-travis-functions.R create_results && 
+  Rscript ohi-travis-functions.R push_branch draft && 
+  Rscript ohi-travis-functions.R push_branch published && 
+  Rscript ohi-travis-functions.R create_pages && 
   Rscript ohi-travis-functions.R push_branch gh-pages
 
 after_failure:
@@ -34,16 +47,3 @@ notifications:
     - bbest@nceas.ucsb.edu
     on_success: change
     on_failure: always
-
-matrix:
-  fast_finish: true # finish at first failure
-
-branches:
-  only:
-    - draft
-
-env:
-  global:
-  - secure: MxndVJugIbNZOL/5Tqy9dBX1WQMSbIT4rjq+zByq3aURQ4w9DOuR4I6LD4rYuLtXnaBqE1m2ocAf5WuQ5uA0R/JwiDL688NpVoIAuHDXtUxoXbgX3uHRS6espQmMzs+4MuVkliXld4/68GQpKWUkCbI/HEdvR4SXN40Uba4/Ptc=
-  - default_branch_scenario="<%=default_branch_scenario%>"
-  - study_area="<%=study_area%>"
