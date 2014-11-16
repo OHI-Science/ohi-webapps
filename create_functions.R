@@ -574,11 +574,12 @@ populate_draft_branch <- function(){
 
 populate_website <- function(){
   
-  # README
-  brew(sprintf('%s/ohi-webapps/README.brew.md', dir_github), 'README.md')
-  
+  # TODO: enxure on gh-pages branch and exists
   # TODO: copy ecu/gh-pages, brew template pages and store in ohi-webapps/gh-pages
   
+  # README
+  brew(sprintf('%s/ohi-webapps/README.brew.md', dir_github), 'README.md')
+
   # add Rstudio project files, plus _site to ignore if testing with local jekyll serve --baseurl ''
   file.copy(system.file('templates/template.Rproj', package='devtools'), sprintf('%s.Rproj', key))
   writeLines(c('.Rproj.user', '.Rhistory', '.RData', '_site','_asset_bundler_cache','.sass','.sass-cache','.DS_Store'), '.gitignore')  

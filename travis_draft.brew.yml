@@ -9,17 +9,21 @@ before_install:
 install:
 - ./travis-tool.sh install_r zoo
 - ./travis-tool.sh install_r psych
-- ./travis-tool.sh install_r git2r
+- ./travis-tool.sh install_r brew
+- ./travis-tool.sh install_github ropensci/git2r
 - ./travis-tool.sh install_github ohi-science/rCharts
 - ./travis-tool.sh install_github ohi-science/ohicore@dev # @master or @2f7a3d7 to specify by commit (https://github.com/OHI-Science/ohicore/commits/master)
+- git config --global user.email "bbest@nceas.ucsb.edu"
+- git config --global user.name "Ben Best"
 
 script:
-- Rscript ohi-travis-functions.R calculate_scores
-- Rscript ohi-travis-functions.R create_results
-- Rscript ohi-travis-functions.R push_branch draft
-- Rscript ohi-travis-functions.R push_branch published
-- Rscript ohi-travis-functions.R create_pages
-- Rscript ohi-travis-functions.R push_branch gh-pages
+# execute as a sequence, so if any fail, none of the subsequent commands are executed
+- Rscript ohi-travis-functions.R calculate_scores && \
+  Rscript ohi-travis-functions.R create_results && \
+  Rscript ohi-travis-functions.R push_branch draft && \
+  Rscript ohi-travis-functions.R push_branch published && \
+  Rscript ohi-travis-functions.R create_pages && \
+  Rscript ohi-travis-functions.R push_branch gh-pages
 
 after_failure:
 - ./travis-tool.sh dump_logs

@@ -16,7 +16,7 @@ LIV_ECO = function(layers, subgoal){
     select(rgn_id = id_num, year, jobs_all = val_num)
   
   le_unemployment = SelectLayersData(layers, layers='le_unemployment') %>%
-    select(rgn_id = id_num, year, percent = val_num)
+    select(rgn_id = id_num, year, pct_unemployed = val_num)
   
   # debug
   #     le_gdp            = read.csv('eez2014/layers/le_gdp.csv')
@@ -34,7 +34,7 @@ LIV_ECO = function(layers, subgoal){
   # calculate employment counts
   le_employed = le_workforce_size %>%
     left_join(le_unemployment, by = c('rgn_id', 'year')) %>%
-    mutate(proportion_employed = (100 - percent) / 100, 
+    mutate(proportion_employed = (100 - pct_unemployed) / 100, 
            employed            = jobs_all * proportion_employed)
   
   # reworded from SOM p.26-27
@@ -45,19 +45,15 @@ LIV_ECO = function(layers, subgoal){
   #livelihoods and economies (L&E) on short time scales, allowing for decadal or generational shifts in what people 
   #want and expect for coastal L&E. The most recent year c must be 2000 or later in order for the data to be included.
   
-  liv = 
+  liv =
     # adjust jobs
     le_jobs %>%
     left_join(multipliers_jobs, by = 'sector') %>%
     mutate(jobs_mult = jobs * multiplier) %>%  # adjust jobs by multipliers
     left_join(le_employed, by= c('rgn_id', 'year')) %>%
-    mutate(jobs_adj = jobs_mult / proportion_employed) %>% # adjust jobs by proportion employed
-    select(rgn_id, year, sector, jobs_adj) %>%
-    
-    left_join(le_wages) %>%      
-    left_join(le_jobs, by = c('rgn_id', 'year', 'sector')) %>% # left_join le_jobs and le_wages
+    mutate(jobs_adj = jobs_mult * proportion_employed) %>% # adjust jobs by proportion employed
+    left_join(le_wages, by=c('rgn_id','year','sector')) %>%
     arrange(year, sector, rgn_id)
-  
   
   ## LIV calculations
   
@@ -74,12 +70,13 @@ LIV_ECO = function(layers, subgoal){
       # across sectors, wages are averaged
       wages_avg = mean(wage_usd, na.rm=T)) %>%
     group_by(rgn_id) %>%
+    arrange(rgn_id, year) %>%
     mutate(
       # reference for jobs [j]: value in the current year (or most recent year) [c], relative to the value in a recent moving reference period [r] defined as 5 years prior to [c]
-      jobs_sum_first  = first(jobs_sum , order_by=year),
+      jobs_sum_first  = first(jobs_sum),                     # note:  `first(jobs_sum, order_by=year)` caused segfault crash on Linux with dplyr 0.3.0.2, so using arrange above instead
       # original reference for wages [w]: target value for average annual wages is the highest value observed across all reporting units
       # new reference for wages [w]: value in the current year (or most recent year) [c], relative to the value in a recent moving reference period [r] defined as 5 years prior to [c]
-      wages_avg_first = first(wages_avg, order_by=year)) %>%
+      wages_avg_first = first(wages_avg)) %>% # note:  `first(jobs_sum, order_by=year)` caused segfault crash on Linux with dplyr 0.3.0.2, so using arrange above instead
     # calculate final scores
     ungroup() %>%
     mutate(
