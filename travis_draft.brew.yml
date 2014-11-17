@@ -18,10 +18,12 @@ before_install:
 - curl -OL http://raw.github.com/OHI-Science/ohi-webapps/master/ohi-travis-functions.R
 - chmod 755 ./travis-tool.sh
 - ./travis-tool.sh bootstrap
+- sudo apt-get install pandoc
 
 install:
 - ./travis-tool.sh install_r zoo
 - ./travis-tool.sh install_r psych
+- ./travis-tool.sh install_r tidyr
 - ./travis-tool.sh install_r brew
 - ./travis-tool.sh install_r rmarkdown
 - ./travis-tool.sh install_r httr

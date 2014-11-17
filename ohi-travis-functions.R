@@ -217,12 +217,11 @@ create_pages <- function(){
   dir.create(dir_archive, recursive=T, showWarnings=F)
   unlink(dir_archive, recursive=T)
   git_branches   = setdiff(sapply(git2r::branches(repo, flags='remote'), function(x) str_replace(x@name, 'origin/', '')), c('HEAD','gh-pages','app'))
-  branch_commits = list()
+  message('git_branches', git_branches)
   for (branch in git_branches){ # branch = 'published'
     
-    checkout(repo, branch=branch, force=T)
+    checkout(repo, branch, force=T)
     pull(repo)
-    branch_commits[[branch]] = commits(repo)
     
     dir_branch = file.path(dir_archive, branch)    
     files = list.files(dir_repo, recursive=T)
@@ -233,7 +232,7 @@ create_pages <- function(){
   }
   
   # switch to gh-pages branch
-  checkout(repo, branch='gh-pages', force=T)
+  checkout(repo, 'gh-pages', force=T)
   
   # get list of all branch/scenarios and directory to output
   branch_scenarios = dirname(list.files(dir_archive, 'scores.csv', recursive=T))
