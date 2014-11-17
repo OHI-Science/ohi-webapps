@@ -209,7 +209,7 @@ create_pages <- function(){
   for (f in c('goals_frontmatter.brew.html','goals.html.Rmd','layers.brew.md','navbar.brew.html','regions.brew.md','scores.brew.md')){
     url_in = file.path('https://raw.githubusercontent.com/OHI-Science/ohi-webapps/master/results', f)
     f_out  = file.path(dir_brew, f)
-    writeBin(content(GET(url_in)), f_out)
+    writeBin(httr::content(GET(url_in)), f_out)
   }
     
   # archive branches
