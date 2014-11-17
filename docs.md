@@ -33,18 +33,3 @@ GitHub stores all data files and scripts for your OHI+ assessment in a repositor
 1. [**published**](https://github.com/{{ site.git_slug }}/tree/published) branch is a vetted copy of the draft branch, not for direct editing.
 
 ...scenarios
-
-
-## Regions within {{ site.study_area }}
-
-Template data for {{ site.study_area }} has the following subcountry regions, each with a unique ID:
-
-{% capture regions_csv %}regions_{{ site.default_branch_scenario | replace:'/','_' }}{% endcapture %}
-{% assign regions = site.data[regions_csv] %}
-
-| ID               | NAME            |
-|-----------------:|:----------------|
-{% for rgn in regions %}| {{ rgn.region_id }} | {{ rgn.rgn_title }} |
-{% endfor %}
-
-The entire study area ({{ site.study_area }}) has a special region ID of 0.  IDs for subcountry regions were assigned geographically by increasing longitude. Exclusive economic zones (EEZs) were identified by [www.marineregions.org/](http://www.marineregions.org/) and the largest subcountry regions were identified by [gadm.org](http://www.gadm.org). Region boundaries were extended offshore to divide the EEZ of {{ site.study_area }} offshore regions. It is possible to use different regions than the ones provided here: see [ohi-science.org/pages/create_regions.html](http://ohi-science.org/pages/create_regions.html) for more details.  
