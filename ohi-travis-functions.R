@@ -176,22 +176,12 @@ create_pages <- function(){
   library(git2r)
   merge = base::merge
   diff  = base::diff
-  # TODO: cd to proper dir whether local or on Travis
-  # setwd('~/github/clip-n-ship/ecu')  
-  
-  # get results brew files from ohi-webapps
-  
-  # copy draft branch scenarios
-  #system('git checkout draft; git pull')
-  #system('rm -rf ~/tmp_draft; mkdir ~/tmp_draft; cp -R * ~/tmp_draft/.')
-
-  # get default_branch_scenario set by .travis.yml
-  dir_repo = getwd()
-  repo = repository(getwd())
-  checkout(repo, 'draft', force=T)  
+        
+  # assume in draft branch, get default_branch_scenario set by .travis.yml
+  wd = getwd()
   default_branch_scenario  = Sys.getenv('default_branch_scenario')
   study_area               = Sys.getenv('study_area')
-  if (default_branch_scenario == '' | study_area == ''){    
+  if (default_branch_scenario == '' | study_area == ''){        
     # if not set, then running locally so read in yaml
     travis_yaml = yaml.load_file('.travis.yml')    
     for (var in travis_yaml$env$global){ # var = travis_yaml$env$global[[2]]
@@ -200,39 +190,49 @@ create_pages <- function(){
         assign(var_parts[1], str_replace_all(var_parts[2], '\"',''))
       }
     }
-  }
+  } else {
+    git_slug  = Sys.getenv('TRAVIS_REPO_SLUG')
+    git_owner = str_split(git_slug, '/')[[1]][1]
+    git_repo  = str_split(git_slug, '/')[[1]][2]
+    git_url   = sprintf('https://github.com/%s', git_slug)    
+  }  
   
   # get template brew files
   # update vector: sprintf("'%s'", paste(list.files('~/github/ohi-webapps/results'), collapse="','"))
-  dir_brew   = '~/tmp_ohi-webapps'
+  dir_brew   = '~/tmp/ohi-webapps'
   dir.create(dir_brew, recursive=T, showWarnings=F)
   for (f in c('goals_frontmatter.brew.html','goals.html.Rmd','layers.brew.md','navbar.brew.html','regions.brew.md','scores.brew.md')){
     url_in = file.path('https://raw.githubusercontent.com/OHI-Science/ohi-webapps/master/results', f)
     f_out  = file.path(dir_brew, f)
     writeBin(httr::content(GET(url_in)), f_out)
   }
-    
+  
+  # clone repo with all branches
+  dir_repo = sprintf('~/tmp/%s', git_repo)  
+  dir.create(dir_repo, recursive=T, showWarnings=F)
+  unlink(dir_repo, recursive=T)
+  repo = clone(git_url, normalizePath(dir_repo, mustWork=F))
+  setwd(dir_repo)
+  
   # archive branches
-  dir_archive <- '~/tmp/repo_archive'
-  dir.create(dir_archive, recursive=T, showWarnings=F)
+  dir_archive = sprintf('~/tmp/%s_archive', git_repo)
+  dir.create(dir_archive, recursive=T, showWarnings=F)  
   unlink(dir_archive, recursive=T)
   git_branches   = setdiff(sapply(git2r::branches(repo, flags='remote'), function(x) str_replace(x@name, 'origin/', '')), c('HEAD','gh-pages','app'))
-  message('git_branches', git_branches)
-  for (branch in git_branches){ # branch = 'published'
-    
+  branch_commits = list()
+  for (branch in git_branches){ # branch = 'published'        
     checkout(repo, branch, force=T)
-    pull(repo)
-    
+    branch_commits[[branch]] = commits(repo)
     dir_branch = file.path(dir_archive, branch)    
     files = list.files(dir_repo, recursive=T)
     for (f in files){ # f = shiny_files[1]
       dir.create(dirname(file.path(dir_branch, f)), showWarnings=F, recursive=T)
       file.copy(file.path(dir_repo, f), file.path(dir_branch, f), overwrite = T, copy.mode=T, copy.date=T) # suppressWarnings)
-    }
+    }    
   }
   
   # switch to gh-pages branch
-  checkout(repo, 'gh-pages', force=T)
+  checkout(repo, branch='gh-pages', force=T)
   
   # get list of all branch/scenarios and directory to output
   branch_scenarios = dirname(list.files(dir_archive, 'scores.csv', recursive=T))
@@ -267,7 +267,7 @@ create_pages <- function(){
         mutate(
           title = name)  %>% 
         arrange(title))
-      
+    
     # copy results: figures and tables
     dir_data_results  =  file.path(dir_archive, branch_scenario, 'reports')
     dir_pages_results =  file.path('results', branch_scenario)
@@ -283,51 +283,57 @@ create_pages <- function(){
       cat(sprintf('%s -> %s\n', f_rmd, f_out_html))
       
       dir.create(dirname(navbar_html), showWarnings=F, recursive=T)
-      brew(file.path(dir_brew, 'navbar.brew.html'), navbar_html)
-
+      suppressWarnings(brew(file.path(dir_brew, 'navbar.brew.html'), navbar_html))
+      
       f_in_front = sprintf('%s/%s_frontmatter.brew.html', dir_brew, str_replace(basename(f_rmd), fixed('.html.Rmd'), ''))
       stopifnot(file.exists(f_in_front))
       dir.create(dirname(f_out_html), showWarnings=F, recursive=T)
-      brew(f_in_front, f_out_html)
+      suppressWarnings(brew(f_in_front, f_out_html))
       f_tmp = tempfile()
       render(f_rmd, 'html_document', output_file=f_tmp)
-      cat(readLines(f_tmp), file=f_out_html, append=T)
+      cat(suppressWarnings(readLines(f_tmp)), file=f_out_html, append=T)
       unlink(f_tmp)
     }
     
     # brew markdown files
     for (f_brew in list.files(dir_brew, '.*\\.brew\\.md', full.names=T)){ # f_brew = list.files(dir_brew, '.*\\.brew\\.md', full.names=T)[1]
       section = str_replace(basename(f_brew), fixed('.brew.md'), '')
-      branch_scenario_navbar = utils::capture.output({ brew(file.path(dir_brew, 'navbar.brew.html')) })
+      branch_scenario_navbar = utils::capture.output({ suppressWarnings(brew(file.path(dir_brew, 'navbar.brew.html'))) })
       f_md = file.path(dir_bs_pages[[branch_scenario]], section, 'index.md')
       dir.create(dirname(f_md), showWarnings=F, recursive=T)
       cat(sprintf('%s -> %s\n', f_brew, f_md))
-      brew(f_brew, f_md)
+      suppressWarnings(brew(f_brew, f_md))
     }
     
     # copy regions
     file.copy(file.path(dir_data_results, 'tables/region_titles.csv'), sprintf('_data/regions_%s.csv', str_replace(branch_scenario, '/', '_')))
-  }  
+  }
+  
+  # push gh-pages
+  k = branch_commits[['draft']][[1]]
+  system(sprintf('git add -A; git commit -a -m "automatically create_pages from draft commit %0.7s"', k@sha))
+  system(sprintf('git push https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git HEAD:gh-pages', git_slug))
+  
+  # return to original directory
+  setwd(wd)
 }
 
-push_branch <- function(branch='draft'){  
-  # set message with [ci skip] to skip travis-ci build for next time
-
+push_branch <- function(branch='draft', ci_skip=T){
+  
+  # set message with [ci skip] to skip travis-ci build for this push
+  ci_skip_msg = c('TRUE'='\n[ci_skip]', 'FALSE'='')[as.character(ci_skip)]
+  
   if (all(Sys.getenv('GH_TOKEN') > '', Sys.getenv('TRAVIS_COMMIT') > '', Sys.getenv('TRAVIS_REPO_SLUG') > '')){
     
     # working on travis-ci
-    system('git add -A')
-    system('git commit -a -m "auto-calculate from commit ${TRAVIS_COMMIT}\n[ci skip]"')
-    system('git remote set-url origin "https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git"')
-    system(sprintf('git push origin HEAD:%s', branch))
+    system(sprintf('git add -A; git commit -a -m "automatically calculate_scores from commit ${TRAVIS_COMMIT}"', ci_skip_msg))
+    system(sprintf('git push https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git HEAD:%s', branch))
     
   } else {
     
     # working locally, gh_token set in create_init.R, repo_name set in create_init_sc.Rs
-    system('git add -A')
-    system('git commit -a -m "auto-calculate from commit `git rev-parse HEAD`\n[ci skip]"')
-    system(sprintf('git remote set-url origin "https://%s@github.com/%s.git"', gh_token, git_slug))
-    system(sprintf('git push origin HEAD:%s', branch))
+    system(sprintf('git add -A; git commit -a -m "automatically calculate_scores from commit `git rev-parse HEAD`"', ci_skip_msg))
+    system(sprintf('git push https://%s@github.com/%s.git HEAD:%s', gh_token, git_slug, branch))
     
   }
 }
@@ -335,11 +341,11 @@ push_branch <- function(branch='draft'){
 # main
 args <- commandArgs(trailingOnly=T)
 if (length(args)>0){
-  
+  message('')
   fxn = args[1]
   if (length(args)==1){
     eval(parse(text=sprintf('%s()', fxn)))
   } else {
-    eval(parse(text=sprintf("%s('%s')", fxn, paste(args[2:length(args)], collapse="', '"))))
+    eval(parse(text=sprintf("%s('%s')", fxn, paste( args[2:length(args)], collapse="', '"))))
   }
 }

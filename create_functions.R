@@ -651,3 +651,127 @@ deploy_app <- function(key){ # key='ecu'
   setwd(wd)
 }
 
+create_maps = function(key='ecu', width=400, height=250, effect='toycamera'){ # key='ecu' # setwd('~/github/clip-n-ship/ecu')
+    
+  # map_1600x800.png
+  # regions_400x250.png
+  #   key='ecu'
+  #   width=400
+  #   height=250
+  #   effect = 'toycamera'
+  #   png = file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'gh-pages/images/regions_400x250.png')  
+  #   # app-inset_262x178.png # TODO: composite
+  #   width=262
+  #   height=178
+  #   effect = 'app'
+  #   png = file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'gh-pages/images/app_400x250.png')  
+  
+  # load libraries quietly
+  suppressWarnings(suppressPackageStartupMessages({
+    library(sp)
+    library(rgdal)
+    library(raster)
+    library(rgeos)
+    library(dismo)
+    library(ggplot2)
+    library(ggmap) # devtools::install_github('dkahle/ggmap') # want 2.4 for stamen toner-lite
+    library(dplyr)
+    library(grid) # for unit
+    merge = base::merge # override git2r
+    diff  = base::diff    
+  }))
+  
+  # vars 
+  buffers   = c('offshore'=0.2, 'inland'=0.2, 'inland1km'=0.8, 'inland25km'=0.4, 'offshore3nm'=0.4, 'offshore1km'=0.8) # and transparency  
+  
+  # paths (dir_neptune, dir_github already set by source('~/github/ohi-webapps/create_init.R')
+  source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
+  dir_data  = file.path(dir_neptune, 'git-annex/clip-n-ship')
+  dir_spatial = file.path(dir_data, key, 'spatial')
+  dir_pages   = file.path(dir_data, key, 'gh-pages')
+  
+  # create output directory if don't exist
+  dir.create(dirname(png), recursive=T, showWarnings=F)
+  
+  # read shapefiles  
+  shps = setNames(sprintf('%s/rgn_%s_gcs', dir_spatial, names(buffers)), names(buffers))
+  plys = lapply(shps, function(x) readOGR(dirname(x), basename(x)))
+  
+  # fortify and set rgn_names as factor of all inland rgns
+  rgn_names = factor(plys[['inland']][['rgn_name']])
+  plys.df = lapply(plys, function(x){
+    x = fortify(x, region='rgn_name')
+    x$id = factor(as.character(x$id), rgn_names)
+    return(x)
+  })
+  ids_offshore = unique(plys.df[['offshore']][['id']])
+  
+  # get extent from inland and offshore, expanded 10%
+  bb_inland25km = bbox(plys[['inland25km']])
+  bb_offshore   = bbox(plys[['offshore']])
+  x  = extendrange(c(bb_inland25km['x',], bb_offshore['x',]), f=0.1)
+  y  = extendrange(c(bb_inland25km['y',], bb_offshore['y',]), f=0.1)
+  
+  # make bbox proportional to desired output image dimensions
+  if (diff(x) < width / height * diff(y)){
+    x = c(-1, 1) * diff(y)/2 * width/height + mean(x)
+  } else {
+    y = c(-1, 1) * diff(x)/2 * height/width + mean(y)
+  }
+  bb = c(x[1], y[1], x[2], y[2])
+  
+  # plot
+  m = get_map(location=bb, source='stamen', maptype='toner-lite', crop=T)
+  
+  tmp_png = tempfile(fileext='.png')
+  png(tmp_png, width=width, height=height, res=150, type='cairo-png')
+  ggmap(m, extent='device') + 
+    # offshore
+    geom_polygon(
+      aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['offshore']], 
+      data=plys.df[['offshore']]) +
+    # offshore3nm
+    geom_polygon(
+      aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['offshore3nm']], 
+      data=plys.df[['offshore3nm']]) +  
+    # offshore1km
+    geom_polygon(
+      aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['offshore1km']], 
+      data=plys.df[['offshore1km']]) +  
+    # inland
+    geom_polygon(
+      aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['inland']], 
+      data=subset(plys.df[['inland']], id %in% ids_offshore)) +  
+    # inland25km
+    geom_polygon(
+      aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['inland25km']], 
+      data=subset(plys.df[['inland25km']], id %in% ids_offshore)) +  
+    # inland1km
+    geom_polygon(
+      aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['inland1km']], 
+      data=subset(plys.df[['inland1km']], id %in% ids_offshore)) +
+    # tweaks
+    labs(fill='', xlab='', ylab='') + 
+    theme(
+      legend.position='none')
+  #     legend.justification = c(1,0),   # anchor legend to max x, min y of graph
+  #     legend.position      = c(1,0),   # from anchor position max x, min y
+  #     legend.key.size      = unit(2.5, 'cm'),
+  #     legend.text          = element_text(size = 20),
+  #     axis.line            = element_line(color = NA))
+  dev.off()
+  
+  unlink(png)
+  if (effect == 'toycamera'){
+    toycamera_options = '-i 5 -o 150 -d 5 -h -3 -t yellow -a 10 -I 0.75 -O 5'
+    system(sprintf('./toycamera %s %s %s', toycamera_options, tmp_png, png))
+  } else if (effect == 'app'){
+    app_png = file.path(dir_github, 'ohi-webapps/fig/app_400x250.png')
+    system(sprintf('convert -size 400x250 -composite %s %s -geometry 262x178+136+57 -depth 8 %s', app_png, tmp_png, png, png))
+  } else {
+    file.copy(tmp_png, png)
+  }
+  unlink(tmp_png)
+  #system(sprintf('open %s', png))  
+}
+
