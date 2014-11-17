@@ -8,6 +8,8 @@ branch_scenario: <%=branch%>/<%=scenario%>
 toc: true
 ---
 
+Scores displayed below are based on template data that were extracted from the global assessment. These scores will update when data layers are modified.
+
 <%= branch_scenario_navbar %>
 
 <% 

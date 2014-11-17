@@ -8,9 +8,8 @@ branch_scenario: <%=branch%>/<%=scenario%>
 toc: true
 ---
 
-<%= branch_scenario_navbar %>
+The following data layers are used in Ocean Health Index calculations for goal status, trend, pressures, and resilience. Data for {{ site.study_area }} were extracted from the global assessment and should serve as a template as you gather higher-resolution data and indicators. Note that many values do not have a range because they were equally extracted from the global data layer.
 
-<%
 library(dplyr)
 library(markdown)
 
