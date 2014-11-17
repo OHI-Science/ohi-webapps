@@ -337,11 +337,10 @@ push_branch <- function(branch='draft'){
 args <- commandArgs(trailingOnly=T)
 if (length(args)>0){
   
-  fxns <- c('calculate_scores', 'generate_pages', 'push_changes', 'create_results')
   fxn = args[1]
   if (length(args)==1){
     eval(parse(text=sprintf('%s()', fxn)))
   } else {
-    eval(parse(text=sprintf('%s(%s)', fxn, paste(args[2:length(args)], collapse=', '))))
+    eval(parse(text=sprintf("%s('%s')", fxn, paste(args[2:length(args)], collapse="', '"))))
   }
 }
