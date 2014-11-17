@@ -5,6 +5,8 @@ output:
     self_contained: false
 ---
 
+The following goal models are from the global assessment in 2014. These models should be modified when better data or indicators are available.
+
 {% include_relative branch_scenario_navbar.html %}
 
 ## Food Provision: Fisheries
