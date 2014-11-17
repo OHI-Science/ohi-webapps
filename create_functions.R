@@ -665,6 +665,11 @@ create_maps = function(key='ecu', width=400, height=250, effect='toycamera'){ # 
   #   height=178
   #   effect = 'app'
   #   png = file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'gh-pages/images/app_400x250.png')  
+  # width  = 600
+  # height = 400
+  # effect = ''
+  # res    = 72
+  # png = file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'gh-pages/images/regions_600x400.png')    
   
   # load libraries quietly
   suppressWarnings(suppressPackageStartupMessages({
