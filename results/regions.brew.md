@@ -11,7 +11,8 @@ toc: true
 <%= branch_scenario_navbar %>
 
 <!--script src="https://embed.github.com/view/geojson/<%=git_slug%>/<%=branch_scenario%>/spatial/regions_gcs.geojson"></script-->
-![](results/{{ page.branch_scenario }}/reports/figures/regions_600x400.png)
+
+![]({{ site.baseurl }}/results/{{ page.branch_scenario }}/figures/regions_600x400.png)
 
 Template data for {{ site.study_area }} has the following subcountry regions, each with a unique ID:
 
