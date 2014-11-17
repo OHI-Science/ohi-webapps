@@ -8,7 +8,7 @@ branch_scenario: <%=branch_scenario%>
 toc: true
 ---
 
-Regions are the key spatial units of the Ocean Health Index: scores are calculated for each region and combined (with an area-weighted average) to produce scores for the entire study area: {{ site.study_area }}. 
+Regions are the key spatial units of the Ocean Health Index: scores are calculated for each region and combined, with an offshore area-weighted average, to produce scores for the entire study area of {{ site.study_area }}. 
 
 <%= branch_scenario_navbar %>
 
