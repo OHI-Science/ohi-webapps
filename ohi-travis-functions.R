@@ -172,19 +172,21 @@ create_pages <- function(){
   library(knitr)
   library(stringr)
   library(rmarkdown)
-  
+  library(httr)
+  library(git2r)
+  merge = base::merge
+  diff  = base::diff
   # TODO: cd to proper dir whether local or on Travis
-  # setwd('~/github/clip-n-ship/ecu')
+  # setwd('~/github/clip-n-ship/ecu')  
   
   # get results brew files from ohi-webapps
-  # TODO: clone ohi-webapps/results
-  dir_brew = '~/github/ohi-webapps/results'
   
   # copy draft branch scenarios
   #system('git checkout draft; git pull')
   #system('rm -rf ~/tmp_draft; mkdir ~/tmp_draft; cp -R * ~/tmp_draft/.')
 
   # get default_branch_scenario set by .travis.yml
+  dir_repo = getwd()
   repo = repository(getwd())
   checkout(repo, 'draft', force=T)  
   default_branch_scenario  = Sys.getenv('default_branch_scenario')
@@ -200,8 +202,19 @@ create_pages <- function(){
     }
   }
   
+  # get template brew files
+  # update vector: sprintf("'%s'", paste(list.files('~/github/ohi-webapps/results'), collapse="','"))
+  dir_brew   = '~/tmp_ohi-webapps'
+  dir.create(dir_brew, recursive=T, showWarnings=F)
+  for (f in c('goals_frontmatter.brew.html','goals.html.Rmd','layers.brew.md','navbar.brew.html','regions.brew.md','scores.brew.md')){
+    url_in = file.path('https://raw.githubusercontent.com/OHI-Science/ohi-webapps/master/results', f)
+    f_out  = file.path(dir_brew, f)
+    writeBin(content(GET(url_in)), f_out)
+  }
+    
   # archive branches
-  dir_archive <- '~/tmp_repo_archive'
+  dir_archive <- '~/tmp/repo_archive'
+  dir.create(dir_archive, recursive=T, showWarnings=F)
   unlink(dir_archive, recursive=T)
   git_branches   = setdiff(sapply(git2r::branches(repo, flags='remote'), function(x) str_replace(x@name, 'origin/', '')), c('HEAD','gh-pages','app'))
   branch_commits = list()
