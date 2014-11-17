@@ -40,7 +40,7 @@ calculate_scores <- function(){
   setwd(wd)
 }
 
-create_results <- function(res=72){
+create_results <- function(){
   
   library(methods)
   library(ohicore)
@@ -68,6 +68,7 @@ create_results <- function(res=72){
     conf = Conf('conf')
     layers      = Layers('layers.csv', 'layers')
     scores      = read.csv('scores.csv')
+    scores_png  = 'reports/figures/scores_400x250.png'
     regions_csv = 'reports/tables/region_titles.csv'
     
     # get goals for flowers, all and specific to weights
@@ -116,9 +117,9 @@ create_results <- function(res=72){
     for (rgn_id in unique(scores$region_id)){ # rgn_id=0
       
       # rgn vars
-      rgn_name    = subset(rgn_names, region_id==rgn_id, rgn_name, drop=T)
-      flower_png  = sprintf('reports/figures/flower_%s.png', gsub(' ','_', rgn_name))
-      scores_csv  = sprintf('reports/tables/scores_%s.csv', gsub(' ','_', rgn_name))
+      rgn_name   = subset(rgn_names, region_id==rgn_id, rgn_name, drop=T)
+      flower_png = sprintf('reports/figures/flower_%s.png', gsub(' ','_', rgn_name))
+      scores_csv = sprintf('reports/tables/scores_%s.csv', gsub(' ','_', rgn_name))
       
       # create directories, if needed
       dir.create(dirname(flower_png), showWarnings=F)
@@ -130,7 +131,8 @@ create_results <- function(res=72){
       x   = subset(scores, dimension=='score' & region_id==rgn_id & goal == 'Index', score, drop=T)
       
       # flower plot ----
-      png(flower_png, width=res*7, height=res*7)
+      res=150
+      png(flower_png, width=res*7, height=res*7, res=res)
       PlotFlower(
         #main = rgn_name,
         lengths=ifelse(
@@ -145,10 +147,32 @@ create_results <- function(res=72){
         labels  =ifelse(
           is.na(g_x),
           paste(goal_labels, '-', sep='\n'),
-          paste(goal_labels, round(x), sep='\n')),
+          paste(goal_labels, round(g_x), sep='\n')),
         center=round(x),
         max.length = 100, disk=0.4, label.cex=0.9, label.offset=0.155, cex=2.2, cex.main=2.5)
       dev.off()
+      
+      if (rgn_id==0){
+        res = 72
+        png(scores_png, width=400, height=250, res=res)
+        par(omi=c(0,0.85,0,0.85))
+        PlotFlower(
+          lengths=ifelse(
+            is.na(g_x),
+            100,
+            g_x),
+          widths=wts,
+          fill.col=ifelse(
+            is.na(g_x),
+            'grey80',
+            cols.goals.all[names(wts)]),
+          labels = '',
+          center=round(x),
+          max.length = 100, disk=0.4, label.cex=0.9, label.offset=0.155, cex=2.2, cex.main=2.5)
+        dev.off()
+        #system(sprintf('open %s', scores_png))
+      }
+      
       #system(sprintf('convert -density 150x150 %s %s', fig_pdf, fig_png)) # imagemagick's convert
       
       # table csv ----
@@ -308,6 +332,9 @@ create_pages <- function(){
     # copy regions
     file.copy(file.path(dir_data_results, 'tables/region_titles.csv'), sprintf('_data/regions_%s.csv', str_replace(branch_scenario, '/', '_')))
   }
+  
+  # copy scores_400x250.png used in navigation menu
+  file.copy(file.path(dir_archive, default_branch_scenario, 'reports/figures/scores_400x250.png'), 'images/scores_400x250.png', overwrite=T)
   
   # push gh-pages
   k = branch_commits[['draft']][[1]]
