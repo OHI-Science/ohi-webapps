@@ -39,8 +39,7 @@ script:
   Rscript ohi-travis-functions.R create_results && 
   Rscript ohi-travis-functions.R push_branch draft && 
   Rscript ohi-travis-functions.R push_branch published && 
-  Rscript ohi-travis-functions.R create_pages && 
-  Rscript ohi-travis-functions.R push_branch gh-pages
+  Rscript ohi-travis-functions.R create_pages
 
 after_failure:
 - ./travis-tool.sh dump_logs

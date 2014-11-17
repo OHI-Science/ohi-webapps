@@ -11,20 +11,16 @@ output:
 Amount of sustainable wild-caught seafood compared to the max sustainable
 
 $$
-x_{AO} = (1 - D_{U}) * S_{AO}
+x_{FIS} =  (\prod_{g=1}^{6} SS_{i,g}^{C_{i,g}})^\frac{1}{\sum{C_{i,g}}}
 $$
 
-$$
-D_{U} = (1 - P) * (1 - O_{AO})
-$$
- 
-- $D_{U}$ = unmet demand
+- $SS$ stock status score, based on B/Bmsy (biomass / maximum sustainable yield of biomass) and an underharvest penalty adjustment
 
-- $S_{AO}$ = sustainability of fishing methods
+- $C$ total catch
 
-- $O_{AO}$ = access to artisanal fishing
+- $i$ OHI reporting region
 
-- $P$ = gross domestic product (GDP) per capita, adjusted by purchasing power parity (PPP)
+- $g$ level of taxonomic grouping (ISSCAAP)
 
 
 ## Food Provision: Mariculture
@@ -64,7 +60,7 @@ $$
 
 - $O_{AO}$ = access to artisanal fishing
 
-- $P$ = PPP-adjusted per capita GDP 
+- $P$ = gross domestic product (GDP) per capita, adjusted by purchasing power parity (PPP)
 
 
 ## Natural Products

@@ -4,8 +4,7 @@ title: "Layers"
 excerpt: "OHI layers for <%=study_area%>"
 share: false
 ads: false
-branch: <%=branch%>
-scenario: <%=scenario%>
+branch_scenario: <%=branch%>/<%=scenario%>
 toc: true
 ---
 

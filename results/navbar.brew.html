@@ -9,7 +9,7 @@
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><%= branch_scenario %><span class="caret"></span></a>
           <ul class="dropdown-menu" role="menu">
           <% for (bs in setdiff(branch_scenarios, branch_scenario)){ -%>
-            <li><a href="{{ site.baseurl }}/<%= dir_bs_pages[[bs]] %>/<%= section %>"><%= bs %></a></li>
+            <li><a href="{{ site.baseurl }}/<%= dir_bs_pages[[bs]] %>/<%= section %>/"><%= bs %></a></li>
           <% } -%>
           </ul>
         </li>
