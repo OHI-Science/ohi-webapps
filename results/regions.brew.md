@@ -8,6 +8,8 @@ branch_scenario: <%=branch_scenario%>
 toc: true
 ---
 
+Regions are the key spatial units of the Ocean Health Index: scores are calculated for each region and combined (with an area-weighted average) to produce scores for the entire study area: {{ site.study_area }}. 
+
 <%= branch_scenario_navbar %>
 
 <!--script src="https://embed.github.com/view/geojson/<%=git_slug%>/<%=branch_scenario%>/spatial/regions_gcs.geojson"></script-->
