@@ -71,6 +71,16 @@ rename_gh_repo <- function(key, verbosity=1){ # key='are'
 #results <- rbind_all(lapply(sc_studies$sc_key, rename_gh_repo, verbosity=1)) # done 2014-11-02 by bbest
 #repo_todo <- filter(results, !repo_new_exists)$sc_key
 
+zip_shapefiles <- function(key){ # key='ecu'
+  dir_sp = file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'spatial')
+  zip_sp = sprintf('%s/www_subcountry2014/%s_shapefiles.zip', dir_neptune, key)
+  message(basename(zip_sp), ': ', Sys.time())
+  zip(zip_sp, dir_sp, flags='-r9Xq')
+}
+#lapply(sc_studies$sc_key, zip_shapefiles) # done 2014-11-21 by bbest
+
+# major updates ----
+
 # update Github repo with Description, Website and default branch
 edit_gh_repo <- function(key, default_branch='draft', verbosity=1){ # key='abw'
   
