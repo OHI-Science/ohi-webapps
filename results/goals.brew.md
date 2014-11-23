@@ -16,16 +16,21 @@ The following goal models are from the global assessment in 2014. These models s
 <%
 # render goals to html
 library(rmarkdown)
-
 goals_Rmd = file.path(dir_archive, branch_scenario, 'conf/goals.Rmd')
-f_tmp     = tempfile()
-
-render(goals_Rmd, 
-  html_document(
-    toc=F, smart=T, self_contained=F, theme='default', mathjax='default', template='default', css=NULL, includes=NULL, keep_md=F, lib_dir = NULL, pandoc_args = NULL), 
-  output_file=f_tmp)
-cat(suppressWarnings(readLines(f_tmp)))
-unlink(f_tmp)
+cat(renderMarkdown(normalizePath(goals_Rmd), output=NULL))
 %>
 
+<script>
+// add bootstrap table styles to pandoc tables
+$(document).ready(function () {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+});
 
+// dynamically load mathjax for compatibility with self-contained
+(function () {
+  var script = document.createElement("script");
+  script.type = "text/javascript";
+  script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+  document.getElementsByTagName("head")[0].appendChild(script);
+})();
+</script>

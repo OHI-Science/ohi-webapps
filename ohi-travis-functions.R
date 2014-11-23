@@ -228,7 +228,7 @@ create_pages <- function(){
   # get template brew files
   # update vector: sprintf("'%s'", paste(list.files('~/github/ohi-webapps/results'), collapse="','"))
   dir_brew   = '~/tmp/ohi-webapps'
-  unlink(dir_brew)
+  unlink(dir_brew, recursive=T)
   dir.create(dir_brew, recursive=T, showWarnings=F)
   for (f in c('navbar.brew.html','regions.brew.md','layers.brew.md','goals.brew.md','scores.brew.md')){
     url_in = file.path('https://raw.githubusercontent.com/OHI-Science/ohi-webapps/master/results', f)
