@@ -213,7 +213,11 @@ create_pages <- function(){
         var_parts = str_trim(str_split(var, '=')[[1]])
         assign(var_parts[1], str_replace_all(var_parts[2], '\"',''))
       }
-    }
+    }    
+    git_owner = 'OHI-Science'
+    git_repo  = basename(wd)
+    git_slug  = sprintf('%s/%s', git_owner, git_repo)
+    git_url   = sprintf('https://github.com/%s', git_slug)    
   } else {
     git_slug  = Sys.getenv('TRAVIS_REPO_SLUG')
     git_owner = str_split(git_slug, '/')[[1]][1]
@@ -224,8 +228,9 @@ create_pages <- function(){
   # get template brew files
   # update vector: sprintf("'%s'", paste(list.files('~/github/ohi-webapps/results'), collapse="','"))
   dir_brew   = '~/tmp/ohi-webapps'
+  unlink(dir_brew)
   dir.create(dir_brew, recursive=T, showWarnings=F)
-  for (f in c('goals_frontmatter.brew.html','goals.html.Rmd','layers.brew.md','navbar.brew.html','regions.brew.md','scores.brew.md')){
+  for (f in c('navbar.brew.html','regions.brew.md','layers.brew.md','goals.brew.md','scores.brew.md')){
     url_in = file.path('https://raw.githubusercontent.com/OHI-Science/ohi-webapps/master/results', f)
     f_out  = file.path(dir_brew, f)
     writeBin(httr::content(GET(url_in)), f_out)
