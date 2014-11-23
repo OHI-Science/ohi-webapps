@@ -8,15 +8,16 @@ branch_scenario: <%=branch_scenario%>
 toc: true
 ---
 
-Regions are the key spatial units of the Ocean Health Index: scores are calculated for each region and combined, with an offshore area-weighted average, to produce scores for the entire study area of {{ site.study_area }}. 
+Regions are the fundamental spatial units of analysis for the Ocean Health Index. Scores are calculated for each region individually and then combined (with an offshore area-weighted average) to produce scores for the entire study area: {{ site.study_area }}. These template regions can be modified; they were identified as the largest subcountry division within {{ site.study_area }}.
 
 <%= branch_scenario_navbar %>
 
+![]({{ site.baseurl }}/results/{{ page.branch_scenario }}/figures/regions_600x400.png)
 <!--script src="https://embed.github.com/view/geojson/<%=git_slug%>/<%=branch_scenario%>/spatial/regions_gcs.geojson"></script-->
 
-![]({{ site.baseurl }}/results/{{ page.branch_scenario }}/figures/regions_600x400.png)
+Or see the [interactive map of the offshore regions on Github](https://github.com/OHI-Science/{{ site.git_repo }}/blob/{{ page.branch_scenario }}/spatial/regions_gcs.geojson).
 
-Template data for {{ site.study_area }} has the following subcountry regions, each with a unique ID:
+OHI {{ site.study_area }} has the following subcountry regions, each with a unique identifier (ID):
 
 {% capture regions_csv %}regions_{{ page.branch_scenario | replace:'/','_' }}{% endcapture %}
 {% assign regions = site.data[regions_csv] %}
@@ -26,4 +27,19 @@ Template data for {{ site.study_area }} has the following subcountry regions, ea
 {% for rgn in regions %}| {{ rgn.region_id }} | {{ rgn.rgn_title }} |
 {% endfor %}
 
-The entire study area ({{ site.study_area }}) has a special region ID of 0.  IDs for subcountry regions were assigned geographically by increasing longitude. Exclusive economic zones (EEZs) were identified by [www.marineregions.org/](http://www.marineregions.org) and the largest subcountry regions were identified by [gadm.org](http://www.gadm.org). Region boundaries were extended offshore to divide the EEZ of {{ site.study_area }} offshore regions. It is possible to use different regions than the ones provided here: see [ohi-science.org/pages/create_regions.html](http://ohi-science.org/pages/create_regions.html) for more details.
+IDs for subcountry regions were assigned geographically by increasing longitude. The entire study area ({{ site.study_area }}) has a special region ID of 0.  
+
+Exclusive economic zones (EEZs) were identified by [www.marineregions.org/](http://www.marineregions.org) and the largest subcountry regions were identified by [gadm.org](http://www.gadm.org). Region boundaries were extended offshore to divide the EEZ of {{ site.study_area }} offshore regions. It is possible to use different regions than the ones provided here: see [ohi-science.org/pages/create_regions.html](http://ohi-science.org/pages/create_regions.html) for more details.
+
+Regions were generated with the following inland and offshore buffers relative to the shoreline, which are visualized in the graphic above within increasing opacity away from the shoreline. 
+
+- offshore
+- offshore1km
+- offshore3nm
+- inland
+- inland1km
+- inland25km
+
+These data are available as shapefiles as well as csv files summarizing total area per region. Since shapefiles are binary and can be large, they're best stored outside the **{{ site.git_repo }}** Github repository. Instead, download the zipped set of shapefiles:
+
+- [{{ site.git_repo }}_shapefiles.zip](http://ohi.nceas.ucsb.edu/data/subcountry2014/{{ site.git_repo }}_shapefiles.zip)

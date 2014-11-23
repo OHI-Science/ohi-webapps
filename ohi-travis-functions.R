@@ -298,27 +298,6 @@ create_pages <- function(){
     dir.create(dir_pages_results, showWarnings=F, recursive=T)
     file.copy(list.files(dir_data_results, full.names=T), dir_pages_results, recursive=T)
     
-    # render Rmarkdown files and prepend with frontmatter, ie for Goal equations
-    for (f_rmd in list.files(dir_brew, '.*\\.html\\.Rmd', full.names=T)){ # f_rmd = list.files(dir_brew, '.*\\.html\\.Rmd', full.names=T)[1]
-      
-      section     = str_replace(basename(f_rmd), fixed('.html.Rmd'), '')
-      navbar_html = file.path(dir_bs_pages[[branch_scenario]], section, 'branch_scenario_navbar.html')
-      f_out_html  = file.path(dir_bs_pages[[branch_scenario]], section, 'index.html')  
-      cat(sprintf('%s -> %s\n', f_rmd, f_out_html))
-      
-      dir.create(dirname(navbar_html), showWarnings=F, recursive=T)
-      suppressWarnings(brew(file.path(dir_brew, 'navbar.brew.html'), navbar_html))
-      
-      f_in_front = sprintf('%s/%s_frontmatter.brew.html', dir_brew, str_replace(basename(f_rmd), fixed('.html.Rmd'), ''))
-      stopifnot(file.exists(f_in_front))
-      dir.create(dirname(f_out_html), showWarnings=F, recursive=T)
-      suppressWarnings(brew(f_in_front, f_out_html))
-      f_tmp = tempfile()
-      render(f_rmd, 'html_document', output_file=f_tmp)
-      cat(suppressWarnings(readLines(f_tmp)), file=f_out_html, append=T)
-      unlink(f_tmp)
-    }
-    
     # brew markdown files
     for (f_brew in list.files(dir_brew, '.*\\.brew\\.md', full.names=T)){ # f_brew = list.files(dir_brew, '.*\\.brew\\.md', full.names=T)[1]
       section = str_replace(basename(f_brew), fixed('.brew.md'), '')
