@@ -137,7 +137,7 @@ edit_gh_repo <- function(key, default_branch='draft', verbosity=1){ # key='abw'
   
   cmd = sprintf('git ls-remote git@github.com:ohi-science/%s.git', repo)
   cmd_res = system(cmd, ignore.stderr=T, intern=T)
-  repo_exists = ifelse(res[1] != 128, T, F)  
+  repo_exists = ifelse(cmd_res[1] != 128, T, F)  
   if (repo_exists){
     if (verbosity > 0){
       message(sprintf('%s: updating github repo attributes -- %s', key, format(Sys.time(), '%X')))
@@ -624,6 +624,7 @@ populate_draft_branch <- function(){
   write_shortcuts('.', os_files=0)
   
   # add travis.yml file
+  setwd(dir_repo)
   brew(travis_draft_yaml_brew, '.travis.yml')
   
   # copy regions map image
@@ -662,7 +663,15 @@ populate_website <- function(){
       file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'gh-pages/images', f), 
       file.path('images', f), overwrite=T))
   }
-    
+  
+  # copy flag
+  flag_in = sprintf('%s/ohi-webapps/flags/small/%s.png', dir_github, str_replace(subset(sc_studies, sc_key==key, sc_name, drop=T), ' ', '_'))
+  if (file.exists(flag_in)){
+    flag_out = file.path(dir_repo, 'images/flag_80x40.png')
+    unlink(flag_out)
+    system(sprintf("convert -resize '80x40' %s %s", flag_in, flag_out))
+  }
+  
   # brew config and README
   brew('_config.brew.yml', '_config.yml')
   unlink('_config.brew.yml')

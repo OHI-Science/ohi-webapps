@@ -6,7 +6,7 @@ source('create_functions.R')
 source('ohi-travis-functions.R')
 
 # loop through countries
-for (key in sc_studies$sc_key){ # key = 'ago'
+for (key in sc_studies$sc_key){ # key = 'aia'
   
   # set vars by subcountry key
   setwd(dir_repos)
@@ -28,7 +28,7 @@ for (key in sc_studies$sc_key){ # key = 'ago'
   # push draft branch
   setwd(dir_repo)
   push_branch('draft')
-  system('git checkout draft; git pull')
+  system('git pull')
   
   # calculate_scores
   setwd(dir_repo)
@@ -54,26 +54,25 @@ for (key in sc_studies$sc_key){ # key = 'ago'
   # populate website
   populate_website()
   
-  # if master lingering, delete
+  # ensure draft is default branch, delete extras (like old master)
+  edit_gh_repo(key, default_branch='draft', verbosity=1)
   delete_extra_branches()
-  
-  # ensure draft is default branch
-  #edit_gh_repo(key, default_branch='draft', verbosity=1)
   
   # create pages based on results
   create_pages()
+  system('git checkout gh-pages; git pull')
   
   # turn on Travis
   setwd(dir_repo)
   system('git checkout draft')
   system(sprintf('travis encrypt -r %s GH_TOKEN=%s --add env.global', git_slug, gh_token))
   system(sprintf('travis enable -r %s', git_slug))
-  system('git commit -am "enabled travis.yml with encrypted github token"; git push')
+  system('git commit -am "enabled travis.yml with encrypted github token"; git pull; git push')
   
   # deploy app
   #devtools::install_github('ohi-science/ohicore@dev') # install latest ohicore, with DESCRIPTION having commit etc to add to app
   setwd(dir_repos)
-  deploy_app(key)  
+  deploy_app(key)
 
 } # end for (key in keys)
 # 
