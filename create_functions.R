@@ -811,6 +811,7 @@ create_maps = function(key='ecu'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
     bb = c(x[1], y[1], x[2], y[2])
     
     # plot
+    cat('bb:',bb,'\n')
     m = get_map(location=bb, source='stamen', maptype='toner-lite', crop=T)    
     ggmap(m, extent='device') + 
       # offshore

@@ -15,10 +15,10 @@ sc_studies = sc_studies %>%
       filter(finished==T),
     by=c('sc_name'='Country')) %>%  # n=138
   arrange(sc_key) %>%
-  filter(sc_key > 'are') 
+  filter(sc_key >= 'aus') 
 # TODO:
 # - are : create_maps: readOGR('/Volumes/data_edit/git-annex/clip-n-ship/are/spatial', 'rgn_inland1km_gcs') # Error in ogrInfo(dsn = dsn, layer = layer, encoding = encoding, use_iconv = use_iconv) : Multiple # dimensions:
-for (key in sc_studies$sc_key){ # key = 'ago'
+for (key in sc_studies$sc_key){ # key = 'aia'
   
   # set vars by subcountry key
   setwd(dir_repos)
@@ -28,7 +28,13 @@ for (key in sc_studies$sc_key){ # key = 'ago'
   #create_gh_repo(key)
   
   # create maps
-  create_maps(key)
+  res = try(create_maps(key))
+  txt_map_error = sprintf('%s/%s_map.txt', dir_errors, key)
+  unlink(txt_map_error)
+  if (class(res)=='try-error'){
+    cat(as.character(traceback(res)), file=txt_map_error)
+    next
+  }
   
   # clone and cd
   system(sprintf('git clone %s %s', git_url, dir_repo))
@@ -71,7 +77,6 @@ for (key in sc_studies$sc_key){ # key = 'ago'
   delete_extra_branches()
   
   # create pages based on results
-  setwd(dir_repo)
   create_pages()
   system('git checkout gh-pages; git pull')
   
