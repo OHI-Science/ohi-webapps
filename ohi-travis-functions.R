@@ -369,13 +369,13 @@ push_branch <- function(branch='draft', ci_skip=T){
   if (all(Sys.getenv('GH_TOKEN') > '', Sys.getenv('TRAVIS_COMMIT') > '', Sys.getenv('TRAVIS_REPO_SLUG') > '')){
     
     # working on travis-ci
-    system(sprintf('git add -A; git commit -a -m "automatically calculate_scores from commit ${TRAVIS_COMMIT}"', ci_skip_msg))
+    system(sprintf('git add -A; git commit -a -m "automatically calculate_scores from commit ${TRAVIS_COMMIT} %s"', ci_skip_msg))
     system(sprintf('git push https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git HEAD:%s', branch))
     
   } else {
     
     # working locally, gh_token set in create_init.R, repo_name set in create_init_sc.Rs
-    system(sprintf('git add -A; git commit -a -m "automatically calculate_scores from commit `git rev-parse HEAD`"', ci_skip_msg))
+    system(sprintf('git add -A; git commit -a -m "automatically calculate_scores from commit `git rev-parse HEAD`" %s', ci_skip_msg))
     system(sprintf('git push https://%s@github.com/%s.git HEAD:%s', gh_token, git_slug, branch))
     
   }

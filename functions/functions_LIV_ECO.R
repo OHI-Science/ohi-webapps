@@ -78,8 +78,8 @@ LIV_ECO = function(layers, subgoal){
         score     = NA)
   } else {
     liv_status = liv_status %>%
-      filter(year >= max(year, na.rm=T) - 4) # reference point is 5 years ago
-    arrange(rgn_id, year, sector) %>%
+      filter(year >= max(year, na.rm=T) - 4) %>% # reference point is 5 years ago
+      arrange(rgn_id, year, sector) %>%
       # summarize across sectors
       group_by(rgn_id, year) %>%
       summarize(

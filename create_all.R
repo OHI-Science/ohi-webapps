@@ -6,6 +6,18 @@ source('create_functions.R')
 source('ohi-travis-functions.R')
 
 # loop through countries
+
+# limit to those that were able to calculate scores last time
+status_prev = read.csv('tmp/webapp_status_2014-10-23.csv') 
+sc_studies = sc_studies %>%
+  semi_join(
+    status_prev %>% 
+      filter(finished==T),
+    by=c('sc_name'='Country')) %>%  # n=138
+  arrange(sc_key) %>%
+  filter(sc_key > 'are') 
+# TODO:
+# - are : create_maps: readOGR('/Volumes/data_edit/git-annex/clip-n-ship/are/spatial', 'rgn_inland1km_gcs') # Error in ogrInfo(dsn = dsn, layer = layer, encoding = encoding, use_iconv = use_iconv) : Multiple # dimensions:
 for (key in sc_studies$sc_key){ # key = 'aia'
   
   # set vars by subcountry key
