@@ -6,25 +6,31 @@ source('create_functions.R')
 source('ohi-travis-functions.R')
 
 # loop through countries
-for (key in sc_studies$sc_key){ # key = 'ecu'
+for (key in sc_studies$sc_key){ # key = 'abw'
   
   # set vars by subcountry key
   source('create_init_sc.R')
-      
+
   # create github repo
   #create_gh_repo(key)
   
-  # populate draft branch
-  #populate_draft_branch()
-
-  # push draft branch
-  push_branch('draft')
+  # create maps
+  create_maps(key)
   
-  # move into draft branch
+  # clone and cd
+  system(sprintf('git clone %s %s', git_url, dir_repo))
   setwd(dir_repo)
-  system('git checkout draft --force')
+  
+  # populate draft branch
+  populate_draft_branch()
+  
+  # push draft branch
+  setwd(dir_repo)
+  push_branch('draft')
+  system('git checkout draft; git pull')
   
   # calculate_scores
+  setwd(dir_repo)
   res = try(calculate_scores())
   # if problem calculating, log problem and move on to next subcountry key
   txt_calc_error = sprintf('%s/%s_calc-scores.txt', dir_errors, key)
@@ -35,20 +41,26 @@ for (key in sc_studies$sc_key){ # key = 'ecu'
   }
 
   # create flower plot and table
+  setwd(dir_repo)
   create_results()
   
-  # push draft branch
+  # push draft and published branches
+  setwd(dir_repo)
   push_branch('draft')
-  
-  # publish draft branch
   push_branch('published')
+  system('git pull')
   
   # populate website
-  #populate_website()
+  populate_website()
+  
+  # if master lingering, delete
+  delete_extra_branches()
+  
+  # ensure draft is default branch
+  #edit_gh_repo(key, default_branch='draft', verbosity=1)
   
   # create pages based on results
   create_pages()
-
   
   # publish draft branch
   # TODO: push_branch('gh-pages') BAD: currently pushing draft to gh-pages

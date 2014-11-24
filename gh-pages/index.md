@@ -2,7 +2,7 @@
 layout: home
 permalink: /
 image:
-  feature: map_1600x800.png
+  feature: regions_1600x800.png
 ---
 
 <div class="tiles">

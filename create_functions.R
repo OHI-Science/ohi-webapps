@@ -79,6 +79,43 @@ zip_shapefiles <- function(key){ # key='ecu'
 }
 #lapply(sc_studies$sc_key, zip_shapefiles) # done 2014-11-21 by bbest
 
+make_status <- function(){
+  # after create_init.R
+  
+  #require(jsonlite) # see how jsonlite is more compiant with github json: http://www.r-bloggers.com/new-package-jsonlite-a-smarter-json-encoderdecoder/  
+  
+  sc_not_gadm = read.csv('tmp/rgn_notmatching_gadm_manual_utf-8.csv')
+  stopifnot(nrow(anti_join(sc_not_gadm, sc_studies, by=c('rgn_name'='gl_rgn_name')))==0)
+  
+  dirs_annex = list.dirs('/Volumes/data_edit/git-annex/clip-n-ship', recursive=F, full.names=F)
+  stopifnot(nrow(setdiff(dirs_annex, d$sc_key))==0)
+  
+  d = sc_studies %>%
+    left_join(
+      sc_not_gadm %>%
+        mutate(
+          gadm_not_matching = TRUE,
+          gadm_splits       = rgn_to_gadm_splitting,
+          gadm_lumps        = rgn_to_gadm_lumping) %>%
+        select(
+          gl_rgn_name = rgn_name,
+          starts_with('gadm_')),
+      by='gl_rgn_name')
+    
+  d %>%
+    arrange(sc_key) %>%
+    transmute(
+      repo       = sc_key,
+      study_area = sc_name,      
+      status     = NA,
+      last_mod   = NA,
+      map_url    = NA,
+      n_regions  = NA) %>%
+    write.csv('~/github/subcountry/_data/status.csv', row.names=F, na='')
+        
+  #system(sprintf('git push -u origin %s', branch_new)) # push and set upstream to origin
+}
+
 # major updates ----
 
 # update Github repo with Description, Website and default branch
@@ -130,9 +167,6 @@ edit_gh_repo <- function(key, default_branch='draft', verbosity=1){ # key='abw'
 rename_branches <- function(key, verbosity=1){ # key='ecu'
   # rename: master -> published, dev -> draft
   
-  dir_repo = file.path(dir_repos, key)
-  setwd(dir_repo)  
-  
   rename_branch <- function(branch_old, branch_new){
     branches = system('git branch -l', intern=T) %>% str_replace(fixed('*'), '') %>% str_trim()
     
@@ -162,12 +196,22 @@ rename_branches <- function(key, verbosity=1){ # key='ecu'
   res = edit_gh_repo(key, default_branch='draft')
   
   # delete old branches remotely and locally, if exist
+  system('git fetch; git pull')
   branches = system('git branch -l', intern=T) %>% str_replace(fixed('*'), '') %>% str_trim()
   for (b in intersect(c('dev','master'), branches)){
     system(sprintf('git push origin :%s', b))
   }  
 }    
 #results = rbind_all(lapply(sc_studies$sc_key[1:3], edit_gh_repo, verbosity=2)) # done 2014-11-02 by bbest
+
+delete_extra_branches <- function(dir_repo=getwd(), branches_keep=c('draft','published','gh-pages','app')){ # key='ecu'
+  setwd(dir_repo)
+  repo = repository(dir_repo)
+  remote_branches = sapply(branches(repo, 'remote'), function(x) str_split(x@name, '/')[[1]][2])
+  for (b in setdiff(remote_branches, branches_keep)){
+    system(sprintf('git push origin :%s', b))
+  }
+}
 
 populate_draft_branch <- function(){
   
@@ -237,7 +281,7 @@ populate_draft_branch <- function(){
     file.copy(f, sprintf('spatial/%s', basename(f)), overwrite=T)
   }
   
-  # modify layers
+  # modify layers  
   lyrs_sc = lyrs_gl %>%
     select(
       targets, layer, name, description, 
@@ -573,27 +617,73 @@ populate_draft_branch <- function(){
   }
   write.csv(goals, 'conf/goals.csv', row.names=F, na='')
   
+  # copy goals documentation
+  file.copy(file.path(dir_github, 'ohi-webapps/subcountry2014/conf/goals.Rmd'), 'conf/goals.Rmd', overwrite=T)
+  
   # save shortcut files not specific to operating system
   write_shortcuts('.', os_files=0)
   
   # add travis.yml file
   brew(travis_draft_yaml_brew, '.travis.yml')
   
+  # copy regions map image
+  dir.create('subcountry2014/reports/figures', showWarnings=F, recursive=T) 
+  file.copy(
+    file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'gh-pages/images/regions_600x400.png'), 
+    'subcountry2014/reports/figures/regions_600x400.png', overwrite=T)
+  
   setwd(wd)  
 }
 
 populate_website <- function(){
   
-  # TODO: enxure on gh-pages branch and exists
-  # TODO: copy ecu/gh-pages, brew template pages and store in ohi-webapps/gh-pages
+  # presume in repo
+    
+  # cd into repo, checkout gh-pages
+  wd = getwd()
+  if (!file.exists(dir_repo)) system(sprintf('git clone %s %s', git_url, dir_repo))
+  setwd(dir_repo)
+  repo = repository(dir_repo)
+  remote_branches = sapply(branches(repo, 'remote'), function(x) str_split(x@name, '/')[[1]][2])
+  if (!'gh-pages' %in% remote_branches){
+    system('git checkout --orphan gh-pages')
+    system('git rm -rf .')    
+  } else {
+    system('git checkout gh-pages')
+  } 
+  system('rm -rf *') # clear existing
   
-  # README
+  # copy template
+  file.copy(list.files(file.path(dir_github, 'ohi-webapps/gh-pages'), full.names=T, all.files=T), '.', overwrite=T, recursive=T)
+  
+  # copy images
+  for (f in c('app_400x250.png','regions_1600x800.png',	'regions_30x20.png', 'regions_400x250.png')){
+    file.copy(
+      file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'gh-pages/images', f), 
+      file.path('images', f), overwrite=T)
+  }
+  
+  # copy regions map image
+  dir.create('subcountry2014/figures', showWarnings=F, recursive=T) 
+  file.copy(
+    , 
+    'subcountry2014/figures/regions_600x400.png', overwrite=T)
+  
+  
+  # brew config and README
+  brew('_config.brew.yml', '_config.yml')
+  unlink('_config.brew.yml')
   brew(sprintf('%s/ohi-webapps/README.brew.md', dir_github), 'README.md')
 
   # add Rstudio project files, plus _site to ignore if testing with local jekyll serve --baseurl ''
   file.copy(system.file('templates/template.Rproj', package='devtools'), sprintf('%s.Rproj', key))
   writeLines(c('.Rproj.user', '.Rhistory', '.RData', '_site','_asset_bundler_cache','.sass','.sass-cache','.DS_Store'), '.gitignore')  
   
+  # git add, commit and push
+  system('git add -A; git commit -a -m "populate_website"')
+  system('git push origin gh-pages')
+  system('git branch --set-upstream-to=origin/gh-pages gh-pages')
+  system('git fetch; git pull')
 }
 
 deploy_app <- function(key){ # key='ecu'
@@ -661,25 +751,7 @@ deploy_app <- function(key){ # key='ecu'
   setwd(wd)
 }
 
-create_maps = function(key='ecu', width=400, height=250, effect='toycamera'){ # key='ecu' # setwd('~/github/clip-n-ship/ecu')
-    
-  # map_1600x800.png
-  # regions_400x250.png
-  #   key='ecu'
-  #   width=400
-  #   height=250
-  #   effect = 'toycamera'
-  #   png = file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'gh-pages/images/regions_400x250.png')  
-  #   # app-inset_262x178.png # TODO: composite
-  #   width=262
-  #   height=178
-  #   effect = 'app'
-  #   png = file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'gh-pages/images/app_400x250.png')  
-  # width  = 600
-  # height = 400
-  # effect = ''
-  # res    = 72
-  # png = file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'gh-pages/images/regions_600x400.png')    
+create_maps = function(key='ecu'){ # key='abw' # setwd('~/github/clip-n-ship/ecu')    
   
   # load libraries quietly
   suppressWarnings(suppressPackageStartupMessages({
@@ -704,10 +776,7 @@ create_maps = function(key='ecu', width=400, height=250, effect='toycamera'){ # 
   dir_data  = file.path(dir_neptune, 'git-annex/clip-n-ship')
   dir_spatial = file.path(dir_data, key, 'spatial')
   dir_pages   = file.path(dir_data, key, 'gh-pages')
-  
-  # create output directory if don't exist
-  dir.create(dirname(png), recursive=T, showWarnings=F)
-  
+    
   # read shapefiles  
   shps = setNames(sprintf('%s/rgn_%s_gcs', dir_spatial, names(buffers)), names(buffers))
   plys = lapply(shps, function(x) readOGR(dirname(x), basename(x)))
@@ -724,69 +793,87 @@ create_maps = function(key='ecu', width=400, height=250, effect='toycamera'){ # 
   # get extent from inland and offshore, expanded 10%
   bb_inland25km = bbox(plys[['inland25km']])
   bb_offshore   = bbox(plys[['offshore']])
-  x  = extendrange(c(bb_inland25km['x',], bb_offshore['x',]), f=0.1)
-  y  = extendrange(c(bb_inland25km['y',], bb_offshore['y',]), f=0.1)
   
-  # make bbox proportional to desired output image dimensions
-  if (diff(x) < width / height * diff(y)){
-    x = c(-1, 1) * diff(y)/2 * width/height + mean(x)
-  } else {
-    y = c(-1, 1) * diff(x)/2 * height/width + mean(y)
+  create_map = function(f_png, width=400, height=250, res=72, effect='toycamera'){  
+  
+    x  = extendrange(c(bb_inland25km['x',], bb_offshore['x',]), f=0.1)
+    y  = extendrange(c(bb_inland25km['y',], bb_offshore['y',]), f=0.1)
+    
+    # make bbox proportional to desired output image dimensions
+    if (diff(x) < width / height * diff(y)){
+      x = c(-1, 1) * diff(y)/2 * width/height + mean(x)
+    } else {
+      y = c(-1, 1) * diff(x)/2 * height/width + mean(y)
+    }
+    bb = c(x[1], y[1], x[2], y[2])
+    
+    # plot
+    m = get_map(location=bb, source='stamen', maptype='toner-lite', crop=T)    
+    ggmap(m, extent='device') + 
+      # offshore
+      geom_polygon(
+        aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['offshore']], 
+        data=plys.df[['offshore']]) +
+      # offshore3nm
+      geom_polygon(
+        aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['offshore3nm']], 
+        data=plys.df[['offshore3nm']]) +  
+      # offshore1km
+      geom_polygon(
+        aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['offshore1km']], 
+        data=plys.df[['offshore1km']]) +  
+      # inland
+      geom_polygon(
+        aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['inland']], 
+        data=subset(plys.df[['inland']], id %in% ids_offshore)) +  
+      # inland25km
+      geom_polygon(
+        aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['inland25km']], 
+        data=subset(plys.df[['inland25km']], id %in% ids_offshore)) +  
+      # inland1km
+      geom_polygon(
+        aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['inland1km']], 
+        data=subset(plys.df[['inland1km']], id %in% ids_offshore)) +
+      # tweaks
+      labs(fill='', xlab='', ylab='') + 
+      theme(
+        legend.position='none')
+    tmp_png = tempfile(tmpdir=dirname(f_png), fileext='.png')
+    ggsave(tmp_png, width=width/res, height=height/res, dpi=res, units='in', type='cairo-png')
+    #system(sprintf('open %s', tmp_png))
+    
+    unlink(f_png)
+    if (effect == 'toycamera'){
+      toycamera_options = '-i 5 -o 150 -d 5 -h -3 -t yellow -a 10 -I 0.75 -O 5'
+      system(sprintf('./toycamera %s %s %s', toycamera_options, tmp_png, f_png))
+    } else if (effect == 'app'){
+      app_png = file.path(dir_github, 'ohi-webapps/fig/app_400x250.png')
+      system(sprintf('convert -size 400x250 -composite %s %s -geometry 262x178+136+57 -depth 8 %s', app_png, tmp_png, f_png, f_png))
+    } else {
+      file.copy(tmp_png, f_png)
+    }
+    unlink(tmp_png)
+    #system(sprintf('open %s', f_png))
   }
-  bb = c(x[1], y[1], x[2], y[2])
   
-  # plot
-  m = get_map(location=bb, source='stamen', maptype='toner-lite', crop=T)
+  dir_pfx = file.path(dir_annex, key, 'gh-pages/images')
+  dir.create(dir_pfx, showWarnings=F, recursive=T)
   
-  tmp_png = tempfile(fileext='.png')
-  png(tmp_png, width=width, height=height, res=150, type='cairo-png')
-  ggmap(m, extent='device') + 
-    # offshore
-    geom_polygon(
-      aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['offshore']], 
-      data=plys.df[['offshore']]) +
-    # offshore3nm
-    geom_polygon(
-      aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['offshore3nm']], 
-      data=plys.df[['offshore3nm']]) +  
-    # offshore1km
-    geom_polygon(
-      aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['offshore1km']], 
-      data=plys.df[['offshore1km']]) +  
-    # inland
-    geom_polygon(
-      aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['inland']], 
-      data=subset(plys.df[['inland']], id %in% ids_offshore)) +  
-    # inland25km
-    geom_polygon(
-      aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['inland25km']], 
-      data=subset(plys.df[['inland25km']], id %in% ids_offshore)) +  
-    # inland1km
-    geom_polygon(
-      aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['inland1km']], 
-      data=subset(plys.df[['inland1km']], id %in% ids_offshore)) +
-    # tweaks
-    labs(fill='', xlab='', ylab='') + 
-    theme(
-      legend.position='none')
-  #     legend.justification = c(1,0),   # anchor legend to max x, min y of graph
-  #     legend.position      = c(1,0),   # from anchor position max x, min y
-  #     legend.key.size      = unit(2.5, 'cm'),
-  #     legend.text          = element_text(size = 20),
-  #     axis.line            = element_line(color = NA))
-  dev.off()
-  
-  unlink(png)
-  if (effect == 'toycamera'){
-    toycamera_options = '-i 5 -o 150 -d 5 -h -3 -t yellow -a 10 -I 0.75 -O 5'
-    system(sprintf('./toycamera %s %s %s', toycamera_options, tmp_png, png))
-  } else if (effect == 'app'){
-    app_png = file.path(dir_github, 'ohi-webapps/fig/app_400x250.png')
-    system(sprintf('convert -size 400x250 -composite %s %s -geometry 262x178+136+57 -depth 8 %s', app_png, tmp_png, png, png))
-  } else {
-    file.copy(tmp_png, png)
-  }
-  unlink(tmp_png)
-  #system(sprintf('open %s', png))  
+  # create maps
+  create_map( # for home page banner
+    f_png = file.path(dir_pfx, 'regions_1600x800.png'), 
+    res=72, width=1600, height=800, effect='toycamera')
+  create_map( # for regions page
+    f_png = file.path(dir_pfx, 'regions_600x400.png'), 
+    res=72, width=600, height=400, effect='')
+  create_map( # for nav regions
+    f_png = file.path(dir_pfx, 'regions_400x250.png'), 
+    res=72, width=400, height=250, effect='')
+  create_map( # for nav app
+    f_png = file.path(dir_pfx, 'app_400x250.png'), 
+    res=72, width=262, height=178, effect='app')
+  create_map( # for status thumbnail
+    f_png = file.path(dir_pfx, 'regions_30x20.png'), 
+    res=72, width=30, height=20, effect='')  
 }
 

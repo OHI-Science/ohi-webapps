@@ -10,6 +10,7 @@ library(brew)
 library(yaml)
 merge <- base::merge # override git2r::merge
 tags  <- shiny::tags # override git2r::tags, otherwise get "Error in tags$head : object of type 'closure' is not subsettable"
+select <- dplyr::select
 
 #
 setwd('~/github/ohi-webapps') # setwd('~/github/clip-n-ship/alb')
@@ -57,6 +58,7 @@ lyrs_gl <- lyrs_gl %>%
 
 # read in github token outside of repo, generated via https://help.github.com/articles/creating-an-access-token-for-command-line-use
 gh_token <- scan('~/.github-token', 'character', quiet = T)
+Sys.setenv(GH_TOKEN=gh_token)
 
 # lookups
 gl_sc_mcntry <- read.csv(csv_mcntry)

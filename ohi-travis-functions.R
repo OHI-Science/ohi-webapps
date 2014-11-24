@@ -195,6 +195,7 @@ create_pages <- function(){
   library(dplyr)
   library(knitr)
   library(stringr)
+  library(markdown)
   library(rmarkdown)
   library(httr)
   library(git2r)
@@ -203,6 +204,7 @@ create_pages <- function(){
         
   # assume in draft branch, get default_branch_scenario set by .travis.yml
   wd = getwd()
+  system('git pull; git checkout draft')
   default_branch_scenario  = Sys.getenv('default_branch_scenario')
   study_area               = Sys.getenv('study_area')
   if (default_branch_scenario == '' | study_area == ''){        
@@ -217,7 +219,7 @@ create_pages <- function(){
     git_owner = 'OHI-Science'
     git_repo  = basename(wd)
     git_slug  = sprintf('%s/%s', git_owner, git_repo)
-    git_url   = sprintf('https://github.com/%s', git_slug)    
+    git_url   = sprintf('https://github.com/%s', git_slug)  
   } else {
     git_slug  = Sys.getenv('TRAVIS_REPO_SLUG')
     git_owner = str_split(git_slug, '/')[[1]][1]
@@ -323,7 +325,37 @@ create_pages <- function(){
   # push gh-pages
   k = branch_commits[['draft']][[1]]
   system(sprintf('git add -A; git commit -a -m "automatically create_pages from draft commit %0.7s"', k@sha))
-  system(sprintf('git push https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git HEAD:gh-pages', git_slug))
+  system(sprintf('git push https://${GH_TOKEN}@github.com/%s.git HEAD:gh-pages', git_slug))
+  
+  # update status ----
+  
+  # get status repo  depth of 1 only
+  if (file.exists('~/tmp/subcountry')){
+    system('cd ~/tmp/subcountry; git pull')
+  } else {
+    dir.create(dirname('tmp'), showWarnings=F, recursive=T)
+    system('git clone --depth=1 https://github.com/OHI-Science/subcountry ~/tmp/subcountry')
+  }
+  csv_status = '~/tmp/subcountry/_data/status.csv'
+  d = read.csv(csv_status, stringsAsFactors=F)
+  
+  # get this repo's info
+  n_rgns = file.path(dir_archive, default_branch_scenario, 'reports/tables/region_titles.csv') %>% read.csv() %>% nrow() - 1    
+  k = branch_commits[['draft']][[1]]
+  
+  # update status
+  i = which(d$repo == git_repo)
+  d$status[i]    = sprintf('[![](https://api.travis-ci.org/OHI-Science/%s.svg?branch=draft)](https://travis-ci.org/OHI-Science/%s/branches)', git_repo, git_repo)
+  d$last_mod[i]  = sprintf('%0.10s', as(k@author@when, 'character'))
+  d$last_sha[i]  = sprintf('%0.7s', k@sha)
+  d$last_msg[i]  = k@summary
+  d$map_url[i]   = sprintf('http://ohi-science.org/%s/images/regions_30x20.png', git_repo)
+  d$n_regions[i] = n_rgns
+ 
+  # update status repo
+  write.csv(d, csv_status, row.names=F, na='')
+  system(sprintf('cd ~/tmp/subcountry; git commit -a -m "updated status from %s commit %0.7s"', git_repo, k@sha))
+  system('cd ~/tmp/subcountry; git push https://${GH_TOKEN}@github.com/OHI-Science/subcountry.git HEAD:gh-pages')  
   
   # return to original directory
   setwd(wd)
