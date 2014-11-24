@@ -15,10 +15,22 @@ sc_studies = sc_studies %>%
       filter(finished==T),
     by=c('sc_name'='Country')) %>%  # n=138
   arrange(sc_key) %>%
-  filter(sc_key > 'brb') 
+  filter(sc_key >= 'mar') 
 # TODO:
 # - are : create_maps: readOGR('/Volumes/data_edit/git-annex/clip-n-ship/are/spatial', 'rgn_inland1km_gcs') # Error in ogrInfo(dsn = dsn, layer = layer, encoding = encoding, use_iconv = use_iconv) : Multiple # dimensions:
 # - aus : create_maps: ggmap tile not found prob
+
+# studies not part of loop
+sc_studies %>%
+  anti_join(
+    status_prev %>% 
+      filter(finished==T),
+    by=c('sc_name'='Country')) %>%
+  select(sc_key, sc_name) %>%
+  arrange(sc_key)
+# priority areas todo:
+#   c('bra','chl','chn','esp','fin','fji','isr','kor','usa')
+
 for (key in sc_studies$sc_key){ # key = 'aia' # key = sc_studies$sc_key[1]
   
   # set vars by subcountry key
@@ -29,12 +41,14 @@ for (key in sc_studies$sc_key){ # key = 'aia' # key = sc_studies$sc_key[1]
   #create_gh_repo(key)
   
   # create maps
-  res = try(create_maps(key))
-  txt_map_error = sprintf('%s/%s_map.txt', dir_errors, key)
-  unlink(txt_map_error)
-  if (class(res)=='try-error'){
-    cat(as.character(traceback(res)), file=txt_map_error)
-    next
+  if (key != 'kwt'){
+    res = try(create_maps(key))
+    txt_map_error = sprintf('%s/%s_map.txt', dir_errors, key)
+    unlink(txt_map_error)
+    if (class(res)=='try-error'){
+      cat(as.character(traceback(res)), file=txt_map_error)
+      next
+    }
   }
   
   # clone and cd
@@ -92,8 +106,15 @@ for (key in sc_studies$sc_key){ # key = 'aia' # key = sc_studies$sc_key[1]
   
   # deploy app
   #devtools::install_github('ohi-science/ohicore@dev') # install latest ohicore, with DESCRIPTION having commit etc to add to app
-  setwd(dir_repos)
-  deploy_app(key)
+  res = try(deploy_app(key))
+  # if problem calculating, log problem and move on to next subcountry key
+  txt_app_error = sprintf('%s/%s_app.txt', dir_errors, key)
+  unlink(txt_app_error)
+  if (class(res)=='try-error'){
+    cat(as.character(traceback(res)), file=txt_app_error)
+    next
+  }
+  
 
 } # end for (key in keys)
 
