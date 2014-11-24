@@ -18,7 +18,7 @@ sc_studies = sc_studies %>%
   filter(sc_key > 'are') 
 # TODO:
 # - are : create_maps: readOGR('/Volumes/data_edit/git-annex/clip-n-ship/are/spatial', 'rgn_inland1km_gcs') # Error in ogrInfo(dsn = dsn, layer = layer, encoding = encoding, use_iconv = use_iconv) : Multiple # dimensions:
-for (key in sc_studies$sc_key){ # key = 'aia'
+for (key in sc_studies$sc_key){ # key = 'ago'
   
   # set vars by subcountry key
   setwd(dir_repos)
@@ -71,6 +71,7 @@ for (key in sc_studies$sc_key){ # key = 'aia'
   delete_extra_branches()
   
   # create pages based on results
+  setwd(dir_repo)
   create_pages()
   system('git checkout gh-pages; git pull')
   

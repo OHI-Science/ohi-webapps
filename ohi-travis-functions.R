@@ -316,7 +316,7 @@ create_pages <- function(){
     }
     
     # copy regions
-    file.copy(file.path(dir_data_results, 'tables/region_titles.csv'), sprintf('_data/regions_%s.csv', str_replace(branch_scenario, '/', '_')))
+    file.copy(file.path(dir_data_results, 'tables/region_titles.csv'), sprintf('_data/regions_%s.csv', str_replace(branch_scenario, '/', '_')), overwrite=T)
   }
   
   # copy scores_400x250.png used in navigation menu
@@ -375,7 +375,7 @@ push_branch <- function(branch='draft', ci_skip=T){
   } else {
     
     # working locally, gh_token set in create_init.R, repo_name set in create_init_sc.Rs
-    system(sprintf('git add -A; git commit -a -m "automatically calculate_scores from commit `git rev-parse HEAD`" %s', ci_skip_msg))
+    system(sprintf('git add -A; git commit -a -m "automatically calculate_scores from commit `git rev-parse HEAD` %s" ', ci_skip_msg))
     system(sprintf('git push https://%s@github.com/%s.git HEAD:%s', gh_token, git_slug, branch))
     
   }
