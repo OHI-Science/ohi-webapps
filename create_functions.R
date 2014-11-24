@@ -658,18 +658,11 @@ populate_website <- function(){
   
   # copy images
   for (f in c('app_400x250.png','regions_1600x800.png',	'regions_30x20.png', 'regions_400x250.png')){
-    file.copy(
+    stopifnot(file.copy(
       file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'gh-pages/images', f), 
-      file.path('images', f), overwrite=T)
+      file.path('images', f), overwrite=T))
   }
-  
-  # copy regions map image
-  dir.create('subcountry2014/figures', showWarnings=F, recursive=T) 
-  file.copy(
-    , 
-    'subcountry2014/figures/regions_600x400.png', overwrite=T)
-  
-  
+    
   # brew config and README
   brew('_config.brew.yml', '_config.yml')
   unlink('_config.brew.yml')
@@ -688,7 +681,7 @@ populate_website <- function(){
 
 deploy_app <- function(key){ # key='ecu'
   
-  source('create_init_sc.R')
+  source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
   
   # delete old
   dir_app_old <- sprintf('%s/git-annex/clip-n-ship/%s/shinyapps.io', dir_neptune, git_repo)
@@ -704,9 +697,9 @@ deploy_app <- function(key){ # key='ecu'
     system('git checkout --orphan app')
     system('git rm -rf .')
   } else {
-    system('git checkout app')
-    system('rm -rf *')
-  }  
+    system('git checkout app')    
+  }
+  system('rm -rf *')
   
   # copy installed ohicore shiny app files
   # good to have latest dev ohicore first: devtools::install_github('ohi-science/ohicore@dev') 
@@ -729,6 +722,7 @@ deploy_app <- function(key){ # key='ecu'
   
   # write config
   brew(file.path(dir_github, 'ohi-webapps/app.brew.yml'), 'app.yml')
+  file.copy(file.path(dir_github, 'ohi-webapps/travis_app.yml'), '.travis.yml')
     
   # add Rstudio project files. cannabalized devtools::add_rstudio_project() which only works for full R packages.
   file.copy(system.file('templates/template.Rproj', package='devtools'), sprintf('%s.Rproj', key))

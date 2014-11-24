@@ -19,6 +19,9 @@ pages_url     = sprintf('http://ohi-science.org/%s', git_repo)
 dir_repo      = file.path(dir_repos, repo_name)
 #  scenario_old  = 'subcountry2014'
 default_branch_scenario = 'published/subcountry2014'
+default_branch          = 'published'
+default_scenario        = 'subcountry2014'
+  
 #  dir_ap_old    = file.path(dir_annex, cntries[i], 'shinyapps.io')
 dir_annex_sc  = file.path(dir_annex, key)
 app_name      = sprintf('%s_app', key)

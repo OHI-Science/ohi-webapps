@@ -6,9 +6,10 @@ source('create_functions.R')
 source('ohi-travis-functions.R')
 
 # loop through countries
-for (key in sc_studies$sc_key){ # key = 'abw'
+for (key in sc_studies$sc_key){ # key = 'ago'
   
   # set vars by subcountry key
+  setwd(dir_repos)
   source('create_init_sc.R')
 
   # create github repo
@@ -62,15 +63,17 @@ for (key in sc_studies$sc_key){ # key = 'abw'
   # create pages based on results
   create_pages()
   
-  # publish draft branch
-  # TODO: push_branch('gh-pages') BAD: currently pushing draft to gh-pages
-  
-  # install latest ohicore, with DESCRIPTION having commit etc to add to app
-  #devtools::install_github('ohi-science/ohicore@dev')
+  # turn on Travis
+  setwd(dir_repo)
+  system('git checkout draft')
+  system(sprintf('travis encrypt -r %s GH_TOKEN=%s --add env.global', git_slug, gh_token))
+  system(sprintf('travis enable -r %s', git_slug))
+  system('git commit -am "enabled travis.yml with encrypted github token"; git push')
   
   # deploy app
-  deploy_app()
-  
+  #devtools::install_github('ohi-science/ohicore@dev') # install latest ohicore, with DESCRIPTION having commit etc to add to app
+  setwd(dir_repos)
+  deploy_app(key)  
 
 } # end for (key in keys)
 # 
