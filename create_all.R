@@ -19,6 +19,7 @@ sc_studies = sc_studies %>%
 # TODO:
 # - are : create_maps: readOGR('/Volumes/data_edit/git-annex/clip-n-ship/are/spatial', 'rgn_inland1km_gcs') # Error in ogrInfo(dsn = dsn, layer = layer, encoding = encoding, use_iconv = use_iconv) : Multiple # dimensions:
 # - aus : create_maps: ggmap tile not found prob
+# - home: Ecuador ->, up to bgr
 for (key in sc_studies$sc_key){ # key = 'aia'
   
   # set vars by subcountry key
