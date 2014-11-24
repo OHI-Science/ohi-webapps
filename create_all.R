@@ -18,6 +18,7 @@ sc_studies = sc_studies %>%
   filter(sc_key >= 'aus') 
 # TODO:
 # - are : create_maps: readOGR('/Volumes/data_edit/git-annex/clip-n-ship/are/spatial', 'rgn_inland1km_gcs') # Error in ogrInfo(dsn = dsn, layer = layer, encoding = encoding, use_iconv = use_iconv) : Multiple # dimensions:
+# - aus : create_maps: ggmap tile not found prob
 for (key in sc_studies$sc_key){ # key = 'aia'
   
   # set vars by subcountry key
@@ -67,7 +68,7 @@ for (key in sc_studies$sc_key){ # key = 'aia'
   setwd(dir_repo)
   push_branch('draft')
   push_branch('published')
-  system('git pull')
+  system('git checkout published; git pull; git checkout draft')
   
   # populate website
   populate_website()
@@ -78,7 +79,7 @@ for (key in sc_studies$sc_key){ # key = 'aia'
   
   # create pages based on results
   create_pages()
-  system('git checkout gh-pages; git pull')
+  system('git checkout gh-pages; git pull; git checkout published; git pull')
   
   # turn on Travis
   setwd(dir_repo)
