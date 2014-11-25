@@ -19,6 +19,7 @@ sc_studies = sc_studies %>%
 # TODO:
 # - are : create_maps: readOGR('/Volumes/data_edit/git-annex/clip-n-ship/are/spatial', 'rgn_inland1km_gcs') # Error in ogrInfo(dsn = dsn, layer = layer, encoding = encoding, use_iconv = use_iconv) : Multiple # dimensions:
 # - aus : create_maps: ggmap tile not found prob
+# - nic : missing spatial/rgn_offshore3nm_data.csv
 
 # studies not part of loop
 sc_studies %>%
@@ -29,31 +30,26 @@ sc_studies %>%
   select(sc_key, sc_name) %>%
   arrange(sc_key)
 # priority areas todo:
-#   c('bra','chl','chn','esp','fin','fji','isr','kor','usa')
+# c('esp','usa','chn','chl','fin','kor','fji') # 'isr' no spatial
 
-for (key in sc_studies$sc_key){ # key = 'aia' # key = sc_studies$sc_key[1]
+#for (key in sc_studies$sc_key){ # key = 'fji' # key = sc_studies$sc_key[1]
+for (key in sc_studies$sc_key){ # key = 'esp' # key = sc_studies$sc_key[1]  
   
   # set vars by subcountry key
   setwd(dir_repos)
-  source('create_init_sc.R')
+  source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
 
   # create github repo
   #create_gh_repo(key)
   
   # create maps
-  if (key != 'kwt'){
-    res = try(create_maps(key))
-    txt_map_error = sprintf('%s/%s_map.txt', dir_errors, key)
-    unlink(txt_map_error)
-    if (class(res)=='try-error'){
-      cat(as.character(traceback(res)), file=txt_map_error)
-      next
-    }
+  res = try(create_maps(key))
+  txt_map_error = sprintf('%s/%s_map.txt', dir_errors, key)
+  unlink(txt_map_error)
+  if (class(res)=='try-error'){
+    cat(as.character(traceback(res)), file=txt_map_error)
+    next
   }
-  
-  # clone and cd
-  system(sprintf('git clone %s %s', git_url, dir_repo))
-  setwd(dir_repo)
   
   # populate draft branch
   populate_draft_branch()

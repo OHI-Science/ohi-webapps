@@ -762,7 +762,7 @@ create_maps = function(key='ecu'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
     library(rgdal)
     library(raster)
     library(rgeos)
-    library(dismo)
+    #library(dismo)
     library(ggplot2)
     library(ggmap) # devtools::install_github('dkahle/ggmap') # want 2.4 for stamen toner-lite
     library(dplyr)
@@ -772,7 +772,7 @@ create_maps = function(key='ecu'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
   }))
   
   # vars 
-  buffers   = c('offshore'=0.2, 'inland'=0.2, 'inland1km'=0.8, 'inland25km'=0.4, 'offshore3nm'=0.4, 'offshore1km'=0.8) # and transparency  
+  buffers = c('offshore'=0.2, 'inland'=0.2, 'inland1km'=0.8, 'inland25km'=0.4, 'offshore3nm'=0.4, 'offshore1km'=0.8) # and transparency  
   
   # paths (dir_neptune, dir_github already set by source('~/github/ohi-webapps/create_init.R')
   source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
@@ -782,7 +782,10 @@ create_maps = function(key='ecu'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
     
   # read shapefiles  
   shps = setNames(sprintf('%s/rgn_%s_gcs', dir_spatial, names(buffers)), names(buffers))
-  plys = lapply(shps, function(x) readOGR(dirname(x), basename(x)))
+  plys = lapply(shps, function(x) try(readOGR(dirname(x), basename(x))))
+  
+  # drop failed buffers
+  plys = plys[sapply(plys, function(x) !'try-error' %in% class(x))]
   
   # fortify and set rgn_names as factor of all inland rgns
   rgn_names = factor(plys[['inland']][['rgn_name']])
@@ -813,37 +816,58 @@ create_maps = function(key='ecu'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
     # plot
     cat('bb:',bb,'\n')
     m = get_map(location=bb, source='stamen', maptype='toner-lite', crop=T)    
-    ggmap(m, extent='device') + 
-      # offshore
-      geom_polygon(
+    p = ggmap(m, extent='device')
+    
+    # offshore
+    if ('offshore' %in% names(plys)){
+      p = p + geom_polygon(
         aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['offshore']], 
-        data=plys.df[['offshore']]) +
-      # offshore3nm
-      geom_polygon(
+        data=plys.df[['offshore']])
+    }
+      
+    # offshore3nm
+    if ('offshore3nm' %in% names(plys)){
+      p = p + geom_polygon(
         aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['offshore3nm']], 
-        data=plys.df[['offshore3nm']]) +  
-      # offshore1km
-      geom_polygon(
+        data=plys.df[['offshore3nm']])
+    }
+    
+    # offshore1km
+    if ('offshore1km' %in% names(plys)){
+      p = p + geom_polygon(
         aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['offshore1km']], 
-        data=plys.df[['offshore1km']]) +  
-      # inland
-      geom_polygon(
+        data=plys.df[['offshore1km']])
+    }
+    
+    # inland
+    if ('inland' %in% names(plys)){
+      p = p + geom_polygon(
         aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['inland']], 
-        data=subset(plys.df[['inland']], id %in% ids_offshore)) +  
-      # inland25km
-      geom_polygon(
+        data=subset(plys.df[['inland']], id %in% ids_offshore))
+    }
+        
+    # inland25km
+    if ('inland25km' %in% names(plys)){
+      p = p + geom_polygon(
         aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['inland25km']], 
-        data=subset(plys.df[['inland25km']], id %in% ids_offshore)) +  
-      # inland1km
-      geom_polygon(
+        data=subset(plys.df[['inland25km']], id %in% ids_offshore))
+    }
+    
+    # inland1km
+    if ('inland1km' %in% names(plys)){
+      p = p + geom_polygon(
         aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['inland1km']], 
-        data=subset(plys.df[['inland1km']], id %in% ids_offshore)) +
-      # tweaks
+        data=subset(plys.df[['inland1km']], id %in% ids_offshore))
+    }
+    
+    # tweaks
+    p = p +
       labs(fill='', xlab='', ylab='') + 
       theme(
         legend.position='none')
+    
     tmp_png = tempfile(tmpdir=dirname(f_png), fileext='.png')
-    ggsave(tmp_png, width=width/res, height=height/res, dpi=res, units='in', type='cairo-png')
+    ggsave(tmp_png, plot=p, width=width/res, height=height/res, dpi=res, units='in', type='cairo-png')
     #system(sprintf('open %s', tmp_png))
     
     unlink(f_png)

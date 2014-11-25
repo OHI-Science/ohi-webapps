@@ -1,9 +1,10 @@
+# devtools::install_github('ohi-science/ohicore@dev')
 library(stringr)
-library(git2r)
+library(git2r)     # devtools::install_github('ropensci/git2r')
 library(dplyr)
 library(rgdal)
 library(shiny)
-library(shinyapps)
+library(shinyapps) # devtools::install_github('rstudio/shinyapps')
 library(stringr)
 library(jsonlite)
 library(brew)
@@ -17,7 +18,11 @@ setwd('~/github/ohi-webapps') # setwd('~/github/clip-n-ship/alb')
 
 # vars
 # get paths based on host machine
-dir_neptune <- '/Volumes/data_edit'
+dir_neptune <- c(
+  'Windows' = '//neptune.nceas.ucsb.edu/data_edit',
+  'Darwin'  = '/Volumes/data_edit',
+  'Linux'   = '/var/data/ohi')[[ Sys.info()[['sysname']] ]]
+
 dir_github  <- '~/github'
 
 dir_annex   <- sprintf('%s/git-annex/clip-n-ship', dir_neptune) # 'N:/git-annex/clip-n-ship/data'
