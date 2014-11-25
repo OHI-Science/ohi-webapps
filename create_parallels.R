@@ -1,3 +1,4 @@
+library(parallel)
 
 # set vars and get functions
 setwd('~/github/ohi-webapps')
@@ -5,7 +6,14 @@ source('create_init.R')
 source('create_functions.R')
 source('ohi-travis-functions.R')
 
+log       = file.path(dir_github, 'ohi-webapps/tmp/create_parallels_log.txt')
+res_Rdata = file.path(dir_github, 'ohi-webapps/tmp/create_parallels_results.Rdata')
+cat('', file=log)
+
 create_all = function(key){ # key='are'
+  
+  cat(sprintf('INIT %s [%s]\n', key, Sys.time()), file=log, append=T)
+  key <<- key
   
   # set vars by subcountry key
   setwd(dir_repos)
@@ -99,6 +107,7 @@ sc_run   = intersect(sc_todo, sc_annex)
 #lapply(cntries, make_sc_coastpop_lyr, redo=T)  
 cat(sprintf('\n\nlog starting for parallell::mclapply (%s)\n\n', Sys.time()), file=log)
 res = mclapply(sc_run, create_all, mc.cores = detectCores() - 3, mc.preschedule=F)
+save(res, res_Rdata)
 
 # to kill processes from terminal
 # after running from https://neptune.nceas.ucsb.edu/rstudio/:
@@ -107,3 +116,5 @@ res = mclapply(sc_run, create_all, mc.cores = detectCores() - 3, mc.preschedule=
 #   kill $(ps -U bbest | grep R | awk '{print $1}')
 # tracking progress:
 #   log=/var/data/ohi/git-annex/clip-n-ship/make_sc_coastpop_lyr_log.txt; cat $log
+# see: https://github.com/OHI-Science/ohi-webapps/blob/master/process_rasters.R#L113
+#      https://github.com/OHI-Science/issues/issues/269#issuecomment-61531150
