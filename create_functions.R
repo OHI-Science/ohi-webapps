@@ -75,9 +75,11 @@ zip_shapefiles <- function(key){ # key='ecu'
   dir_sp = file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'spatial')
   zip_sp = sprintf('%s/www_subcountry2014/%s_shapefiles.zip', dir_neptune, key)
   message(basename(zip_sp), ': ', Sys.time())
+  unlink(zip_sp)
   zip(zip_sp, dir_sp, flags='-r9Xq')
 }
 #lapply(sc_studies$sc_key, zip_shapefiles) # done 2014-11-21 by bbest
+#lapply('esp', zip_shapefiles) # done 2014-11-25 post inland1km/offshore1km Spain shp fix by bbest
 
 make_status <- function(){
   # after create_init.R
