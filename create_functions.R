@@ -473,8 +473,7 @@ populate_draft_branch <- function(){
   # populate empty layers with global averages
   for (lyr in subset(lyrs, data_na, layer, drop=T)){ # lyr = subset(lyrs, data_na, layer, drop=T)[1]
     
-    # copy global layer
-    #lyr == 'mar_harvest_tonnes'
+    message(' for empty layer ', lyr, ', getting global avg')
     
     # get all global data for layer
     l = subset(lyrs, layer==lyr)

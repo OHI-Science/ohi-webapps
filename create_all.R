@@ -9,26 +9,27 @@ source('ohi-travis-functions.R')
 
 # limit to those that were able to calculate scores last time
 status_prev = read.csv('tmp/webapp_status_2014-10-23.csv') 
-sc_studies = sc_studies %>%
-  semi_join(
-    status_prev %>% 
-      filter(finished==T),
-    by=c('sc_name'='Country')) %>%  # n=138
-  arrange(sc_key) %>%
-  filter(sc_key >= 'mar') 
+# sc_studies = sc_studies %>%
+#   semi_join(
+#     status_prev %>% 
+#       filter(finished==T),
+#     by=c('sc_name'='Country')) %>%  # n=138
+#   arrange(sc_key) %>%
+#   filter(sc_key >= 'mar') 
 # TODO:
 # - are : create_maps: readOGR('/Volumes/data_edit/git-annex/clip-n-ship/are/spatial', 'rgn_inland1km_gcs') # Error in ogrInfo(dsn = dsn, layer = layer, encoding = encoding, use_iconv = use_iconv) : Multiple # dimensions:
 # - aus : create_maps: ggmap tile not found prob
 # - nic : missing spatial/rgn_offshore3nm_data.csv
+# - zaf : inland1km Error in ogrInfo(dsn = dsn, layer = layer, encoding = encoding, use_iconv = use_iconv) : Multiple # dimensions: 
 
 # studies not part of loop
-sc_studies %>%
-  anti_join(
-    status_prev %>% 
-      filter(finished==T),
-    by=c('sc_name'='Country')) %>%
-  select(sc_key, sc_name) %>%
-  arrange(sc_key)
+# sc_studies %>%
+#   anti_join(
+#     status_prev %>% 
+#       filter(finished==T),
+#     by=c('sc_name'='Country')) %>%
+#   select(sc_key, sc_name) %>%
+#   arrange(sc_key)
 # priority areas todo:
 # c('esp','usa','chn','chl','fin','kor','fji') # 'isr' no spatial
 
