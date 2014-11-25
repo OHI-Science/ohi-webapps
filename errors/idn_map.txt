@@ -1,0 +1,2 @@
+Error in readPNG("ggmapFileDrawer/ggmapTemp.png") : 
+  libpng error: IDAT: CRC error

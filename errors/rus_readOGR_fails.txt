@@ -1,0 +1,1 @@
+rus:inland1km,inland25km,offshore1km

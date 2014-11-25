@@ -1,0 +1,1 @@
+twn:inland1km,offshore1km

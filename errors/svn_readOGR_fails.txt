@@ -1,0 +1,1 @@
+svn:inland1km,offshore1km

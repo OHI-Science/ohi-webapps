@@ -1,0 +1,1 @@
+Error : value.var (val_chr) not found in input

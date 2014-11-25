@@ -1,0 +1,1 @@
+Error : is.wholenumber(x) || !(0 <= x && x < 2^zoom) is not TRUE
