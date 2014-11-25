@@ -5,36 +5,7 @@ source('create_init.R')
 source('create_functions.R')
 source('ohi-travis-functions.R')
 
-# loop through countries
-
-# limit to those that were able to calculate scores last time
-status_prev = read.csv('tmp/webapp_status_2014-10-23.csv')
-# sc_studies = sc_studies %>%
-#   semi_join(
-#     status_prev %>% 
-#       filter(finished==T),
-#     by=c('sc_name'='Country')) %>%  # n=138
-#   arrange(sc_key) %>%
-#   filter(sc_key >= 'mar') 
-# TODO:
-# - are : create_maps: readOGR('/Volumes/data_edit/git-annex/clip-n-ship/are/spatial', 'rgn_inland1km_gcs') # Error in ogrInfo(dsn = dsn, layer = layer, encoding = encoding, use_iconv = use_iconv) : Multiple # dimensions:
-# - aus : create_maps: ggmap tile not found prob
-# - nic : missing spatial/rgn_offshore3nm_data.csv
-# - zaf : inland1km Error in ogrInfo(dsn = dsn, layer = layer, encoding = encoding, use_iconv = use_iconv) : Multiple # dimensions: 
-
-# studies not part of loop
-# sc_studies %>%
-#   anti_join(
-#     status_prev %>% 
-#       filter(finished==T),
-#     by=c('sc_name'='Country')) %>%
-#   select(sc_key, sc_name) %>%
-#   arrange(sc_key)
-# priority areas todo:
-# c('esp','usa','chn','chl','fin','kor','fji') # 'isr' no spatial
-
-#for (key in sc_studies$sc_key){ # key = 'fji' # key = sc_studies$sc_key[1]
-for (key in sc_studies$sc_key){ # key = 'kor' # key = sc_studies$sc_key[1]  
+create_all = function(key){ # key='are'
   
   # set vars by subcountry key
   setwd(dir_repos)
@@ -112,18 +83,27 @@ for (key in sc_studies$sc_key){ # key = 'kor' # key = sc_studies$sc_key[1]
     next
   }
   
+}
 
-} # end for (key in keys)
+# get rgns with spatial data not yet run
+system('cd ~/github/subcountry; git pull')
+sc_todo = subset(
+  read.csv('~/github/subcountry/_data/status.csv', na.strings='', stringsAsFactors=F),
+  is.na(status),
+  repo, drop=T)
+sc_annex = list.dirs(file.path(dir_neptune, 'git-annex/clip-n-ship'), recursive=F, full.names=F)
+sc_run   = intersect(sc_todo, sc_annex)
 
-# y = y %>%
-#   select(Country, init_app, status, url_github_repo, url_shiny_app, error) %>%
-#   arrange(desc(init_app), status, error, Country)
-# 
-# write.csv(y, '~/github/ohi-webapps/tmp/webapp_status.csv', row.names=F, na='')
-# 
-# table(y$error) %>%
-#   as.data.frame() %>% 
-#   select(error = Var1, count=Freq) %>%
-#   filter(error != '') %>%
-#   arrange(desc(count)) %>%
-#   knitr::kable()
+# loop through countries on max detected cores - 1
+# debug with lapply: 
+#lapply(cntries, make_sc_coastpop_lyr, redo=T)  
+cat(sprintf('\n\nlog starting for parallell::mclapply (%s)\n\n', Sys.time()), file=log)
+res = mclapply(sc_run, create_all, mc.cores = detectCores() - 1, mc.preschedule=F)  
+
+# to kill processes from terminal
+# after running from https://neptune.nceas.ucsb.edu/rstudio/:
+#   kill $(ps -U bbest | grep rsession | awk '{print $1}')
+# after running from terminal: Rscript ~/github/ohi-webapps/process_rasters.R &
+#   kill $(ps -U bbest | grep R | awk '{print $1}')
+# tracking progress:
+#   log=/var/data/ohi/git-annex/clip-n-ship/make_sc_coastpop_lyr_log.txt; cat $log

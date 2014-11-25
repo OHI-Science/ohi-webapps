@@ -138,8 +138,9 @@ edit_gh_repo <- function(key, default_branch='draft', verbosity=1){ # key='abw'
   json = toJSON(kv, auto_unbox = T)
   
   cmd = sprintf('git ls-remote git@github.com:ohi-science/%s.git', repo)
+  browser()
   cmd_res = system(cmd, ignore.stderr=T, intern=T)
-  repo_exists = ifelse(cmd_res[1] != 128, T, F)  
+  repo_exists = ifelse(attr(cmd_res, 'status') != 128, T, F)  
   if (repo_exists){
     if (verbosity > 0){
       message(sprintf('%s: updating github repo attributes -- %s', key, format(Sys.time(), '%X')))
@@ -659,10 +660,10 @@ populate_website <- function(){
   file.copy(list.files(file.path(dir_github, 'ohi-webapps/gh-pages'), full.names=T, all.files=T), '.', overwrite=T, recursive=T)
   
   # copy images
-  for (f in c('app_400x250.png','regions_1600x800.png',	'regions_30x20.png', 'regions_400x250.png')){
-    stopifnot(file.copy(
-      file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'gh-pages/images', f), 
-      file.path('images', f), overwrite=T))
+  for (f in c('app_400x250.png','regions_1600x800.png',	'regions_30x20.png', 'regions_400x250.png')){    
+    f_from = file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'gh-pages/images', f)
+    message('copying ', f_from)
+    stopifnot(file.copy(f_from, file.path('images', f), overwrite=T))
   }
   
   # copy flag
@@ -786,7 +787,13 @@ create_maps = function(key='ecu'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
   plys = lapply(shps, function(x) try(readOGR(dirname(x), basename(x))))
   
   # drop failed buffers
-  plys = plys[sapply(plys, function(x) !'try-error' %in% class(x))]
+  bufs_valid = sapply(plys, function(x) !'try-error' %in% class(x))
+  txt_shp_error = sprintf('%s/%s_readOGR_fails.txt', dir_errors, key)
+  unlink(txt_shp_error)
+  if (sum(!bufs_valid) > 0){
+      cat(sprintf('%s:%s\n', key, paste(names(bufs_valid)[!bufs_valid], collapse=',')), file=txt_shp_error)
+  }
+  plys = plys[bufs_valid]
   
   # fortify and set rgn_names as factor of all inland rgns
   rgn_names = factor(plys[['inland']][['rgn_name']])
@@ -874,7 +881,7 @@ create_maps = function(key='ecu'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
     unlink(f_png)
     if (effect == 'toycamera'){
       toycamera_options = '-i 5 -o 150 -d 5 -h -3 -t yellow -a 10 -I 0.75 -O 5'
-      system(sprintf('./toycamera %s %s %s', toycamera_options, tmp_png, f_png))
+      system(sprintf('%s/ohi-webapps/toycamera %s %s %s', dir_github, toycamera_options, tmp_png, f_png)) # need to make this executable: chmod 77f toycamera
     } else if (effect == 'app'){
       app_png = file.path(dir_github, 'ohi-webapps/fig/app_400x250.png')
       system(sprintf('convert -size 400x250 -composite %s %s -geometry 262x178+136+57 -depth 8 %s', app_png, tmp_png, f_png, f_png))
