@@ -137,10 +137,9 @@ edit_gh_repo <- function(key, default_branch='draft', verbosity=1){ # key='abw'
     default_branch = default_branch)
   json = toJSON(kv, auto_unbox = T)
   
-  cmd = sprintf('git ls-remote git@github.com:ohi-science/%s.git', repo)
-  browser()
+  cmd = sprintf('git ls-remote https://github.com/OHI-Science/%s.git', repo)
   cmd_res = system(cmd, ignore.stderr=T, intern=T)
-  repo_exists = ifelse(attr(cmd_res, 'status') != 128, T, F)  
+  repo_exists = ifelse(is.null(attr(cmd_res, 'status')), T, F)  
   if (repo_exists){
     if (verbosity > 0){
       message(sprintf('%s: updating github repo attributes -- %s', key, format(Sys.time(), '%X')))
@@ -746,6 +745,7 @@ deploy_app <- function(key){ # key='ecu'
   unlink('github', recursive=T, force=T)
   
   # deploy
+  # Error: You must register an account using setAccountInfo prior to proceeding. Sign in to shinyapps.io via Github as bbest, Settings > Tokens to use setAccountInfo('ohi-science',...)
   deployApp(appDir='.', appName=app_name, upload=T, launch.browser=T, lint=F)
   
   # push files to github app branch

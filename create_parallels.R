@@ -65,12 +65,12 @@ create_all = function(key){ # key='are'
   create_pages()
   system('git checkout gh-pages; git pull; git checkout published; git pull')
   
-  # turn on Travis
-  setwd(dir_repo)
-  system('git checkout draft')
-  system(sprintf('travis encrypt -r %s GH_TOKEN=%s --add env.global', git_slug, gh_token))
-  system(sprintf('travis enable -r %s', git_slug))
-  system('git commit -am "enabled travis.yml with encrypted github token"; git pull; git push')
+#   # turn on Travis [NOT NEPTUNE]
+#   setwd(dir_repo)
+#   system('git checkout draft')
+#   system(sprintf('travis encrypt -r %s GH_TOKEN=%s --add env.global', git_slug, gh_token))
+#   system(sprintf('travis enable -r %s', git_slug))
+#   system('git commit -am "enabled travis.yml with encrypted github token"; git pull; git push')
   
   # deploy app
   #devtools::install_github('ohi-science/ohicore@dev') # install latest ohicore, with DESCRIPTION having commit etc to add to app
@@ -98,12 +98,12 @@ sc_run   = intersect(sc_todo, sc_annex)
 # debug with lapply: 
 #lapply(cntries, make_sc_coastpop_lyr, redo=T)  
 cat(sprintf('\n\nlog starting for parallell::mclapply (%s)\n\n', Sys.time()), file=log)
-res = mclapply(sc_run, create_all, mc.cores = detectCores() - 1, mc.preschedule=F)  
+res = mclapply(sc_run, create_all, mc.cores = detectCores() - 3, mc.preschedule=F)
 
 # to kill processes from terminal
 # after running from https://neptune.nceas.ucsb.edu/rstudio/:
 #   kill $(ps -U bbest | grep rsession | awk '{print $1}')
-# after running from terminal: Rscript ~/github/ohi-webapps/process_rasters.R &
+# after running from terminal: Rscript ~/github/ohi-webapps/create_parallels.R &
 #   kill $(ps -U bbest | grep R | awk '{print $1}')
 # tracking progress:
 #   log=/var/data/ohi/git-annex/clip-n-ship/make_sc_coastpop_lyr_log.txt; cat $log
