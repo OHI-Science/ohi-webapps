@@ -32,6 +32,7 @@ status_prev = read.csv('tmp/webapp_status_2014-10-23.csv')
 #   arrange(sc_key)
 # priority areas todo:
 # c('esp','usa','chn','chl','fin','kor','fji') # 'isr' no spatial
+redo_maps = F
 
 #for (key in sc_studies$sc_key){ # key = 'fji' # key = sc_studies$sc_key[1]
 for (key in sc_studies$sc_key){ # key = 'kor' # key = sc_studies$sc_key[1]  
@@ -44,12 +45,14 @@ for (key in sc_studies$sc_key){ # key = 'kor' # key = sc_studies$sc_key[1]
   #create_gh_repo(key)
   
   # create maps
-  res = try(create_maps(key))
   txt_map_error = sprintf('%s/%s_map.txt', dir_errors, key)
-  unlink(txt_map_error)
-  if (class(res)=='try-error'){
-    cat(as.character(traceback(res)), file=txt_map_error)
-    next
+  unlink(txt_map_error)  
+  if (!all(file.exists(file.path(dir_annex, key, 'gh-pages/images', c('regions_1600x800.png', 'regions_600x400.png', 'regions_400x250.png', 'app_400x250.png', 'regions_30x20.png')))) | redo_maps){
+    res = try(create_maps(key))
+    if (class(res)=='try-error'){
+      cat(as.character(traceback(res)), file=txt_map_error)
+      next
+    }
   }
   
   # populate draft branch

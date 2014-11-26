@@ -80,6 +80,7 @@ zip_shapefiles <- function(key){ # key='ecu'
 }
 #lapply(sc_studies$sc_key, zip_shapefiles) # done 2014-11-21 by bbest
 #lapply('esp', zip_shapefiles) # done 2014-11-25 post inland1km/offshore1km Spain shp fix by bbest
+#lapply(c('kor', 'are', 'zaf'), zip_shapefiles) # done 2014-11-25 post inland1km/offshore1km Spain shp fix by bbest (done: 'esp')
 
 make_status <- function(){
   # after create_init.R
@@ -777,6 +778,7 @@ create_maps = function(key='ecu'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
   buffers = c('offshore'=0.2, 'inland'=0.2, 'inland1km'=0.8, 'inland25km'=0.4, 'offshore3nm'=0.4, 'offshore1km'=0.8) # and transparency  
   
   # paths (dir_neptune, dir_github already set by source('~/github/ohi-webapps/create_init.R')
+  key <<- key
   source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
   dir_data  = file.path(dir_neptune, 'git-annex/clip-n-ship')
   dir_spatial = file.path(dir_data, key, 'spatial')
@@ -823,7 +825,11 @@ create_maps = function(key='ecu'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
     
     # plot
     cat('bb:',bb,'\n')
-    m = get_map(location=bb, source='stamen', maptype='toner-lite', crop=T)    
+    m = try(get_map(location=bb, source='stamen', maptype='toner-lite', crop=T))
+    if (class(m) == 'try-error'){
+      # fallback to ggmap default map
+      m = get_map(location=bb, crop=T)
+    }    
     p = ggmap(m, extent='device')
     
     # offshore
@@ -912,4 +918,5 @@ create_maps = function(key='ecu'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
     f_png = file.path(dir_pfx, 'regions_30x20.png'), 
     res=72, width=30, height=20, effect='')  
 }
-
+sc_maps_todo = setdiff(str_replace(list.files('~/github/ohi-webapps/errors/map'), '_map.txt', ''), 'aus')
+lapply(as.list(sc_maps_todo[which(sc_maps_todo=='cok'):length(sc_maps_todo)]), create_maps)
