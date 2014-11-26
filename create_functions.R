@@ -18,8 +18,10 @@ rename_sc_annex <- function(name){
 create_gh_repo <- function(key, gh_token=gh_token, verbosity=1){
 
   repo_name = key
-  res = system(sprintf('git ls-remote git@github.com:ohi-science/%s.git', repo_name), ignore.stderr=T, intern=T)
-  repo_exists = ifelse(res != 128, T, F)
+  #cmd = sprintf('git ls-remote https://github.com/OHI-Science/%s.git', repo_name)
+  cmd = sprintf('git ls-remote git@github.com:ohi-science/%s.git', repo_name)
+  res = system(cmd, ignore.stderr=T, intern=T)  
+  repo_exists = ifelse(length(res)==0, T, F)
   if (!repo_exists){    
     if (verbosity > 0){
       message(sprintf('%s: creating github repo -- %s', repo_name, format(Sys.time(), '%X')))
@@ -27,7 +29,9 @@ create_gh_repo <- function(key, gh_token=gh_token, verbosity=1){
     # create using Github API: https://developer.github.com/v3/repos/#create
     cmd = sprintf('curl --silent -u "bbest:%s" https://api.github.com/orgs/ohi-science/repos -d \'{"name":"%s"}\'', gh_token, repo_name)
     cmd_res = paste(capture.output(fromJSON(system(cmd, intern=T))), collapse='\n')
-  } 
+  } else{
+    cmd_res = NA
+  }
   
   # return data.frame
   data.frame(
@@ -226,10 +230,23 @@ populate_draft_branch <- function(){
   repo = clone(git_url, normalizePath(dir_repo, mustWork=F))
   setwd(dir_repo)
   
-  # rename/create branches: draft, published
+  # get remote branches
   remote_branches = sapply(branches(repo, 'remote'), function(x) str_split(x@name, '/')[[1]][2])
-  if (length(setdiff(c('draft','published'), remote_branches)) > 0){
+  
+  # initialize
+  if (length(remote_branches)==0){
+    system('touch README.md')
+    system('git add -A; git commit -m "first commit"')
+    system(sprintf('git remote add origin https://github.com/OHI-Science/%s.git', key))
+    system('git push -u origin master')    
+    system('git pull')
+    remote_branches = sapply(branches(repo, 'remote'), function(x) str_split(x@name, '/')[[1]][2])
+  }
+  
+  # rename if draft & published don't already exist
+  if (length(setdiff(c('draft','published'), remote_branches)) > 0 & length(remote_branches) > 0){
     rename_branches(key)
+    remote_branches = sapply(branches(repo, 'remote'), function(x) str_split(x@name, '/')[[1]][2])
   }
   
   # ensure on draft branch ----
@@ -360,6 +377,11 @@ populate_draft_branch <- function(){
     mutate(
       dw = popsum / sum(popsum)) %>%
     select(rgn_id, dw)
+  # fix Canada (can) with Nunavet [10] repeats b/c of spatial funk, presume just need to add
+  #   read.csv(file.path(dir_annex_sc, 'layers' , 'mar_coastalpopn_inland25km_lyr.csv')) %>%
+  #     group_by(rgn_id, year) %>%
+  #     summarize(popsum = sum(popsum)) %>%
+  #     write.csv(file.path(dir_annex_sc, 'layers' , 'mar_coastalpopn_inland25km_lyr.csv'), na='', row.names=F)  
   area_offshore         = read.csv(file.path(dir_annex_sc, 'spatial', 'rgn_offshore_data.csv')) %>%
     mutate(
       dw = area_km2 / sum(area_km2)) %>%
@@ -776,6 +798,9 @@ create_maps = function(key='ecu'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
   
   # vars 
   buffers = c('offshore'=0.2, 'inland'=0.2, 'inland1km'=0.8, 'inland25km'=0.4, 'offshore3nm'=0.4, 'offshore1km'=0.8) # and transparency  
+  if (key=='usa'){ # inland1km/offshore1km making R crash b/c so big for USA
+    buffers = c('offshore'=0.2, 'inland'=0.2, 'inland25km'=0.6, 'offshore3nm'=0.6) # and transparency  
+  }
   
   # paths (dir_neptune, dir_github already set by source('~/github/ohi-webapps/create_init.R')
   key <<- key

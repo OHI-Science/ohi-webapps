@@ -35,14 +35,15 @@ status_prev = read.csv('tmp/webapp_status_2014-10-23.csv')
 redo_maps = F
 
 #for (key in sc_studies$sc_key){ # key = 'fji' # key = sc_studies$sc_key[1]
-for (key in sc_studies$sc_key){ # key = 'kor' # key = sc_studies$sc_key[1]  
+#sc_run = c('can'=T,'chn'=T,'fin','fji','fro','grl','idn','ind','irl','irn','irq','isl','ita','jpn','kna','lca','lka','mmr','mne','nld','nzl','rus','sau','sdn','sen','shn','slb','sle', 'som','spm','stp','sur','svn','syr')
+for (key in sc_studies$sc_key){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1]  
   
   # set vars by subcountry key
   setwd(dir_repos)
   source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
 
   # create github repo
-  #create_gh_repo(key)
+  #repo = create_gh_repo(key)
   
   # create maps
   txt_map_error = sprintf('%s/%s_map.txt', dir_errors, key)
