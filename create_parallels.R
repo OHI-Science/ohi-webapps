@@ -107,7 +107,7 @@ sc_run   = intersect(sc_todo, sc_annex)
 #lapply(cntries, make_sc_coastpop_lyr, redo=T)  
 cat(sprintf('\n\nlog starting for parallell::mclapply (%s)\n\n', Sys.time()), file=log)
 res = mclapply(sc_run, create_all, mc.cores = detectCores() - 3, mc.preschedule=F)
-save(res, res_Rdata)
+save(res, file=res_Rdata)
 
 # to kill processes from terminal
 # after running from https://neptune.nceas.ucsb.edu/rstudio/:

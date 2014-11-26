@@ -780,7 +780,7 @@ create_maps = function(key='ecu'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
   # paths (dir_neptune, dir_github already set by source('~/github/ohi-webapps/create_init.R')
   key <<- key
   source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
-  dir_data  = file.path(dir_neptune, 'git-annex/clip-n-ship')
+  dir_data    = file.path(dir_neptune, 'git-annex/clip-n-ship')
   dir_spatial = file.path(dir_data, key, 'spatial')
   dir_pages   = file.path(dir_data, key, 'gh-pages')
     
