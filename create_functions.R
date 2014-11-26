@@ -798,8 +798,8 @@ create_maps = function(key='ecu'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
   
   # vars 
   buffers = c('offshore'=0.2, 'inland'=0.2, 'inland1km'=0.8, 'inland25km'=0.4, 'offshore3nm'=0.4, 'offshore1km'=0.8) # and transparency  
-  if (key=='usa'){ # inland1km/offshore1km making R crash b/c so big for USA
-    buffers = c('offshore'=0.2, 'inland'=0.2, 'inland25km'=0.6, 'offshore3nm'=0.6) # and transparency  
+  if (key=='usa'){ # extra buffers making R crash presumably at fortify step b/c so big for USA
+    buffers = c('offshore'=0.2, 'inland25km'=0.2, 'inland25km'=0.4) # and transparency  
   }
   
   # paths (dir_neptune, dir_github already set by source('~/github/ohi-webapps/create_init.R')
