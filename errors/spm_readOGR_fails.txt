@@ -1,1 +1,0 @@
-spm:inland1km,inland25km,offshore3nm,offshore1km

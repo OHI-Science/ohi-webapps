@@ -1,1 +1,0 @@
-Error in bbox(plys[["inland25km"]]) : object not a >= 2-column array
