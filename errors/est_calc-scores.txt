@@ -1,1 +1,1 @@
-Error : 0 (non-NA) cases
+Error : value.var (val_chr) not found in input

@@ -1,2 +1,0 @@
-Error in readPNG(paste0("ggmapFileDrawer/", destfile)) : 
-  file is not in PNG format

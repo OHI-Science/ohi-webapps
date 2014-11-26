@@ -21,26 +21,25 @@ redo        = T
 years       = 2005:2015
 
 # function to parallelize
-make_sc_coastpop_lyr = function(cntry, redo=F){
+make_sc_coastpop_lyr = function(cntry, redo=F){ # cntry='usa'
   
   #cat(sprintf('%03d (of %d): %s\n', i, length(cntries), cntry))
   csv_lyr = sprintf('%s/%s/layers/mar_coastalpopn_inland25km_lyr.csv', dir_data, cntry)
   
   if (file.exists(csv_lyr) & !redo){
-    browser()
     cat(sprintf('%s: %s already done\n', cntry, csv_lyr), file=log, append=T)
     next
   } 
   
   # loop through years
-  for (yr in years){
+  for (yr in years){ # yr=2005
     tif_g = sprintf('%s/model/GL-NCEAS-CoastalPopulation_v2013/data/popdensity_%d_mol.tif', dirs['neptune_data'], yr)
     tif_c = file.path(dir_data, cntry, 'spatial/rgn_inland25km_mol.tif')
     csv_a = file.path(dir_data, cntry, 'spatial/rgn_inland25km_data.csv')
     csv_y = sprintf('%s/%s/layers/mar_coastalpopn_inland25km_%s.csv', dir_data, cntry, yr)
     fxn   = 'mean'
     
-    if (file.exists(csv_y)){
+    if (file.exists(csv_y) & !redo){
       next
     } 
     

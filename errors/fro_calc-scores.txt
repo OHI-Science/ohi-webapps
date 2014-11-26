@@ -1,1 +1,2 @@
-Error : not compatible with requested type
+Error in list_to_dataframe(res, attr(.data, "split_labels"), .id, id_as_factor) : 
+  Results must be all atomic, or all data frames

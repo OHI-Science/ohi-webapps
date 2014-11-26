@@ -1,2 +1,0 @@
-Error in readPNG(paste0("ggmapFileDrawer/", destfile)) : 
-  libpng error: Read Error
