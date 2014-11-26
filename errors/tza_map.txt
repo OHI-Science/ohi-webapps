@@ -1,2 +1,0 @@
-Error in readPNG("ggmapFileDrawer/ggmapTemp.png") : 
-  libpng error: Read Error

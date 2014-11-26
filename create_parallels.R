@@ -10,7 +10,7 @@ log       = file.path(dir_github, 'ohi-webapps/tmp/create_parallels_log.txt')
 res_Rdata = file.path(dir_github, 'ohi-webapps/tmp/create_parallels_results.Rdata')
 cat('', file=log)
 
-create_all = function(key){ # key='are'
+create_all = function(key, redo_maps=F){ # key='are'
   
   cat(sprintf('INIT %s [%s]\n', key, Sys.time()), file=log, append=T)
   key <<- key
@@ -23,12 +23,14 @@ create_all = function(key){ # key='are'
   #create_gh_repo(key)
   
   # create maps
-  res = try(create_maps(key))
   txt_map_error = sprintf('%s/%s_map.txt', dir_errors, key)
-  unlink(txt_map_error)
-  if (class(res)=='try-error'){
-    cat(as.character(traceback(res)), file=txt_map_error)
-    next
+  unlink(txt_map_error)  
+  if (!all(file.exists(file.path(dir_annex, key, 'gh-pages/images', c('regions_1600x800.png', 'regions_600x400.png', 'regions_400x250.png', 'app_400x250.png', 'regions_30x20.png')))) | redo_maps){
+    res = try(create_maps(key))
+    if (class(res)=='try-error'){
+      cat(as.character(traceback(res)), file=txt_map_error)
+      next
+    }
   }
   
   # populate draft branch
@@ -108,6 +110,8 @@ sc_run   = intersect(sc_todo, sc_annex)
 cat(sprintf('\n\nlog starting for parallell::mclapply (%s)\n\n', Sys.time()), file=log)
 res = mclapply(sc_run, create_all, mc.cores = detectCores() - 3, mc.preschedule=F)
 save(res, file=res_Rdata)
+
+# load('~/github/ohi-webapps/tmp/create_parallels_results.Rdata', verbose=T)
 
 # to kill processes from terminal
 # after running from https://neptune.nceas.ucsb.edu/rstudio/:

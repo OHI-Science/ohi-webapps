@@ -1,2 +1,2 @@
-Error in readPNG("ggmapFileDrawer/ggmapTemp.png") : 
-  file is not in PNG format
+Error in download.file(url, destfile = paste0("ggmapFileDrawer/", destfile),  : 
+  cannot open destfile 'ggmapFileDrawer/ggmapTemp.png', reason 'No such file or directory'

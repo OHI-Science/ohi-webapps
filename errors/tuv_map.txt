@@ -1,1 +1,2 @@
-Error : is.wholenumber(x) || !(0 <= x && x < 2^zoom) is not TRUE
+Error in readPNG(paste0("ggmapFileDrawer/", destfile)) : 
+  file is not in PNG format

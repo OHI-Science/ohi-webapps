@@ -918,5 +918,5 @@ create_maps = function(key='ecu'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
     f_png = file.path(dir_pfx, 'regions_30x20.png'), 
     res=72, width=30, height=20, effect='')  
 }
-sc_maps_todo = setdiff(str_replace(list.files('~/github/ohi-webapps/errors/map'), '_map.txt', ''), 'aus')
-lapply(as.list(sc_maps_todo[which(sc_maps_todo=='cok'):length(sc_maps_todo)]), create_maps)
+#sc_maps_todo = setdiff(str_replace(list.files('~/github/ohi-webapps/errors/map'), '_map.txt', ''), 'aus')
+#lapply(as.list(sc_maps_todo[which(sc_maps_todo=='cok'):length(sc_maps_todo)]), create_maps)

@@ -1,2 +1,0 @@
-Error in readPNG("ggmapFileDrawer/ggmapTemp.png") : 
-  file is not in PNG format

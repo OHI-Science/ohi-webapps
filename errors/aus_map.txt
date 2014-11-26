@@ -1,2 +1,0 @@
-Error in download.file(url, destfile = paste0("ggmapFileDrawer/ggmapTemp.",  : 
-  cannot open URL 'http://tile.stamen.com/toner-lite/3/8/4.png'
