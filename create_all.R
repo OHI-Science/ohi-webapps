@@ -48,6 +48,8 @@ for (key in 'usa'){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1]
   # create maps
   txt_map_error = sprintf('%s/%s_map.txt', dir_errors, key)
   unlink(txt_map_error)  
+  txt_shp_error = sprintf('%s/%s_readOGR_fails.txt', dir_errors, key)
+  unlink(txt_shp_error)
   if (!all(file.exists(file.path(dir_annex, key, 'gh-pages/images', c('regions_1600x800.png', 'regions_600x400.png', 'regions_400x250.png', 'app_400x250.png', 'regions_30x20.png')))) | redo_maps){
     res = try(create_maps(key))
     if (class(res)=='try-error'){
@@ -98,12 +100,10 @@ for (key in 'usa'){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1]
   create_pages()
   system('git checkout gh-pages; git pull; git checkout published; git pull')
   
-  # turn on Travis
-  setwd(dir_repo)
-  system('git checkout draft')
-  system(sprintf('travis encrypt -r %s GH_TOKEN=%s --add env.global', git_slug, gh_token))
-  system(sprintf('travis enable -r %s', git_slug))
-  system('git commit -am "enabled travis.yml with encrypted github token"; git pull; git push')
+  # enable Travis if on Mac
+  if (Sys.info()[['sysname']] == 'Darwin'){
+    enable_travis()
+  }
   
   # deploy app
   #devtools::install_github('ohi-science/ohicore@dev') # install latest ohicore, with DESCRIPTION having commit etc to add to app

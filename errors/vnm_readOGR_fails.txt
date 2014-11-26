@@ -1,1 +1,0 @@
-vnm:inland1km,offshore1km

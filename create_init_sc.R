@@ -46,8 +46,7 @@ stopifnot(!is.na(key))
 if (!file.exists(csv_pop_inland25km)){
   cat('  mar_coastalpopn_inland25km_lyr.csv NOT PRESENT, skipping!\n')
   #next
-} 
-if (!'year' %in% names(read.csv(csv_pop_inland25km))){
+} else if (!'year' %in% names(read.csv(csv_pop_inland25km))){
   cat('  mar_coastalpopn_inland25km_lyr.csv WITHOUT YEAR, skipping!\n')
   #next
 } 

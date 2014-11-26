@@ -1,1 +1,0 @@
-stp:inland1km,offshore1km

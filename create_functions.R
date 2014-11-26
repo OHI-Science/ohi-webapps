@@ -534,6 +534,7 @@ populate_draft_branch <- function(){
     
     # presuming numeric...
     # get mean
+    if (lyr == 'mar_coastalpopn_inland25km') browser()
     if (length(flds_other) > 0){
       b = a %>%
         group_by_(.dots=flds_other) %>%
@@ -945,3 +946,25 @@ create_maps = function(key='ecu'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
 }
 #sc_maps_todo = setdiff(str_replace(list.files('~/github/ohi-webapps/errors/map'), '_map.txt', ''), 'aus')
 #lapply(as.list(sc_maps_todo[which(sc_maps_todo=='cok'):length(sc_maps_todo)]), create_maps)
+
+enable_travis = function(key){
+  
+  key <<- key
+  source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
+  if (!file.exists(dir_repo)){
+    setwd(dir_repos)
+    system(sprintf('git clone %s', git_url))
+  }
+  setwd(dir_repo)
+  
+  # turn on Travis
+  system('git pull; git checkout draft; git pull')
+  system(sprintf('travis encrypt -r %s GH_TOKEN=%s --add env.global', git_slug, gh_token))
+  system(sprintf('travis enable -r %s', git_slug))
+  system('git commit -am "enabled travis.yml with encrypted github token"; git pull; git push')  
+}
+
+
+#enable_travis('are')
+#lapply(as.list(c('aus','bmu','bra','can','chl','deu','dji','dnk','eri','esh','fsm','gbr','geo','hrv','hti','idn','irn','isl','ita','jam','kir','lca','lka','mhl','mmr','mne','mrt','nic','niu','nor','sau','sdn','sen','sgp','shn','slb','sle','stp','zaf')), enable_travis)
+lapply(intersect(sc_studies$sc_key, sc_annex_dirs), enable_travis)
