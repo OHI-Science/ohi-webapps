@@ -104,6 +104,9 @@ sc_todo = subset(
 sc_annex = list.dirs(file.path(dir_neptune, 'git-annex/clip-n-ship'), recursive=F, full.names=F)
 sc_run   = intersect(sc_todo, sc_annex)
 
+# redo after fix buffers from readOGR fails
+sc_run = c('can','chn','fin','fji','fro','grl','idn','ind','irl','irn','irq','isl','ita','jpn','kna','lca','lka','mmr','mne','nld','nzl','rus','sau','sdn','sen','shn','slb','sle','som','spm','stp','sur','svn','syr')
+
 # loop through countries on max detected cores - 1
 # debug with lapply: 
 #lapply(cntries, make_sc_coastpop_lyr, redo=T)  
