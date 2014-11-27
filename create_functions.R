@@ -967,4 +967,4 @@ enable_travis = function(key){
 
 #enable_travis('are')
 #lapply(as.list(c('aus','bmu','bra','can','chl','deu','dji','dnk','eri','esh','fsm','gbr','geo','hrv','hti','idn','irn','isl','ita','jam','kir','lca','lka','mhl','mmr','mne','mrt','nic','niu','nor','sau','sdn','sen','sgp','shn','slb','sle','stp','zaf')), enable_travis)
-lapply(intersect(sc_studies$sc_key, sc_annex_dirs), enable_travis)
+#lapply(intersect(sc_studies$sc_key, sc_annex_dirs), enable_travis)
