@@ -95,14 +95,27 @@ create_all = function(key, redo_maps=F){ # key='are'
   
 }
 
-# get rgns with spatial data not yet run
-system('cd ~/github/subcountry; git pull')
-sc_todo = subset(
-  read.csv('~/github/subcountry/_data/status.csv', na.strings='', stringsAsFactors=F),
-  is.na(status),
-  repo, drop=T)
-sc_annex = list.dirs(file.path(dir_neptune, 'git-annex/clip-n-ship'), recursive=F, full.names=F)
-sc_run   = intersect(sc_todo, sc_annex)
+# # get rgns with spatial data not yet run
+# system('cd ~/github/subcountry; git pull')
+# sc_todo = subset(
+#   read.csv('~/github/subcountry/_data/status.csv', na.strings='', stringsAsFactors=F),
+#   is.na(status),
+#   repo, drop=T)
+# sc_annex = list.dirs(file.path(dir_neptune, 'git-annex/clip-n-ship'), recursive=F, full.names=F)
+# sc_run   = intersect(sc_todo, sc_annex)
+
+# get keys without a build passing status
+just_passed = c('ago','abw','com','cok','irq','irl','grl','fji','ken','kna')
+read.csv(file.path(dir_github, 'ohi-webapps/tmp/webapp_travis_status.csv')) %>%
+#  select(travis_status) %>% table()
+# 2014-11-28
+#                            enabled                            errored                             failed no build yet & missing .travis.yml                             passed 
+#                                 64                                 14                                 20                                  3                                 81 
+#               repository not known 
+#                                  5
+  filter(travis_status != 'passed' & !sc_key %in% just_passed) %>%
+  subset(select=sc_key, drop=T) %>% as.character() -> sc_run
+
 
 # redo after fix buffers from readOGR fails
 #sc_run = c('can','chn','fin','fji','fro','grl','idn','ind','irl','irn','irq','isl','ita','jpn','kna','lca','lka','mmr','mne','nld','nzl','rus','sau','sdn','sen','shn','slb','sle','som','spm','stp','sur','svn','syr')

@@ -992,7 +992,7 @@ status_travis = function(key, enable=T, csv_status=file.path(dir_github, 'ohi-we
 #res = sapply(intersect(sc_studies$sc_key, sc_annex_dirs), status_travis)
 #keys = intersect(sc_studies$sc_key, sc_annex_dirs) # which(keys=='mus')
 #res = sapply(keys[which(keys=='mus'):length(keys)], status_travis)
-#travis = read.csv(file.path(dir_github, 'tmp/webapp_travis_status.csv'), na='')
+#travis = read.csv(file.path(dir_github, 'ohi-webapps/tmp/webapp_travis_status.csv'), na='')
 
 #enable_travis('are')
 #lapply(as.list(c('aus','bmu','bra','can','chl','deu','dji','dnk','eri','esh','fsm','gbr','geo','hrv','hti','idn','irn','isl','ita','jam','kir','lca','lka','mhl','mmr','mne','mrt','nic','niu','nor','sau','sdn','sen','sgp','shn','slb','sle','stp','zaf')), enable_travis)
