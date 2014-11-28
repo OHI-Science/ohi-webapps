@@ -124,8 +124,10 @@ read.csv(file.path(dir_github, 'ohi-webapps/tmp/webapp_travis_status.csv')) %>%
 # debug with lapply: 
 #lapply(cntries, make_sc_coastpop_lyr, redo=T)  
 cat(sprintf('\n\nlog starting for parallell::mclapply (%s)\n\n', Sys.time()), file=log)
-res = mclapply(sc_run, create_all, mc.cores = detectCores() - 3, mc.preschedule=F)
+res = mclapply(sc_run, create_all, mc.cores = detectCores() - 3, mc.preschedule=F, USE.NAMES=T)
+# names(res) = sc_run
 save(res, file=results)
+
 
 # load('~/github/ohi-webapps/tmp/create_parallels_results.Rdata', verbose=T)
 
