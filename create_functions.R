@@ -947,23 +947,52 @@ create_maps = function(key='ecu'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
 #sc_maps_todo = setdiff(str_replace(list.files('~/github/ohi-webapps/errors/map'), '_map.txt', ''), 'aus')
 #lapply(as.list(sc_maps_todo[which(sc_maps_todo=='cok'):length(sc_maps_todo)]), create_maps)
 
-enable_travis = function(key){
+status_travis = function(key, enable=T, csv_status=file.path(dir_github, 'ohi-webapps/tmp/webapp_travis_status.csv')){
   
+  wd = getwd()
   key <<- key
   source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
+  message(sprintf('key: %s, dir_repo:%s', key, dir_repo))
+  
   if (!file.exists(dir_repo)){
     setwd(dir_repos)
     system(sprintf('git clone %s', git_url))
   }
+  
   setwd(dir_repo)
+  system('git pull; git checkout draft; git pull')
+  res = suppressWarnings(system(sprintf('travis status -i -r %s 2>&1', git_slug), intern=T)) # 'errored'
+  states = c('repository not known','passed','errored','failed','no build yet','started')
+  status = states[sapply(states, function(x) grepl(x, res))]
+  stopifnot(length(status)==1)
   
   # turn on Travis
-  system('git pull; git checkout draft; git pull')
-  system(sprintf('travis encrypt -r %s GH_TOKEN=%s --add env.global', git_slug, gh_token))
-  system(sprintf('travis enable -r %s', git_slug))
-  system('git commit -am "enabled travis.yml with encrypted github token"; git pull; git push')  
+  if (status %in% c('no build yet','repository not known') & enable==T & file.exists('.travis.yml')){
+    system(sprintf('travis encrypt -r %s GH_TOKEN=%s --add env.global', git_slug, gh_token))
+    system(sprintf('travis enable -r %s', git_slug))
+    system('git commit -am "enabled travis.yml with encrypted github token"; git pull; git push')  
+    status = 'enabled'
+  } else if (status %in% c('no build yet','repository not known') & enable==T & !file.exists('.travis.yml')){
+    status = paste(status, '& missing .travis.yml')
+  }
+  
+  # update status csv
+  read.csv(csv_status, stringsAsFactors=F, na.strings='') %>%
+    filter(sc_key != key) %>%
+    rbind(
+      data.frame(
+        sc_key = key,
+        travis_status = status,
+        date_checked = as.character(Sys.time()))) %>%
+    write.csv(csv_status, row.names=F, na='')
+  
+  setwd(wd)
+  return(status)
 }
-
+#res = sapply(intersect(sc_studies$sc_key, sc_annex_dirs), status_travis)
+#keys = intersect(sc_studies$sc_key, sc_annex_dirs) # which(keys=='mus')
+#res = sapply(keys[which(keys=='mus'):length(keys)], status_travis)
+#travis = read.csv(file.path(dir_github, 'tmp/webapp_travis_status.csv'), na='')
 
 #enable_travis('are')
 #lapply(as.list(c('aus','bmu','bra','can','chl','deu','dji','dnk','eri','esh','fsm','gbr','geo','hrv','hti','idn','irn','isl','ita','jam','kir','lca','lka','mhl','mmr','mne','mrt','nic','niu','nor','sau','sdn','sen','sgp','shn','slb','sle','stp','zaf')), enable_travis)

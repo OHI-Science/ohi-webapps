@@ -29,7 +29,7 @@ csv_pop_inland25km = file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'layer
 # dir_annex_old  = str_replace_all(Country, ' ', '_')
 study_area = subset(sc_studies, sc_key==key, sc_name, drop=T)
 
-message(sprintf('\n%03d of %d: %s [%s] -- %s', i, nrow(sc_studies), name, key, format(Sys.time(), '%X')))    
+#message(sprintf('\n%03d of %d: %s [%s] -- %s', i, nrow(sc_studies), name, key, format(Sys.time(), '%X')))    
 stopifnot(!is.na(key))
 
 
@@ -44,7 +44,7 @@ stopifnot(!is.na(key))
 #   }
 
 if (!file.exists(csv_pop_inland25km)){
-  cat('  mar_coastalpopn_inland25km_lyr.csv NOT PRESENT, skipping!\n')
+  #cat('  mar_coastalpopn_inland25km_lyr.csv NOT PRESENT, skipping!\n')
   #next
 } else if (!'year' %in% names(read.csv(csv_pop_inland25km))){
   cat('  mar_coastalpopn_inland25km_lyr.csv WITHOUT YEAR, skipping!\n')
