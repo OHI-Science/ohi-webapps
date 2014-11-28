@@ -364,7 +364,7 @@ create_pages <- function(){
 push_branch <- function(branch='draft', ci_skip=T){
   
   # set message with [ci skip] to skip travis-ci build for this push
-  ci_skip_msg = c('TRUE'='\n[ci_skip]', 'FALSE'='')[as.character(ci_skip)]
+  ci_skip_msg = c('TRUE'='\n[ci skip]', 'FALSE'='')[as.character(ci_skip)]
   
   if (all(Sys.getenv('GH_TOKEN') > '', Sys.getenv('TRAVIS_COMMIT') > '', Sys.getenv('TRAVIS_REPO_SLUG') > '')){
     
