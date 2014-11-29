@@ -104,6 +104,7 @@ make_sc_coastpop_lyr = function(cntry, redo=F){ # cntry='usa'
 
 # get list of countries with prepped data
 cntries = list.files(dir_data)
+cntries = c('rus','spm')
 
 # loop through countries on max detected cores - 1
 # debug with lapply: 
