@@ -775,6 +775,8 @@ deploy_app <- function(key){ # key='ecu'
   # push files to github app branch
   system('git add -A; git commit -a -m "deployed app"')
   push_branch('app')
+  system('git fetch')
+  system('git branch --set-upstream-to=origin/app app')
   
   # restore wd
   setwd(wd)
@@ -947,16 +949,19 @@ create_maps = function(key='ecu'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
 #sc_maps_todo = setdiff(str_replace(list.files('~/github/ohi-webapps/errors/map'), '_map.txt', ''), 'aus')
 #lapply(as.list(sc_maps_todo[which(sc_maps_todo=='cok'):length(sc_maps_todo)]), create_maps)
 
-status_travis = function(key, enable=T, csv_status=file.path(dir_github, 'ohi-webapps/tmp/webapp_travis_status.csv')){
+status_travis = function(key, clone=F, enable=T, csv_status=file.path(dir_github, 'ohi-webapps/tmp/webapp_travis_status.csv')){
   
   wd = getwd()
   key <<- key
   source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
-  
-  if (!file.exists(dir_repo)){
+    
+  if (!file.exists(dir_repo) | clone){    
     setwd(dir_repos)
+    unlink(dir_repo, recursive=T, force=T)
     system(sprintf('git clone %s', git_url))
   }
+  repo = repository(dir_repo)
+  checkout(repo, 'draft')
   
   setwd(dir_repo)
   #system('git pull; git checkout draft; git pull')
@@ -971,7 +976,7 @@ status_travis = function(key, enable=T, csv_status=file.path(dir_github, 'ohi-we
   stopifnot(length(status)==1 | !status %in% states)
   
   # turn on Travis
-  if (status %in% c('no history', 'no build yet','repository not known') & enable==T & file.exists('.travis.yml')){
+  if (status %in% c('no history', 'no build yet','repository not known','failed') & enable==T & file.exists('.travis.yml')){    
     system(sprintf('travis encrypt -r %s GH_TOKEN=%s --add env.global', git_slug, gh_token))
     system(sprintf('travis enable -r %s', git_slug))
     system('git commit -am "enabled travis.yml with encrypted github token"; git pull; git push')  
@@ -998,7 +1003,7 @@ status_travis = function(key, enable=T, csv_status=file.path(dir_github, 'ohi-we
 #res = sapply(intersect(sc_studies$sc_key, sc_annex_dirs), status_travis)
 keys = intersect(sc_studies$sc_key, sc_annex_dirs) # which(keys=='mus')
 #travis = read.csv(file.path(dir_github, 'ohi-webapps/tmp/webapp_travis_status.csv'), na='')
-read.csv(file.path(dir_github, 'ohi-webapps/tmp/webapp_travis_status.csv')) %>%
+#read.csv(file.path(dir_github, 'ohi-webapps/tmp/webapp_travis_status.csv')) %>%
 #  select(travis_status) %>% table()
 # 2014-11-28
 #                            enabled                            errored                             failed no build yet & missing .travis.yml                             passed 
@@ -1011,13 +1016,24 @@ read.csv(file.path(dir_github, 'ohi-webapps/tmp/webapp_travis_status.csv')) %>%
 # 2014-11-28 6:35
 #   canceled     failed no history     passed 
 #          6         61         15        105
-   filter(travis_status == 'no history') %>%
-   arrange(sc_key) %>%
-   subset(select=sc_key, drop=T) %>% as.character() -> keys
+#    filter(travis_status == 'no history') %>%
+#    arrange(sc_key) %>%
+#    subset(select=sc_key, drop=T) %>% as.character() -> keys
 #res = sapply(keys[which(keys=='nld'):length(keys)], status_travis)
-res = sapply(keys, status_travis)
+#res = sapply(c('aia','alb'), status_travis)
+# keys_ghtoken = c('are','asm','aus','bel','ben','bgd','bgr','bhr','bhs','bmu','bra','brb','brn','can','chl',
+#                  'dji','kir','kwt','lca','mhl','mmr','mne','mrt','nic','niu','nor','sau','sdn','sen','sgp','shn')
+# res = sapply(keys_ghtoken, status_travis, clone=T)
 
-#enable_travis('are')
+# redo
+#c('bih','bvt','cog','cpt','cuw','egy','est','fin','fra','fro','ggy','gtm','guy','hmd','ind','iot','jey','jpn','kor','ltu','lva','maf',
+#  'mco','nfk','nld','pol','sgs','tto','rus','spm')
+
+# tto
+# Error in plot.new() : 
+# could not open file 'reports/figures/flower_Couva/Tabaquite/Talparo.png'
+# Calls: eval ... create_results -> PlotFlower -> plot -> plot.default -> plot.new
+
 #lapply(as.list(c('aus','bmu','bra','can','chl','deu','dji','dnk','eri','esh','fsm','gbr','geo','hrv','hti','idn','irn','isl','ita','jam','kir','lca','lka','mhl','mmr','mne','mrt','nic','niu','nor','sau','sdn','sen','sgp','shn','slb','sle','stp','zaf')), enable_travis)
 #lapply(intersect(sc_studies$sc_key, sc_annex_dirs), enable_travis)
 

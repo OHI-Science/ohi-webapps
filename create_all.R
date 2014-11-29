@@ -34,9 +34,25 @@ status_prev = read.csv('tmp/webapp_status_2014-10-23.csv')
 # c('esp','usa','chn','chl','fin','kor','fji') # 'isr' no spatial
 redo_maps = F
 
+# fix "/" in names for Trinidad and Tobago (tto)
+# for (csv in list.files('/Volumes/data_edit/git-annex/clip-n-ship/tto', '\\.csv$', recursive=T, full.names=T)){ # csv = list.files('/Volumes/data_edit/git-annex/clip-n-ship/tto', '\\.csv$', recursive=T, full.names=T)[1]
+#   d = read.csv(csv)
+#   if ('rgn_name' %in% names(d)){
+#     d %>%
+#       mutate(
+#         rgn_name = str_replace_all(rgn_name, '/', '-')) %>%
+#       write.csv(csv, row.names=F, na='')
+#   }
+# }
+
 #for (key in sc_studies$sc_key){ # key = 'fji' # key = sc_studies$sc_key[1]
 #sc_run = c('can'=T,'chn'=T,'fin','fji','fro','grl','idn','ind','irl','irn','irq','isl','ita','jpn','kna','lca','lka','mmr','mne','nld','nzl','rus','sau','sdn','sen','shn','slb','sle', 'som','spm','stp','sur','svn','syr')
-for (key in c('rus','spm','syr','vnm')){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1]  
+#keys_redo = c('bih','bvt','cog','cpt','cuw','egy','est','fin','fra','fro','ggy','gtm','guy','hmd','ind','iot','jey','jpn','kor','ltu','lva','maf','mco','nfk','nld','pol','sgs')
+keys_redo = c('tto','rus','spm')
+for (key in keys_redo){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1]
+  # TODO: 'rus','spm' after neptune process_rasters
+  # TODO: 'syr' inland1km, vnm offshore3nm
+  #
   
   # set vars by subcountry key
   setwd(dir_repos)
