@@ -48,8 +48,9 @@ create_all = function(key, redo_maps=F){ # key='are'
   txt_calc_error = sprintf('%s/%s_calc-scores.txt', dir_errors, key)
   unlink(txt_calc_error)
   if (class(res)=='try-error'){
-    cat(as.character(traceback(res)), file=txt_calc_error)
-    next
+    err = as.character(traceback(res))
+    cat(err, file=txt_calc_error)
+    return(sprintf('calculate_scores error: %s', err))
   }
 
   # create flower plot and table
@@ -89,8 +90,9 @@ create_all = function(key, redo_maps=F){ # key='are'
   txt_app_error = sprintf('%s/%s_app.txt', dir_errors, key)
   unlink(txt_app_error)
   if (class(res)=='try-error'){
-    cat(as.character(traceback(res)), file=txt_app_error)
-    next
+    err = as.character(traceback(res))
+    cat(err, file=txt_app_error)
+    return(sprintf('app error: %s', err))    
   }
   
 }
