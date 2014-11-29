@@ -25,7 +25,6 @@ can,passed,2014-11-28 23:39:24
 cck,passed,2014-11-28 23:39:26
 chl,passed,2014-11-28 23:39:28
 chn,passed,2014-11-28 23:39:29
-civ,no draft repo,2014-11-28 23:42:31
 cmr,passed,2014-11-28 23:42:34
 cod,passed,2014-11-28 23:42:35
 cog,failed,2014-11-28 23:42:37
@@ -141,7 +140,7 @@ prk,passed,2014-11-28 23:46:22
 prt,passed,2014-11-28 23:46:23
 pyf,passed,2014-11-28 23:46:25
 qat,passed,2014-11-28 23:46:26
-reu,no draft repo,2014-11-28 23:46:26
+reu,passed,2014-11-28 23:46:26
 rou,passed,2014-11-28 23:46:27
 rus,passed,2014-11-28 23:46:29
 sau,passed,2014-11-28 23:46:31
@@ -186,3 +185,4 @@ wlf,passed,2014-11-28 23:47:35
 wsm,passed,2014-11-28 23:47:36
 yem,passed,2014-11-28 23:47:37
 zaf,passed,2014-11-28 23:47:39
+civ,no draft repo,2014-11-28 23:54:59
