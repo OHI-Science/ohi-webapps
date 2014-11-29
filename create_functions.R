@@ -534,7 +534,7 @@ populate_draft_branch <- function(){
     
     # presuming numeric...
     # get mean
-    if (lyr == 'mar_coastalpopn_inland25km') browser()
+    #if (lyr == 'mar_coastalpopn_inland25km') browser()
     if (length(flds_other) > 0){
       b = a %>%
         group_by_(.dots=flds_other) %>%
@@ -952,7 +952,6 @@ status_travis = function(key, enable=T, csv_status=file.path(dir_github, 'ohi-we
   wd = getwd()
   key <<- key
   source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
-  message(sprintf('key: %s, dir_repo:%s', key, dir_repo))
   
   if (!file.exists(dir_repo)){
     setwd(dir_repos)
@@ -960,19 +959,24 @@ status_travis = function(key, enable=T, csv_status=file.path(dir_github, 'ohi-we
   }
   
   setwd(dir_repo)
-  system('git pull; git checkout draft; git pull')
-  res = suppressWarnings(system(sprintf('travis status -i -r %s 2>&1', git_slug), intern=T)) # 'errored'
-  states = c('repository not known','passed','errored','failed','no build yet','started')
-  status = states[sapply(states, function(x) grepl(x, res))]
-  stopifnot(length(status)==1)
+  #system('git pull; git checkout draft; git pull')
+  res = suppressWarnings(system(sprintf('travis history -i -r %s -b draft -l 1 2>&1', git_slug), intern=T))
+  if (length(res) > 0){
+    status = str_split(res, ' ')[[1]][2] %>% str_replace(':','')
+  } else {
+    status = 'no history' 
+  }
+  states = c('canceled','repository not known','passed','errored','failed','no build yet','started','no history')
+  #status = states[sapply(states, function(x) grepl(x, res))]
+  stopifnot(length(status)==1 | !status %in% states)
   
   # turn on Travis
-  if (status %in% c('no build yet','repository not known') & enable==T & file.exists('.travis.yml')){
+  if (status %in% c('no history', 'no build yet','repository not known') & enable==T & file.exists('.travis.yml')){
     system(sprintf('travis encrypt -r %s GH_TOKEN=%s --add env.global', git_slug, gh_token))
     system(sprintf('travis enable -r %s', git_slug))
     system('git commit -am "enabled travis.yml with encrypted github token"; git pull; git push')  
     status = 'enabled'
-  } else if (status %in% c('no build yet','repository not known') & enable==T & !file.exists('.travis.yml')){
+  } else if (status %in% c('no history', 'no build yet','repository not known') & enable==T & !file.exists('.travis.yml')){
     status = paste(status, '& missing .travis.yml')
   }
   
@@ -984,16 +988,144 @@ status_travis = function(key, enable=T, csv_status=file.path(dir_github, 'ohi-we
         sc_key = key,
         travis_status = status,
         date_checked = as.character(Sys.time()))) %>%
+    #arrange(sc_key) %>%
     write.csv(csv_status, row.names=F, na='')
+  message(sprintf('Travis %s: %s', key, status))
   
   setwd(wd)
   return(status)
 }
 #res = sapply(intersect(sc_studies$sc_key, sc_annex_dirs), status_travis)
-#keys = intersect(sc_studies$sc_key, sc_annex_dirs) # which(keys=='mus')
-#res = sapply(keys[which(keys=='mus'):length(keys)], status_travis)
+keys = intersect(sc_studies$sc_key, sc_annex_dirs) # which(keys=='mus')
 #travis = read.csv(file.path(dir_github, 'ohi-webapps/tmp/webapp_travis_status.csv'), na='')
+read.csv(file.path(dir_github, 'ohi-webapps/tmp/webapp_travis_status.csv')) %>%
+#  select(travis_status) %>% table()
+# 2014-11-28
+#                            enabled                            errored                             failed no build yet & missing .travis.yml                             passed 
+#                                 64                                 14                                 20                                  3                                 81 
+#               repository not known 
+#                                  5
+# 2014-11-28 5:10 pm
+#                            enabled                            errored                             failed no build yet & missing .travis.yml                             passed               repository not known 
+#                                 64                                 14                                 20                                  3                                 81                                  5 
+# 2014-11-28 6:35
+#   canceled     failed no history     passed 
+#          6         61         15        105
+   filter(travis_status == 'no history') %>%
+   arrange(sc_key) %>%
+   subset(select=sc_key, drop=T) %>% as.character() -> keys
+#res = sapply(keys[which(keys=='nld'):length(keys)], status_travis)
+res = sapply(keys, status_travis)
 
 #enable_travis('are')
 #lapply(as.list(c('aus','bmu','bra','can','chl','deu','dji','dnk','eri','esh','fsm','gbr','geo','hrv','hti','idn','irn','isl','ita','jam','kir','lca','lka','mhl','mmr','mne','mrt','nic','niu','nor','sau','sdn','sen','sgp','shn','slb','sle','stp','zaf')), enable_travis)
 #lapply(intersect(sc_studies$sc_key, sc_annex_dirs), enable_travis)
+
+update_status <- function(){
+  
+  # get status repo  depth of 1 only
+  if (file.exists('~/github/subcountry')){
+    system('cd ~/github/subcountry; git pull')
+  } else {
+    system('git clone --depth=1 https://github.com/OHI-Science/subcountry ~/github/subcountry')
+  }
+  csv_status = '~/github/subcountry/_data/status.csv'
+  #read.csv(csv_status, stringsAsFactors=F) %>% head
+  
+  d_sc = sc_studies %>% 
+    select(sc_key, sc_name, gl_rgn_name, sc_annex_dir) %>%
+    left_join(
+      read.csv(file.path(dir_github, 'ohi-webapps/tmp/rgn_notmatching_gadm_manual_utf-8.csv'), na.strings='') %>%
+        select(
+          sc_name  = rgn_name, 
+          gadm_name,
+          gadm_lumped = rgn_to_gadm_lumping,
+          gadm_split  = rgn_to_gadm_splitting),
+      by='sc_name') %>%
+    left_join(
+      read.csv(file.path(dir_github, 'ohi-webapps/tmp/webapp_travis_status.csv')),
+      by='sc_key') %>%        
+    left_join(
+      read.csv(file.path(dir_github, 'subcountry/_data/status.csv'), na.strings=''), # repo, study_area, status, last_mod, last_sha, last_msg, map_url, n_regions
+      by = c('sc_key'='repo')) %>%
+    select(-study_area, -date_checked, -gl_rgn_name)
+
+  # handle NAs ----
+  d_na = filter(d_sc, is.na(status) & is.na(travis_status)) %>%
+    mutate(
+      status = ifelse(
+        !is.na(gadm_lumped), 
+        sprintf('%s lumped in GADM to %s', sc_name, gadm_name),
+        ifelse(
+          !is.na(gadm_split),
+          sprintf('%s split in GADM to %s', sc_name, gadm_name),
+          sprintf('%s not found in GADM', sc_name)
+          ))) %>%
+    mutate(
+      last_mod = as.character(Sys.Date())) %>%
+    select(repo = sc_key, status, last_mod)
+
+  rbind_list(
+    read.csv(csv_status, stringsAsFactors=F) %>%
+      filter(!repo %in% d_na$repo),
+    read.csv(csv_status, stringsAsFactors=F) %>% 
+      filter(repo %in% d_na$repo) %>%
+      select(-status, -last_mod) %>%
+      left_join(
+        d_na %>%
+          select(repo, status, last_mod),
+        by='repo')) %>%
+    arrange(repo) %>%
+    select(repo, study_area, status, last_mod, last_sha, last_msg, map_url, n_regions) %>%
+    write.csv(csv_status, row.names=F, na='')
+
+  # handle others ----
+  #subset(d_sc, is.na(status) & !is.na(travis_status), c(sc_key, travis_status))
+  
+  wd = getwd()
+  keys = subset(d_sc, is.na(status) & !is.na(travis_status), sc_key, drop=T)
+  for (key in keys[which(keys=='civ'):length(keys)]){ # key='bih'
+    
+    key <<- key
+    source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
+    #message(sprintf('key: %s, dir_repo:%s', key, dir_repo))
+    setwd(dir_repo)
+    
+    system('cd ~/github/subcountry; git pull')
+    d = read.csv(csv_status, stringsAsFactors=F)
+    i = which(d$repo == key)
+    
+    # get this repo's info
+    repo = repository(dir_repo)
+    res = try(checkout(repo, 'draft'))
+    if (class(res)=='try-error'){
+      d$status[i]    = 'draft repo not yet generated'
+    } else {
+      k = commits(repo)[[1]]
+      
+      rgns_csv = 'subcountry2014/reports/tables/region_titles.csv'
+      if (file.exists(rgns_csv)){
+        n_rgns = read.csv(rgns_csv) %>% nrow() - 1
+      } else {
+        n_rgns = NA
+      }    
+      
+      # update d
+      d$status[i]    = sprintf('[![](https://api.travis-ci.org/OHI-Science/%s.svg?branch=draft)](https://travis-ci.org/OHI-Science/%s/branches)', git_repo, git_repo)
+      d$last_mod[i]  = sprintf('%0.10s', as(k@author@when, 'character'))
+      d$last_sha[i]  = sprintf('%0.7s', k@sha)
+      d$last_msg[i]  = k@summary
+      d$map_url[i]   = sprintf('http://ohi-science.org/%s/images/regions_30x20.png', git_repo)
+      d$n_regions[i] = n_rgns
+    }
+      
+    # update status repo
+    write.csv(d, csv_status, row.names=F, na='')
+    system(sprintf('cd ~/github/subcountry; git commit -a -m "updated status for %s commit %0.7s"', key, k@sha))
+    system('cd ~/github/subcountry; git push https://${GH_TOKEN}@github.com/OHI-Science/subcountry.git HEAD:gh-pages')  
+    
+  }
+  
+  # return to original directory
+  setwd(wd)
+}

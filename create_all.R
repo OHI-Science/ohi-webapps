@@ -36,7 +36,7 @@ redo_maps = F
 
 #for (key in sc_studies$sc_key){ # key = 'fji' # key = sc_studies$sc_key[1]
 #sc_run = c('can'=T,'chn'=T,'fin','fji','fro','grl','idn','ind','irl','irn','irq','isl','ita','jpn','kna','lca','lka','mmr','mne','nld','nzl','rus','sau','sdn','sen','shn','slb','sle', 'som','spm','stp','sur','svn','syr')
-for (key in 'usa'){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1]  
+for (key in c('rus','spm','syr','vnm')){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1]  
   
   # set vars by subcountry key
   setwd(dir_repos)
@@ -102,7 +102,7 @@ for (key in 'usa'){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1]
   
   # enable Travis if on Mac
   if (Sys.info()[['sysname']] == 'Darwin'){
-    enable_travis()
+    status_travis(key)
   }
   
   # deploy app

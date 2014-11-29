@@ -116,5 +116,5 @@ write.csv(
     filter(is.na(sc_annex_dir)) %>%
     select(gl_rgn_id, gl_rgn_name, sc_key) %>%
     arrange(gl_rgn_name), 'tmp/gl-rgns_no-sc-annex-data.csv', row.names=F, na='')
-sc_studies = filter(sc_studies, !is.na(gl_rgn_key))
+#sc_studies = filter(sc_studies, !is.na(gl_rgn_key))
 stopifnot(count(sc_studies, sc_key) %>% filter(n > 1) %>% nrow == 0)
