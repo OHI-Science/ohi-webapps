@@ -961,17 +961,20 @@ status_travis = function(key, clone=F, enable=T, csv_status=file.path(dir_github
     system(sprintf('git clone %s', git_url))
   }
   repo = repository(dir_repo)
-  checkout(repo, 'draft')
-  
-  setwd(dir_repo)
-  #system('git pull; git checkout draft; git pull')
-  res = suppressWarnings(system(sprintf('travis history -i -r %s -b draft -l 1 2>&1', git_slug), intern=T))
-  if (length(res) > 0){
-    status = str_split(res, ' ')[[1]][2] %>% str_replace(':','')
-  } else {
-    status = 'no history' 
+  res = try(checkout(repo, 'draft'))
+  if (class(res)=='try-error'){
+    status = 'no draft repo'
+  } else {  
+    setwd(dir_repo)
+    #system('git pull; git checkout draft; git pull')
+    res = suppressWarnings(system(sprintf('travis history -i -r %s -b draft -l 1 2>&1', git_slug), intern=T))
+    if (length(res) > 0){
+      status = str_split(res, ' ')[[1]][2] %>% str_replace(':','')
+    } else {
+      status = 'no history' 
+    }
   }
-  states = c('canceled','repository not known','passed','errored','failed','no build yet','started','no history')
+  states = c('canceled','repository not known','passed','errored','failed','no build yet','started','no history','no draft repo')
   #status = states[sapply(states, function(x) grepl(x, res))]
   stopifnot(length(status)==1 | !status %in% states)
   
@@ -1024,7 +1027,8 @@ keys = intersect(sc_studies$sc_key, sc_annex_dirs) # which(keys=='mus')
 # keys_ghtoken = c('are','asm','aus','bel','ben','bgd','bgr','bhr','bhs','bmu','bra','brb','brn','can','chl',
 #                  'dji','kir','kwt','lca','mhl','mmr','mne','mrt','nic','niu','nor','sau','sdn','sen','sgp','shn')
 # res = sapply(keys_ghtoken, status_travis, clone=T)
-
+res = sapply(keys[(which(keys=='chn')+1):length(keys)], status_travis, enable=F)
+table(res)
 # redo
 #c('bih','bvt','cog','cpt','cuw','egy','est','fin','fra','fro','ggy','gtm','guy','hmd','ind','iot','jey','jpn','kor','ltu','lva','maf',
 #  'mco','nfk','nld','pol','sgs','tto','rus','spm')
