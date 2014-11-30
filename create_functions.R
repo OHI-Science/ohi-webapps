@@ -1068,7 +1068,44 @@ update_status <- function(){
     left_join(
       read.csv(file.path(dir_github, 'subcountry/_data/status.csv'), na.strings=''), # repo, study_area, status, last_mod, last_sha, last_msg, map_url, n_regions
       by = c('sc_key'='repo')) %>%
-    select(-study_area, -date_checked, -gl_rgn_name)
+    select(-study_area, -gl_rgn_name) %>%
+    rename(travis_checked=date_checked)
+
+  # TODO: mutate(travis_checked = 'passed','failed','lumped to GADM','split to GADM','not created b/c accented rename')
+  
+subset(d_sc, travis_status=='no draft repo')
+#   sc_key     sc_name                                 sc_annex_dir     gadm_name gadm_lumped gadm_split travis_status      travis_checked                       status last_mod last_sha last_msg map_url n_regions
+#   31    civ Ivory Coast /Volumes/data_edit/git-annex/clip-n-ship/civ Côte d'Ivoire          NA         NA no draft repo 2014-11-28 23:54:59 draft repo not yet generated     <NA>     <NA>     <NA>    <NA>        NA
+table(is.na(d_sc$travis_status))
+# FALSE  TRUE 
+#   187    34 
+# built  not   total
+#   186   35 = 221
+table(d_sc$travis_status)
+#      canceled        failed no draft repo        passed 
+#             6            26             1           154 
+#   failed     passed   built
+#       26        160 = 186
+d_sc %>%
+  filter(is.na(d_sc$travis_status)) %>%
+  mutate(
+    status_general = ifelse(
+      grepl('lumped in GADM', status),
+      'lumped in GADM',
+      ifelse(
+        grepl('split in GADM', status),
+        'split in GADM',
+        ifelse(
+          grepl('not found in GADM', status),
+          'not found in GADM',
+          as.character(status))))) %>%
+  select(status_general) %>% table
+#    not found in GADM   split in GADM  lumped in GADM
+#                   26               3               3 
+#   Antarctica  Israel   Ivory Coast 
+#            1       1             1                   = 35 not built
+
+# TODO: close issues!!
 
   # handle NAs ----
   d_na = filter(d_sc, is.na(status) & is.na(travis_status)) %>%
