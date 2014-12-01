@@ -104,7 +104,7 @@ for (key in keys_redo){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1]
   system('git checkout published; git pull; git checkout draft')
   
   # populate website
-  populate_website()
+  populate_website(key)
   
   # ensure draft is default branch, delete extras (like old master)
   edit_gh_repo(key, default_branch='draft', verbosity=1)

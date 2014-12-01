@@ -661,9 +661,11 @@ populate_draft_branch <- function(){
   setwd(wd)  
 }
 
-populate_website <- function(){
+populate_website <- function(key, delete_first=T, copy_images=T, copy_flag=T, msg='populate_website()'){
   
-  # presume in repo
+  # get subcountry vars specific to key
+  key <<- key
+  source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
     
   # cd into repo, checkout gh-pages
   wd = getwd()
@@ -675,26 +677,33 @@ populate_website <- function(){
     system('git checkout --orphan gh-pages')
     system('git rm -rf .')    
   } else {
-    system('git checkout gh-pages')
-  } 
-  system('rm -rf *') # clear existing
+    system('git checkout gh-pages; git pull')
+  }
+  if (delete_first){
+    system('rm -rf *') # clear existing
+  }
   
   # copy template
-  file.copy(list.files(file.path(dir_github, 'ohi-webapps/gh-pages'), full.names=T, all.files=T), '.', overwrite=T, recursive=T)
+  file.copy(list.files(file.path(dir_github, 'ohi-webapps/gh-pages'), full.names=T), '.', overwrite=T, recursive=T)
+  file.copy(file.path(dir_github, 'ohi-webapps/gh-pages', c('.travis.yml','.gitignore')), '.', overwrite=T, recursive=T)
   
   # copy images
-  for (f in c('app_400x250.png','regions_1600x800.png',	'regions_30x20.png', 'regions_400x250.png')){    
-    f_from = file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'gh-pages/images', f)
-    message('copying ', f_from)
-    stopifnot(file.copy(f_from, file.path('images', f), overwrite=T))
+  if (copy_images){
+    for (f in c('app_400x250.png','regions_1600x800.png',	'regions_30x20.png', 'regions_400x250.png')){    
+      f_from = file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'gh-pages/images', f)
+      message('copying ', f_from)
+      stopifnot(file.copy(f_from, file.path('images', f), overwrite=T))
+    }
   }
   
   # copy flag
-  flag_in = sprintf('%s/ohi-webapps/flags/small/%s.png', dir_github, str_replace(subset(sc_studies, sc_key==key, sc_name, drop=T), ' ', '_'))
-  if (file.exists(flag_in)){
-    flag_out = file.path(dir_repo, 'images/flag_80x40.png')
-    unlink(flag_out)
-    system(sprintf("convert -resize '80x40' %s %s", flag_in, flag_out))
+  if (copy_flag){
+    flag_in = sprintf('%s/ohi-webapps/flags/small/%s.png', dir_github, str_replace(subset(sc_studies, sc_key==key, sc_name, drop=T), ' ', '_'))
+    if (file.exists(flag_in)){
+      flag_out = file.path(dir_repo, 'images/flag_80x40.png')
+      unlink(flag_out)
+      system(sprintf("convert -resize '80x40' %s %s", flag_in, flag_out))
+    }
   }
   
   # brew config and README
@@ -707,11 +716,17 @@ populate_website <- function(){
   writeLines(c('.Rproj.user', '.Rhistory', '.RData', '_site','_asset_bundler_cache','.sass','.sass-cache','.DS_Store'), '.gitignore')  
   
   # git add, commit and push
-  system('git add -A; git commit -a -m "populate_website"')
+  system(sprintf('git add -A; git commit -a -m "%s"', msg))
   system('git push origin gh-pages')
   system('git branch --set-upstream-to=origin/gh-pages gh-pages')
   system('git fetch; git pull')
+  setwd(wd)
 }
+#d = read.csv('tmp/webapp_travis_status.csv', stringsAsFactors=F); head(d); table(d$travis_status)
+# keys = subset(d, travis_status %in% c('canceled','passed'), sc_key, drop=T)
+#keys = subset(d, travis_status %in% c('failed'), sc_key, drop=T)
+#sapply(keys[(which(keys=='asm')+1):length(keys)], populate_website, delete_first=F, copy_images=F, copy_flag=F, msg='add Google Translate via populate_website()')
+#sapply(keys, populate_website, delete_first=F, copy_images=F, copy_flag=F, msg='add Google Translate via populate_website()')
 
 deploy_app <- function(key){ # key='ecu'
   
@@ -1004,7 +1019,7 @@ status_travis = function(key, clone=F, enable=T, csv_status=file.path(dir_github
   return(status)
 }
 #res = sapply(intersect(sc_studies$sc_key, sc_annex_dirs), status_travis)
-keys = intersect(sc_studies$sc_key, sc_annex_dirs) # which(keys=='mus')
+#keys = intersect(sc_studies$sc_key, sc_annex_dirs) # which(keys=='mus')
 #travis = read.csv(file.path(dir_github, 'ohi-webapps/tmp/webapp_travis_status.csv'), na='')
 #read.csv(file.path(dir_github, 'ohi-webapps/tmp/webapp_travis_status.csv')) %>%
 #  select(travis_status) %>% table()
@@ -1027,8 +1042,8 @@ keys = intersect(sc_studies$sc_key, sc_annex_dirs) # which(keys=='mus')
 # keys_ghtoken = c('are','asm','aus','bel','ben','bgd','bgr','bhr','bhs','bmu','bra','brb','brn','can','chl',
 #                  'dji','kir','kwt','lca','mhl','mmr','mne','mrt','nic','niu','nor','sau','sdn','sen','sgp','shn')
 # res = sapply(keys_ghtoken, status_travis, clone=T)
-res = sapply(keys[(which(keys=='chn')+1):length(keys)], status_travis, enable=F)
-table(res)
+#res = sapply(keys[(which(keys=='chn')+1):length(keys)], status_travis, enable=F)
+#table(res)
 # redo
 #c('bih','bvt','cog','cpt','cuw','egy','est','fin','fra','fro','ggy','gtm','guy','hmd','ind','iot','jey','jpn','kor','ltu','lva','maf',
 #  'mco','nfk','nld','pol','sgs','tto','rus','spm')
