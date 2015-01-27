@@ -661,6 +661,96 @@ populate_draft_branch <- function(){
   setwd(wd)  
 }
 
+update_draft <- function(key, msg='ohi-webapps/create_functions.R - update_website()'){
+  # key='ecu'
+
+  # get subcountry vars specific to key
+  key <<- key
+  source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
+    
+  # cd into repo, checkout gh-pages
+  wd = getwd()
+  if (!file.exists(dir_repo)) system(sprintf('git clone %s %s', git_url, dir_repo))
+  setwd(dir_repo)
+  repo = repository(dir_repo)
+  
+  # switch to draft branch and get latest
+  system('git checkout draft; git pull')
+    
+  # create and cd to scenario
+  dir_scenario = file.path(dir_repo, basename(default_branch_scenario))
+  dir.create(dir_scenario, showWarnings=F)
+  setwd(dir_scenario)
+  
+  # TODO: merge existing subcountry layers.csv with global layers.csv for updated descriptions
+  read.csv('layers.csv') %>%
+    merge(lyrs_gl) %>%
+    mutate(...) %>%
+    #head()
+    write.csv('layers.csv')
+      
+  # TODO: update functions.R  
+
+  # copy configuration files
+  conf_files = c('functions.R','goals.csv','pressures_matrix.csv','resilience_matrix.csv','resilience_weights.csv')
+  for (f in conf_files){ # f = conf_files[2]
+    
+    f_in  = sprintf('%s/conf/%s', dir_global, f)
+    f_out = sprintf('conf/%s', f)
+    
+    # read in file
+    s = readLines(f_in, warn=F, encoding='UTF-8')
+    
+    # swap out custom functions
+    if (f=='functions.R'){
+      
+      # iterate over goals with functions to swap
+      for (g in names(fxn_swap)){ # g = names(fxn_swap)[1]
+        
+        # get goal=line# index for functions.R
+        fxn_idx = setNames(
+          grep('= function', s),
+          str_trim(str_replace(grep('= function', s, value=T), '= function.*', '')))
+        
+        # read in new goal function
+        s_g = readLines(fxn_swap[g], warn=F, encoding='UTF-8')
+        
+        # get line numbers for current and next goal to begin and end excision
+        ln_beg = fxn_idx[g] - 1
+        ln_end = fxn_idx[which(names(fxn_idx)==g) + 1]
+        
+        # inject new goal function
+        s = c(s[1:ln_beg], s_g, '\n', s[ln_end:length(s)])
+      }      
+    }
+    
+    # substitute old layer names with new
+    # TODO: Need to borrow code back from original populate_draft_branch() to get proper layer names? 
+    #       Or create a lookup table of old to new layer names.
+    lyrs_dif = lyrs_sc %>% filter(layer!=layer_gl)
+    for (i in 1:nrow(lyrs_dif)){ # i=1
+      s = str_replace_all(s, fixed(lyrs_dif$layer_gl[i]), lyrs_dif$layer[i])
+    }
+    
+    writeLines(s, f_out)
+  }
+  
+  # swap fields in goals.csv
+  goals = read.csv('conf/goals.csv', stringsAsFactors=F)
+  for (g in names(goal_swap)){ # g = names(goal_swap)[1]
+    for (fld in names(goal_swap[[g]])){
+      goals[goals$goal==g, fld] = goal_swap[[g]][[fld]]
+    }
+  }
+  write.csv(goals, 'conf/goals.csv', row.names=F, na='')
+  
+  # copy goals documentation
+  file.copy(file.path(dir_github, 'ohi-webapps/subcountry2014/conf/goals.Rmd'), 'conf/goals.Rmd', overwrite=T)
+  
+  setwd(wd)  
+}
+
+
 populate_website <- function(key, delete_first=T, copy_images=T, copy_flag=T, msg='populate_website()'){
   
   # get subcountry vars specific to key
@@ -727,6 +817,36 @@ populate_website <- function(key, delete_first=T, copy_images=T, copy_flag=T, ms
 #keys = subset(d, travis_status %in% c('failed'), sc_key, drop=T)
 #sapply(keys[(which(keys=='asm')+1):length(keys)], populate_website, delete_first=F, copy_images=F, copy_flag=F, msg='add Google Translate via populate_website()')
 #sapply(keys, populate_website, delete_first=F, copy_images=F, copy_flag=F, msg='add Google Translate via populate_website()')
+
+update_website <- function(key, msg='ohi-webapps/create_functions.R - update_website()'){
+  # key='ecu'
+  
+  # get subcountry vars specific to key
+  key <<- key
+  source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
+    
+  # cd into repo, checkout gh-pages
+  wd = getwd()
+  if (!file.exists(dir_repo)) system(sprintf('git clone %s %s', git_url, dir_repo))
+  setwd(dir_repo)
+  repo = repository(dir_repo)
+  
+  # switch to gh-pages and get latest
+  system('git checkout gh-pages; git pull')
+  
+  # copy template web files over
+  file.copy(list.files(file.path(dir_github, 'ohi-webapps/gh-pages'), full.names=T), '.', overwrite=T, recursive=T)
+  unlink('_config.brew.yml')
+  
+  # git add, commit and push
+  system(sprintf('git add -A; git commit -a -m "%s"', msg))
+  system('git push origin gh-pages')
+  setwd(wd)
+}
+
+# keys = sc_studies %>% filter(!is.na(sc_annex_dir)) %>% select(sc_key)
+# keys = keys[,1]
+# sapply(keys, update_website, 'update About using ohi-webapps/create_functions.R - update_website()') # done 2015-01-23 by bbest, jules32
 
 deploy_app <- function(key){ # key='ecu'
   
