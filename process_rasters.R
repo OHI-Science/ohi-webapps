@@ -9,7 +9,10 @@ rasterOptions(tmpdir=tmpdir)
 
 # get paths based on host machine, now on neptune
 dirs = list(
-  neptune_data  = '/var/data/ohi', 
+  neptune_data  =  c(
+    'Windows' = '//neptune.nceas.ucsb.edu/data_edit',
+    'Darwin'  = '/Volumes/data_edit',
+    'Linux'   = '/var/data/ohi')[[ Sys.info()[['sysname']] ]], 
   github        = '~/github')
 
 dir_data    = sprintf('%s/git-annex/clip-n-ship', dirs['neptune_data']) # 'N:/git-annex/clip-n-ship/data'
