@@ -237,6 +237,7 @@ populate_draft_branch <- function(){
   if (length(remote_branches)==0){
     system('touch README.md')
     system('git add -A; git commit -m "first commit"')
+    try(system('git remote rm origin')) # added by JSL Mar 13 2015; http://stackoverflow.com/questions/1221840/remote-origin-already-exists-on-git-push-to-new-repository
     system(sprintf('git remote add origin https://github.com/OHI-Science/%s.git', key))
     system('git push -u origin master')    
     system('git pull')
@@ -967,6 +968,8 @@ create_maps = function(key='ecu'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
     x$id = factor(as.character(x$id), rgn_names)
     return(x)
   })
+  
+  # keep only coastal subcountry regions
   ids_offshore = unique(plys.df[['offshore']][['id']])
   
   # get extent from inland and offshore, expanded 10%
@@ -1115,11 +1118,14 @@ custom_maps = function(key='gye'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
   dir_custom  = file.path(dir_spatial, 'custom')
   dir_pages   = file.path(dir_data, key, 'gh-pages')
   
-  # read shapefiles  
-  shp = file_path_sans_ext(list.files(dir_custom))[1]
-  plys = lapply(shp, function(x) try(readOGR(dir_custom, shp)))
-#   shps = setNames(sprintf('%s/rgn_%s_gcs', dir_spatial, names(buffers)), names(buffers))
-#   plys = lapply(shps, function(x) try(readOGR(dirname(x), basename(x))))
+  # read shapefiles, store as list
+  shp_name = file_path_sans_ext(list.files(dir_custom))[1]
+  plys = lapply(shp_name, function(x){
+    shp_orig = readOGR(dir_custom, shp_name)
+    crs = CRS("+proj=longlat +datum=WGS84")
+    shp = spTransform(shp_orig,crs) # shp 
+    return(shp)
+  })
   
   # drop failed buffers
   bufs_valid = sapply(plys, function(x) !'try-error' %in% class(x))
@@ -1136,7 +1142,8 @@ custom_maps = function(key='gye'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
     x = fortify(x, region='Zona')          # rgn_name or Zona # need to generalize this
     x$id = factor(as.character(x$id), rgn_names)
     return(x)
-  })
+  })         # head(as.data.frame(plys.df))
+  
 # keep only coastal subcountry regions
 #   ids_offshore = unique(plys.df[['offshore']][['id']]) 
   
@@ -1146,9 +1153,6 @@ custom_maps = function(key='gye'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
 #   
   custom_map = function(f_png, width=400, height=250, res=72, effect='toycamera'){  
     
-#     x  = extendrange(c(bb_inland25km['x',], bb_offshore['x',]), f=0.1)
-#     y  = extendrange(c(bb_inland25km['y',], bb_offshore['y',]), f=0.1)
-
       x  = extendrange(c(bb_offshore['x',], bb_offshore['x',]), f=0.1)
       y  = extendrange(c(bb_offshore['y',], bb_offshore['y',]), f=0.1)
     
@@ -1160,7 +1164,7 @@ custom_maps = function(key='gye'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
     }
     bb = c(x[1], y[1], x[2], y[2])
     
-    # plot
+    # plot basemap
     cat('bb:',bb,'\n')
     m = try(get_map(location=bb, source='stamen', maptype='toner-lite', crop=T))
     if (class(m) == 'try-error'){
@@ -1169,47 +1173,10 @@ custom_maps = function(key='gye'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
     }    
     p = ggmap(m, extent='device')
     
-    # offshore
-    if ('offshore' %in% names(plys)){
+    # overlay region buffers as colors; see create_map above for each individual buffer (offshore, offshore3nm etc)
       p = p + geom_polygon(
         aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['offshore']], 
-        data=plys.df[['offshore']])
-    }
-    
-    # offshore3nm
-    if ('offshore3nm' %in% names(plys)){
-      p = p + geom_polygon(
-        aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['offshore3nm']], 
-        data=plys.df[['offshore3nm']])
-    }
-    
-    # offshore1km
-    if ('offshore1km' %in% names(plys)){
-      p = p + geom_polygon(
-        aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['offshore1km']], 
-        data=plys.df[['offshore1km']])
-    }
-    
-    # inland
-    if ('inland' %in% names(plys)){
-      p = p + geom_polygon(
-        aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['inland']], 
-        data=subset(plys.df[['inland']], id %in% ids_offshore))
-    }
-    
-    # inland25km
-    if ('inland25km' %in% names(plys)){
-      p = p + geom_polygon(
-        aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['inland25km']], 
-        data=subset(plys.df[['inland25km']], id %in% ids_offshore))
-    }
-    
-    # inland1km
-    if ('inland1km' %in% names(plys)){
-      p = p + geom_polygon(
-        aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['inland1km']], 
-        data=subset(plys.df[['inland1km']], id %in% ids_offshore))
-    }
+        data=plys.df[[1]]) 
     
     # tweaks
     p = p +
@@ -1235,6 +1202,7 @@ custom_maps = function(key='gye'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
     #system(sprintf('open %s', f_png))
   }
   
+  # create gh-pages/images directory
   dir_pfx = file.path(dir_annex, key, 'gh-pages/images')
   dir.create(dir_pfx, showWarnings=F, recursive=T)
   
