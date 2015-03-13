@@ -1,5 +1,6 @@
 # devtools::install_github('ohi-science/ohicore@dev')
 library(stringr)
+library(tools)
 library(git2r)     # devtools::install_github('ropensci/git2r')
 library(dplyr)
 library(shiny)

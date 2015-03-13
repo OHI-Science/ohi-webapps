@@ -5,27 +5,42 @@ source('create_init_custom.R') # by J. Lowndes Mar 11 2015
 source('create_functions.R')
 source('ohi-travis-functions.R')
 
+repo_name     = key
+git_owner     = 'OHI-Science'
+git_repo      = repo_name
+dir_repo = sprintf('~/tmp/%s', git_repo) 
+git_slug  = sprintf('%s/%s', git_owner, git_repo)
+git_url   = sprintf('https://github.com/%s', git_slug) 
+
 # view map and accompanying data: 
-gye = readOGR(dsn='/Users/julialowndes/Dropbox/NCEAS_Julie/OHI_Regional/OHI_Ecuador/GYE_shp',layer='Regiones')
+library(rgdal) 
+dir_neptune <- c(
+  'Windows' = '//neptune.nceas.ucsb.edu/data_edit',
+  'Darwin'  = '/Volumes/data_edit',
+  'Linux'   = '/var/data/ohi')[[ Sys.info()[['sysname']] ]]
+
+gye = readOGR(dsn=file.path(dir_neptune, 'git-annex/tmp/GYE_shp'), 
+              layer='Regiones')
 plot(gye)
 gye@data
 
+
+# back to the script
 make_sc_coastpop_lyr(gye, redo=F)
 
 # loop through countries
 
 redo_maps = F
 
-
 keys_custom = c('gye')
 for (key in keys_custom){ # key = 'gye' 
    
   # set vars by subcountry key
-  setwd(dir_repos)
-  source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
+#   setwd(dir_repos)
+#   source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
 
   # create github repo
-  #repo = create_gh_repo(key)
+  repo = create_gh_repo(key)
   
   # create maps
   txt_map_error = sprintf('%s/%s_map.txt', dir_errors, key)
@@ -33,7 +48,7 @@ for (key in keys_custom){ # key = 'gye'
   txt_shp_error = sprintf('%s/%s_readOGR_fails.txt', dir_errors, key)
   unlink(txt_shp_error)
   if (!all(file.exists(file.path(dir_annex, key, 'gh-pages/images', c('regions_1600x800.png', 'regions_600x400.png', 'regions_400x250.png', 'app_400x250.png', 'regions_30x20.png')))) | redo_maps){
-    res = try(create_maps(key))
+    res = try(custom_maps(key))
     if (class(res)=='try-error'){
       cat(as.character(traceback(res)), file=txt_map_error)
       next
