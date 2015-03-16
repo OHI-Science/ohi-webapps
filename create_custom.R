@@ -12,6 +12,12 @@ git_repo      = repo_name
 dir_repo = sprintf('~/tmp/%s', git_repo) 
 git_slug  = sprintf('%s/%s', git_owner, git_repo)
 git_url   = sprintf('https://github.com/%s', git_slug) 
+pages_url     = sprintf('http://ohi-science.org/%s', git_repo)
+
+dir_annex_sc  = file.path(dir_annex, key)
+
+study_area = 'Golfo de Guayaquil' # make generalizable with ohi-webapps/tmp/gl_rgn_custom
+default_branch_scenario = 'published/region2015'  # generalize this
 
 # view map and accompanying data: 
 library(rgdal) 
