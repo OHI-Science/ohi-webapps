@@ -1,0 +1,1 @@
+Error : You must register an account using setAccountInfo prior to proceeding.

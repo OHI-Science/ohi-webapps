@@ -170,6 +170,51 @@ edit_gh_repo <- function(key, default_branch='draft', verbosity=1){ # key='abw'
 }    
 #results = rbind_all(lapply(sc_studies$sc_key[1:3], edit_gh_repo, verbosity=2)) # done 2014-11-02 by bbest
 
+# update Github repo with Description, Website and default branch
+edit_gh_repo_custom <- function(key, default_branch='draft', verbosity=1){ # key='abw'
+  
+  # vars
+  d           = subset(sc_studies, sc_key == key)
+  repo        = d$sc_key
+  description = sprintf('Ocean Health Index for %s', d$sc_name)
+  website     = sprintf('http://ohi-science.org/%s', repo)
+  
+  # setup JSON metadata object to inject
+  kv = list(
+    name           = repo, 
+    description    = description,
+    homepage       = website,
+    default_branch = default_branch)
+  json = toJSON(kv, auto_unbox = T)
+  
+  cmd = sprintf('git ls-remote https://github.com/OHI-Science/%s.git', repo)
+  cmd_res = system(cmd, ignore.stderr=T, intern=T)
+  repo_exists = ifelse(is.null(attr(cmd_res, 'status')), T, F)  
+  if (repo_exists){
+    if (verbosity > 0){
+      message(sprintf('%s: updating github repo attributes -- %s', key, format(Sys.time(), '%X')))
+      if (verbosity > 1){
+        message(paste(sprintf('  %s: %s', names(kv), as.character(kv)), collapse='\n'))
+      }
+    }
+    cmd = sprintf('curl --silent -u "bbest:%s" -X PATCH -d \'%s\' https://api.github.com/repos/ohi-science/%s', gh_token, json, repo) # this worked; thought I would need to change to jules32
+    cmd_res = paste(capture.output(fromJSON(system(cmd, intern=T))), collapse='\n')
+  }
+  
+  # return data.frame
+  data.frame(
+    sc_key         = key, 
+    sc_name        = d$sc_name, 
+    repo_exists    = repo_exists,
+    cmd            = cmd, 
+    cmd_res        = cmd_res, 
+    description    = ifelse(repo_exists, description), 
+    website        = ifelse(repo_exists, website),
+    default_branch = ifelse(repo_exists, default_branch),
+    stringsAsFactors=F)
+}    
+#results = rbind_all(lapply(sc_studies$sc_key[1:3], edit_gh_repo, verbosity=2)) # done 2014-11-02 by bbest
+
 
 rename_branches <- function(key, verbosity=1){ # key='ecu'
   # rename: master -> published, dev -> draft
@@ -289,7 +334,7 @@ populate_draft_branch <- function(){
   if (file.exists(f_geojson_old)) file.rename(f_geojson_old, f_geojson)
   txt_shp_error = sprintf('%s/%s_shp_to_geojson.txt', dir_errors, key)
   unlink(txt_shp_error)
-  if (!file.exists(f_js)){
+  if (!file.exists(f_js)){                                               # throws error; Mar 16
     f_shp = file.path(dir_annex, key, 'spatial', 'rgn_offshore_gcs.shp')
     cat(sprintf('  shp_to_geojson -- %s\n', format(Sys.time(), '%X')))    
     v = try(shp_to_geojson(f_shp, f_js, f_geojson))
@@ -322,7 +367,7 @@ populate_draft_branch <- function(){
   # rgn_id_sc->sc_rgn_id, rgn_name_sc->sc_rgn_name, rgn_id_gl-> gl_rgn_id, rgn_name_gl-> gl_rgn_name
   sc_rgns = read.csv(sc_rgns_csv) %>%
     select(sc_rgn_id=rgn_id, sc_rgn_name=rgn_name) %>%
-    mutate(gl_rgn_name = name) %>%
+    mutate(gl_rgn_name = name) %>%                      
     merge(
       gl_rgns %>%
         select(gl_rgn_name, gl_rgn_id),
@@ -339,29 +384,9 @@ populate_draft_branch <- function(){
     group_by(gl_cntry_key, sc_rgn_id) %>%
     summarise(n=n()) %>%
     select(cntry_key = gl_cntry_key, sc_rgn_id) %>%
-    as.data.frame()
-  
-  # bind single cntry_key
-  if (length(unique(sc_cntry$cntry_key)) > 1){
+    filter(cntry_key == 'ECU') %>%                  # generalize this with Julien's method
+    as.data.frame() 
     
-    # extract non-na rows from lookup
-    d_mcntry = gl_sc_mcntry %>% filter(gl_rgn_name == name & !is.na(sc_rgn_name))
-    
-    # log error if no rows defined
-    txt_mcntry_error = sprintf('%s/%s_cntry-key-length-gt-1.txt', dir_errors, key)
-    unlink(txt_mcntry_error)
-    if (nrow(d_mcntry) == 0){
-      cat(sprintf('  multi-country lookup not registered yet in %s. NEXT!\n', csv_mcntry))
-      write.csv(d_mcntry, txt_mcntry_error, row.names=F, na='')
-      next
-    }
-    
-    # update cntry key
-    sc_cntry = d_mcntry %>%
-      select(
-        cntry_key = gl_cntry_key,
-        sc_rgn_id = sc_rgn_id)    
-  }    
   
   # swap out custom mar_coastalpopn_inland25mi for mar_coastalpopn_inland25km (NOTE: mi -> km)
   ix = which(lyrs_sc$layer=='mar_coastalpopn_inland25mi')
@@ -373,7 +398,7 @@ populate_draft_branch <- function(){
   lyrs_sc$rgns_in[ix]     = 'subcountry'
   
   # get layers used to downweight from global: area_offshore, area_offshore_3nm, equal, equal , population_inland25km, 
-  population_inland25km = read.csv(file.path(dir_annex_sc, 'layers' , 'mar_coastalpopn_inland25km_lyr.csv')) %>%
+  population_inland25km = read.csv(file.path(dir_annex_sc, 'layers' , 'mar_coastalpopn_inland25km_lyr.csv')) %>%      # DUMMY file March 16. 
     filter(year == dw_year) %>%
     mutate(
       dw = popsum / sum(popsum)) %>%
@@ -387,16 +412,16 @@ populate_draft_branch <- function(){
     mutate(
       dw = area_km2 / sum(area_km2)) %>%
     select(rgn_id, dw)
-  area_offshore_3nm     = read.csv(file.path(dir_annex_sc, 'spatial', 'rgn_offshore3nm_data.csv')) %>%
-    mutate(
-      dw = area_km2 / sum(area_km2)) %>%
-    select(rgn_id, dw)
-  
+#   area_offshore_3nm     = read.csv(file.path(dir_annex_sc, 'spatial', 'rgn_offshore3nm_data.csv')) %>%     # error, no file March 16
+#     mutate(
+#       dw = area_km2 / sum(area_km2)) %>%
+#     select(rgn_id, dw)
+#   
   # swap out spatial area layers
   area_layers = c(
-    'rgn_area'             = 'rgn_offshore_data.csv',
-    'rgn_area_inland1km'   = 'rgn_inland1km_data.csv',
-    'rgn_area_offshore3nm' = 'rgn_offshore3nm_data.csv')
+    'rgn_area'             = 'rgn_offshore_data.csv')
+#     'rgn_area_inland1km'   = 'rgn_inland1km_data.csv',
+#     'rgn_area_offshore3nm' = 'rgn_offshore3nm_data.csv')
   for (lyr in names(area_layers)){
     csv = area_layers[lyr]
     ix = which(lyrs_sc$layer==lyr)
@@ -417,7 +442,7 @@ populate_draft_branch <- function(){
   lyrs_sc = filter(lyrs_sc, !layer %in% lyrs_le_rm)
   
   # write layers data files
-  for (j in 1:nrow(lyrs_sc)){ # i=56
+  for (j in 1:nrow(lyrs_sc)){ # j=56
     
     lyr     = lyrs_sc$layer[j]
     rgns_in = lyrs_sc$rgns_in[j]
@@ -455,11 +480,10 @@ populate_draft_branch <- function(){
           select(rgn_id, type, label=sc_rgn_name)
       }
       
-      # downweight: area_offshore, area_offshore_3nm, equal, equal , population_inland25km, 
+      # downweight: area_offshore, equal, equal , population_inland25km, 
       # shp = '/Volumes/data_edit/git-annex/clip-n-ship/data/Albania/rgn_inland25km_mol.shp'    
-      # TODO: raster, raster | area_inland1km, raster | area_offshore, raster | area_offshore3nm, raster | equal
       downweight = str_trim(lyrs_sc$clip_n_ship_disag[j])
-      downweightings = c('area_offshore'='area-offshore', 'area_offshore_3nm'='area-offshore3nm', 'population_inland25km'='popn-inland25km')
+      downweightings = c('area_offshore'='area-offshore', 'population_inland25km'='popn-inland25km')
       if (downweight %in% names(downweightings) & nrow(d) > 0){
         
         # update data frame with downweighting
@@ -496,7 +520,7 @@ populate_draft_branch <- function(){
     write.csv(lyrs_empty, 'layers-empty_swapping-global-mean.csv', row.names=F, na='')
   }
   
-  # populate empty layers with global averages
+  # populate empty layers with global averages. 
   for (lyr in subset(lyrs, data_na, layer, drop=T)){ # lyr = subset(lyrs, data_na, layer, drop=T)[1]
     
     message(' for empty layer ', lyr, ', getting global avg')
@@ -654,10 +678,10 @@ populate_draft_branch <- function(){
   brew(travis_draft_yaml_brew, '.travis.yml')
   
   # copy regions map image
-  dir.create('subcountry2014/reports/figures', showWarnings=F, recursive=T) 
+  dir.create(sprintf('%s/reports/figures', default_scenario), showWarnings=F, recursive=T) 
   file.copy(
     file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'gh-pages/images/regions_600x400.png'), 
-    'subcountry2014/reports/figures/regions_600x400.png', overwrite=T)
+    sprintf('%s/reports/figures/regions_600x400.png', default_scenario), overwrite=T)
   
   setwd(wd)  
 }
@@ -787,13 +811,16 @@ populate_website <- function(key, delete_first=T, copy_images=T, copy_flag=T, ms
     }
   }
   
-  # copy flag
+  # copy flag, i.e., national flag
   if (copy_flag){
-    flag_in = sprintf('%s/ohi-webapps/flags/small/%s.png', dir_github, str_replace(subset(sc_studies, sc_key==key, sc_name, drop=T), ' ', '_'))
+    flag_in = sprintf('%s/ohi-webapps/flags/small/%s.png', dir_github, str_replace(subset(sc_studies, sc_key=='ecu', sc_name, drop=T), ' ', '_'))
     if (file.exists(flag_in)){
       flag_out = file.path(dir_repo, 'images/flag_80x40.png')
       unlink(flag_out)
-      system(sprintf("convert -resize '80x40' %s %s", flag_in, flag_out))
+      system(sprintf("convert -resize '80x40' %s %s", flag_in, flag_out))  # Ran this on Neptune since this gives a weird error in Yosemite:
+      # Error in if (file.exists(flag_in)) { : argument is of length zero
+      # sh convert: command not found
+      # workaround March 16: from Neptune, save in ohi-webapps/tmp, and then from normal RStudio, copy into file.path(dir_repo, 'images')
     }
   }
   
@@ -865,7 +892,7 @@ deploy_app <- function(key){ # key='ecu'
   remote_branches = sapply(branches(repo, 'remote'), function(x) str_split(x@name, '/')[[1]][2])
   if (!'app' %in% remote_branches){
     system('git checkout --orphan app')
-    system('git rm -rf .')
+    system('git rm -rf .')     # ERROR: fatal: pathspec '.' did not match any files
   } else {
     system('git checkout app')    
   }
@@ -905,7 +932,7 @@ deploy_app <- function(key){ # key='ecu'
   unlink('github', recursive=T, force=T)
   
   # deploy
-  # Error: You must register an account using setAccountInfo prior to proceeding. Sign in to shinyapps.io via Github as bbest, Settings > Tokens to use setAccountInfo('ohi-science',...)
+  # Error: You must register an account using setAccountInfo prior to proceeding. Sign in to shinyapps.io via Github as bbest, Settings > Tokens to use setAccountInfo('ohi-science',...). March 16 Error: did as above. In console: shinyapps::setAccountInfo(name='jules32', token='...', secret='...')
   deployApp(appDir='.', appName=app_name, upload=T, launch.browser=T, lint=F)
   
   # push files to github app branch
@@ -1118,8 +1145,16 @@ custom_maps = function(key='gye'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
   dir_custom  = file.path(dir_spatial, 'custom')
   dir_pages   = file.path(dir_data, key, 'gh-pages')
   
-  # read shapefiles, store as list
+   # process shapefiles: 
+  
+  # read shapefiles, save in dir_spatial
   shp_name = file_path_sans_ext(list.files(dir_custom))[1]
+  shp_orig = readOGR(dir_custom, shp_name)
+  crs = CRS("+proj=longlat +datum=WGS84")
+  shp = spTransform(shp_orig,crs)
+  writeOGR(shp, dsn=dir_spatial, 'rgn_offshore_gcs', driver='ESRI Shapefile')
+  
+  # read shapefiles, store as list
   plys = lapply(shp_name, function(x){
     shp_orig = readOGR(dir_custom, shp_name)
     crs = CRS("+proj=longlat +datum=WGS84")

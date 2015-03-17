@@ -1,47 +1,64 @@
+# create_custom.r
+# by J. Lowndes lowndes@nceas.ucsb.edu, March 2015
+#
+# This script creates custom OHI+ repos and WebApps 
+# It is based off of create_all.r by B. Best, Fall 2014
+#
+# Requirements: 
+# 1. Save shp files in ...
+
+
 # set vars and get functions
 setwd('~/github/ohi-webapps')
-source('process_rasters.r') 
+
+# source('process_rasters.r') 
 source('create_init_custom.R') # by J. Lowndes Mar 11 2015
 source('create_functions.R')
 source('ohi-travis-functions.R')
 
-# need to move this
-repo_name     = key
-git_owner     = 'OHI-Science'
-git_repo      = repo_name
-dir_repo = sprintf('~/tmp/%s', git_repo) 
-git_slug  = sprintf('%s/%s', git_owner, git_repo)
-git_url   = sprintf('https://github.com/%s', git_slug) 
-pages_url     = sprintf('http://ohi-science.org/%s', git_repo)
-
-dir_annex_sc  = file.path(dir_annex, key)
-
-study_area = 'Golfo de Guayaquil' # make generalizable with ohi-webapps/tmp/gl_rgn_custom
-default_branch_scenario = 'published/region2015'  # generalize this
-
-# view map and accompanying data: 
-library(rgdal) 
 dir_neptune <- c(
   'Windows' = '//neptune.nceas.ucsb.edu/data_edit',
   'Darwin'  = '/Volumes/data_edit',
   'Linux'   = '/var/data/ohi')[[ Sys.info()[['sysname']] ]]
 
+# Important for ECU+Galapagos
+csv_mcntry  <- sprintf('%s/ohi-webapps/tmp/gl-rgn_multiple-cntry_sc-rgn_manual.csv', dir_github)
+gl_sc_mcntry <- read.csv(csv_mcntry)
 
-# back to the script
-make_sc_coastpop_lyr(gye, redo=F)
+sc_studies = read.csv(sprintf('%s/ohi-webapps/tmp/sc_studies_custom.csv', dir_github))
 
-# loop through countries
-
-redo_maps = F
+# # back to the script
+# make_sc_coastpop_lyr(gye, redo=F)
+# 
+# # loop through countries
+# 
+# redo_maps = F
 
 keys_custom = c('gye')
 for (key in keys_custom){ # key = 'gye' 
    
+  # setup
+  repo_name     = key
+  git_owner     = 'OHI-Science'
+  git_repo      = repo_name
+  dir_repo = sprintf('~/tmp/%s', git_repo) 
+  git_slug  = sprintf('%s/%s', git_owner, git_repo)
+  git_url   = sprintf('https://github.com/%s', git_slug) 
+  pages_url     = sprintf('http://ohi-science.org/%s', git_repo)
+  dir_annex_sc  = file.path(dir_annex, key)
+  study_area = 'Golfo de Guayaquil' # make generalizable with ohi-webapps/tmp/gl_rgn_custom
+  default_branch          = 'published'
+  default_scenario        = 'region2015'  # generalize this
+  default_branch_scenario = 'published/region2015'  # generalize this
+  name = sc$sc_name
+#   sc = 'ECU'; sc = as.data.frame(sc); names(sc) = 'gl_rgn_key'  # make lookup table to generalize # don't think I need this anymore
+  
+  
   # set vars by subcountry key
 #   setwd(dir_repos)
 #   source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
 
-  # create empty github repo
+  # create empty github repo ## KEEP
   # repo = create_gh_repo(key)
   
   # create maps
@@ -90,8 +107,8 @@ for (key in keys_custom){ # key = 'gye'
   populate_website(key)
   
   # ensure draft is default branch, delete extras (like old master)
-  edit_gh_repo(key, default_branch='draft', verbosity=1)
-  delete_extra_branches()
+  edit_gh_repo_custom(key, default_branch='draft', verbosity=1)
+  delete_extra_branches()            # must be in dir_repo = sprintf("~/tmp/%s', key)
   
   # create pages based on results
   setwd(dir_repo)
