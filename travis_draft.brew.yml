@@ -29,8 +29,8 @@ install:
 - ./travis-tool.sh install_github ropensci/git2r
 - ./travis-tool.sh install_github ohi-science/rCharts
 - ./travis-tool.sh install_github ohi-science/ohicore@dev # @master or @2f7a3d7 to specify by commit (https://github.com/OHI-Science/ohicore/commits/master)
-- git config --global user.email "bbest@nceas.ucsb.edu"
-- git config --global user.name "Ben Best"
+- git config --global user.email "lowndes@nceas.ucsb.edu"
+- git config --global user.name "Julia Lowndes"
 
 script:
 # execute as a sequence, so if any fail, none of the subsequent commands are executed
@@ -47,5 +47,6 @@ notifications:
   email:
     recipients:
     - bbest@nceas.ucsb.edu
+    - lowndes@nceas.ucsb.edu
     on_success: change
     on_failure: always
