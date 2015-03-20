@@ -373,6 +373,7 @@ populate_draft_branch <- function(){
         select(gl_rgn_name, gl_rgn_id),
       by='gl_rgn_name', all.x=T) %>%
     select(sc_rgn_id, sc_rgn_name, gl_rgn_id, gl_rgn_name) %>%
+    mutate(gl_rgn_id = 137) %>% ## generalize!!!
     arrange(sc_rgn_name)
   
   # old global to new subcountry countries
@@ -691,7 +692,7 @@ update_draft <- function(key, msg='ohi-webapps/create_functions.R - update_websi
 
   # get subcountry vars specific to key
   key <<- key
-  source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
+#   source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
     
   # cd into repo, checkout gh-pages
   wd = getwd()
@@ -780,7 +781,6 @@ populate_website <- function(key, delete_first=T, copy_images=T, copy_flag=T, ms
   
   # get subcountry vars specific to key
   key <<- key
-  source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
     
   # cd into repo, checkout gh-pages
   wd = getwd()
@@ -813,7 +813,7 @@ populate_website <- function(key, delete_first=T, copy_images=T, copy_flag=T, ms
   
   # copy flag, i.e., national flag
   if (copy_flag){
-    flag_in = sprintf('%s/ohi-webapps/flags/small/%s.png', dir_github, str_replace(subset(sc_studies, sc_key=='ecu', sc_name, drop=T), ' ', '_'))
+    flag_in = sprintf('%s/ohi-webapps/flags/small/%s.png', dir_github, sc_studies$gl_rgn_name) # modified by JSL March 19
     if (file.exists(flag_in)){
       flag_out = file.path(dir_repo, 'images/flag_80x40.png')
       unlink(flag_out)
@@ -851,7 +851,7 @@ update_website <- function(key, msg='ohi-webapps/create_functions.R - update_web
   
   # get subcountry vars specific to key
   key <<- key
-  source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
+#   source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
     
   # cd into repo, checkout gh-pages
   wd = getwd()
@@ -878,8 +878,6 @@ update_website <- function(key, msg='ohi-webapps/create_functions.R - update_web
 
 deploy_app <- function(key){ # key='ecu'
   
-  source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
-  
   # delete old
   dir_app_old <- sprintf('%s/git-annex/clip-n-ship/%s/shinyapps.io', dir_neptune, git_repo)
   unlink(dir_app_old, recursive=T)
@@ -899,8 +897,9 @@ deploy_app <- function(key){ # key='ecu'
   system('rm -rf *')
   
   # copy installed ohicore shiny app files
-  # good to have latest dev ohicore first: devtools::install_github('ohi-science/ohicore@dev') 
-  dir_ohicore_app = file.path(system.file(package='ohicore'), 'shiny_app')
+  # good to have latest dev ohicore first: 
+  devtools::install_github('ohi-science/ohicore@dev')  # update by JSL March 19
+  dir_ohicore_app = '~/github/ohicore/inst/shiny_app' #file.path(system.file(package='ohicore'), 'shiny_app') # 
   shiny_files = list.files(dir_ohicore_app, recursive=T)  
   for (f in shiny_files){ # f = shiny_files[1]
     dir.create(dirname(f), showWarnings=F, recursive=T)
@@ -908,18 +907,18 @@ deploy_app <- function(key){ # key='ecu'
   }
     
   # get commit version of ohicore app files
-  lns = readLines(file.path(dir_ohicore_app, '../DESCRIPTION'))
+  lns = readLines(file.path(dir_ohicore_app, '../../DESCRIPTION'))
   g = sapply(str_split(lns[grepl('^Github', lns)], ': '), function(x) setNames(x[2], x[1]))
   #ohicore_app_commit = sprintf('%s/%s@%s,%.7s', g[['GithubUsername']], g[['GithubRepo']], , g[['GithubSHA1']])
   ohicore_app = list(ohicore_app=list(
-    git_owner  = g[['GithubUsername']],
-    git_repo   = g[['GithubRepo']],
-    git_branch = g[['GithubRef']],      
-    git_commit = g[['GithubSHA1']]))
+    git_owner  = 'jules32', #g[['GithubUsername']],   ## generalize-- DESCRIPTION not found...
+    git_repo   = 'gye', # g[['GithubRepo']],
+    git_branch = 'draft', # g[['GithubRef']],      
+    git_commit = 'initial commit')) #g[['GithubSHA1']]))
   
   # write config
   brew(file.path(dir_github, 'ohi-webapps/app.brew.yml'), 'app.yml')
-  file.copy(file.path(dir_github, 'ohi-webapps/travis_app.yml'), '.travis.yml')
+  file.copy(file.path(dir_github, 'ohi-webapps/travis_app.yml'), '.travis.yml') # overwrite=T)
     
   # add Rstudio project files. cannabalized devtools::add_rstudio_project() which only works for full R packages.
   file.copy(system.file('templates/template.Rproj', package='devtools'), sprintf('%s.Rproj', key))
@@ -1139,7 +1138,6 @@ custom_maps = function(key='gye'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
   
   # paths (dir_neptune, dir_github already set by source('~/github/ohi-webapps/create_init.R')
   key <<- key
-  source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
   dir_data    = file.path(dir_neptune, 'git-annex/clip-n-ship')
   dir_spatial = file.path(dir_data, key, 'spatial')
   dir_custom  = file.path(dir_spatial, 'custom')
@@ -1153,6 +1151,12 @@ custom_maps = function(key='gye'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
   crs = CRS("+proj=longlat +datum=WGS84")
   shp = spTransform(shp_orig,crs)
   writeOGR(shp, dsn=dir_spatial, 'rgn_offshore_gcs', driver='ESRI Shapefile')
+   # !! need to change names, see ohicore/shp_to_geojson:: I set this as names(x) = c('rgn_id', 'rgn_name', 'area_km2', 'hectares')
+  
+#   shp_orig@data # this is a data.frame
+#   shp_orig@data$Zona # call a column
+  
+  names(shp_orig@data) = c('rgn_id', 'rgn_name', 'area_km2', 'hectares')
   
   # read shapefiles, store as list
   plys = lapply(shp_name, function(x){
@@ -1263,7 +1267,6 @@ status_travis = function(key, clone=F, enable=T, csv_status=file.path(dir_github
   
   wd = getwd()
   key <<- key
-  source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
     
   if (!file.exists(dir_repo) | clone){    
     setwd(dir_repos)
@@ -1454,7 +1457,7 @@ d_sc %>%
   for (key in keys[which(keys=='civ'):length(keys)]){ # key='bih'
     
     key <<- key
-    source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
+#     source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
     #message(sprintf('key: %s, dir_repo:%s', key, dir_repo))
     setwd(dir_repo)
     
