@@ -104,6 +104,7 @@ for (key in keys_redo){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1]
   system('git checkout published; git pull; git checkout draft')
   
   # populate website
+  source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
   populate_website(key)
   
   # ensure draft is default branch, delete extras (like old master)
@@ -118,11 +119,13 @@ for (key in keys_redo){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1]
   
   # enable Travis if on Mac
   if (Sys.info()[['sysname']] == 'Darwin'){
+    source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
     status_travis(key)
   }
   
   # deploy app
   #devtools::install_github('ohi-science/ohicore@dev') # install latest ohicore, with DESCRIPTION having commit etc to add to app
+  source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
   res = try(deploy_app(key))
   # if problem calculating, log problem and move on to next subcountry key
   txt_app_error = sprintf('%s/%s_app.txt', dir_errors, key)

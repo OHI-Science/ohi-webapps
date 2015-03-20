@@ -89,6 +89,7 @@ cu_rgns = read.csv(csv_custom, stringsAsFactors=F) %>% # custom regions
 # get list of subcountry study areas with prepped data
 # set lowercase global country ISO [gl_rgn_key] as study area key [sc_key]
 sc_annex_dirs <- list.dirs(dir_annex, full.names=F, recursive=F)
+sc_studies = read.csv('tmp/sc_studies_custom.csv')
 # sc_studies <- gl_rgns %>%                                        # March 16: this is now a .csv file called ohi-webapps/tmp/sc_studies_custom.csv
 #   mutate(
 #     sc_key  = tolower(gl_rgn_key),

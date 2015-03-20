@@ -21,25 +21,21 @@ dir_neptune <- c(
   'Darwin'  = '/Volumes/data_edit',
   'Linux'   = '/var/data/ohi')[[ Sys.info()[['sysname']] ]]
 
-# Important for ECU+Galapagos
+# Multiple country lookup
 csv_mcntry  <- sprintf('%s/ohi-webapps/tmp/gl-rgn_multiple-cntry_sc-rgn_manual.csv', dir_github)
 gl_sc_mcntry <- read.csv(csv_mcntry)
 
-sc_studies = read.csv(sprintf('%s/ohi-webapps/tmp/sc_studies_custom.csv', dir_github))
 
-# # back to the script
-# make_sc_coastpop_lyr(gye, redo=F)
-# 
 # # loop through countries
-# 
-# redo_maps = F
+redo_repo = F
+redo_maps = F
+keys_custom = c('gye') # set up an 'if exists, skip
 
-keys_custom = c('gye')
 for (key in keys_custom){ # key = 'gye' 
    
   # setup
   repo_name     = key
-  git_owner     = 'OHI-Science'
+  git_owner     = 'jules32'
   git_repo      = repo_name
   dir_repo = sprintf('~/tmp/%s', git_repo) 
   git_slug  = sprintf('%s/%s', git_owner, git_repo)
@@ -50,28 +46,20 @@ for (key in keys_custom){ # key = 'gye'
   default_branch          = 'published'
   default_scenario        = 'region2015'  # generalize this
   default_branch_scenario = 'published/region2015'  # generalize this
-  name = sc$sc_name
-#   sc = 'ECU'; sc = as.data.frame(sc); names(sc) = 'gl_rgn_key'  # make lookup table to generalize # don't think I need this anymore
+  sc_studies = sc_studies %>%
+    filter(sc_key == key)
+  name = sc_studies$sc_name 
   
-  
-  # set vars by subcountry key
-#   setwd(dir_repos)
-#   source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
 
-  # create empty github repo ## KEEP
-  # repo = create_gh_repo(key)
+  # create empty github repo 
+  if(redo_repo) repo = create_gh_repo(key)
   
   # create maps
-  txt_map_error = sprintf('%s/%s_map.txt', dir_errors, key)
-  unlink(txt_map_error)  
-  txt_shp_error = sprintf('%s/%s_readOGR_fails.txt', dir_errors, key)
-  unlink(txt_shp_error)
-  if (!all(file.exists(file.path(dir_annex, key, 'gh-pages/images', c('regions_1600x800.png', 'regions_600x400.png', 'regions_400x250.png', 'app_400x250.png', 'regions_30x20.png')))) | redo_maps){
+  if (!all(file.exists(
+    file.path(dir_annex, key, 
+              'gh-pages/images', c('regions_1600x800.png', 'regions_600x400.png', 'regions_400x250.png', 'app_400x250.png', 'regions_30x20.png'))))
+    | redo_maps){
     res = try(custom_maps(key))
-    if (class(res)=='try-error'){
-      cat(as.character(traceback(res)), file=txt_map_error)
-      next
-    }
   }
   
   # populate draft branch
@@ -85,14 +73,7 @@ for (key in keys_custom){ # key = 'gye'
   # calculate_scores
   setwd(dir_repo)
   res = try(calculate_scores())
-  # if problem calculating, log problem and move on to next subcountry key
-  txt_calc_error = sprintf('%s/%s_calc-scores.txt', dir_errors, key)
-  unlink(txt_calc_error)
-  if (class(res)=='try-error'){
-    cat(as.character(traceback(res)), file=txt_calc_error)
-    next
-  }
-
+  
   # create flower plot and table
   setwd(dir_repo)
   create_results()
@@ -103,17 +84,18 @@ for (key in keys_custom){ # key = 'gye'
   push_branch('published')
   system('git checkout published; git pull; git checkout draft')
   
-  # populate website
+  # populate WebApp (pages will be empty)
   populate_website(key)
   
   # ensure draft is default branch, delete extras (like old master)
   edit_gh_repo_custom(key, default_branch='draft', verbosity=1)
-  delete_extra_branches()            # must be in dir_repo = sprintf("~/tmp/%s', key)
+  delete_extra_branches()            # must be in dir_repo = sprintf('~/tmp/%s', key)
   
-  # create pages based on results
+  # create pages on WebApp based on results
   setwd(dir_repo)
   system('git pull; git checkout draft; git pull')
-  create_pages()
+  create_pages()  # make a custom because the error-checking throws an error since custom repos aren't included in the master list
+#   system('git checkout gh-pages; git commit -m "updated jules32 from bbest" ')
   system('git checkout gh-pages; git pull; git checkout published; git pull')
   
   # enable Travis if on Mac
@@ -123,6 +105,7 @@ for (key in keys_custom){ # key = 'gye'
   
   # deploy app
   #devtools::install_github('ohi-science/ohicore@dev') # install latest ohicore, with DESCRIPTION having commit etc to add to app
+#   source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
   res = try(deploy_app(key))
   # if problem calculating, log problem and move on to next subcountry key
   txt_app_error = sprintf('%s/%s_app.txt', dir_errors, key)
