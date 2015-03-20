@@ -268,6 +268,7 @@ delete_extra_branches <- function(dir_repo=getwd(), branches_keep=c('draft','pub
 populate_draft_branch <- function(){
   
   wd = getwd()
+  library(rgdal)
   
   # clone repo
   setwd(dir_repos)
@@ -298,10 +299,9 @@ populate_draft_branch <- function(){
   # ensure on draft branch ----
   checkout(repo, 'draft')
   
-  dir_errors = file.path(dir_repos, '_errors')
-  dir.create(dir_errors, showWarnings=F)
-  
-  #cat(sprintf('  populating local dev repo with scenario files -- %s\n', format(Sys.time(), '%X')))
+#   dir_errors = file.path(dir_repos, '_errors')
+#   dir.create(dir_errors, showWarnings=F)
+#   
   
   # recreate empty dir, except hidden .git
   del_except = ''
@@ -798,7 +798,7 @@ populate_website <- function(key, delete_first=T, copy_images=T, copy_flag=T, ms
     system('rm -rf *') # clear existing
   }
   
-  # copy template
+  # copy template files from ohi-webapps/gh-pages (including _config.brew.yml, which identifies the shiny server location (app_url))
   file.copy(list.files(file.path(dir_github, 'ohi-webapps/gh-pages'), full.names=T), '.', overwrite=T, recursive=T)
   file.copy(file.path(dir_github, 'ohi-webapps/gh-pages', c('.travis.yml','.gitignore')), '.', overwrite=T, recursive=T)
   
@@ -817,13 +817,11 @@ populate_website <- function(key, delete_first=T, copy_images=T, copy_flag=T, ms
     if (file.exists(flag_in)){
       flag_out = file.path(dir_repo, 'images/flag_80x40.png')
       unlink(flag_out)
-      system(sprintf("convert -resize '80x40' %s %s", flag_in, flag_out))  # Ran this on Neptune since this gives a weird error in Yosemite:
-      # Error in if (file.exists(flag_in)) { : argument is of length zero
-      # sh convert: command not found
-      # workaround March 16: from Neptune, save in ohi-webapps/tmp, and then from normal RStudio, copy into file.path(dir_repo, 'images')
-    }
-  }
-  
+      system(sprintf("convert -resize '80x40' %s %s", flag_in, flag_out)) } }  # Requires that imageMagick be installed. See below and http://stackoverflow.com/questions/25460047/cants-install-imagemagick-with-brew-on-mac-os-x-mavericks
+      # From terminal:
+      # $ brew update
+      # $ brew install imagemagick --disable-openmp --build-from-source   
+
   # brew config and README
   brew('_config.brew.yml', '_config.yml')
   unlink('_config.brew.yml')
@@ -898,7 +896,7 @@ deploy_app <- function(key){ # key='ecu'
   
   # copy installed ohicore shiny app files
   # good to have latest dev ohicore first: 
-  devtools::install_github('ohi-science/ohicore@dev')  # update by JSL March 19
+  devtools::install_github('ohi-science/ohicore@dev')  # update by JSL March 19. Could cause problems since need to make sure pulled latest version
   dir_ohicore_app = '~/github/ohicore/inst/shiny_app' #file.path(system.file(package='ohicore'), 'shiny_app') # 
   shiny_files = list.files(dir_ohicore_app, recursive=T)  
   for (f in shiny_files){ # f = shiny_files[1]
@@ -917,6 +915,10 @@ deploy_app <- function(key){ # key='ecu'
     git_commit = 'initial commit')) #g[['GithubSHA1']]))
   
   # write config
+#   default_branch          = 'published'  ## remove these 3 lines but this keeps getting overwritten with subcountry2014
+#   default_scenario        = 'region2015'  # generalize this
+#   default_branch_scenario = 'published/region2015'  # generalize this
+
   brew(file.path(dir_github, 'ohi-webapps/app.brew.yml'), 'app.yml')
   file.copy(file.path(dir_github, 'ohi-webapps/travis_app.yml'), '.travis.yml') # overwrite=T)
     
@@ -932,7 +934,7 @@ deploy_app <- function(key){ # key='ecu'
   
   # deploy
   # Error: You must register an account using setAccountInfo prior to proceeding. Sign in to shinyapps.io via Github as bbest, Settings > Tokens to use setAccountInfo('ohi-science',...). March 16 Error: did as above. In console: shinyapps::setAccountInfo(name='jules32', token='...', secret='...')
-  deployApp(appDir='.', appName=app_name, upload=T, launch.browser=T, lint=F)
+  deployApp(appDir='.', appName=app_name, upload=T, launch.browser=T, lint=F) # Change this with Nick Brand
   
   # push files to github app branch
   system('git add -A; git commit -a -m "deployed app"')
@@ -1145,18 +1147,13 @@ custom_maps = function(key='gye'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
   
    # process shapefiles: 
   
-  # read shapefiles, save in dir_spatial
+  # read shapefiles, rename headers and save in dir_spatial
   shp_name = file_path_sans_ext(list.files(dir_custom))[1]
-  shp_orig = readOGR(dir_custom, shp_name)
+  shp_orig = readOGR(dir_custom, shp_name) # inspect: shp_orig
+  names(shp_orig@data) = c('rgn_id', 'rgn_name', 'area_km2', 'hectares')       ## generalize!
   crs = CRS("+proj=longlat +datum=WGS84")
-  shp = spTransform(shp_orig,crs)
+  shp = spTransform(shp_orig,crs) # inspect as data.frame: shp@data // inspect a column: shp@data$rgn_name
   writeOGR(shp, dsn=dir_spatial, 'rgn_offshore_gcs', driver='ESRI Shapefile')
-   # !! need to change names, see ohicore/shp_to_geojson:: I set this as names(x) = c('rgn_id', 'rgn_name', 'area_km2', 'hectares')
-  
-#   shp_orig@data # this is a data.frame
-#   shp_orig@data$Zona # call a column
-  
-  names(shp_orig@data) = c('rgn_id', 'rgn_name', 'area_km2', 'hectares')
   
   # read shapefiles, store as list
   plys = lapply(shp_name, function(x){
@@ -1280,7 +1277,7 @@ status_travis = function(key, clone=F, enable=T, csv_status=file.path(dir_github
   } else {  
     setwd(dir_repo)
     #system('git pull; git checkout draft; git pull')
-    res = suppressWarnings(system(sprintf('travis history -i -r %s -b draft -l 1 2>&1', git_slug), intern=T))
+    res = suppressWarnings(system(sprintf('travis history -i -r %s -b draft -l 1 2>&1', git_slug), intern=T)) # this gives an error for jules32
     if (length(res) > 0){
       status = str_split(res, ' ')[[1]][2] %>% str_replace(':','')
     } else {
