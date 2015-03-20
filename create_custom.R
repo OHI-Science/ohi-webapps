@@ -10,8 +10,6 @@
 
 # set vars and get functions
 setwd('~/github/ohi-webapps')
-
-# source('process_rasters.r') 
 source('create_init_custom.R') # by J. Lowndes Mar 11 2015
 source('create_functions.R')
 source('ohi-travis-functions.R')
@@ -35,20 +33,21 @@ for (key in keys_custom){ # key = 'gye'
    
   # setup
   repo_name     = key
-  git_owner     = 'jules32'
+  git_owner     = 'OHI-Science'
   git_repo      = repo_name
   dir_repo = sprintf('~/tmp/%s', git_repo) 
   git_slug  = sprintf('%s/%s', git_owner, git_repo)
   git_url   = sprintf('https://github.com/%s', git_slug) 
   pages_url     = sprintf('http://ohi-science.org/%s', git_repo)
   dir_annex_sc  = file.path(dir_annex, key)
-  study_area = 'Golfo de Guayaquil' # make generalizable with ohi-webapps/tmp/gl_rgn_custom
   default_branch          = 'published'
   default_scenario        = 'region2015'  # generalize this
   default_branch_scenario = 'published/region2015'  # generalize this
   sc_studies = sc_studies %>%
     filter(sc_key == key)
+  study_area = sc_studies$sc_name 
   name = sc_studies$sc_name 
+  app_name = sprintf('%s_app', key)
   
 
   # create empty github repo 
@@ -95,7 +94,6 @@ for (key in keys_custom){ # key = 'gye'
   setwd(dir_repo)
   system('git pull; git checkout draft; git pull')
   create_pages()  # make a custom because the error-checking throws an error since custom repos aren't included in the master list
-#   system('git checkout gh-pages; git commit -m "updated jules32 from bbest" ')
   system('git checkout gh-pages; git pull; git checkout published; git pull')
   
   # enable Travis if on Mac

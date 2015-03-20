@@ -14,6 +14,9 @@ pop_crs = crs(pop) # check crs (coodinate ref system) = mollweide. Always easier
 shp_gye = file_path_sans_ext(list.files(dir_custom))[1]
 shp_orig = readOGR(dir_custom, shp_gye)
 
+# shp_orig@data # this is a data.frame
+# shp_orig@data$Zona # call a column
+
 shp = spTransform(shp_orig,pop_crs) # transforming shpfile to crs of pop raster
 ext_gye = extent(shp_gye) #in meters now
 

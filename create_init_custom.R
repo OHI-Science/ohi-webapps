@@ -1,4 +1,4 @@
-# devtools::install_github('ohi-science/ohicore@dev')
+devtools::install_github('ohi-science/ohicore@dev')
 library(stringr)
 library(tools)
 library(git2r)     # devtools::install_github('ropensci/git2r')
@@ -37,7 +37,7 @@ sfx_global  <- 'gl2014'
 dw_year     <- 2014
 git_branch  <- 'master'
 tabs_hide   <- c('Calculate','Report') # , Compare'
-commit_msg  <- "downweighted layers based on popn-inland25km, area-offshore, area-offshore3nm"
+commit_msg  <- "downweighted layers based on popn-inland25km, area-offshore"
 redo_layers <- T
 redo_app    <- T
 fxn_swap    <- c(
@@ -47,7 +47,7 @@ goal_swap   <- list(
   'LIV' = list(preindex_function="LIV_ECO(layers, subgoal='LIV')"),
   'ECO' = list(preindex_function="LIV_ECO(layers, subgoal='ECO')"))
 travis_draft_yaml_brew <- sprintf('%s/ohi-webapps/travis_draft.brew.yml', dir_github)
-travis_pages_yaml_brew <- sprintf('%s/ohi-webapps/travis_gh-pages.brew.yml', dir_github)
+travis_pages_yaml_brew <- sprintf('%s/ohi-webapps/travis_gh-pages.brew.yml', dir_github)  # I don't see this
 
 # load ohicore
 library(ohicore) # devtools::load_all(dir_ohicore)
@@ -89,32 +89,6 @@ cu_rgns = read.csv(csv_custom, stringsAsFactors=F) %>% # custom regions
 # get list of subcountry study areas with prepped data
 # set lowercase global country ISO [gl_rgn_key] as study area key [sc_key]
 sc_annex_dirs <- list.dirs(dir_annex, full.names=F, recursive=F)
-sc_studies = read.csv('tmp/sc_studies_custom.csv')
-# sc_studies <- gl_rgns %>%                                        # March 16: this is now a .csv file called ohi-webapps/tmp/sc_studies_custom.csv
-#   mutate(
-#     sc_key  = tolower(gl_rgn_key),
-#     sc_name = gl_rgn_name)  %>%
-#   left_join(
-#     data.frame(
-#       sc_key       = sc_annex_dirs,
-#       sc_annex_dir = file.path(dir_annex, sc_annex_dirs)),
-#     by = 'sc_key') %>% 
-#   mutate(
-#     sc_key_old = tolower(str_replace_all(sc_name, ' ', '_')),
-#     sc_key     = tolower(gl_rgn_key)) %>%
-#   select(sc_key, sc_name, sc_key_old, gl_rgn_id, gl_rgn_name, gl_rgn_key, sc_annex_dir) %>%
-#   arrange(sc_key)
-# report on subcountries without annex data dirs
-if (nrow(filter(sc_studies, is.na(sc_annex_dir))) > 0){
-  message(
-    sprintf(
-      'Looking for prepped data folders by subcountry key (lowercase gl_rgn_key):\n    %s\n  The following global regions were not found:\n    %s', 
-      dir_annex, paste(with(filter(sc_studies, is.na(sc_annex_dir)), sprintf('%s (%s)', gl_rgn_name, sc_key)), collapse = '\n    ')))
-}
-write.csv(
-  sc_studies %>%
-    filter(is.na(sc_annex_dir)) %>%
-    select(gl_rgn_id, gl_rgn_name, sc_key) %>%
-    arrange(gl_rgn_name), 'tmp/gl-rgns_no-sc-annex-data.csv', row.names=F, na='')
-#sc_studies = filter(sc_studies, !is.na(gl_rgn_key))
+sc_studies = read.csv('tmp/sc_studies_custom.csv')          # March 16: this is now a .csv file called ohi-webapps/tmp/sc_studies_custom.csv
+
 stopifnot(count(sc_studies, sc_key) %>% filter(n > 1) %>% nrow == 0)
