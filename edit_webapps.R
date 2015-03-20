@@ -4,6 +4,7 @@ source('create_init.R')
 source('create_functions.R')
 
 # update About page
+# first, make any changes you want to the files in gh-pages; ex: ohi-webapps/gh-pages/about/index.md
 keys = sc_studies %>% filter(!is.na(sc_annex_dir)) %>% select(sc_key)
 keys = keys[,1]
 sapply(keys, update_website, 'update About using ohi-webapps/create_functions.R - update_website()')
