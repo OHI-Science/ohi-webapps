@@ -83,14 +83,15 @@ for (key in keys_custom){ # key = 'gye'
   push_branch('published')
   system('git checkout published; git pull; git checkout draft')
   
-  # populate WebApp (pages will be empty)
+  
+  # populate gh-pages branch (pages will be empty)
   populate_website(key)
   
   # ensure draft is default branch, delete extras (like old master)
   edit_gh_repo_custom(key, default_branch='draft', verbosity=1)
   delete_extra_branches()            # must be in dir_repo = sprintf('~/tmp/%s', key)
   
-  # create pages on WebApp based on results
+  # create pages for WebApp from all the branches
   setwd(dir_repo)
   system('git pull; git checkout draft; git pull')
   create_pages()  # make a custom because the error-checking throws an error since custom repos aren't included in the master list
@@ -101,9 +102,8 @@ for (key in keys_custom){ # key = 'gye'
     status_travis(key)
   }
   
-  # deploy app
+  # create app branch and deploy app
   #devtools::install_github('ohi-science/ohicore@dev') # install latest ohicore, with DESCRIPTION having commit etc to add to app
-#   source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
   res = try(deploy_app(key))
   # if problem calculating, log problem and move on to next subcountry key
   txt_app_error = sprintf('%s/%s_app.txt', dir_errors, key)
