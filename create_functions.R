@@ -1,3 +1,27 @@
+# setup config ----
+
+#config_key <- function(key){ # also read in the sc_studies source
+#   repo_name     = key
+#   git_owner     = 'OHI-Science'
+#   git_repo      = repo_name
+#   dir_repo = sprintf('~/tmp/%s', git_repo) 
+#   git_slug  = sprintf('%s/%s', git_owner, git_repo)
+#   git_url   = sprintf('https://github.com/%s', git_slug) 
+#   pages_url     = sprintf('http://ohi-science.org/%s', git_repo)
+#   dir_annex_sc  = file.path(dir_annex, key)
+#   default_branch          = 'published'
+#   default_scenario        = 'region2015'  # generalize this
+#   default_branch_scenario = 'published/region2015'  # generalize this
+#   # sc_studies = sc_studies %>%
+#   #   filter(sc_key == key)
+#   # study_area = sc_studies$sc_name 
+#   # name = sc_studies$sc_name 
+#   app_name = sprintf('%s_app', key)
+#   
+#  return arglist
+#   
+# }
+
 # one-time fixes ----
 
 rename_sc_annex <- function(name){
@@ -935,7 +959,10 @@ deploy_app <- function(key){ # key='ecu'
   # deploy
   # Error: You must register an account using setAccountInfo prior to proceeding. Sign in to shinyapps.io via Github as bbest, Settings > Tokens to use setAccountInfo('ohi-science',...). March 16 Error: did as above. In console: shinyapps::setAccountInfo(name='jules32', token='...', secret='...')
   deployApp(appDir='.', appName=app_name, upload=T, launch.browser=T, lint=F) # Change this with Nick Brand
-  
+# copying over ssh to the server with Nick Brand. From terminal
+# rm first (rsync would be able to delete stuff that's missing)
+# scp -r gye jstewart@fitz:/srv/shiny-server/ # scp is how to copy over ssh,  -r is recursive   
+
   # push files to github app branch
   system('git add -A; git commit -a -m "deployed app"')
   push_branch('app')
@@ -945,6 +972,105 @@ deploy_app <- function(key){ # key='ecu'
   # restore wd
   setwd(wd)
 }
+
+deploy_app_nceas <- function(key){ # key='ecu' # eventually combine with deploy_app and keep that name. 
+  
+  source('ohi-travis-functions.r')
+
+  #   config_key(key)
+  repo_name     = key
+  git_owner     = 'OHI-Science'
+  git_repo      = repo_name
+  dir_repo = sprintf('~/tmp/%s', git_repo) 
+  git_slug  = sprintf('%s/%s', git_owner, git_repo)
+  git_url   = sprintf('https://github.com/%s', git_slug) 
+  pages_url     = sprintf('http://ohi-science.org/%s', git_repo)
+  dir_annex_sc  = file.path(dir_annex, key)
+  default_branch          = 'published'
+  default_scenario        = 'subcountry2014'
+  default_branch_scenario = 'published/subcountry2014'
+  # sc_studies = sc_studies %>%
+  #   filter(sc_key == key)
+  study_area = 'Belize' # study_area = sc_studies$sc_name 
+  name = 'Belize'# name = sc_studies$sc_name 
+  app_name = sprintf('%s_app', key)
+  
+  
+  
+  # delete old
+  dir_app_old <- sprintf('%s/git-annex/clip-n-ship/%s/shinyapps.io', dir_neptune, git_repo)
+  unlink(dir_app_old, recursive=T)
+  
+  # cd into repo, checkout app
+  wd = getwd()
+  if (!file.exists(dir_repo)) system(sprintf('git clone %s %s', git_url, dir_repo))
+  setwd(dir_repo)
+  repo = repository(dir_repo)
+  remote_branches = sapply(branches(repo, 'remote'), function(x) str_split(x@name, '/')[[1]][2])
+  if (!'app' %in% remote_branches){
+    system('git checkout --orphan app')
+    system('git rm -rf .')     # ERROR: fatal: pathspec '.' did not match any files
+  } else {
+    system('git checkout app')    
+  }
+  system('rm -rf *')
+  
+  # copy installed ohicore shiny app files
+  # good to have latest dev ohicore first: 
+  devtools::install_github('ohi-science/ohicore@dev')  # update by JSL March 19. Could cause problems since need to make sure pulled latest version
+  dir_ohicore_app = '~/github/ohicore/inst/shiny_app' #file.path(system.file(package='ohicore'), 'shiny_app') # 
+  shiny_files = list.files(dir_ohicore_app, recursive=T)  
+  for (f in shiny_files){ # f = shiny_files[1]
+    dir.create(dirname(f), showWarnings=F, recursive=T)
+    suppressWarnings(file.copy(file.path(dir_ohicore_app, f), f, overwrite=T, recursive=T, copy.mode=T, copy.date=T))
+  }
+    
+  # get commit version of ohicore app files
+  lns = readLines(file.path(dir_ohicore_app, '../../DESCRIPTION'))
+  g = sapply(str_split(lns[grepl('^Github', lns)], ': '), function(x) setNames(x[2], x[1]))
+  #ohicore_app_commit = sprintf('%s/%s@%s,%.7s', g[['GithubUsername']], g[['GithubRepo']], , g[['GithubSHA1']])
+  ohicore_app = list(ohicore_app=list(
+    git_owner  = 'jules32', #g[['GithubUsername']],   ## generalize-- DESCRIPTION not found...
+    git_repo   = key, # g[['GithubRepo']],
+    git_branch = 'draft', # g[['GithubRef']],      
+    git_commit = 'moving App to NCEAS server')) #g[['GithubSHA1']]))
+  
+  # write config
+#   default_branch          = 'published'  ## remove these 3 lines but this keeps getting overwritten with subcountry2014
+#   default_scenario        = 'region2015'  # generalize this
+#   default_branch_scenario = 'published/region2015'  # generalize this
+
+  brew(file.path(dir_github, 'ohi-webapps/app.brew.yml'), 'app.yml')
+  file.copy(file.path(dir_github, 'ohi-webapps/travis_app.yml'), '.travis.yml') #, overwrite=T)
+    
+  # add Rstudio project files. cannabalized devtools::add_rstudio_project() which only works for full R packages.
+  file.copy(system.file('templates/template.Rproj', package='devtools'), sprintf('%s.Rproj', key))
+  writeLines(c('.Rproj.user', '.Rhistory', '.RData', 'github', git_repo), '.gitignore')  
+  
+  # shiny::runApp()    # test app locally # this worked for blz!!
+  
+  # clean up cloned / archived repos which get populated if testing app
+  unlink(git_repo, recursive=T, force=T)
+  unlink('github', recursive=T, force=T)
+  
+  # deploy
+  # Error: You must register an account using setAccountInfo prior to proceeding. Sign in to shinyapps.io via Github as bbest, Settings > Tokens to use setAccountInfo('ohi-science',...). March 16 Error: did as above. In console: shinyapps::setAccountInfo(name='jules32', token='...', secret='...')
+#   deployApp(appDir='.', appName=app_name, upload=T, launch.browser=T, lint=F) # Change this with Nick Brand
+# copying over ssh to the server with Nick Brand. From terminal
+  # deploy on NCEAS server
+  try(system(sprintf('rm %s', key))) # (rsync would be able to delete stuff that's missing)
+  system(sprintf('scp -r ../%s jstewart@fitz:/srv/shiny-server/', key)) # scp is how to copy over ssh,  -r is recursive   
+
+  # push files to github app branch
+  system('git add -A; git commit -a -m "deployed app"')
+  push_branch('app')
+  system('git fetch')
+  system('git branch --set-upstream-to=origin/app app')
+  
+  # restore wd
+  setwd(wd)
+}
+
 
 create_maps = function(key='ecu'){ # key='abw' # setwd('~/github/clip-n-ship/ecu')    
   
