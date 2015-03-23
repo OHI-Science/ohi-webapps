@@ -118,3 +118,6 @@ write.csv(
     arrange(gl_rgn_name), 'tmp/gl-rgns_no-sc-annex-data.csv', row.names=F, na='')
 #sc_studies = filter(sc_studies, !is.na(gl_rgn_key))
 stopifnot(count(sc_studies, sc_key) %>% filter(n > 1) %>% nrow == 0)
+
+# read in 
+sc_custom = read.csv('tmp/sc_studies_custom.csv', stringsAsFactors=F)
