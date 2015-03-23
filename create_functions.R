@@ -1058,8 +1058,9 @@ deploy_app_nceas <- function(key){ # key='ecu' # eventually combine with deploy_
 #   deployApp(appDir='.', appName=app_name, upload=T, launch.browser=T, lint=F) # Change this with Nick Brand
 # copying over ssh to the server with Nick Brand. From terminal
   # deploy on NCEAS server
-  try(system(sprintf('rm %s', key))) # (rsync would be able to delete stuff that's missing)
-  system(sprintf('scp -r ../%s jstewart@fitz:/srv/shiny-server/', key)) # scp is how to copy over ssh,  -r is recursive   
+#   try(system(sprintf('ssh jstewart@fitz rm -rf fitz.nceas.ucsb.edu:/srv/shiny-server/%s', key))) # (rsync would be able to delete stuff that's missing)
+#   system(sprintf('scp -r ../%s jstewart@fitz.nceas.ucsb.edu:/srv/shiny-server/', key)) # scp is how to copy over ssh,  -r is recursive   
+  system(sprintf('rsync -r --delete ../%s jstewart@fitz.nceas.ucsb.edu:/srv/shiny-server/', key))
 
   # push files to github app branch
   system('git add -A; git commit -a -m "deployed app"')
