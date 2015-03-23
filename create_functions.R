@@ -1055,6 +1055,7 @@ deploy_app_nceas <- function(key){ # key='ecu' # eventually combine with deploy_
 
   # deploy by copying over ssh to the NCEAS server with Nick Brand
   system(sprintf('rsync -r --delete ../%s jstewart@fitz.nceas.ucsb.edu:/srv/shiny-server/', app_name))
+  system(sprintf("ssh jstewart@fitz.nceas.ucsb.edu 'chmod g+w -R ls -l /srv/shiny-server/%s'", app_name))
 
   # push files to github app branch
   system('git add -A; git commit -a -m "deployed app"')
