@@ -890,9 +890,48 @@ update_website <- function(key, msg='ohi-webapps/create_functions.R - update_web
   setwd(wd)
 }
 
+revert_website <- function(key, previous='2015-03-23 08:00:00'){
+  # key='abw'
+  
+  # convert previous string to datetime
+  previous_t = as.POSIXct(strptime(previous, '%Y-%m-%d %H:%M:%S'))
+    
+  # get subcountry vars specific to key
+  key <<- key
+  source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
+  
+  # cd into repo, checkout gh-pages
+  wd = getwd()
+  if (!file.exists(dir_repo)) system(sprintf('git clone %s %s', git_url, dir_repo))
+  setwd(dir_repo)
+  repo = repository(dir_repo)
+  
+  # switch to gh-pages and get latest
+  system('git checkout gh-pages; git pull')
+  
+  # get commit history
+  library(git2r)
+  ks = commits(repository(dir_repo), topological=F, time=T, reverse=F)
+  d = 
+    data.frame(
+      sha     = sapply(ks, function(x) x@sha),
+      when    = sapply(ks, function(x) as.POSIXct(strptime(when(x), '%Y-%m-%d %H:%M:%S'))),
+      message = sapply(ks, function(x) x@message),
+      v       = NA, stringsAsFactors=F)
+  
+  # get most recent commit before previous datetime
+  sha = subset(d, when < previous_t, sha, drop=T)[1]
+  
+  # checkout, commit and push
+  system(sprintf("git checkout %s .; git commit -m 'reverting to %.7s'; git push origin gh-pages", sha, sha))  
+  
+  # change back to working directory
+  setwd(wd)
+}
+
 # keys = sc_studies %>% filter(!is.na(sc_annex_dir)) %>% select(sc_key)
 # keys = keys[,1]
-# sapply(keys, update_website, 'update About using ohi-webapps/create_functions.R - update_website()') # done 2015-01-23 by bbest, jules32
+# sapply(keys, revert_website, '2015-03-23 08:00:00') # done 2015-03-24 by bbest, jules32
 
 deploy_app <- function(key){ # key='ecu'
 
