@@ -399,9 +399,11 @@ populate_draft_branch <- function(){
 
   # old global to new custom countries
   if (dim(sc_cntry)[1] != dim(sc_rgns)[1]) { # make sure Guayaquil doesn't match to both ECU and Galapagos
-    dots = list(subset(sc_studies$gl_rgn_key, sc_studies$sc_key == key))
+    #dots = list(subset(sc_studies$gl_rgn_key, sc_studies$sc_key == key))
+    sc_cntries = subset(sc_studies, sc_key == key, gl_rgn_key, drop=T)
     sc_cntry = sc_cntry %>%
-      filter(cntry_key == (.dots = dots))
+      #filter(cntry_key == (.dots = dots))
+      filter(cntry_key %in% sc_cntries)
   }
     
   # swap out custom mar_coastalpopn_inland25mi for mar_coastalpopn_inland25km (NOTE: mi -> km)
@@ -861,7 +863,7 @@ populate_website <- function(key, delete_first=T, copy_images=T, copy_flag=T, ms
 #sapply(keys, populate_website, delete_first=F, copy_images=F, copy_flag=F, msg='add Google Translate via populate_website()')
 
 update_website <- function(key, msg='ohi-webapps/create_functions.R - update_website()'){
-  # key='ecu'
+  # key='abw'
 
   # get subcountry vars specific to key
   key <<- key
@@ -1018,24 +1020,6 @@ deploy_app_nceas <- function(key){ # key='ecu' # eventually combine with deploy_
   key <<- key # assign key to the global namespace so available for other functions
   source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
   
-#   #   config_key(key)
-#   repo_name     = key
-#   git_owner     = 'OHI-Science'
-#   git_repo      = repo_name
-#   dir_repo = sprintf('~/tmp/%s', git_repo)
-#   git_slug  = sprintf('%s/%s', git_owner, git_repo)
-#   git_url   = sprintf('https://github.com/%s', git_slug)
-#   pages_url     = sprintf('http://ohi-science.org/%s', git_repo)
-#   dir_annex_sc  = file.path(dir_annex, key)
-#   default_branch          = 'published'
-#   default_scenario        = 'subcountry2014'
-#   default_branch_scenario = 'published/subcountry2014'
-#   # sc_studies = sc_studies %>%
-#   #   filter(sc_key == key)
-#   study_area = 'Belize' # study_area = sc_studies$sc_name
-#   name = 'Belize'# name = sc_studies$sc_name
-#   app_name = key # sprintf('%s_app', key)
-
   # delete old
   dir_app_old <- sprintf('%s/git-annex/clip-n-ship/%s/shinyapps.io', dir_neptune, git_repo)
   unlink(dir_app_old, recursive=T)
