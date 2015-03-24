@@ -61,17 +61,25 @@ for (key in keys_redo){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1]
   # create github repo
   #repo = create_gh_repo(key)
   
-  # create maps
-  txt_map_error = sprintf('%s/%s_map.txt', dir_errors, key)
-  unlink(txt_map_error)  
-  txt_shp_error = sprintf('%s/%s_readOGR_fails.txt', dir_errors, key)
-  unlink(txt_shp_error)
-  if (!all(file.exists(file.path(dir_annex, key, 'gh-pages/images', c('regions_1600x800.png', 'regions_600x400.png', 'regions_400x250.png', 'app_400x250.png', 'regions_30x20.png')))) | redo_maps){
-    res = try(create_maps(key))
-    if (class(res)=='try-error'){
-      cat(as.character(traceback(res)), file=txt_map_error)
-      next
-    }
+  # create maps --orignal by @bbest
+#   txt_map_error = sprintf('%s/%s_map.txt', dir_errors, key)
+#   unlink(txt_map_error)  
+#   txt_shp_error = sprintf('%s/%s_readOGR_fails.txt', dir_errors, key)
+#   unlink(txt_shp_error)
+#   if (!all(file.exists(file.path(dir_annex, key, 'gh-pages/images', c('regions_1600x800.png', 'regions_600x400.png', 'regions_400x250.png', 'app_400x250.png', 'regions_30x20.png')))) | redo_maps){
+#     res = try(create_maps(key))
+#     if (class(res)=='try-error'){
+#       cat(as.character(traceback(res)), file=txt_map_error)
+#       next
+#     }
+#   }
+  
+  # create custom maps @ by jules32
+  if (!all(file.exists(
+    file.path(dir_annex, key,
+              'gh-pages/images', c('regions_1600x800.png', 'regions_600x400.png', 'regions_400x250.png', 'app_400x250.png', 'regions_30x20.png'))))
+    | redo_maps){
+    res = try(custom_maps(key))
   }
   
   # populate draft branch

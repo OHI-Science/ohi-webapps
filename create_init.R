@@ -104,6 +104,13 @@ sc_studies <- gl_rgns %>%
     sc_key     = tolower(gl_rgn_key)) %>%
   select(sc_key, sc_name, sc_key_old, gl_rgn_id, gl_rgn_name, gl_rgn_key, sc_annex_dir) %>%
   arrange(sc_key)
+
+# read in custom sc studies
+sc_custom = read.csv('tmp/sc_studies_custom.csv', stringsAsFactors=F) 
+sc_studies = rbind(
+  sc_studies,
+  sc_custom[, names(sc_studies)])
+
 # report on subcountries without annex data dirs
 if (nrow(filter(sc_studies, is.na(sc_annex_dir))) > 0){
   message(
@@ -111,6 +118,7 @@ if (nrow(filter(sc_studies, is.na(sc_annex_dir))) > 0){
       'Looking for prepped data folders by subcountry key (lowercase gl_rgn_key):\n    %s\n  The following global regions were not found:\n    %s', 
       dir_annex, paste(with(filter(sc_studies, is.na(sc_annex_dir)), sprintf('%s (%s)', gl_rgn_name, sc_key)), collapse = '\n    ')))
 }
+
 write.csv(
   sc_studies %>%
     filter(is.na(sc_annex_dir)) %>%
@@ -118,6 +126,3 @@ write.csv(
     arrange(gl_rgn_name), 'tmp/gl-rgns_no-sc-annex-data.csv', row.names=F, na='')
 #sc_studies = filter(sc_studies, !is.na(gl_rgn_key))
 stopifnot(count(sc_studies, sc_key) %>% filter(n > 1) %>% nrow == 0)
-
-# read in 
-sc_custom = read.csv('tmp/sc_studies_custom.csv', stringsAsFactors=F)
