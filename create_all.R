@@ -48,8 +48,8 @@ redo_maps = F
 #for (key in sc_studies$sc_key){ # key = 'fji' # key = sc_studies$sc_key[1]
 #sc_run = c('can'=T,'chn'=T,'fin','fji','fro','grl','idn','ind','irl','irn','irq','isl','ita','jpn','kna','lca','lka','mmr','mne','nld','nzl','rus','sau','sdn','sen','shn','slb','sle', 'som','spm','stp','sur','svn','syr')
 #keys_redo = c('bih','bvt','cog','cpt','cuw','egy','est','fin','fra','fro','ggy','gtm','guy','hmd','ind','iot','jey','jpn','kor','ltu','lva','maf','mco','nfk','nld','pol','sgs')
-keys_redo = c('tto','rus','spm')
-for (key in keys_redo){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1]
+keys_redo = c('gye')
+for (key in keys_redo){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1] # key='gye'
   # TODO: 'rus','spm' after neptune process_rasters
   # TODO: 'syr' inland1km, vnm offshore3nm
   #
@@ -125,6 +125,7 @@ for (key in keys_redo){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1]
   system('git checkout gh-pages; git pull; git checkout published; git pull')
   
   # enable Travis if on Mac
+  # install Travis client: `sudo gem install travis; travis login --org --auto` on Terminal (https://github.com/travis-ci/travis.rb)
   if (Sys.info()[['sysname']] == 'Darwin'){
     source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))   # Error in system(sprintf("travis history -i -r %s -b draft -l 1 2>&1",  :error in running command 
     status_travis(key)
