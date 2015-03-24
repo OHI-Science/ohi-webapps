@@ -995,7 +995,7 @@ deploy_app_nceas <- function(key){ # key='ecu' # eventually combine with deploy_
 #   #   filter(sc_key == key)
 #   study_area = 'Belize' # study_area = sc_studies$sc_name
 #   name = 'Belize'# name = sc_studies$sc_name
-#   app_name = sprintf('%s_app', key)
+#   app_name = key # sprintf('%s_app', key)
 
   # delete old
   dir_app_old <- sprintf('%s/git-annex/clip-n-ship/%s/shinyapps.io', dir_neptune, git_repo)
