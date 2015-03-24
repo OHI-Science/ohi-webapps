@@ -19,6 +19,6 @@ source('create_functions.R')
 #   2. ohi-webapps/app.brew.yml
 keys = sc_studies %>% filter(!is.na(sc_annex_dir)) %>% select(sc_key)
 keys = keys[,1] # keys = 'blz'
-keys = keys[1:3]
+# keys = keys[1:3]
 sapply(keys, deploy_app_nceas)
 sapply(keys, update_website,   'move Shiny App onto NCEAS server - update_website()')

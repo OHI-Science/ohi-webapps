@@ -838,7 +838,7 @@ populate_website <- function(key, delete_first=T, copy_images=T, copy_flag=T, ms
 
   # copy flag, i.e., national flag
   if (copy_flag){
-    flag_in = sprintf('%s/ohi-webapps/flags/small/%s.png', dir_github, sc_studies$gl_rgn_name) # modified by JSL March 19
+    flag_in = sprintf('%s/ohi-webapps/flags/small/%s.png', dir_github, str_replace(subset(sc_studies, sc_key==key, gl_rgn_name, drop=T), ' ', '_'))
     if (file.exists(flag_in)){
       flag_out = file.path(dir_repo, 'images/flag_80x40.png')
       unlink(flag_out)
@@ -983,7 +983,7 @@ deploy_app <- function(key){ # key='ecu'
 
 deploy_app_nceas <- function(key){ # key='ecu' # eventually combine with deploy_app and keep that name.
 
-  source('ohi-travis-functions.r')
+#   source('ohi-webapps/ohi-travis-functions.r')
 
   key <<- key # assign key to the global namespace so available for other functions
   source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
@@ -1059,6 +1059,7 @@ deploy_app_nceas <- function(key){ # key='ecu' # eventually combine with deploy_
   unlink('github', recursive=T, force=T)
 
   # deploy by copying over ssh to the NCEAS server with Nick Brand
+  system(sprintf('ssh jstewart@fitz.nceas.ucsb.edu'))
   system(sprintf('rsync -r --delete ../%s jstewart@fitz.nceas.ucsb.edu:/srv/shiny-server/', app_name))
   system(sprintf("ssh jstewart@fitz.nceas.ucsb.edu 'chmod g+w -R /srv/shiny-server/%s'", app_name))
 
