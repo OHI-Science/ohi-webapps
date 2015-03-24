@@ -4,7 +4,7 @@ git_owner:        <%=git_owner%>
 git_repo:         <%=git_repo%>
 git_slug:         <%=git_slug%>
 git_url:          https://github.com/<%=git_slug%>
-app_url:          https://ohi-science.nceas.ucsb.edu/<%=app_name%>
+app_url:          http://ohi-science.nceas.ucsb.edu/<%=app_name%>
 default_branch:   <%=default_branch%>
 default_scenario: <%=default_scenario%>
 debug:            False
