@@ -22,8 +22,10 @@ keys = keys[,1] # keys = 'blz'
 # keys = keys[1:3]
 # sapply(keys, deploy_app_nceas)
 # sapply(keys, update_website,   'move Shiny App onto NCEAS server - update_website()')
-# sapply(keys[1:3, revert_website, '2015-03-23 08:00:00') # done 2015-03-24 by bbest, jules32
+# sapply(keys[1:3], revert_website, '2015-03-23 08:00:00') # done 2015-03-24 by bbest, jules32
 
-sapply(keys[1:3], deploy_app_nceas)
-sapply(keys[1:3], update_website,   'move Shiny App onto NCEAS server - update_website()')
+sapply(keys, deploy_app_nceas)
+
+# restart R and run above before line below
+sapply(keys, update_website,   'move Shiny App onto NCEAS server - update_website()')
 

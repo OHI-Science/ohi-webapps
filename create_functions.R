@@ -1077,10 +1077,10 @@ deploy_app_nceas <- function(key){ # key='ecu' # eventually combine with deploy_
   system(sprintf("ssh jstewart@fitz.nceas.ucsb.edu 'chmod g+w -R /srv/shiny-server/%s'", app_name))
 
   # push files to github app branch
-  system('git add -A; git commit -a -m "deployed app"')
-  push_branch('app')
-  system('git fetch')
-  system('git branch --set-upstream-to=origin/app app')
+  system('git add -A; git commit -a -m "deployed app"; git push origin app')
+  #   push_branch('app')
+  #   system('git fetch')
+  #   system('git branch --set-upstream-to=origin/app app')
 
   # restore wd
   setwd(wd)
