@@ -887,7 +887,11 @@ update_website <- function(key, msg='ohi-webapps/create_functions.R - update_web
 
   # copy template web files over
   file.copy(list.files(file.path(dir_github, 'ohi-webapps/gh-pages'), full.names=T), '.', overwrite=T, recursive=T)
+  
+  # brew config and README
+  brew('_config.brew.yml', '_config.yml')
   unlink('_config.brew.yml')
+  brew(sprintf('%s/ohi-webapps/README.brew.md', dir_github), 'README.md')
 
   # git add, commit and push
   system(sprintf('git add -A; git commit -a -m "%s"', msg))
@@ -1012,11 +1016,12 @@ deploy_app_nceas <- function(key){ # key='ecu' # eventually combine with deploy_
   setwd(dir_repo)
   repo = repository(dir_repo)
   remote_branches = sapply(branches(repo, 'remote'), function(x) str_split(x@name, '/')[[1]][2])
+  system('git pull')
   if (!'app' %in% remote_branches){
     system('git checkout --orphan app')
     system('git rm -rf .')     # ERROR: fatal: pathspec '.' did not match any files
   } else {
-    system('git checkout app')
+    system('git checkout app; git pull')
   }
   system('rm -rf *')
 
@@ -1041,10 +1046,10 @@ deploy_app_nceas <- function(key){ # key='ecu' # eventually combine with deploy_
     git_commit = g[['GithubSHA1']]))
 
   brew(file.path(dir_github, 'ohi-webapps/app.brew.yml'), 'app.yml')
-  file.copy(file.path(dir_github, 'ohi-webapps/travis_app.yml'), '.travis.yml') #, overwrite=T)
+  file.copy(file.path(dir_github, 'ohi-webapps/travis_app.yml'), '.travis.yml', overwrite=T)
 
   # add Rstudio project files. cannabalized devtools::add_rstudio_project() which only works for full R packages.
-  file.copy(system.file('templates/template.Rproj', package='devtools'), sprintf('%s.Rproj', key))
+  file.copy(system.file('templates/template.Rproj', package='devtools'), sprintf('%s.Rproj', key), overwrite=T)
   writeLines(c('.Rproj.user', '.Rhistory', '.RData', 'github', git_repo), '.gitignore')
 
   # shiny::runApp()    # test app locally # this worked for blz!!
