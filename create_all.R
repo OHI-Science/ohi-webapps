@@ -83,7 +83,7 @@ for (key in keys_redo){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1]
   }
   
   # populate draft branch
-  populate_draft_branch()
+  populate_draft_branch() # turn buffers back on if using buffers
   
   # push draft branch
   setwd(dir_repo)

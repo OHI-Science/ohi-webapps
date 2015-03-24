@@ -1,26 +1,3 @@
-# setup config ----
-
-#config_key <- function(key){ # also read in the sc_studies source
-#   repo_name     = key
-#   git_owner     = 'OHI-Science'
-#   git_repo      = repo_name
-#   dir_repo = sprintf('~/tmp/%s', git_repo)
-#   git_slug  = sprintf('%s/%s', git_owner, git_repo)
-#   git_url   = sprintf('https://github.com/%s', git_slug)
-#   pages_url     = sprintf('http://ohi-science.org/%s', git_repo)
-#   dir_annex_sc  = file.path(dir_annex, key)
-#   default_branch          = 'published'
-#   default_scenario        = 'region2015'  # generalize this
-#   default_branch_scenario = 'published/region2015'  # generalize this
-#   # sc_studies = sc_studies %>%
-#   #   filter(sc_key == key)
-#   # study_area = sc_studies$sc_name
-#   # name = sc_studies$sc_name
-#   app_name = key # sprintf('%s_app', key)
-#
-#  return arglist
-#
-# }
 
 # one-time fixes ----
 
@@ -290,7 +267,7 @@ delete_extra_branches <- function(dir_repo=getwd(), branches_keep=c('draft','pub
 }
 
 populate_draft_branch <- function(){
-
+ 
   wd = getwd()
   library(rgdal)
 
@@ -397,8 +374,17 @@ populate_draft_branch <- function(){
         select(gl_rgn_name, gl_rgn_id),
       by='gl_rgn_name', all.x=T) %>%
     select(sc_rgn_id, sc_rgn_name, gl_rgn_id, gl_rgn_name) %>%
-    mutate(gl_rgn_id = 137) %>% ## generalize!!!
     arrange(sc_rgn_name)
+
+  # old global to new custom regions
+  if (all(is.na(sc_rgns$gl_rgn_id))){
+    sc_rgns = sc_rgns %>%
+      select(-gl_rgn_id) %>%
+      left_join(sc_studies %>%
+                  select(gl_rgn_name = sc_name, 
+                         gl_rgn_id), 
+                by= 'gl_rgn_name')
+  }
 
   # old global to new subcountry countries
   sc_cntry = gl_cntries %>%
@@ -409,10 +395,15 @@ populate_draft_branch <- function(){
     group_by(gl_cntry_key, sc_rgn_id) %>%
     summarise(n=n()) %>%
     select(cntry_key = gl_cntry_key, sc_rgn_id) %>%
-    filter(cntry_key == 'ECU') %>%                  # generalize this with Julien's method
     as.data.frame()
 
-
+  # old global to new custom countries
+  if (dim(sc_cntry)[1] != dim(sc_rgns)[1]) { # make sure Guayaquil doesn't match to both ECU and Galapagos
+    dots = list(subset(sc_studies$gl_rgn_key, sc_studies$sc_key == key))
+    sc_cntry = sc_cntry %>%
+      filter(cntry_key == (.dots = dots))
+  }
+    
   # swap out custom mar_coastalpopn_inland25mi for mar_coastalpopn_inland25km (NOTE: mi -> km)
   ix = which(lyrs_sc$layer=='mar_coastalpopn_inland25mi')
   lyrs_sc$layer[ix]       = 'mar_coastalpopn_inland25km'
@@ -493,7 +484,7 @@ populate_draft_branch <- function(){
           inner_join(
             sc_cntry,
             by='cntry_key') %>%
-          rename(rgn_id=sc_rgn_id) %>%
+          dplyr::rename(rgn_id=sc_rgn_id) %>%
           select_(.dots = as.list(c('rgn_id', setdiff(names(d), 'cntry_key'))))
       }
 
@@ -1059,7 +1050,6 @@ deploy_app_nceas <- function(key){ # key='ecu' # eventually combine with deploy_
   unlink('github', recursive=T, force=T)
 
   # deploy by copying over ssh to the NCEAS server with Nick Brand
-  system(sprintf('ssh jstewart@fitz.nceas.ucsb.edu'))
   system(sprintf('rsync -r --delete ../%s jstewart@fitz.nceas.ucsb.edu:/srv/shiny-server/', app_name))
   system(sprintf("ssh jstewart@fitz.nceas.ucsb.edu 'chmod g+w -R /srv/shiny-server/%s'", app_name))
 
