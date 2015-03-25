@@ -29,3 +29,7 @@ sapply(keys, deploy_app_nceas)
 # restart R and run above before line below
 sapply(keys, update_website,   'move Shiny App onto NCEAS server - update_website()')
 
+# fixing GYE 2015-03-25
+revert_website('gye', '2015-03-23 08:00:00')
+update_website('gye', 'move Shiny App onto NCEAS server - update_website()')
+deploy_app_nceas('gye', nceas_user='bbest')

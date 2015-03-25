@@ -1013,7 +1013,7 @@ deploy_app <- function(key){ # key='ecu'
   setwd(wd)
 }
 
-deploy_app_nceas <- function(key){ # key='ecu' # eventually combine with deploy_app and keep that name.
+deploy_app_nceas <- function(key, nceas_user = 'jstewart'){ # key='ecu' # eventually combine with deploy_app and keep that name.
 
 #   source('ohi-webapps/ohi-travis-functions.r')
 
@@ -1035,7 +1035,7 @@ deploy_app_nceas <- function(key){ # key='ecu' # eventually combine with deploy_
     system('git checkout --orphan app')
     system('git rm -rf .')     # ERROR: fatal: pathspec '.' did not match any files
   } else {
-    system('git checkout app; git pull')
+    system('git fetch origin; git checkout -b app origin/app; git checkout app; git pull')
   }
   system('rm -rf *')
 
@@ -1073,8 +1073,8 @@ deploy_app_nceas <- function(key){ # key='ecu' # eventually combine with deploy_
   unlink('github', recursive=T, force=T)
 
   # deploy by copying over ssh to the NCEAS server with Nick Brand
-  system(sprintf('rsync -r --delete ../%s jstewart@fitz.nceas.ucsb.edu:/srv/shiny-server/', app_name))
-  system(sprintf("ssh jstewart@fitz.nceas.ucsb.edu 'chmod g+w -R /srv/shiny-server/%s'", app_name))
+  system(sprintf('rsync -r --delete ../%s %s@fitz.nceas.ucsb.edu:/srv/shiny-server/', nceas_user, app_name))
+  system(sprintf("ssh %s@fitz.nceas.ucsb.edu 'chmod g+w -R /srv/shiny-server/%s'", nceas_user, app_name))
 
   # push files to github app branch
   system('git add -A; git commit -a -m "deployed app"; git push origin app')
