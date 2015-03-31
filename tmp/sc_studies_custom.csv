@@ -1,2 +1,3 @@
 sc_key, sc_name, sc_key_old, gl_rgn_id, gl_rgn_name, gl_rgn_key, sc_annex_dir, default_scenario
 gye,Golfo de Guayaquil,ecuador,137,Ecuador,ECU,/Volumes/data_edit/git-annex/clip-n-ship/gye,region2015
+bhi-swe,Baltic,sweden,222,Sweden,SWE,/Volumes/data_edit/git-annex/clip-n-ship/bhi,region2015
