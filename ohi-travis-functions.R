@@ -376,8 +376,7 @@ push_branch <- function(branch='draft', ci_skip=T){
     
     # working locally, gh_token set in create_init.R, repo_name set in create_init_sc.Rs
     system(sprintf('git add -A; git commit -a -m "automatically calculate_scores from commit `git rev-parse HEAD`%s" ', ci_skip_msg))
-    system(sprintf('git push https://%s@github.com/%s.git HEAD:%s', gh_token, git_slug, branch))
-    
+    system(sprintf('git push https://%s@github.com/%s.git HEAD:%s', gh_token, git_slug, branch))    
   }
 }
 

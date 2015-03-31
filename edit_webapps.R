@@ -33,3 +33,6 @@ sapply(keys, update_website,   'move Shiny App onto NCEAS server - update_websit
 revert_website('gye', '2015-03-23 08:00:00')
 update_website('gye', 'move Shiny App onto NCEAS server - update_website()')
 deploy_app_nceas('gye', nceas_user='bbest')
+
+# created ohi-global
+deploy_app_nceas(key='ohi-global')

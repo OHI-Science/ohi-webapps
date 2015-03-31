@@ -24,7 +24,7 @@ if (key %in% sc_custom$sc_key){
   default_scenario = 'subcountry2014'
 }
 default_branch          = 'published'
-default_branch_scenario = sprintf('%s/%s', default_scenario, default_branch)
+default_branch_scenario = sprintf('%s/%s', default_branch, default_scenario)
 
 #  dir_ap_old    = file.path(dir_annex, cntries[i], 'shinyapps.io')
 dir_annex_sc  = file.path(dir_annex, key)

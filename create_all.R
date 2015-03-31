@@ -57,7 +57,8 @@ for (key in keys_redo){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1]
   # set vars by subcountry key
   setwd(dir_repos)
   source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
-
+  setwd(dir_repo)
+  
   # create github repo
   #repo = create_gh_repo(key)
   
@@ -133,7 +134,7 @@ for (key in keys_redo){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1]
   
   # deploy app
   #devtools::install_github('ohi-science/ohicore@dev') # install latest ohicore, with DESCRIPTION having commit etc to add to app
-  res = try(deploy_app_nceas(key))
+  res = try(deploy_app_nceas(key, nceas_user))
   # if problem calculating, log problem and move on to next subcountry key
   txt_app_error = sprintf('%s/%s_app.txt', dir_errors, key)
   unlink(txt_app_error)

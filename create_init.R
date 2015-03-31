@@ -23,6 +23,10 @@ dir_neptune <- c(
   'Darwin'  = '/Volumes/data_edit',
   'Linux'   = '/var/data/ohi')[[ Sys.info()[['sysname']] ]]
 
+# set username for copying app files onto fitz.nceas
+nceas_user = c('bbest'='bbest','julialowndes'='jstewart','jstewart'='jstewart')[Sys.info()["user"]]
+
+
 dir_github  <- '~/github'
 
 dir_annex   <- sprintf('%s/git-annex/clip-n-ship', dir_neptune) # 'N:/git-annex/clip-n-ship/data'

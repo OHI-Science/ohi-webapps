@@ -1066,14 +1066,14 @@ deploy_app_nceas <- function(key, nceas_user = 'jstewart'){ # key='ecu' # eventu
   file.copy(system.file('templates/template.Rproj', package='devtools'), sprintf('%s.Rproj', key), overwrite=T)
   writeLines(c('.Rproj.user', '.Rhistory', '.RData', 'github', git_repo), '.gitignore')
 
-  # shiny::runApp()    # test app locally # this worked for blz!!
+  # shiny::runApp()    # test app locally # need to rm('dir_scenario')
 
   # clean up cloned / archived repos which get populated if testing app
   unlink(git_repo, recursive=T, force=T)
   unlink('github', recursive=T, force=T)
 
   # deploy by copying over ssh to the NCEAS server with Nick Brand
-  system(sprintf('rsync -r --delete ../%s %s@fitz.nceas.ucsb.edu:/srv/shiny-server/', nceas_user, app_name))
+  system(sprintf('rsync -r --delete ../%s %s@fitz.nceas.ucsb.edu:/srv/shiny-server/', app_name, nceas_user))
   system(sprintf("ssh %s@fitz.nceas.ucsb.edu 'chmod g+w -R /srv/shiny-server/%s'", nceas_user, app_name))
 
   # push files to github app branch
@@ -1085,7 +1085,6 @@ deploy_app_nceas <- function(key, nceas_user = 'jstewart'){ # key='ecu' # eventu
   # restore wd
   setwd(wd)
 }
-
 
 create_maps = function(key='ecu'){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
 
