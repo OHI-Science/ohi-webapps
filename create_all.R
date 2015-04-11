@@ -48,8 +48,8 @@ redo_maps = F
 #for (key in sc_studies$sc_key){ # key = 'fji' # key = sc_studies$sc_key[1]
 #sc_run = c('can'=T,'chn'=T,'fin','fji','fro','grl','idn','ind','irl','irn','irq','isl','ita','jpn','kna','lca','lka','mmr','mne','nld','nzl','rus','sau','sdn','sen','shn','slb','sle', 'som','spm','stp','sur','svn','syr')
 #keys_redo = c('bih','bvt','cog','cpt','cuw','egy','est','fin','fra','fro','ggy','gtm','guy','hmd','ind','iot','jey','jpn','kor','ltu','lva','maf','mco','nfk','nld','pol','sgs')
-keys_redo = c('gye')
-for (key in keys_redo){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1] # key='gye'
+keys_redo = bhi_rgn   
+for (key in keys_redo){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1] # key='bhi-swe'
   # TODO: 'rus','spm' after neptune process_rasters
   # TODO: 'syr' inland1km, vnm offshore3nm
   #
@@ -60,7 +60,7 @@ for (key in keys_redo){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1]
   setwd(dir_repo)
   
   # create github repo
-  #repo = create_gh_repo(key)
+  # repo = create_gh_repo(key)
   
   # create maps --orignal by @bbest
 #   txt_map_error = sprintf('%s/%s_map.txt', dir_errors, key)
@@ -85,7 +85,7 @@ for (key in keys_redo){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1]
   
   # populate draft branch
   populate_draft_branch() # turn buffers back on if using buffers
-  
+
   # push draft branch
   setwd(dir_repo)
   push_branch('draft')
