@@ -16,13 +16,13 @@ rename_sc_annex <- function(name){
 }
 #lapply(sc_studies$sc_name, rename_sc_annex) # done 2014-11-02 by bbest
 
-create_gh_repo <- function(key, gh_token=gh_token, verbosity=1){
+create_gh_repo <- function(key, gh_token=gh_token, verbosity=1){ # gh_token=gh_token; verbosity=1
 
   repo_name = key
   #cmd = sprintf('git ls-remote https://github.com/OHI-Science/%s.git', repo_name)
   cmd = sprintf('git ls-remote git@github.com:ohi-science/%s.git', repo_name)
   res = system(cmd, ignore.stderr=T, intern=T)
-  repo_exists = ifelse(length(res)==0, T, F)
+  repo_exists = ifelse(length(res)==0, T, F) # set to F for bhi-rgns?
   if (!repo_exists){
     if (verbosity > 0){
       message(sprintf('%s: creating github repo -- %s', repo_name, format(Sys.time(), '%X')))
@@ -321,7 +321,7 @@ populate_draft_branch <- function(){
   setwd(dir_scenario)
 
   # create dirs
-  for (dir in c('tmp','layers','conf','spatial')) dir.create(dir, showWarnings=F)
+  for (dir in c('tmp','layers','conf','spatial', 'prep')) dir.create(dir, showWarnings=F)
 
   # copy layers from global
   write.csv(lyrs_gl, sprintf('tmp/layers_%s.csv', sfx_global), na='', row.names=F)
@@ -700,6 +700,20 @@ populate_draft_branch <- function(){
   file.copy(
     file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'gh-pages/images/regions_600x400.png'),
     sprintf('%s/reports/figures/regions_600x400.png', default_scenario), overwrite=T)
+
+
+  # create subfolders in prep folder
+  prep_subfolders = c('1.1_FIS', '1.2_MAR', '2_AO', '3_NP', '4_CS', '5_CP', '6.1_LIV', '6.2_ECO', '7_TR', '8_CW',
+                      '9.1_ICO', '9.2_LSP', '10.1_SPP', '10.2_HAB', 'pressures', 'resilience')
+  sapply(file.path(default_scenario, sprintf('prep/%s', prep_subfolders)), dir.create)
+  
+  # populate prep folder's supfolders
+  file.create(file.path(default_scenario, sprintf('prep/%s', prep_subfolders), 'README.txt'))
+#   file.append(file.path(dir_github, 'ohi-webapps/tmp/README_template_prepgoals.txt'),  # this should append, but doesn't. Also tried file.create
+#     file.path(default_scenario, sprintf('prep/%s', prep_subfolders), 'README.txt'))  
+#  
+  file.copy(file.path(dir_github, 'ohi-webapps/tmp/README_template_prep.txt'), 
+            file.path(default_scenario, 'prep/README.txt'), overwrite=T)
 
   setwd(wd)
 }
@@ -1255,7 +1269,7 @@ create_maps = function(key='ecu'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
 #sc_maps_todo = setdiff(str_replace(list.files('~/github/ohi-webapps/errors/map'), '_map.txt', ''), 'aus')
 #lapply(as.list(sc_maps_todo[which(sc_maps_todo=='cok'):length(sc_maps_todo)]), create_maps)
 
-custom_maps = function(key='gye'){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
+custom_maps = function(key){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
 
   # load libraries quietly
   suppressWarnings(suppressPackageStartupMessages({
@@ -1268,6 +1282,7 @@ custom_maps = function(key='gye'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
     library(ggmap) # devtools::install_github('dkahle/ggmap') # want 2.4 for stamen toner-lite
     library(dplyr)
     library(grid) # for unit
+    library(tools)
     merge = base::merge # override git2r
     diff  = base::diff
   }))
@@ -1281,8 +1296,9 @@ custom_maps = function(key='gye'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
   # paths (dir_neptune, dir_github already set by source('~/github/ohi-webapps/create_init.R')
   key <<- key
   source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
+#   key = 'bhi' # necessary for creating baltic map
   dir_data    = file.path(dir_neptune, 'git-annex/clip-n-ship')
-  dir_spatial = file.path(dir_data, key, 'spatial')
+  dir_spatial = file.path(dir_data, key, 'spatial') # baltic: dir_spatial = file.path(dir_data, 'bhi', 'spatial') 
   dir_custom  = file.path(dir_spatial, 'custom')
   dir_pages   = file.path(dir_data, key, 'gh-pages')
 
@@ -1291,7 +1307,14 @@ custom_maps = function(key='gye'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
   # read shapefiles, rename headers and save in dir_spatial
   shp_name = file_path_sans_ext(list.files(dir_custom))[1]
   shp_orig = readOGR(dir_custom, shp_name) # inspect: shp_orig
-  names(shp_orig@data) = c('rgn_id', 'rgn_name', 'area_km2', 'hectares')       ## generalize!
+  #names(shp_orig@data) = c('rgn_id', 'rgn_name', 'area_km2', 'hectares')  # for GYE     ## generalize!
+  shp_orig@data = shp_orig@data %>% 
+    mutate(rgn_id = 1:25) %>%
+    select(rgn_id, 
+           rgn_name,
+           area_km2 = Area,
+           cntry_name = Name,
+           basin_name = SUBNAME)
   crs = CRS("+proj=longlat +datum=WGS84")
   shp = spTransform(shp_orig,crs) # inspect as data.frame: shp@data // inspect a column: shp@data$rgn_name
   writeOGR(shp, dsn=dir_spatial, 'rgn_offshore_gcs', driver='ESRI Shapefile')
@@ -1314,9 +1337,9 @@ custom_maps = function(key='gye'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
   plys = plys[bufs_valid]
 
   # fortify and set rgn_names as factor of all inland rgns
-  rgn_names = factor(plys[[1]][['Zona']])  # rgn_name or Zona # need to generalize this
+  rgn_names = factor(plys[[1]][['rgn_name']])  # orig: rgn_name, gye:Zona, bhi:rgn_name # need to generalize this
   plys.df = lapply(plys, function(x){
-    x = fortify(x, region='Zona')          # rgn_name or Zona # need to generalize this
+    x = fortify(x, region='rgn_name')              # orig: rgn_name, gye:Zona, bhi:rgn_name # need to generalize this
     x$id = factor(as.character(x$id), rgn_names)
     return(x)
   })         # head(as.data.frame(plys.df))
