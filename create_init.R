@@ -74,7 +74,7 @@ gl_sc_mcntry <- read.csv(csv_mcntry)
 
 gl_cntries <- read.csv(sprintf('%s/layers/cntry_rgn.csv', dir_global)) %>%
   select(
-    gl_cntry_key = cntry_key, 
+    gl_cntry_key = cntry_key,
     gl_rgn_id    = rgn_id) %>%
   arrange(gl_cntry_key)
 
@@ -102,7 +102,7 @@ sc_studies <- gl_rgns %>%
     data.frame(
       sc_key       = sc_annex_dirs,
       sc_annex_dir = file.path(dir_annex, sc_annex_dirs)),
-    by = 'sc_key') %>% 
+    by = 'sc_key') %>%
   mutate(
     sc_key_old = tolower(str_replace_all(sc_name, ' ', '_')),
     sc_key     = tolower(gl_rgn_key)) %>%
@@ -110,7 +110,7 @@ sc_studies <- gl_rgns %>%
   arrange(sc_key)
 
 # read in custom sc studies
-sc_custom = read.csv('tmp/sc_studies_custom.csv', stringsAsFactors=F) 
+sc_custom = read.csv('custom/sc_studies_custom.csv', stringsAsFactors=F) 
 sc_studies = rbind(
   sc_studies,
   sc_custom[, names(sc_studies)])
@@ -119,7 +119,7 @@ sc_studies = rbind(
 if (nrow(filter(sc_studies, is.na(sc_annex_dir))) > 0){
   message(
     sprintf(
-      'Looking for prepped data folders by subcountry key (lowercase gl_rgn_key):\n    %s\n  The following global regions were not found:\n    %s', 
+      'Looking for prepped data folders by subcountry key (lowercase gl_rgn_key):\n    %s\n  The following global regions were not found:\n    %s',
       dir_annex, paste(with(filter(sc_studies, is.na(sc_annex_dir)), sprintf('%s (%s)', gl_rgn_name, sc_key)), collapse = '\n    ')))
 }
 

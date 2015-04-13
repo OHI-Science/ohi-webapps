@@ -1,6 +1,6 @@
 # Workflow for creating custom WebApps
 
-1. Add the custom region to the lookup table: `~/github/ohi-webapps/tmp/gl_rgn_custom.csv`
+1. Add the custom region to the lookup table: `~/github/ohi-webapps/custom/gl_rgn_custom.csv`
 1. Add an empty folder in git-annex on Neptune: e.g.
 `git-annex/clip-n-ship/gye`
 
