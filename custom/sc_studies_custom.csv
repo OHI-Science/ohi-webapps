@@ -1,10 +1,12 @@
-sc_key, sc_name, sc_key_old, gl_rgn_id, gl_rgn_name, gl_rgn_key, sc_annex_dir, default_scenario
+sc_key,sc_name,sc_key_old,gl_rgn_id,gl_rgn_name,gl_rgn_key,sc_annex_dir,default_scenario
 gye,Golfo de Guayaquil,ecuador,137,Ecuador,ECU,/Volumes/data_edit/git-annex/clip-n-ship/gye,region2015
-bhi-swe,Baltic,sweden,222,Sweden,SWE,/Volumes/data_edit/git-annex/clip-n-ship/bhi,region2015
-bhi-fin,Baltic,finland,174,Finland,FIN,/Volumes/data_edit/git-annex/clip-n-ship/bhi,region2015
-bhi-dnk,Baltic,denmark,175,Denmark,DNK,/Volumes/data_edit/git-annex/clip-n-ship/bhi,region2015
-bhi-deu,Baltic,germany,176,Germany,DEU,/Volumes/data_edit/git-annex/clip-n-ship/bhi,region2015
-bhi-est,Baltic,estonia,70,Estonia,EST,/Volumes/data_edit/git-annex/clip-n-ship/bhi,region2015
-bhi-pol,Baltic,poland,178,Poland,POL,/Volumes/data_edit/git-annex/clip-n-ship/bhi,region2015
-bhi-lva,Baltic,latvia,69,Latvia,LVA,/Volumes/data_edit/git-annex/clip-n-ship/bhi,region2015
-bhi-ltu,Baltic,lithuania,189,Lithuania,LTU,/Volumes/data_edit/git-annex/clip-n-ship/bhi,region2015
+bhi-swe,Sweden,sweden,222,Sweden,SWE,/Volumes/data_edit/git-annex/clip-n-ship/bhi-swe,region2015
+bhi-fin,Finland,finland,174,Finland,FIN,/Volumes/data_edit/git-annex/clip-n-ship/bhi-fin,region2015
+bhi-dnk,Denmark,denmark,175,Denmark,DNK,/Volumes/data_edit/git-annex/clip-n-ship/bhi-dnk,region2015
+bhi-deu,Germany,germany,176,Germany,DEU,/Volumes/data_edit/git-annex/clip-n-ship/bhi-deu,region2015
+bhi-est,Estonia,estonia,70,Estonia,EST,/Volumes/data_edit/git-annex/clip-n-ship/bhi-est,region2015
+bhi-pol,Poland,poland,178,Poland,POL,/Volumes/data_edit/git-annex/clip-n-ship/bhi-pol,region2015
+bhi-lva,Latvia,latvia,69,Latvia,LVA,/Volumes/data_edit/git-annex/clip-n-ship/bhi-lva,region2015
+bhi-ltu,Lithuania,lithuania,189,Lithuania,LTU,/Volumes/data_edit/git-annex/clip-n-ship/bhi-ltu,region2015
+bhi-rus,Russia,russia,73,Russia,RUS,/Volumes/data_edit/git-annex/clip-n-ship/bhi-rus,region2015
+bhi,Baltic,baltic,,Baltic,BHI,/Volumes/data_edit/git-annex/clip-n-ship/bhi,baltic2015
