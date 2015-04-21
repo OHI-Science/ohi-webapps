@@ -130,7 +130,7 @@ file.rename(file.path(dir_bhi, 'bhi-deu.Rproj'),
 setwd('~/github/ohi-webapps')
 
 # read in lookup table
-lkp_baltic = read_csv('custom/bhi/baltic_rgns_to_bhi_rgns_lookup.csv'); lkp_baltic
+lkp_baltic = read_csv('~/github/ohi-webapps/custom/bhi/baltic_rgns_to_bhi_rgns_lookup.csv'); lkp_baltic
 
 # list all layers in b
 lyrs_list = list.files(file.path(dir_repos, 'bhi/baltic2015/layers'), glob2rx('*.csv'), full.names=T) 
@@ -205,11 +205,18 @@ for (f in lyrs_list){ # f = "~/github/clip-n-ship/bhi/baltic2015/layers/ao_acces
 redo_lyrs_individually = F
 if (redo_lyrs_individually) {
   
-  # recreate rgn_labels.csv and rgn_global_gl2014.csv
+  # recreate rgn_global_gl2014.csv
   tmp = lkp_baltic %>%
-    select(rgn_id, rgn_name)
-  write_csv(tmp, file.path(dir_repos, 'bhi/baltic2015/layers/rgn_labels.csv'))
+    select(rgn_id, 
+           label = rgn_name)
   write_csv(tmp, file.path(dir_repos, 'bhi/baltic2015/layers/rgn_global_gl2014.csv'))
+  
+  # recreate rgn_labels.csv 
+  tmp = lkp_baltic %>%
+    mutate(type = 'eez') %>%
+    select(rgn_id, type, 
+           label = rgn_name)
+  write_csv(tmp, file.path(dir_repos, 'bhi/baltic2015/layers/rgn_labels.csv'))
   
   # recreate rgn_area_sc2014-area.csv
   tmp = lkp_baltic %>%
@@ -218,14 +225,15 @@ if (redo_lyrs_individually) {
   
   # recreate rgn_area_inland1km_gl2014.csv and rgn_area_offshore3nm_gl2014.csv
   tmp = lkp_baltic %>%
-    select(rgn_id)
+    select(rgn_id) %>%
+    mutate(area_km2 = 5) # placeholder
   write_csv(tmp, file.path(dir_repos, 'bhi/baltic2015/layers/rgn_area_inland1km_gl2014.csv'))
   write_csv(tmp, file.path(dir_repos, 'bhi/baltic2015/layers/rgn_area_offshore3nm_gl2014.csv'))
   
   # recreate lsp_prot_area_inland1km_gl2014.csv and lsp_prot_area_offshore3nm_gl2014.csv
   # weird errors with not being able to see areakm2: Error in eval(expr, envir, enclos) : object 'area_km2' not found 
   tmp = read_csv(file.path(dir_repos, 'bhi/baltic2015/layers/mar_coastalpopn_inland25km_sc2014-raster.csv')) %>%
-    mutate(area_km2 = NA) %>%
+    mutate(area_km2 = 10) %>% # placeholder; NA caused errors
     select(-popsum)
   write_csv(tmp, file.path(dir_repos, 'bhi/baltic2015/layers/lsp_prot_area_inland1km_gl2014.csv'))
   write_csv(tmp, file.path(dir_repos, 'bhi/baltic2015/layers/lsp_prot_area_offshore3nm_gl2014.csv'))
@@ -282,9 +290,12 @@ key = keys_redo[1]
 
 
 
-
-
-
+# make a temporary resilience placeholder file since errors with calculating resilince
+a = read_csv('~/github/ohi-global/eez2014/scores.csv') %>%
+  filter(dimension == 'resilience', 
+         region_id < 26 & region_id != 0) %>%
+  mutate(score = 70)
+write_csv(a, '~/github/ohi-webapps/custom/bhi/resilience_scores_baltic_placeholder.csv') 
 
 
 # plot(bhi) # see image below
