@@ -130,7 +130,7 @@ file.rename(file.path(dir_bhi, 'bhi-deu.Rproj'),
 setwd('~/github/ohi-webapps')
 
 # read in lookup table
-lkp_baltic = read_csv('custom/bhi/baltic_rgns_to_bhi_rgns_lookup.csv'); lkp_baltic
+lkp_baltic = read_csv('~/github/ohi-webapps/custom/bhi/baltic_rgns_to_bhi_rgns_lookup.csv'); lkp_baltic
 
 # list all layers in b
 lyrs_list = list.files(file.path(dir_repos, 'bhi/baltic2015/layers'), glob2rx('*.csv'), full.names=T) 
@@ -207,13 +207,15 @@ if (redo_lyrs_individually) {
   
   # recreate rgn_global_gl2014.csv
   tmp = lkp_baltic %>%
-    select(rgn_id, rgn_name)
+    select(rgn_id, 
+           label = rgn_name)
   write_csv(tmp, file.path(dir_repos, 'bhi/baltic2015/layers/rgn_global_gl2014.csv'))
   
   # recreate rgn_labels.csv 
   tmp = lkp_baltic %>%
     mutate(type = 'eez') %>%
-    select(rgn_id, type, rgn_name)
+    select(rgn_id, type, 
+           label = rgn_name)
   write_csv(tmp, file.path(dir_repos, 'bhi/baltic2015/layers/rgn_labels.csv'))
   
   # recreate rgn_area_sc2014-area.csv
