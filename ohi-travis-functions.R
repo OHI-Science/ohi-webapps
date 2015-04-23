@@ -209,13 +209,11 @@ create_pages <- function(){
   study_area               = Sys.getenv('study_area')
   if (default_branch_scenario == '' | study_area == ''){        
     # if not set, then running locally so read in yaml
-    travis_yaml = yaml.load_file('.travis.yml')    
-    for (var in travis_yaml$env$global){ # var = travis_yaml$env$global[[2]]
-      if (is.null(names(var))){
-        var_parts = str_trim(str_split(var, '=')[[1]])
-        assign(var_parts[1], str_replace_all(var_parts[2], '\"',''))
-      }
-    }    
+    y = yaml.load_file('.travis.yml')
+    v = unlist(y$env$global)
+    for (n in names(v)){ # var = travis_yaml$env$global[[2]]
+      assign(n, v[[n]])
+    }
     git_owner = 'OHI-Science'
     git_repo  = basename(wd)
     git_slug  = sprintf('%s/%s', git_owner, git_repo)
