@@ -1667,10 +1667,48 @@ update_status <- function(){
   setwd(wd)
 }
 
-# helper functions ----
+# other updates ----
 
-simpleCap = function(x) {
-  s = strsplit(x, " ")[[1]]
-  paste(toupper(substring(s, 1, 1)), substring(s, 2),
-        sep = "", collapse = " ")
+update_travis_yml <- function(key, msg='ohi-webapps/create_functions.R - update_travis_yml()'){
+  
+  # get subcountry vars specific to key
+  key <<- key
+  source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
+  
+  # clone repo
+  wd = getwd()
+  if (!file.exists(dir_repo)) system(sprintf('git clone %s %s', git_url, dir_repo))
+  setwd(dir_repo)
+  repo = repository(dir_repo)
+  
+  # switch to draft branch and get latest
+  system('git checkout draft; git pull')
+  
+  # update .travis.yml file a la github.com/OHI-Science/issues/issues/427
+  readLines('.travis.yml') %>%
+    str_replace_all('- default_branch_scenario=', '- default_branch_scenario: ') %>%
+    str_replace_all('- study_area=',              '- study_area: ') %>%
+    str_replace_all('- secure=',                  '- secure: ') %>%
+  writeLines('.travis.yml')
+  
+  # could also update the filepaths but couldn't get str_replace to recognize the setwd so will have to do this another round.
+  # update setwd() in assessment/scenario/calculate_scores.r
+#   readLines(file.path(default_scenario, 'calculate_scores.r')) %>%
+# #     grep("(setwd).*"), paste0("\\1", file.path(dir_github, key, default_scenario))) %>%
+#     str_replace("setwd('/Users/bbest/github/clip-n-ship/abw/subcountry2014')", 
+#                 paste0("setwd('", file.path(dir_github, key, default_scenario), "')")) %>%
+#     writeLines(file.path(default_scenario, 'calculate_scores.r'))
+  
+  # git add, commit and push
+  system(sprintf('git add -A; git commit -a -m "%s"', msg))
+  system('git push origin draft')
+  setwd(wd)
 }
+  
+
+# JSL commented out 2015-04-23 bc pretty sure I never used this although I did write it. Delete if this is the case.
+# simpleCap = function(x) {
+#   s = strsplit(x, " ")[[1]]
+#   paste(toupper(substring(s, 1, 1)), substring(s, 2),
+#         sep = "", collapse = " ")
+# }
