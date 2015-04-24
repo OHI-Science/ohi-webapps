@@ -1707,9 +1707,12 @@ update_travis_yml <- function(key, msg='ohi-webapps/create_functions.R - update_
   # git add, commit and push
   system(sprintf('git add -A; git commit -a -m "%s"', msg))
   system('git push origin draft')
+<<<<<<< HEAD
 
   # ensure on draft branch 
   checkout(repo, 'draft')
+=======
+>>>>>>> 497072a5f73b7be30574914134a06f915ad89031
   setwd(wd)
 }
   
