@@ -1710,7 +1710,6 @@ update_travis_yml <- function(key, msg='ohi-webapps/create_functions.R - update_
 
   # ensure on draft branch 
   checkout(repo, 'draft')
-  setwd(wd)
 }
   
 
