@@ -35,12 +35,12 @@ deploy_app_nceas('gye', nceas_user='bbest')
 deploy_app_nceas(key='ohi-global')
 
 # update travis 2015-04-23 by bbest, jules32 ----
-# 2 steps: 1) run update_travis_yml. 2) run deploy_app_nceas
-key = 'abw'
-# keys = sc_studies %>% filter(!is.na(sc_annex_dir)) %>% select(sc_key)
-# keys = keys[,1]
+# 2 steps: 1) run update_travis_yml. 2) run deploy_app_nceas on key = 'abw'. Done 2015-04-23. 
+# 2) run deploy_app_nceas on all keys. Not yet done ...
+keys = sc_studies %>% filter(!is.na(sc_annex_dir)) %>% select(sc_key)
+keys = keys[,1]
 # update .travis.yml 
-sapply(keys, update_travis_yml, 'update About using ohi-webapps/create_functions.R - update_travis_yml()')
+sapply(keys, update_travis_yml, 'update travis.yml ohi-webapps/create_functions.R - update_travis_yml()')
 sapply(keys, deploy_app_nceas)
 
 

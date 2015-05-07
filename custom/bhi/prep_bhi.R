@@ -125,7 +125,7 @@ file.rename(file.path(dir_bhi, 'bhi-deu.Rproj'),
 # by hand for the moment
 
 
-## 7. bind possible layers for each bhi-xxx ----
+## 7. bhi layers: bind possible layers for each bhi-xxx ----
 
 setwd('~/github/ohi-webapps')
 
@@ -200,9 +200,10 @@ for (f in lyrs_list){ # f = "~/github/clip-n-ship/bhi/baltic2015/layers/ao_acces
 # 3: 5 problems parsing '~/github/clip-n-ship/bhi-ltu/region2015/layers/mar_harvest_tonnes_gl2014.csv'. See problems(...) for more details. 
 
  
-## handle several layers individually ----
+## 8. bhi layers: handle several layers individually ----
 
 redo_lyrs_individually = F
+
 if (redo_lyrs_individually) {
   
   # recreate rgn_global_gl2014.csv
@@ -211,11 +212,13 @@ if (redo_lyrs_individually) {
            label = rgn_name)
   write_csv(tmp, file.path(dir_repos, 'bhi/baltic2015/layers/rgn_global_gl2014.csv'))
   
+  
   # recreate rgn_labels.csv 
   tmp = lkp_baltic %>%
-    mutate(type = 'eez') %>%
-    select(rgn_id, type, 
-           label = rgn_name)
+    mutate(type = 'eez',
+           label = paste(str_extract(cntry_name, pattern='[A-Z][a-z][a-z]'),
+                         basin_name, sep = ' - ')) %>%
+    select(rgn_id, type, label)
   write_csv(tmp, file.path(dir_repos, 'bhi/baltic2015/layers/rgn_labels.csv'))
   
   # recreate rgn_area_sc2014-area.csv
