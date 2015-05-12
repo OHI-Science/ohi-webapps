@@ -43,7 +43,9 @@ keys = keys[,1]
 sapply(keys, update_travis_yml, 'update travis.yml ohi-webapps/create_functions.R - update_travis_yml()')
 sapply(keys, deploy_app_nceas)
 
-
-
+# update_travis_yml(key='gye', msg='update travis.yml ohi-webapps/create_functions.R - update_travis_yml()')
+# deploy_app_nceas(key='gye')
+# additions_draft(key='tto') # ultimately fold update_travis_yml() action into additions_draft() 
+# since all operations can happen together and there will be fewer functions
 
 

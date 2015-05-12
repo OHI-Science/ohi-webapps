@@ -1696,14 +1696,6 @@ update_travis_yml <- function(key, msg='ohi-webapps/create_functions.R - update_
 #   file.copy(file.path('~/github/ohi-webapps', fn), 
 #             file.path(dir_repo, default_scenario, fn), overwrite=T)
   
-  ## could also update the filepaths but couldn't get str_replace to recognize the setwd so will have to do this another round.
-  # update setwd() in assessment/scenario/calculate_scores.r
-#   readLines(file.path(default_scenario, 'calculate_scores.r')) %>%
-# #     grep("(setwd).*"), paste0("\\1", file.path(dir_github, key, default_scenario))) %>%
-#     str_replace("setwd('/Users/bbest/github/clip-n-ship/abw/subcountry2014')", 
-#                 paste0("setwd('", file.path(dir_github, key, default_scenario), "')")) %>%
-#     writeLines(file.path(default_scenario, 'calculate_scores.r'))
-  
   # git add, commit and push
   system(sprintf('git add -A; git commit -a -m "%s"', msg))
   system('git push origin draft')
@@ -1715,9 +1707,37 @@ update_travis_yml <- function(key, msg='ohi-webapps/create_functions.R - update_
 }
   
 
-# JSL commented out 2015-04-23 bc pretty sure I never used this although I did write it. Delete if this is the case.
-# simpleCap = function(x) {
-#   s = strsplit(x, " ")[[1]]
-#   paste(toupper(substring(s, 1, 1)), substring(s, 2),
-#         sep = "", collapse = " ")
-# }
+additions_draft <- function(key, msg='ohi-webapps/create_functions.R - update_travis_yml()'){
+  
+  # get subcountry vars specific to key
+  key <<- key
+  source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
+  
+  # clone repo
+  wd = getwd()
+  if (!file.exists(dir_repo)) system(sprintf('git clone %s %s', git_url, dir_repo))
+  setwd(dir_repo)
+  repo = repository(dir_repo)
+  
+  # switch to draft branch and get latest
+  system('git checkout draft; git pull')
+  
+  ## 1. update setwd() in assessment/scenario/calculate_scores.r
+  readLines(file.path(default_scenario, 'calculate_scores.r')) %>%
+    str_replace("setwd.*", paste0("setwd('", file.path(dir_github, key, default_scenario), "')")) %>%
+    writeLines(file.path(default_scenario, 'calculate_scores.r'))
+  
+  ## 2. update launch_app() call in assessment/scenario/launch_app_code.r
+  readLines(file.path(default_scenario, 'launch_app_code.r')) %>%
+    str_replace("launch_app.*", paste0("ohicore::launch_app('", file.path(dir_github, key, default_scenario), "')")) %>%
+    writeLines(file.path(default_scenario, 'launch_app_code.r'))
+  
+  # git add, commit and push
+  system(sprintf('git add -A; git commit -a -m "%s"', msg))
+  system('git push origin draft')
+  
+  # ensure on draft branch 
+  checkout(repo, 'draft')
+  setwd(wd)
+  
+}
