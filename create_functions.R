@@ -1723,15 +1723,32 @@ additions_draft <- function(key, msg='ohi-webapps/create_functions.R - update_tr
   # switch to draft branch and get latest
   system('git checkout draft; git pull')
   
-  ## 1. update setwd() in assessment/scenario/calculate_scores.r
+  ## 1. update .travis.yml file a la github.com/OHI-Science/issues/issues/427
+  
+  ## 2. update setwd() in assessment/scenario/calculate_scores.r
   readLines(file.path(default_scenario, 'calculate_scores.r')) %>%
     str_replace("setwd.*", paste0("setwd('", file.path(dir_github, key, default_scenario), "')")) %>%
     writeLines(file.path(default_scenario, 'calculate_scores.r'))
   
-  ## 2. update launch_app() call in assessment/scenario/launch_app_code.r
+  ## 3. update launch_app() call in assessment/scenario/launch_app_code.r
   readLines(file.path(default_scenario, 'launch_app_code.r')) %>%
     str_replace("launch_app.*", paste0("ohicore::launch_app('", file.path(dir_github, key, default_scenario), "')")) %>%
     writeLines(file.path(default_scenario, 'launch_app_code.r'))
+  
+  ## 4. save ohi-webapps/install_ohicore.r in scenario folder Test this before running
+  fn = 'install_ohicore.r'
+  file.copy(file.path('~/github/ohi-webapps', fn), 
+            file.path(dir_repo, default_scenario, fn), overwrite=T)
+  
+  ## 5. create and populate prep folder if it doesn't exist
+  if ( 'prep' %in% list.dirs(default_scenario) ) {
+  prep_subfolders = c('FIS', 'MAR', 'AO', 'NP', 'CS', 'CP', 'LIV', 'ECO', 'TR', 'CW', 'ICO', 'LSP', 'SPP', 'HAB', 
+                      'pressures', 'resilience')
+  sapply(file.path(dir_repo, default_scenario, 'prep'), dir.create)
+  sapply(file.path(dir_repo, default_scenario, sprintf('prep/%s', prep_subfolders)), dir.create)
+  file.copy(file.path(dir_github, 'ohi-webapps/tmp/README_template_prep.txt'), 
+            file.path(default_scenario, 'prep/README.txt'), overwrite=T)
+  }
   
   # git add, commit and push
   system(sprintf('git add -A; git commit -a -m "%s"', msg))
