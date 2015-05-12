@@ -1098,6 +1098,7 @@ deploy_app_nceas <- function(key, nceas_user = 'jstewart'){ # key='ecu' # eventu
   unlink('github', recursive=T, force=T)
   
   # deploy by copying over ssh to the NCEAS server with Nick Brand
+  #   system(sprintf('sudo chown -R %s /srv/shiny-server/%s'), nceas_user, app_name) # may have to run this from Terminal if permission errors
   system(sprintf('rsync -r --delete ../%s %s@fitz.nceas.ucsb.edu:/srv/shiny-server/', app_name, nceas_user))
   system(sprintf("ssh %s@fitz.nceas.ucsb.edu 'chmod g+w -R /srv/shiny-server/%s'", nceas_user, app_name))
   
