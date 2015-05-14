@@ -34,19 +34,14 @@ deploy_app_nceas('gye', nceas_user='bbest')
 # created ohi-global ----
 deploy_app_nceas(key='ohi-global')
 
-# update travis 2015-04-23 by bbest, jules32 ----
+# updates to app branch; additions to draft branch ----
 # 2 steps: 1) run update_travis_yml. 2) run deploy_app_nceas on key = 'abw'. Done 2015-04-23. 
 # 2) run deploy_app_nceas on all keys. Not yet done ...
 
-keys = sc_studies %>% filter(!is.na(sc_annex_dir)) %>% select(sc_key) %>% filter(sc_key != c('gye', 'bhi', 'chn'))
-keys = keys[,1] 
-# update .travis.yml 
-sapply(keys, update_travis_yml, 'update travis.yml ohi-webapps/create_functions.R - update_travis_yml()')
+keys = sc_studies %>% filter(!is.na(sc_annex_dir)) %>% select(sc_key) %>% 
+  filter(sc_key != c('gye', 'bhi', 'chn'))
+keys = c('aia', 'tto', 'asm') # testing
+sapply(keys, additions_draft, 'update travis.yml + additions, ohi-webapps/create_functions.R - additions_draft()')
 sapply(keys, deploy_app_nceas)
-
-update_travis_yml(key='esp', msg='update travis.yml ohi-webapps/create_functions.R - update_travis_yml()')
-deploy_app_nceas(key='esp')
-additions_draft(key='tto') # ultimately fold update_travis_yml() action into additions_draft() 
-# since all operations can happen together and there will be fewer functions
 
 
