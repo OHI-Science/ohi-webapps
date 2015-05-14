@@ -1683,69 +1683,68 @@ additions_draft <- function(key, msg='ohi-webapps/create_functions.R - additions
   setwd(dir_repo)
   repo = repository(dir_repo)
   
-  # branches to update
-  branches_to_update = c('draft') # also do with 'published'?
+  # switch to draft branch and get latest
+  system('git checkout draft; git pull')
   
-  for (branch in branches_to_update) { # branch = 'draft'
+  ## 1. update .travis.yml file a la github.com/OHI-Science/issues/issues/427
+  readLines('.travis.yml') %>%
+    str_replace_all('- default_branch_scenario=', '- default_branch_scenario: ') %>%
+    str_replace_all('- study_area=',              '- study_area: ') %>%
+    str_replace_all('- secure=',                  '- secure: ') %>%
+    writeLines('.travis.yml')
+  
+  ## 2. update setwd() in assessment/scenario/calculate_scores.r
+  readLines(file.path(default_scenario, 'calculate_scores.r')) %>%
+    str_replace("setwd.*", paste0("setwd('", file.path(dir_github, key, default_scenario), "')")) %>%
+    writeLines(file.path(default_scenario, 'calculate_scores.r'))
+  
+  ## 3. update launch_app() call in assessment/scenario/launch_app_code.r
+  readLines(file.path(default_scenario, 'launch_app_code.r')) %>%
+    str_replace("launch_app.*", paste0("ohicore::launch_app('", file.path(dir_github, key, default_scenario), "')")) %>%
+    writeLines(file.path(default_scenario, 'launch_app_code.r'))
+  
+  ## 4. save ohi-webapps/install_ohicore.r
+  fn = 'install_ohicore.r'
+  file.copy(file.path('~/github/ohi-webapps', fn), 
+            file.path(dir_repo, default_scenario, fn), overwrite=T)
+  
+  ## 5a. create and populate prep folder if it doesn't exist
+  if ( !'prep' %in% list.dirs(default_scenario, full.names=F) ) {
+    prep_subfolders = c('FIS', 'MAR', 'AO', 'NP', 'CS', 'CP', 'LIV', 'ECO', 'TR', 'CW', 'ICO', 'LSP', 'SPP', 'HAB', 
+                        'pressures', 'resilience')
+    # prep folder and README.md
+    dir.create(file.path(dir_repo, default_scenario, 'prep'))
+    file.copy(file.path(dir_github, 'ohi-webapps/tmp/README_template_prep.md'), 
+              file.path(default_scenario, 'prep', 'README.md'), overwrite=T)
+    # goal folders and README.md's
+    sapply(file.path(dir_repo, default_scenario, sprintf('prep/%s', prep_subfolders)), dir.create)
+    file.copy(file.path(dir_github, 'ohi-webapps/tmp/README_template_goal.md'), 
+              file.path(default_scenario, sprintf('prep/%s', prep_subfolders), 'README.md'), overwrite=T)
     
-    # switch to draft branch and get latest
-    system(sprintf('git checkout %s; git pull', branch))
+    ## 5b. create and populate prep/tutorials folder 
+    dir_tutes = file.path(dir_github, 'ohimanual/tutorials/R_tutes')
     
-    ## 1. update .travis.yml file a la github.com/OHI-Science/issues/issues/427
-    readLines('.travis.yml') %>%
-      str_replace_all('- default_branch_scenario=', '- default_branch_scenario: ') %>%
-      str_replace_all('- study_area=',              '- study_area: ') %>%
-      str_replace_all('- secure=',                  '- secure: ') %>%
-      writeLines('.travis.yml')
-    
-    ## 2. update setwd() in assessment/scenario/calculate_scores.r
-    readLines(file.path(default_scenario, 'calculate_scores.r')) %>%
-      str_replace("setwd.*", paste0("setwd('", file.path(dir_github, key, default_scenario), "')")) %>%
-      writeLines(file.path(default_scenario, 'calculate_scores.r'))
-    
-    ## 3. update launch_app() call in assessment/scenario/launch_app_code.r
-    readLines(file.path(default_scenario, 'launch_app_code.r')) %>%
-      str_replace("launch_app.*", paste0("ohicore::launch_app('", file.path(dir_github, key, default_scenario), "')")) %>%
-      writeLines(file.path(default_scenario, 'launch_app_code.r'))
-    
-    ## 4. save ohi-webapps/install_ohicore.r
-    fn = 'install_ohicore.r'
-    file.copy(file.path('~/github/ohi-webapps', fn), 
-              file.path(dir_repo, default_scenario, fn), overwrite=T)
-    
-    ## 5a. create and populate prep folder if it doesn't exist
-    if ( !'prep' %in% list.dirs(default_scenario, full.names=F) ) {
-      prep_subfolders = c('FIS', 'MAR', 'AO', 'NP', 'CS', 'CP', 'LIV', 'ECO', 'TR', 'CW', 'ICO', 'LSP', 'SPP', 'HAB', 
-                          'pressures', 'resilience')
-      # prep folder and README.md
-      dir.create(file.path(dir_repo, default_scenario, 'prep'))
-      file.copy(file.path(dir_github, 'ohi-webapps/tmp/README_template_prep.md'), 
-                file.path(default_scenario, 'prep', 'README.md'), overwrite=T)
-      # goal folders and README.md's
-      sapply(file.path(dir_repo, default_scenario, sprintf('prep/%s', prep_subfolders)), dir.create)
-      file.copy(file.path(dir_github, 'ohi-webapps/tmp/README_template_goal.md'), 
-                file.path(default_scenario, sprintf('prep/%s', prep_subfolders), 'README.md'), overwrite=T)
-      
-      ## 5b. create and populate prep/tutorials folder 
-      dir_tutes = file.path(dir_github, 'ohimanual/tutorials/R_tutes')
-      
-      dir.create(file.path(dir_repo, default_scenario, 'prep/tutorials'))
-      file.copy(file.path(dir_tutes, 'R_tutes_all.md'), 
-                file.path(default_scenario, 'prep/tutorials', 'R_intro.md'), overwrite=T)
-      readLines(file.path(dir_tutes, 'R_tutes.r')) %>%
-        str_replace("setwd.*", 
-                    paste0("setwd('", file.path(dir_github, key, default_scenario, 'prep/tutorials'), "')")) %>%
-        writeLines(file.path(default_scenario, 'prep/tutorials', 'R_tutorial.r'))
-      
-    }
-    
-    # git add, commit and push
-    system(sprintf('git add -A; git commit -a -m "%s"', msg))
-    system(sprintf('git push origin %s', branch))
-    
-    # ensure on draft branch 
-    checkout(repo, branch)
-    setwd(wd)
-    
+    dir.create(file.path(dir_repo, default_scenario, 'prep/tutorials'))
+    file.copy(file.path(dir_tutes, 'R_tutes_all.md'), 
+              file.path(default_scenario, 'prep/tutorials', 'R_intro.md'), overwrite=T)
+    readLines(file.path(dir_tutes, 'R_tutes.r')) %>%
+      str_replace("setwd.*", 
+                  paste0("setwd('", file.path(dir_github, key, default_scenario, 'prep/tutorials'), "')")) %>%
+      writeLines(file.path(default_scenario, 'prep/tutorials', 'R_tutorial.r'))    
   }
+  
+  # git add, commit and push
+  system(sprintf('git add -A; git commit -a -m "%s"', msg))
+  system('git push origin draft')
+  
+  # ensure on draft branch 
+  checkout(repo, 'draft')
+
+  # merge published with the draft branch
+  system('git checkout published')
+  system('git merge draft')
+  system('git push origin published')
+           
+  setwd(wd)
 }
+
