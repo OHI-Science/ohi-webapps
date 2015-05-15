@@ -3,7 +3,7 @@ setwd('~/github/ohi-webapps')
 source('create_init.R')
 source('create_functions.R')
 
-# update About page 2015-01-23 by bbest, jules32 ----
+# 2015-Jan, 2015-May: Uupdate WebApps (gh-pages) by bbest, jules32 ----
 # first, make any changes you want to the files in gh-pages; ex: ohi-webapps/gh-pages/about/index.md
 # keys = sc_studies %>% filter(!is.na(sc_annex_dir)) %>% select(sc_key)
 # keys = keys[,1]
@@ -12,7 +12,7 @@ source('create_functions.R')
 # TODO: fix update_draft function to copy functions.R and update layers.csv descriptions.
 #sapply(keys, update_draft, 'update About using ohi-webapps/create_functions.R - update_draft()') 
 
-# Move Apps to NCEAS server ----
+# 2015-March: Move Apps to NCEAS server ----
 # change app_url to https://ohi-science.nceas.ucsb.edu/ (from https://ohi-science.shinyapps.io) in: 
 #   1. ohi-webapps/gh-pages/_config.brew.yml
 #   2. ohi-webapps/app.brew.yml
@@ -34,14 +34,13 @@ deploy_app_nceas('gye', nceas_user='bbest')
 # created ohi-global ----
 deploy_app_nceas(key='ohi-global')
 
-# updates to app branch; additions to draft branch ----
-# 2 steps: 1) run update_travis_yml. 2) run deploy_app_nceas on key = 'abw'. Done 2015-04-23. 
-# 2) run deploy_app_nceas on all keys. Not yet done ...
-
+# 2015-May: Updates to app branch; additions to draft branch ----
 keys = sc_studies %>% filter(!is.na(sc_annex_dir)) %>% select(sc_key) %>% 
-  filter(sc_key != c('gye', 'bhi', 'chn'))
-keys = c('aia', 'tto', 'asm') # testing
-sapply(keys, additions_draft, 'update travis.yml + additions, ohi-webapps/create_functions.R - additions_draft()')
+  filter(!sc_key %in% c('gye', 'bhi', 'chn', 'aia', 'tto', 'asm', 'civ'))
+keys = keys[,1] # keys = keys[1:10,1]
+sapply(keys, additions_draft, msg='update travis.yml + additions, ohi-webapps/create_functions.R - additions_draft()')
+sapply(keys, update_website, msg='update _config.yml branch_scenario, ohi-webapps/create_functions.R - update_website()')
+# `jstewart@fitz:/srv/shiny-server$ sudo service shiny-server restart` restart fitz server in terminal
 sapply(keys, deploy_app_nceas)
 
 
