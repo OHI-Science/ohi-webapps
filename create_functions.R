@@ -1448,7 +1448,7 @@ status_travis = function(key, clone=F, enable=T,
   } else {
     setwd(dir_repo)
     #system('git pull; git checkout draft; git pull')
-    res = suppressWarnings(system(sprintf('travis history -i -r %s -b draft -l 1 2>&1', git_slug), intern=T)) # this gives an error for jules32
+    res = suppressWarnings(system(sprintf('travis history -i -r %s -b draft -l 1 2>&1', git_slug), intern=T)) 
     if (length(res) > 0){
       status = str_split(res, ' ')[[1]][2] %>% str_replace(':','')
     } else {
@@ -1460,7 +1460,9 @@ status_travis = function(key, clone=F, enable=T,
   stopifnot(length(status)==1 | !status %in% states)
   
   # turn on Travis
-  if (status %in% c('no history', 'no build yet','repository not known','failed') & enable==T & file.exists('.travis.yml')){
+  if (status %in% c('no history', 'no build yet','repository not known','failed', 'passed') & 
+        enable==T & 
+        file.exists('.travis.yml')){
     system(sprintf('travis encrypt -r %s GH_TOKEN=%s --add env.global', git_slug, gh_token))
     system(sprintf('travis enable -r %s', git_slug))
     system('git commit -am "enabled travis.yml with encrypted github token"; git pull; git push')
@@ -1750,10 +1752,10 @@ additions_draft <- function(key, msg='ohi-webapps/create_functions.R - additions
 }
 
 
-fix_travis_yml <- function(key, msg='ohi-webapps/create_functions.R - fix_travis_yml()', 
-                           csv_status=file.path(dir_github, 'ohi-webapps/tmp/webapp_yml_secure_recip.csv')){
+fix_travis_yml <- function(key, msg='no updated needed, ohi-webapps/create_functions.R - fix_travis_yml()', 
+                           csv_st=file.path(dir_github, 'ohi-webapps/tmp/webapp_yml_secure_recip.csv')){
   # with @bbest 2015-05-19
-    
+  
   # get subcountry vars specific to key
   key <<- key
   source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
@@ -1767,9 +1769,24 @@ fix_travis_yml <- function(key, msg='ohi-webapps/create_functions.R - fix_travis
   # switch to draft branch and get latest
   system('git checkout draft; git pull')
   
-  yml = file.path(dir_repo, '.travis.yml')
+  yml_log = read.csv(csv_st) %>%
+    filter(sc_key == key)
   
-  if ( file.exists(yml) ){
+  if ( !yml_log$travis_secure | !yml_log$travis_recip ){
+    
+    msg='fix secure/recip, ohi-webapps/create_functions.R - fix_travis_yml()'
+    
+    # rebrew travis
+    brew(travis_draft_yaml_brew, '.travis.yml')
+    
+    # run status_travis
+    st = status_travis(key)
+    readLines('.travis.yml') %>% # may no longer be necessary
+      str_replace_all('- secure=', '- secure: ') %>%
+      writeLines('.travis.yml')
+    
+    # run checks again
+    yml = file.path(dir_repo, '.travis.yml')
     y = yaml.load_file(yml)
     
     # check #1: has secure var?
@@ -1778,34 +1795,23 @@ fix_travis_yml <- function(key, msg='ohi-webapps/create_functions.R - fix_travis
     # check #2: has lowndes as a recipient # TODO: switch to ohi-science@nceas.ucsb.edu?
     recip = 'lowndes@nceas.ucsb.edu' %in% unlist(y$notifications$email$recipients)
     
-    # add to csv_status log
-    read.csv(csv_status, stringsAsFactors=F, na.strings='') %>%
+    # update log
+    read.csv(csv_st, stringsAsFactors=F, na.strings='') %>%
       filter(sc_key != key) %>%
       rbind(
         data.frame(
-          sc_key        = key,
+          sc_key = key,
           travis_secure = secure,
           travis_recip  = recip,
+          travis_status = st,
           date_checked  = as.character(Sys.time()))) %>%
-      write.csv(csv_status, row.names=F, na='')    
-    
-    # rebrew travis
-    if ( !recip )  brew(t ravis_draft_yaml_brew, '.travis.yml')
-    
-    # run status_travis
-    if ( !secure | !recip ) {
-      status_travis(key)
-      readLines('.travis.yml') %>%
-        str_replace_all('- secure=', '- secure: ') %>%
-        writeLines('.travis.yml')
-    }
-    
-    # git add, commit and push
-    system(sprintf('git add -A; git commit -a -m "%s"', msg))
-    system('git push origin draft')
-    
-    setwd(wd)
-    
+      write.csv(csv_st, row.names=F, na='')    
   }
+  # git add, commit and push
+  system(sprintf('git add -A; git commit -a -m "%s"', msg))
+  system('git push origin draft')
+  
+  setwd(wd)
+  
 }
 

@@ -46,9 +46,51 @@ sapply(keys, update_website, msg='update _config.yml branch_scenario, ohi-webapp
 sapply(keys, deploy_app_nceas)
 
 # 2015-May: Update .travis.yml with env:global:secure variable w/ encrypted string that sets GH_TOKEN ----
-# with @bbest
-# and rerun additions_draft because errant extra ohicore::
-status_travis('cog')
-sapply(keys, additions_draft, msg='update travis.yml + additions, ohi-webapps/create_functions.R - additions_draft()')
-# write_csv(data.frame(key, travis_yml = T), 'tmp/yml_record.csv')
-fix_travis_yml
+# with @bbest. and rerun additions_draft because errant extra `ohicore::`.
+# keys = 'blz' bad example because this one had an error in functions.r. 
+# keys = 'nld' # failing
+keys = sc_studies %>% filter(!is.na(sc_annex_dir)) %>% select(sc_key) %>% 
+  filter(!sc_key %in% c('gye', 'bhi', 'chn', 'aia', 'tto', 'asm', 'civ'))
+keys = keys[11:100,1] # keys = keys[1:10,1]
+# sapply(keys, additions_draft, msg='update travis.yml + additions, ohi-webapps/create_functions.R - additions_draft()')
+# sapply(keys, update_website, msg='update _config.yml branch_scenario, ohi-webapps/create_functions.R - update_website()')
+sapply(keys, fix_travis_yml)
+sapply(keys, deploy_app_nceas)
+#khm rsync error
+
+## 2015-May-20: Create `webapp_yml_secure_recip.csv`, a list of which repos have secure/recipient problems:
+
+csv_status=file.path(dir_github, 'ohi-webapps/tmp/webapp_yml_secure_recip.csv')
+for (dir in list.dirs(dir_repos, recursive=F)){ # dir = '/Users/jstewart/github/clip-n-ship/cog'
+ 
+  key = str_split_fixed(dir, '/', 6)[6]
+  key <<- key
+  source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
+  
+  # switch to draft branch and get latest
+  system('git checkout draft; git pull')
+  
+  yml = file.path(dir, '.travis.yml')
+  
+  if ( file.exists(yml) ){
+    y = yaml.load_file(yml)
+  
+    # check #1: has secure var?
+    secure = 'secure' %in% names(unlist(y$env$global))
+    
+    # check #2: has lowndes as a recipient # TODO: switch to ohi-science@nceas.ucsb.edu?
+    recip = 'lowndes@nceas.ucsb.edu' %in% unlist(y$notifications$email$recipients)
+    
+    # add to csv_status log
+    read.csv(csv_status, stringsAsFactors=F, na.strings='') %>%
+      filter(sc_key != key) %>%
+      rbind(
+        data.frame(
+          sc_key = key,
+          travis_secure = secure,
+          travis_recip  = recip,
+          travis_status = '',
+          date_checked  = as.character(Sys.time()))) %>%
+      write.csv(csv_status, row.names=F, na='')    
+  }
+}
