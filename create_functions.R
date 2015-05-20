@@ -1429,7 +1429,8 @@ custom_maps = function(key){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
     res=72, width=30, height=20, effect='')
 }
 
-status_travis = function(key, clone=F, enable=T, csv_status=file.path(dir_github, 'ohi-webapps/tmp/webapp_travis_status.csv')){
+status_travis = function(key, clone=F, enable=T, 
+                         csv_status=file.path(dir_github, 'ohi-webapps/tmp/webapp_travis_status.csv')){
   
   wd = getwd()
   key <<- key
@@ -1700,7 +1701,7 @@ additions_draft <- function(key, msg='ohi-webapps/create_functions.R - additions
   
   ## 3. update launch_app() call in assessment/scenario/launch_app_code.r
   readLines(file.path(default_scenario, 'launch_app_code.r')) %>%
-    str_replace("launch_app.*", paste0("ohicore::launch_app('", file.path(dir_github, key, default_scenario), "')")) %>%
+    str_replace(".*launch_app.*", paste0("ohicore::launch_app('", file.path(dir_github, key, default_scenario), "')")) %>%
     writeLines(file.path(default_scenario, 'launch_app_code.r'))
   
   ## 4. save ohi-webapps/install_ohicore.r
@@ -1746,5 +1747,65 @@ additions_draft <- function(key, msg='ohi-webapps/create_functions.R - additions
   system('git push origin published')
            
   setwd(wd)
+}
+
+
+fix_travis_yml <- function(key, msg='ohi-webapps/create_functions.R - fix_travis_yml()', 
+                           csv_status=file.path(dir_github, 'ohi-webapps/tmp/webapp_yml_secure_recip.csv')){
+  # with @bbest 2015-05-19
+    
+  # get subcountry vars specific to key
+  key <<- key
+  source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
+  
+  # clone repo
+  wd = getwd()
+  if (!file.exists(dir_repo)) system(sprintf('git clone %s %s', git_url, dir_repo))
+  setwd(dir_repo)
+  repo = repository(dir_repo)
+  
+  # switch to draft branch and get latest
+  system('git checkout draft; git pull')
+  
+  yml = file.path(dir_repo, '.travis.yml')
+  
+  if ( file.exists(yml) ){
+    y = yaml.load_file(yml)
+    
+    # check #1: has secure var?
+    secure = 'secure' %in% names(unlist(y$env$global))
+    
+    # check #2: has lowndes as a recipient # TODO: switch to ohi-science@nceas.ucsb.edu?
+    recip = 'lowndes@nceas.ucsb.edu' %in% unlist(y$notifications$email$recipients)
+    
+    # add to csv_status log
+    read.csv(csv_status, stringsAsFactors=F, na.strings='') %>%
+      filter(sc_key != key) %>%
+      rbind(
+        data.frame(
+          sc_key        = key,
+          travis_secure = secure,
+          travis_recip  = recip,
+          date_checked  = as.character(Sys.time()))) %>%
+      write.csv(csv_status, row.names=F, na='')    
+    
+    # rebrew travis
+    if ( !recip )  brew(t ravis_draft_yaml_brew, '.travis.yml')
+    
+    # run status_travis
+    if ( !secure | !recip ) {
+      status_travis(key)
+      readLines('.travis.yml') %>%
+        str_replace_all('- secure=', '- secure: ') %>%
+        writeLines('.travis.yml')
+    }
+    
+    # git add, commit and push
+    system(sprintf('git add -A; git commit -a -m "%s"', msg))
+    system('git push origin draft')
+    
+    setwd(wd)
+    
+  }
 }
 

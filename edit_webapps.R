@@ -45,30 +45,10 @@ sapply(keys, update_website, msg='update _config.yml branch_scenario, ohi-webapp
 # `jstewart@fitz:/srv/shiny-server$ sudo service shiny-server restart` restart fitz server in terminal
 sapply(keys, deploy_app_nceas)
 
-# update .travis.yml with env:global:secure variable with encrypted string that sets GH_TOKEN
+# 2015-May: Update .travis.yml with env:global:secure variable w/ encrypted string that sets GH_TOKEN ----
+# with @bbest
+# and rerun additions_draft because errant extra ohicore::
 status_travis('cog')
-
-# quick code to iterate over repos. prob better as standalone function with repo as input arg so goes in create_functions as fix_yaml() or some such
-# TODO: record in data.frame or fix inline...
-for (dir in list.dirs(dir_repos, recursive=F)){ # dir = '/Users/jstewart/github/clip-n-ship/cog'
-  yml = file.path(dir, '.travis.yml')
-  # TODO: checkout right branch
-  if (file.exists(yml)){
-    y = yaml.load_file(yml)
-    
-    # check #1: has secure var?
-    if ('secure' %in% names(unlist(y$env$global))){
-      # TODO: record that has secure var
-    } else {
-      # TODO: record that repo does NOT have secure var so that you can run status_travis
-    }
-  
-    # check #2: has lowndes as a recipient
-    # TODO: switch to ohi-science@nceas.ucsb.edu?
-    if ('lowndes' %in% names(unlist(y$notifications$email$recipients))){
-      # TODO: record that has lowndes already a recipient
-    } else {
-      # TODO: record that lowndes not already a recipient, so rebrew yaml and run status_travis        
-    }
-  }
-}
+sapply(keys, additions_draft, msg='update travis.yml + additions, ohi-webapps/create_functions.R - additions_draft()')
+# write_csv(data.frame(key, travis_yml = T), 'tmp/yml_record.csv')
+fix_travis_yml
