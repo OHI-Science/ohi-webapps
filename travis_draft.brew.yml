@@ -6,8 +6,8 @@ branches:
 
 env:
   global:
-  - default_branch_scenario="<%=default_branch_scenario%>"
-  - study_area="<%=study_area%>"
+  - default_branch_scenario: "<%=default_branch_scenario%>"
+  - study_area: "<%=study_area%>"
 
 matrix:
   fast_finish: true # finish at first failure
