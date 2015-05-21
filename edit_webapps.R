@@ -51,6 +51,11 @@ sapply(keys, deploy_app_nceas)
 # keys = 'nld' # failing
 keys = sc_studies %>% filter(!is.na(sc_annex_dir)) %>% select(sc_key) %>% 
   filter(!sc_key %in% c('gye', 'bhi', 'chn', 'aia', 'tto', 'asm', 'civ'))
+
+# read in csv of keys that originally were passing; now aren't. 
+# filter(pass_orig==T & pass_now==F)
+keys_2014_11 = readr::read_csv('http://raw.githubusercontent.com/OHI-Science/subcountry/1982aff6d13e172fc880db38a4122bc74c73735b/_data/status.csv')
+
 keys = keys[11:100,1] # keys = keys[1:10,1]
 # sapply(keys, additions_draft, msg='update travis.yml + additions, ohi-webapps/create_functions.R - additions_draft()')
 # sapply(keys, update_website, msg='update _config.yml branch_scenario, ohi-webapps/create_functions.R - update_website()')
