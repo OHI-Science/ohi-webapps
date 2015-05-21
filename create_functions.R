@@ -1460,15 +1460,13 @@ status_travis = function(key, clone=F, enable=T,
   stopifnot(length(status)==1 | !status %in% states)
   
   # turn on Travis
-  if (status %in% c('no history', 'no build yet','repository not known','failed', 'passed', 'created', 'logged') & 
-        enable==T & 
-        file.exists('.travis.yml')){
+  if (!status %in% c('no history', 'no build yet','repository not known') & enable==T & !file.exists('.travis.yml')){
+    status = paste(status, '& missing .travis.yml')
+  }  else { 
     system(sprintf('travis encrypt -r %s GH_TOKEN=%s --add env.global', git_slug, gh_token))
     system(sprintf('travis enable -r %s', git_slug))
     system('git commit -am "enabled travis.yml with encrypted github token"; git pull; git push')
     status = 'enabled'
-  } else if (status %in% c('no history', 'no build yet','repository not known') & enable==T & !file.exists('.travis.yml')){
-    status = paste(status, '& missing .travis.yml')
   }
   
   # update status csv
