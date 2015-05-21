@@ -1460,7 +1460,7 @@ status_travis = function(key, clone=F, enable=T,
   stopifnot(length(status)==1 | !status %in% states)
   
   # turn on Travis
-  if (status %in% c('no history', 'no build yet','repository not known','failed', 'passed') & 
+  if (status %in% c('no history', 'no build yet','repository not known','failed', 'passed', 'created', 'logged') & 
         enable==T & 
         file.exists('.travis.yml')){
     system(sprintf('travis encrypt -r %s GH_TOKEN=%s --add env.global', git_slug, gh_token))
@@ -1781,7 +1781,12 @@ fix_travis_yml <- function(key, msg='no updated needed, ohi-webapps/create_funct
     
     # run status_travis
     st = status_travis(key)
-    readLines('.travis.yml') %>% # may no longer be necessary
+    
+    # switch to draft branch and get latest
+    system('git checkout draft; git pull')
+    
+    # may no longer be necessary
+    readLines('.travis.yml') %>% 
       str_replace_all('- secure=', '- secure: ') %>%
       writeLines('.travis.yml')
     
@@ -1807,6 +1812,7 @@ fix_travis_yml <- function(key, msg='no updated needed, ohi-webapps/create_funct
           date_checked  = as.character(Sys.time()))) %>%
       write.csv(csv_st, row.names=F, na='')    
   }
+  
   # git add, commit and push
   system(sprintf('git add -A; git commit -a -m "%s"', msg))
   system('git push origin draft')
