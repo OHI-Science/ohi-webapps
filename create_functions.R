@@ -1821,6 +1821,7 @@ fix_travis_yml <- function(key, msg='no updated needed, ohi-webapps/create_funct
 
 
 status_travis_check = function(key, csv_check=file.path(dir_github, 'ohi-webapps/tmp/webapp_travis_status_check.csv')){
+  # travis commandline tips http://blog.travis-ci.com/2013-01-21-more-cli-tricks/
   
   wd = getwd()
   key <<- key
@@ -1838,9 +1839,9 @@ status_travis_check = function(key, csv_check=file.path(dir_github, 'ohi-webapps
   } else {
     setwd(dir_repo)
     system('git pull; git checkout draft; git pull')
-    res = suppressWarnings(system(sprintf('travis history -i -r %s -b draft -l 1 2>&1', git_slug), intern=T)) 
+    res = suppressWarnings(system(sprintf('travis history -i -r %s -b draft -l 6 2>&1', git_slug), intern=T)) # 'travis history' to stdout failed
     if (length(res) > 0){
-      status = str_split(res, ' ')[[1]][2] %>% str_replace(':','')
+      status = str_split(res[1], ' ')[[1]][2] %>% str_replace(':','')
     } else {
       status = 'no history'
     }
@@ -1859,4 +1860,27 @@ status_travis_check = function(key, csv_check=file.path(dir_github, 'ohi-webapps
   
   setwd(wd)
   
+}
+
+travis_passing_compare = function(
+  status_orig_csv = 'https://raw.githubusercontent.com/OHI-Science/ohi-webapps/9c7a3f152ba10000b7ad7380de1d7d13eb486898/tmp/webapp_travis_status.csv', 
+  status_now_csv = '~/github/ohi-webapps/tmp/webapp_travis_status_check.csv') {
+  
+  # 1. access travis status from November 2014
+  keys_2014_11_28 = readr::read_csv(status_orig_csv, col_types = 'cc_') # don't need to read in date column, see github.com/hadley/readr
+
+  # 2. check and save the current travis status (don't use status_travis() because that will enable travis, we just want to check)
+  keys_2015_05_21 = read.csv(status_now_csv)
+
+  # 3. identify which keys are now not passing that were in Nov2014
+  keys_now_not_passing = keys_2014_11_28 %>%
+  select(sc_key, status_orig = travis_status) %>%
+  full_join(keys_2015_05_21 %>%
+              select(sc_key, status_now = travis_status) %>%
+              mutate(sc_key = as.character(sc_key), 
+                     status_now = as.character(status_now)), 
+            by= 'sc_key') %>%
+  filter(status_orig == 'passed' & status_now != 'passed') 
+
+  return(keys_now_not_passing)
 }
