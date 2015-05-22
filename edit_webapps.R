@@ -36,6 +36,7 @@ key = 'ohi-global'
 update_website(key, msg='update _config.yml branch_scenario, ohi-webapps/create_functions.R - update_website()')
 deploy_app_nceas(key)
 
+
 # 2015-May: Updates to app branch; additions to draft branch ----
 keys = sc_studies %>% filter(!is.na(sc_annex_dir)) %>% select(sc_key) %>% 
   filter(!sc_key %in% c('gye', 'bhi', 'chn', 'aia', 'tto', 'asm', 'civ'))
@@ -45,21 +46,32 @@ sapply(keys, update_website, msg='update _config.yml branch_scenario, ohi-webapp
 # `jstewart@fitz:/srv/shiny-server$ sudo service shiny-server restart` restart fitz server in terminal
 sapply(keys, deploy_app_nceas)
 
+
 # 2015-May: Update .travis.yml with env:global:secure variable w/ encrypted string that sets GH_TOKEN ----
-# with @bbest. and rerun additions_draft because errant extra `ohicore::`.
-# keys = 'blz' bad example because this one had an error in functions.r. 
-# keys = 'nld' # failing
-keys = sc_studies %>% filter(!is.na(sc_annex_dir)) %>% select(sc_key) %>% 
-  filter(!sc_key %in% c('gye', 'bhi', 'chn', 'aia', 'tto', 'asm', 'civ'))
+# with @bbest. We want to compare current travis status to the original status in Nov2014 so that we only focus on repos that have since broken.
 
-# read in csv of keys that originally were passing; now aren't. 
-# filter(pass_orig==T & pass_now==F)
-keys_2014_11 = readr::read_csv('http://raw.githubusercontent.com/OHI-Science/subcountry/1982aff6d13e172fc880db38a4122bc74c73735b/_data/status.csv')
+# 1. access travis status from November 2014
+keys_2014_11_28 = readr::read_csv(
+  'https://raw.githubusercontent.com/OHI-Science/ohi-webapps/9c7a3f152ba10000b7ad7380de1d7d13eb486898/tmp/webapp_travis_status.csv', 
+  col_types = 'cc_') # don't need to read in date column, see github.com/hadley/readr
 
-keys = keys[11:100,1] # keys = keys[1:10,1]
+# 2. check and save the current travis status (don't use status_travis() because that will enable travis, we just want to check)
+sapply(keys_2014_11_28$sc_key, status_travis_check) # this logs in 'webapp_travis_status_check.csv'
+keys_2015_05_21 = read.csv('~/github/ohi-webapps/tmp/webapp_travis_status_check.csv')
+
+# 3. compare keys that that originally were passing; now aren't. JSL COME BACK HERE
+keys = keys_2014_11_28 %>%
+  select(sc_key, status_orig = travis_status) %>%
+  full_join(keys_2015_05_21 %>%
+              select(sc_key, status_now = travis_status), 
+            by= 'sc_key') %>%
+  filter(status_orig == 'passed' & status_now != 'passed', 
+         !sc_key %in% c('chn', 'dji'))
+
 # sapply(keys, additions_draft, msg='update travis.yml + additions, ohi-webapps/create_functions.R - additions_draft()')
 # sapply(keys, update_website, msg='update _config.yml branch_scenario, ohi-webapps/create_functions.R - update_website()')
 sapply(keys, fix_travis_yml)
+sapply(keys, status_travis_check) # this logs in 'webapp_travis_status_check.csv'
 sapply(keys, deploy_app_nceas)
 #khm rsync error
 

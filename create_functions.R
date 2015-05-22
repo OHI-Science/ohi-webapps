@@ -23,16 +23,16 @@ create_gh_repo <- function(key, gh_token=gh_token, verbosity=1){ # gh_token=gh_t
   cmd = sprintf('git ls-remote git@github.com:ohi-science/%s.git', repo_name)
   res = system(cmd, ignore.stderr=T, intern=T)
   repo_exists = # ifelse(length(res)==0, T, F) # set to F for bhi-rgns?
-  if (!repo_exists){
-    if (verbosity > 0){
-      message(sprintf('%s: creating github repo -- %s', repo_name, format(Sys.time(), '%X')))
+    if (!repo_exists){
+      if (verbosity > 0){
+        message(sprintf('%s: creating github repo -- %s', repo_name, format(Sys.time(), '%X')))
+      }
+      # create using Github API: https://developer.github.com/v3/repos/#create
+      cmd = sprintf('curl --silent -u "jules32:%s" https://api.github.com/orgs/ohi-science/repos -d \'{"name":"%s"}\'', gh_token, repo_name)
+      cmd_res = paste(capture.output(fromJSON(system(cmd, intern=T))), collapse='\n')
+    } else{
+      cmd_res = NA
     }
-    # create using Github API: https://developer.github.com/v3/repos/#create
-    cmd = sprintf('curl --silent -u "jules32:%s" https://api.github.com/orgs/ohi-science/repos -d \'{"name":"%s"}\'', gh_token, repo_name)
-    cmd_res = paste(capture.output(fromJSON(system(cmd, intern=T))), collapse='\n')
-  } else{
-    cmd_res = NA
-  }
   
   # return data.frame
   data.frame(
@@ -1447,7 +1447,7 @@ status_travis = function(key, clone=F, enable=T,
     status = 'no draft repo'
   } else {
     setwd(dir_repo)
-    #system('git pull; git checkout draft; git pull')
+    system('git pull; git checkout draft; git pull')
     res = suppressWarnings(system(sprintf('travis history -i -r %s -b draft -l 1 2>&1', git_slug), intern=T)) 
     if (length(res) > 0){
       status = str_split(res, ' ')[[1]][2] %>% str_replace(':','')
@@ -1462,11 +1462,11 @@ status_travis = function(key, clone=F, enable=T,
   # turn on Travis
   if (!status %in% c('no history', 'no build yet','repository not known') & enable==T & !file.exists('.travis.yml')){
     status = paste(status, '& missing .travis.yml')
-  }  else { 
+  }  else if (enable==T & file.exists('.travis.yml')) { # previously also (status %in% c('no history', 'no build yet','repository not known','failed', 'passed', 'created', 'logged')
     system(sprintf('travis encrypt -r %s GH_TOKEN=%s --add env.global', git_slug, gh_token))
     system(sprintf('travis enable -r %s', git_slug))
     system('git commit -am "enabled travis.yml with encrypted github token"; git pull; git push')
-    status = 'enabled'
+    # status = 'enabled' # JSL May 21: I don't think we want to overwrite all the status values 
   }
   
   # update status csv
@@ -1740,12 +1740,12 @@ additions_draft <- function(key, msg='ohi-webapps/create_functions.R - additions
   
   # ensure on draft branch 
   checkout(repo, 'draft')
-
+  
   # merge published with the draft branch
   system('git checkout published')
   system('git merge draft')
   system('git push origin published')
-           
+  
   setwd(wd)
 }
 
@@ -1819,3 +1819,44 @@ fix_travis_yml <- function(key, msg='no updated needed, ohi-webapps/create_funct
   
 }
 
+
+status_travis_check = function(key, csv_check=file.path(dir_github, 'ohi-webapps/tmp/webapp_travis_status_check.csv')){
+  
+  wd = getwd()
+  key <<- key
+  source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
+  
+  if (!file.exists(dir_repo)){
+    setwd(dir_repos)
+    unlink(dir_repo, recursive=T, force=T)
+    system(sprintf('git clone %s', git_url))
+  }
+  repo = repository(dir_repo)
+  res = try(checkout(repo, 'draft'))
+  if (class(res)=='try-error'){
+    status = 'no draft repo'
+  } else {
+    setwd(dir_repo)
+    system('git pull; git checkout draft; git pull')
+    res = suppressWarnings(system(sprintf('travis history -i -r %s -b draft -l 1 2>&1', git_slug), intern=T)) 
+    if (length(res) > 0){
+      status = str_split(res, ' ')[[1]][2] %>% str_replace(':','')
+    } else {
+      status = 'no history'
+    }
+  }
+  
+  # update status csv
+  read.csv(csv_check, stringsAsFactors=F, na.strings='') %>%
+    filter(sc_key != key) %>%
+    rbind(
+      data.frame(
+        sc_key = key,
+        travis_status = status,
+        date_checked = as.character(Sys.time()))) %>%
+    write.csv(csv_status, row.names=F, na='')
+  message(sprintf('Travis %s: %s', key, status))
+  
+  setwd(wd)
+  
+}
