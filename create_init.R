@@ -112,9 +112,11 @@ sc_studies <- gl_rgns %>%
 
 # read in custom sc studies
 sc_custom = read.csv('custom/sc_studies_custom.csv', stringsAsFactors=F) 
-sc_studies = rbind(
-  sc_studies,
+sc_studies = sc_studies %>%
+  anti_join(sc_custom, by = c('sc_key', 'sc_name', 'gl_rgn_id')) %>%  # removes original chn; 
+    rbind(                                                            # rbinds custom chn
   sc_custom[, names(sc_studies)])
+stopifnot(count(sc_studies, sc_key) %>% filter(n > 1) %>% nrow == 0) 
 
 # report on subcountries without annex data dirs
 if (nrow(filter(sc_studies, is.na(sc_annex_dir))) > 0){
@@ -130,4 +132,4 @@ write.csv(
     select(gl_rgn_id, gl_rgn_name, sc_key) %>%
     arrange(gl_rgn_name), 'tmp/gl-rgns_no-sc-annex-data.csv', row.names=F, na='')
 #sc_studies = filter(sc_studies, !is.na(gl_rgn_key))
-stopifnot(count(sc_studies, sc_key) %>% filter(n > 1) %>% nrow == 0)
+stopifnot(count(sc_studies, sc_key) %>% filter(n > 1) %>% nrow == 0)  
