@@ -71,43 +71,50 @@ keys = keys_2014_11_28 %>%
 # sapply(keys, additions_draft, msg='update travis.yml + additions, ohi-webapps/create_functions.R - additions_draft()')
 # sapply(keys, update_website, msg='update _config.yml branch_scenario, ohi-webapps/create_functions.R - update_website()')
 sapply(keys, fix_travis_yml)
-sapply(keys, status_travis_check) # this logs in 'webapp_travis_status_check.csv'
+sapply(keys$sc_key, status_travis_check) # this logs in 'webapp_travis_status_check.csv'
 sapply(keys, deploy_app_nceas)
 #khm rsync error
 
-## 2015-May-20: Create `webapp_yml_secure_recip.csv`, a list of which repos have secure/recipient problems:
+# May 22 fix CHN scenario issue: published branch still reads 'subcountry2014' not 'province2015'. merge branches.
+# additions_draft('chn')
+# deploy_app_nceas('chn')
 
-csv_status=file.path(dir_github, 'ohi-webapps/tmp/webapp_yml_secure_recip.csv')
-for (dir in list.dirs(dir_repos, recursive=F)){ # dir = '/Users/jstewart/github/clip-n-ship/cog'
- 
-  key = str_split_fixed(dir, '/', 6)[6]
-  key <<- key
-  source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
-  
-  # switch to draft branch and get latest
-  system('git checkout draft; git pull')
-  
-  yml = file.path(dir, '.travis.yml')
-  
-  if ( file.exists(yml) ){
-    y = yaml.load_file(yml)
-  
-    # check #1: has secure var?
-    secure = 'secure' %in% names(unlist(y$env$global))
-    
-    # check #2: has lowndes as a recipient # TODO: switch to ohi-science@nceas.ucsb.edu?
-    recip = 'lowndes@nceas.ucsb.edu' %in% unlist(y$notifications$email$recipients)
-    
-    # add to csv_status log
-    read.csv(csv_status, stringsAsFactors=F, na.strings='') %>%
-      filter(sc_key != key) %>%
-      rbind(
-        data.frame(
-          sc_key = key,
-          travis_secure = secure,
-          travis_recip  = recip,
-          travis_status = '',
-          date_checked  = as.character(Sys.time()))) %>%
-      write.csv(csv_status, row.names=F, na='')    
-  }
-}
+
+
+
+
+## 2015-May-20: Create `webapp_yml_secure_recip.csv`, a list of which repos have secure/recipient problems:
+# csv_status=file.path(dir_github, 'ohi-webapps/tmp/webapp_yml_secure_recip.csv')
+# for (dir in list.dirs(dir_repos, recursive=F)){ # dir = '/Users/jstewart/github/clip-n-ship/cog'
+#  
+#   key = str_split_fixed(dir, '/', 6)[6]
+#   key <<- key
+#   source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
+#   
+#   # switch to draft branch and get latest
+#   system('git checkout draft; git pull')
+#   
+#   yml = file.path(dir, '.travis.yml')
+#   
+#   if ( file.exists(yml) ){
+#     y = yaml.load_file(yml)
+#   
+#     # check #1: has secure var?
+#     secure = 'secure' %in% names(unlist(y$env$global))
+#     
+#     # check #2: has lowndes as a recipient # TODO: switch to ohi-science@nceas.ucsb.edu?
+#     recip = 'lowndes@nceas.ucsb.edu' %in% unlist(y$notifications$email$recipients)
+#     
+#     # add to csv_status log
+#     read.csv(csv_status, stringsAsFactors=F, na.strings='') %>%
+#       filter(sc_key != key) %>%
+#       rbind(
+#         data.frame(
+#           sc_key = key,
+#           travis_secure = secure,
+#           travis_recip  = recip,
+#           travis_status = '',
+#           date_checked  = as.character(Sys.time()))) %>%
+#       write.csv(csv_status, row.names=F, na='')    
+#   }
+# }
