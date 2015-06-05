@@ -1855,7 +1855,7 @@ status_travis_check = function(key, csv_check=file.path(dir_github, 'ohi-webapps
         sc_key = key,
         travis_status = status,
         date_checked = as.character(Sys.time()))) %>%
-    write.csv(csv_status, row.names=F, na='')
+    write.csv(csv_check, row.names=F, na='')
   message(sprintf('Travis %s: %s', key, status))
   
   setwd(wd)
