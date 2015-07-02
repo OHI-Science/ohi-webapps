@@ -1884,3 +1884,27 @@ travis_passing_compare = function(
 
   return(keys_now_not_passing)
 }
+
+merge_published_draft <- function(key, msg='ohi-webapps/create_functions.R - merge_published_draft()'){
+  
+  # get subcountry vars specific to key
+  key <<- key
+  source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
+  
+  # clone repo
+  wd = getwd()
+  if (!file.exists(dir_repo)) system(sprintf('git clone %s %s', git_url, dir_repo))
+  setwd(dir_repo)
+  repo = repository(dir_repo)
+  
+  # switch to draft branch and get latest
+  system('git checkout draft; git pull')
+  
+  # merge published with the draft branch
+  system('git checkout published')
+  system('git merge draft')
+  system('git push origin published')
+  
+  setwd(wd)
+}
+
