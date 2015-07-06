@@ -6,12 +6,9 @@ calculate_scores <- function(){
   suppressWarnings(require(ohicore))
 
   # ensure on draft repo
-#   library(git2r)
-#   repo = repository(wd)
-#   checkout(repo, 'draft')
-
-  system('git checkout draft')
-
+  library(git2r)
+  repo = repository(wd)
+  checkout(repo, 'draft')
 
   # iterate through all scenarios (by finding layers.csv)
   dirs_scenario = normalizePath(dirname(list.files('.', 'layers.csv', recursive=T, full.names=T)))
@@ -202,32 +199,32 @@ create_pages <- function(){
   library(markdown)
   library(rmarkdown)
   library(httr)
-  library(git2r)
+  library(git2r)     # maybe be able to comment out
   merge = base::merge
   diff  = base::diff
 
   # assume in draft branch, get default_branch_scenario set by .travis.yml
-  wd = getwd()
+  wd = getwd() # must be '~/github/gye'
   system('git pull; git checkout draft')
   default_branch_scenario  = Sys.getenv('default_branch_scenario')
   study_area               = Sys.getenv('study_area')
   if (default_branch_scenario == '' | study_area == ''){
     # if not set, then running locally so read in yaml
-    # y = yaml.load_file('.travis.yml')
-    # v = unlist(y$env$global)
-#     for (n in names(v)){ # var = travis_yaml$env$global[[2]]
-#       assign(n, v[[n]])
-#     }
-#     git_owner = 'OHI-Science'
-#     git_repo  = basename(wd)
-#     git_slug  = sprintf('%s/%s', git_owner, git_repo)
-#     git_url   = sprintf('https://github.com/%s', git_slug)
-#   } else {
-#     git_slug  = Sys.getenv('TRAVIS_REPO_SLUG')
-#     git_owner = str_split(git_slug, '/')[[1]][1]
-#     git_repo  = str_split(git_slug, '/')[[1]][2]
-#     git_url   = sprintf('https://github.com/%s', git_slug)
-#   }
+    y = yaml.load_file('.travis.yml')
+    v = unlist(y$env$global)
+    for (n in names(v)){ # var = travis_yaml$env$global[[2]]
+      assign(n, v[[n]])
+    }
+      git_owner = 'OHI-Science'
+      git_repo  = basename(wd)
+      git_slug  = sprintf('%s/%s', git_owner, git_repo)
+      git_url   = sprintf('https://github.com/%s', git_slug)
+  } else {
+    git_slug  = Sys.getenv('TRAVIS_REPO_SLUG')
+    git_owner = str_split(git_slug, '/')[[1]][1]
+    git_repo  = str_split(git_slug, '/')[[1]][2]
+    git_url   = sprintf('https://github.com/%s', git_slug)
+  }
 
   # get template brew files
   # update vector: sprintf("'%s'", paste(list.files('~/github/ohi-webapps/results'), collapse="','"))
@@ -241,27 +238,25 @@ create_pages <- function(){
   }
 
   # clone repo with all branches
-#   dir_repo = sprintf('~/tmp/%s', git_repo)
-#   dir.create(dir_repo, recursive=T, showWarnings=F)
-#   unlink(dir_repo, recursive=T)
-#   repo = clone(git_url, normalizePath(dir_repo, mustWork=F))
-#   setwd(dir_repo)
+   dir_repo = sprintf('~/tmp/%s', git_repo)
+   dir.create(dir_repo, recursive=T, showWarnings=F)
+   unlink(dir_repo, recursive=T)
+   repo = clone(git_url, normalizePath(dir_repo, mustWork=F)) # error but this is important
+   setwd(dir_repo)
 
   # archive branches
-#   dir_archive = sprintf('~/tmp/%s_archive', git_repo)
-#   dir.create(dir_archive, recursive=T, showWarnings=F)
-#   unlink(dir_archive, recursive=T)
-#   git_branches   = setdiff(sapply(git2r::branches(repo, flags='remote'), function(x) str_replace(x@name, 'origin/', '')), c('HEAD','gh-pages','app'))
-#   branch_commits = list()
-  git_branches = c('draft','published') # ,'app'))
+  dir_archive = sprintf('~/tmp/%s_archive', git_repo)
+  dir.create(dir_archive, recursive=T, showWarnings=F)
+  unlink(dir_archive, recursive=T)
+  git_branches   = setdiff(sapply(git2r::branches(repo, flags='remote'), function(x) str_replace(x@name, 'origin/', '')), c('HEAD','gh-pages','app'))
+  # git_branches = c('draft','published') #
   branch_commits = list()
   for (branch in git_branches){ # branch = 'published'
-    # checkout(repo, branch, force=T)
-    system(sprintf('git checkout %s', branch)) ## do we need the force=T?
-    # branch_commits[[branch]] = commits(repo)
-    # dir_branch = file.path(dir_archive, branch)
+    checkout(repo, branch, force=T)
+    branch_commits[[branch]] = commits(repo)
+    dir_branch = file.path(dir_archive, branch)
     files = list.files(path='.', recursive=T)
-    for (f in files){ # f = shiny_files[1]
+    for (f in files){ # f = files[1]
       dir.create(dirname(file.path(dir_branch, f)), showWarnings=F, recursive=T)
       file.copy(file.path(dir_repo, f), file.path(dir_branch, f), overwrite = T, copy.mode=T, copy.date=T) # suppressWarnings)
     }
@@ -280,10 +275,10 @@ create_pages <- function(){
     branch_scenarios)
 
   # iterate over branch/scenarios
-  for (branch_scenario in branch_scenarios){ # branch_scenario=branch_scenarios[2]
+  for (branch_scenario in branch_scenarios){ # branch_scenario=branch_scenarios[1]
 
     # get vars
-    branch      =  dirname(branch_scenario)
+    branch      = dirname(branch_scenario)
     scenario    = basename(branch_scenario)
     dir_bs_data = normalizePath(file.path(dir_archive, branch_scenario))
     rgns         = file.path(dir_bs_data, 'scores.csv') %>% read.csv %>% select(region_id) %>% unique %>% getElement('region_id')
@@ -293,7 +288,7 @@ create_pages <- function(){
     rgns = rbind(
       data.frame(
         id    = 0,
-        name  = 'GLOBAL',
+        name  = 'GLOBAL', # toupper(git_repo), can't change this at the moment because scores.brew.md won't function
         title = study_area,
         stringsAsFactors=F),
       ohicore::SelectLayersData(layers, layers=conf$config$layer_region_labels, narrow=T) %>%
@@ -330,7 +325,12 @@ create_pages <- function(){
   # push gh-pages
   k = branch_commits[['draft']][[1]]
   system(sprintf('git add -A; git commit -a -m "automatically create_pages from draft commit %0.7s"', k@sha))
+
+## JSL to run this must have
+#   gh_token <- scan('~/.github-token', 'character', quiet = T)
+#   Sys.setenv(GH_TOKEN=gh_token)
   system(sprintf('git push https://${GH_TOKEN}@github.com/%s.git HEAD:gh-pages', git_slug))
+
 
   # update status ----
 
@@ -371,19 +371,19 @@ push_branch <- function(branch='draft'){ #, ci_skip=T){
   # set message with [ci skip] to skip travis-ci build for this push
   # ci_skip_msg = c('TRUE'='\n[ci skip]', 'FALSE'='')[as.character(ci_skip)]
 
-  if (all(Sys.getenv('GH_TOKEN') > '', Sys.getenv('TRAVIS_COMMIT') > '', Sys.getenv('TRAVIS_REPO_SLUG') > '')){
-
-    # working on travis-ci
-    system(sprintf('git add -A; git commit -a -m "automatically calculate_scores from commit ${TRAVIS_COMMIT}%s"', ci_skip_msg))
-    system(sprintf('git push https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git HEAD:%s', branch))
-
-  } else {
+#   if (all(Sys.getenv('GH_TOKEN') > '', Sys.getenv('TRAVIS_COMMIT') > '', Sys.getenv('TRAVIS_REPO_SLUG') > '')){
+#
+#     # working on travis-ci
+#     system(sprintf('git add -A; git commit -a -m "automatically calculate_scores from commit ${TRAVIS_COMMIT}%s"', ci_skip_msg))
+#     system(sprintf('git push https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git HEAD:%s', branch))
+#
+#   } else {
 
     # working locally, gh_token set in create_init.R, repo_name set in create_init_sc.Rs
     system(sprintf('git add -A; git commit -a -m "automatically calculate_scores from commit `git rev-parse HEAD`%s" ', ci_skip_msg))
     system(sprintf('git push https://%s@github.com/%s.git HEAD:%s', gh_token, git_slug, branch))
   }
-}
+# }
 
 # main
 args <- commandArgs(trailingOnly=T)
