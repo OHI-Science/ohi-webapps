@@ -1908,3 +1908,53 @@ merge_published_draft <- function(key, msg='ohi-webapps/create_functions.R - mer
   setwd(wd)
 }
 
+
+update_webapp_notravis = function(key, run_calc_scores=T, merge_pub=F) {
+  # Jul 6 2015 by jules32
+  
+  # get subcountry vars specific to key
+  key <<- key
+  source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
+  source('~/github/ohi-webapps/ohi-functions.R')
+  
+  # clone repo
+  wd = getwd()
+  if (!file.exists(dir_repo)) system(sprintf('git clone %s %s', git_url, dir_repo))
+  setwd(dir_repo)
+  repo = repository(dir_repo)
+  
+  # switch to draft branch and get latest
+  system('git checkout draft; git pull')
+  current_msg = commits(repo)[1]
+  
+  # turn off Travis by blacklisting branches; commit
+  travis_blacklist_yaml_brew = sprintf('%s/ohi-webapps/travis_draft_blacklist.brew.yml', dir_github)
+  brew(travis_blacklist_yaml_brew, '.travis.yml')
+  msg = 'turn off Travis by blacklistling branches (.travis.yml)'
+  system(sprintf('git add -A; git commit -a -m "%s"', msg))
+  
+  # calculate scores (ohi-functions.R - calculate_scores_notravis() modified by JSL)
+  if (run_calc_scores) {
+   calculate_scores_notravis()     
+  }
+    
+  # create results (ohi-functions.R - create_results() not modified by JSL)
+  create_results()      
+  
+  # push draft and published branches
+  push_branch('draft') # ohi-functions.R - push_branch() modified by JSL)
+  
+  if (merge_pub=F) {
+    push_branch('published')  
+  } else if (merge_pub=T) {
+    merge_published_draft(key)  # ohi-webapps/create_functions.r - merge_published_draft()
+  }
+  
+  # create pages (ohi-functions.R - create_pages() modified by JSL)
+  setwd(dir_repo)
+  create_pages()
+  
+  setwd(wd)
+  
+}
+

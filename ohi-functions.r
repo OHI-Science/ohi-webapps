@@ -1,5 +1,5 @@
 # copy of ohi-travis-functions.r, without the Travis requirements
-calculate_scores <- function(){
+calculate_scores_notravis <- function(){ # to distinguish from assessmt/scenario/calculate_scores.r
 
   # load required libraries
   wd = getwd()
@@ -37,7 +37,6 @@ calculate_scores <- function(){
       readLines(file.path(system.file(package='ohicore'), 'DESCRIPTION')),
       file='session.txt', sep='\n')
   }
-
   setwd(wd)
 }
 
@@ -204,7 +203,7 @@ create_pages <- function(){
   diff  = base::diff
 
   # assume in draft branch, get default_branch_scenario set by .travis.yml
-  wd = getwd() # must be '~/github/gye'
+  wd = getwd() 
   system('git pull; git checkout draft')
   default_branch_scenario  = Sys.getenv('default_branch_scenario')
   study_area               = Sys.getenv('study_area')
@@ -249,7 +248,6 @@ create_pages <- function(){
   dir.create(dir_archive, recursive=T, showWarnings=F)
   unlink(dir_archive, recursive=T)
   git_branches   = setdiff(sapply(git2r::branches(repo, flags='remote'), function(x) str_replace(x@name, 'origin/', '')), c('HEAD','gh-pages','app'))
-  # git_branches = c('draft','published') #
   branch_commits = list()
   for (branch in git_branches){ # branch = 'published'
     checkout(repo, branch, force=T)
@@ -326,12 +324,10 @@ create_pages <- function(){
   k = branch_commits[['draft']][[1]]
   system(sprintf('git add -A; git commit -a -m "automatically create_pages from draft commit %0.7s"', k@sha))
 
-## JSL to run this must have
-#   gh_token <- scan('~/.github-token', 'character', quiet = T)
-#   Sys.setenv(GH_TOKEN=gh_token)
+  # GH_TOKEN set in ohi-webapps/create_init.r
   system(sprintf('git push https://${GH_TOKEN}@github.com/%s.git HEAD:gh-pages', git_slug))
 
-
+  
   # update status ----
 
   # get status repo  depth of 1 only
@@ -366,33 +362,10 @@ create_pages <- function(){
   setwd(wd)
 }
 
-push_branch <- function(branch='draft'){ #, ci_skip=T){
-
-  # set message with [ci skip] to skip travis-ci build for this push
-  # ci_skip_msg = c('TRUE'='\n[ci skip]', 'FALSE'='')[as.character(ci_skip)]
-
-#   if (all(Sys.getenv('GH_TOKEN') > '', Sys.getenv('TRAVIS_COMMIT') > '', Sys.getenv('TRAVIS_REPO_SLUG') > '')){
-#
-#     # working on travis-ci
-#     system(sprintf('git add -A; git commit -a -m "automatically calculate_scores from commit ${TRAVIS_COMMIT}%s"', ci_skip_msg))
-#     system(sprintf('git push https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git HEAD:%s', branch))
-#
-#   } else {
-
-    # working locally, gh_token set in create_init.R, repo_name set in create_init_sc.Rs
-    system(sprintf('git add -A; git commit -a -m "automatically calculate_scores from commit `git rev-parse HEAD`%s" ', ci_skip_msg))
-    system(sprintf('git push https://%s@github.com/%s.git HEAD:%s', gh_token, git_slug, branch))
-  }
-# }
-
-# main
-args <- commandArgs(trailingOnly=T)
-if (length(args)>0){
-  message('')
-  fxn = args[1]
-  if (length(args)==1){
-    eval(parse(text=sprintf('%s()', fxn)))
-  } else {
-    eval(parse(text=sprintf("%s('%s')", fxn, paste( args[2:length(args)], collapse="', '"))))
-  }
+push_branch <- function(branch='draft'){ 
+  
+  # working locally, gh_token set in create_init.R, repo_name set in create_init_sc.Rs
+  system(sprintf('git add -A; git commit -a -m "calculated scores from commit %s" ', current_msg))
+  system(sprintf('git push https://%s@github.com/%s.git HEAD:%s', gh_token, git_slug, branch))
+  
 }
