@@ -87,7 +87,6 @@ sapply(keys, deploy_app_nceas)
 ## 2015-July-7 additions_draft() step 6 for gye and chn ---
 additions_draft(key='chn', msg='ohi-webapps/create_functions.R - additions_draft()')
 
-
 ## 2015-May-20: Create `webapp_yml_secure_recip.csv`, a list of which repos have secure/recipient problems:
 # csv_status=file.path(dir_github, 'ohi-webapps/tmp/webapp_yml_secure_recip.csv')
 # for (dir in list.dirs(dir_repos, recursive=F)){ # dir = '/Users/jstewart/github/clip-n-ship/cog'
