@@ -84,7 +84,8 @@ keys = c('chn', 'per', 'bhi', 'chl', 'esp', 'jpn', 'kor') # 'gye' also done, but
 sapply(keys, update_webapp_notravis, run_calc_scores=F, merge_pub=F)
 sapply(keys, deploy_app_nceas)
 
-
+## 2015-July-7 additions_draft() step 6 for gye and chn ---
+additions_draft(key='chn', msg='ohi-webapps/create_functions.R - additions_draft()')
 
 
 ## 2015-May-20: Create `webapp_yml_secure_recip.csv`, a list of which repos have secure/recipient problems:
