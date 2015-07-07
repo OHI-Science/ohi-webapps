@@ -80,11 +80,9 @@ sapply(keys, deploy_app_nceas)
 # deploy_app_nceas('chn')
 
 ## 2015-July update_webapp_notravis() ----
-keys = c('per')
-sapply(keys, update_webapp_notravis, run_calc_scores=T, merge_pub=F)
+keys = c('chn', 'per', 'bhi', 'chl', 'esp', 'jpn', 'kor') # 'gye' also done, but with merge_pub=T
+sapply(keys, update_webapp_notravis, run_calc_scores=F, merge_pub=F)
 sapply(keys, deploy_app_nceas)
-
-
 
 
 

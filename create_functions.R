@@ -1925,7 +1925,7 @@ update_webapp_notravis = function(key, run_calc_scores=T, merge_pub=F) {
   
   # switch to draft branch and get latest
   system('git checkout draft; git pull')
-  current_msg = commits(repo)[1]
+  current_msg = as.character(commits(repo)[[1]]@sha)
   
   # turn off Travis by blacklisting branches; commit
   travis_blacklist_yaml_brew = sprintf('%s/ohi-webapps/travis_draft_blacklist.brew.yml', dir_github)
@@ -1935,6 +1935,7 @@ update_webapp_notravis = function(key, run_calc_scores=T, merge_pub=F) {
   
   # calculate scores (ohi-functions.R - calculate_scores_notravis() modified by JSL)
   if (run_calc_scores) {
+  cat('  running ohi-functions.r - calculate_scores_notravis() \n')
    calculate_scores_notravis()     
   }
     
@@ -1944,14 +1945,15 @@ update_webapp_notravis = function(key, run_calc_scores=T, merge_pub=F) {
   # push draft and published branches
   push_branch('draft') # ohi-functions.R - push_branch() modified by JSL)
   
-  if (merge_pub=F) {
+  if (merge_pub==F) {
     push_branch('published')  
-  } else if (merge_pub=T) {
+  } else if (merge_pub==T) {
     merge_published_draft(key)  # ohi-webapps/create_functions.r - merge_published_draft()
   }
   
   # create pages (ohi-functions.R - create_pages() modified by JSL)
   setwd(dir_repo)
+  cat('  running ohi-functions.r - create_pages() \n')
   create_pages()
   
   setwd(wd)
