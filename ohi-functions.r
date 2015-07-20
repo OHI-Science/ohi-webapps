@@ -240,7 +240,7 @@ create_pages <- function(){
    dir_repo = sprintf('~/tmp/%s', git_repo)
    dir.create(dir_repo, recursive=T, showWarnings=F)
    unlink(dir_repo, recursive=T)
-   repo = clone(git_url, normalizePath(dir_repo, mustWork=F)) # error but this is important
+   repo = clone(git_url, normalizePath(dir_repo, mustWork=F)) 
    setwd(dir_repo)
 
   # archive branches
