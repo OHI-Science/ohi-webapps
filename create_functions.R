@@ -1735,7 +1735,7 @@ additions_draft <- function(key, msg='ohi-webapps/create_functions.R - additions
 #   }
   
   # 6. brew copy_webapps_templates.r a la github.com/OHI-Science/issues/issues/506
-  brew(sprintf('%s/ohi-webapps/copy_webapps_templates.brew.r', dir_github), 'copy_webapps_templates')
+  brew(sprintf('%s/ohi-webapps/copy_webapps_templates.brew.r', dir_github), 'copy_webapps_templates.r')
   
   # git add, commit and push
   system(sprintf('git add -A; git commit -a -m "%s"', msg))
