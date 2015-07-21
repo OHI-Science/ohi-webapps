@@ -40,7 +40,7 @@ calculate_scores_notravis <- function(){ # to distinguish from assessmt/scenario
   setwd(wd)
 }
 
-create_results <- function(){
+update_results <- function(){
 
   library(methods)
   library(ohicore)
@@ -187,7 +187,7 @@ create_results <- function(){
   setwd(wd)
 }
 
-create_pages <- function(){
+update_pages <- function(){
 
   library(yaml)
   library(brew)
@@ -225,15 +225,35 @@ create_pages <- function(){
     git_url   = sprintf('https://github.com/%s', git_slug)
   }
 
-  # get template brew files
+  # get template brew files, updated to grab local template brew files if they exist
   # update vector: sprintf("'%s'", paste(list.files('~/github/ohi-webapps/results'), collapse="','"))
-  dir_brew   = '~/tmp/ohi-webapps'
-  unlink(dir_brew, recursive=T)
-  dir.create(dir_brew, recursive=T, showWarnings=F)
-  for (f in c('navbar.brew.html','regions.brew.md','layers.brew.md','goals.brew.md','scores.brew.md')){
+ 
+  dir_gh_local = 'gh-pages_templates'
+  if (file.exists(dir_gh_local)) {
+   
+    # brew navbar
+    f = 'navbar.brew.html'
     url_in = file.path('https://raw.githubusercontent.com/OHI-Science/ohi-webapps/master/results', f)
     f_out  = file.path(dir_brew, f)
     writeBin(httr::content(GET(url_in)), f_out)
+    
+    # brew all other files
+    for (f in c('regions.brew.md','layers.brew.md','goals.brew.md','scores.brew.md')){
+      url_in = file.path(dir_gh_local, f)
+      f_out  = file.path(dir_brew, f)
+      writeBin(httr::content(GET(url_in)), f_out)
+    }
+    
+  } else {
+    
+    dir_brew   = '~/tmp/ohi-webapps'
+    unlink(dir_brew, recursive=T)
+    dir.create(dir_brew, recursive=T, showWarnings=F)
+    for (f in c('navbar.brew.html','regions.brew.md','layers.brew.md','goals.brew.md','scores.brew.md')){
+      url_in = file.path('https://raw.githubusercontent.com/OHI-Science/ohi-webapps/master/results', f)
+      f_out  = file.path(dir_brew, f)
+      writeBin(httr::content(GET(url_in)), f_out)
+    }
   }
 
   # clone repo with all branches

@@ -1942,8 +1942,8 @@ update_webapp_notravis = function(key, run_calc_scores=T, merge_pub=F) {
    calculate_scores_notravis()     
   }
     
-  # create results (ohi-functions.R - create_results() not modified by JSL)
-  create_results()      
+  # update results (ohi-functions.R - update_results() not modified by JSL but renamed from create_results())
+  update_results()      
   
   # push draft and published branches
   push_branch('draft') # ohi-functions.R - push_branch() modified by JSL)
@@ -1954,10 +1954,10 @@ update_webapp_notravis = function(key, run_calc_scores=T, merge_pub=F) {
     merge_published_draft(key)  # ohi-webapps/create_functions.r - merge_published_draft()
   }
   
-  # create pages (ohi-functions.R - create_pages() modified by JSL)
+  # update pages (ohi-functions.R - update_pages() modified by JSL and renamed from create_pages())
   setwd(dir_repo)
-  cat('  running ohi-functions.r - create_pages() \n')
-  create_pages()
+  cat('  running ohi-functions.r - update_pages() \n')
+  update_pages()
   
   setwd(wd)
   
