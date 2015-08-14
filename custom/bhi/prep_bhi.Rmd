@@ -1,12 +1,10 @@
-# prep_bhi.r
-# create baltic repo with original. See Issue #407: https://github.com/OHI-Science/issues/issues/407
+# prep_bhi.Rmd
+create baltic repo. See Issue #407: https://github.com/OHI-Science/issues/issues/407
 
-# THIS SCRIPT IS NOW OBSOLETE. BHI WebApp originally created in April 2015 with
-# PLC Basin Inters_BALTIC_EEZ_PLC1 regions; Redone in August 2015 with HOLAS
-# Basin Intersect_HELCOMsubbasins_BALTIC_EEZ_excl_small_poly regions AND SAVED AS
-# prep_bhi.Rmd.
+NOTE: This script superceded `prep_bhi.r`, which originally created the BHI WebApp in April 2015 with PLC Basin *Inters_BALTIC_EEZ_PLC1* regions. `prep_bhi.rmd` here recreates the BHI WebApp in August 2015 with HOLAS Basin *Intersect_HELCOMsubbasins_BALTIC_EEZ_excl_small_poly* regions. 
 
-## setup ----
+## setup
+```{r, eval=F}
 
 library(dplyr)
 library(readr)
@@ -14,27 +12,37 @@ library(stringr)
 library(rgdal)
 library(raster)
 
+dir_neptune = c('Windows' = '//neptune.nceas.ucsb.edu/data_edit',
+                'Darwin'  = '/Volumes/data_edit',
+                'Linux'   = '/var/data/ohi')[[ Sys.info()[['sysname']] ]]
+
 setwd('~/github/ohi-webapps')
+```
 
 
+## 1. view map and accompanying data; save with ohi data frame 
 
-## 1. view map and accompanying data; save with ohi data frame ----
-
+```{r}
 # read in shp files and save with desired headers in data frame
 redo_shp = F 
 
 if (redo_shp) {
   bhi = readOGR(dsn=file.path(dir_neptune, 'git-annex/clip-n-ship/bhi/spatial/custom/raw'),
-                layer='Inters_BALTIC_EEZ_PLC1')
+                layer='Intersect_HELCOMsubbasins_BALTIC_EEZ_excl_small_poly')
   plot(bhi) # see image below
   bhi@data # view data
   bhi@data = bhi@data %>%
-    mutate(rgn_id = 1:25) %>%
+    mutate(rgn_id = 1:42) %>%
     dplyr::select(rgn_id,
-                  rgn_name,
                   area_km2 = Area,
-                  cntry_name = Name,
-                  basin_name = SUBNAME)
+                  cntry_name = Name_1,
+                  basin_name = Name) %>%
+    mutate(rgn_name = comboXX)
+  
+  C = bhi@data$cntry_name
+  B = bhi@data$basin_name
+  
+  str_split(C, 
   
   writeOGR(bhi, dsn = file.path(dir_neptune, 'git-annex/clip-n-ship/bhi/spatial/custom'), 
            layer = 'baltic_shp', driver = 'ESRI Shapefile')
@@ -56,7 +64,7 @@ if (redo_shp) {
   write_csv(baltic_rgns, 'custom/bhi/baltic_rgns_to_bhi_rgns_lookup.csv')
   
 }
-
+```
 
 ## 2. add all Baltic countries to sc_studies_custom.csv by hand ----
 
