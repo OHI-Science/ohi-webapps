@@ -47,7 +47,7 @@ redo_maps = F
 
 ## prep any custom study areas needed
 
-source('create_bhi.r')
+source('prep_bhi.rmd')
 
 #for (key in sc_studies$sc_key){ # key = 'fji' # key = sc_studies$sc_key[1]
 #sc_run = c('can'=T,'chn'=T,'fin','fji','fro','grl','idn','ind','irl','irn','irq','isl','ita','jpn','kna','lca','lka','mmr','mne','nld','nzl','rus','sau','sdn','sen','shn','slb','sle', 'som','spm','stp','sur','svn','syr')
@@ -79,10 +79,11 @@ for (key in keys_redo){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1]
 #     }
 #   }
   
-  # create custom maps @ by jules32
+  # create custom maps with custom_maps() by @jules32
   if (!all(file.exists(
     file.path(dir_annex, key,
-              'gh-pages/images', c('regions_1600x800.png', 'regions_600x400.png', 'regions_400x250.png', 'app_400x250.png', 'regions_30x20.png'))))
+              'gh-pages/images', 
+              c('regions_1600x800.png', 'regions_600x400.png', 'regions_400x250.png', 'app_400x250.png', 'regions_30x20.png'))))
     | redo_maps){
     res = try(custom_maps(key))
   }

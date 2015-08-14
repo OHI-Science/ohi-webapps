@@ -382,11 +382,12 @@ populate_draft_branch <- function(){
       select(sc_rgn_id, sc_rgn_name, gl_rgn_id, gl_rgn_name) %>%
       arrange(sc_rgn_name)
     
-    # old global to new custom regions
+    # old global to new custom regions by JSL
     if (all(is.na(sc_rgns$gl_rgn_id))){
       
       # hack for BHI #1/2
-      sc_rgns$gl_rgn_name = sc_studies$gl_rgn_name[sc_studies$sc_key == key] 
+      if ( str_detect(key, 'bhi-') ) sc_rgns$gl_rgn_name = bhi_sc$gl_rgn_name[bhi_sc$sc_key == key] # this is a hack for bhi-swe
+      if (key == 'bhi') sc_rgns$gl_rgn_name = sc_studies$gl_rgn_name[sc_studies$sc_key == key] 
       
       # for all custom repos
       sc_rgns = sc_rgns %>%
@@ -397,7 +398,7 @@ populate_draft_branch <- function(){
                   by= 'gl_rgn_name')
       
       # hack for BHI #2/2
-      sc_rgns = distinct(sc_rgns)
+      if (key == 'bhi') sc_rgns = distinct(sc_rgns)
       
     }
     
@@ -1308,7 +1309,10 @@ custom_maps = function(key){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
   # paths (dir_neptune, dir_github already set by source('~/github/ohi-webapps/create_init.R')
   key <<- key
   source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
+  
+  # if ( JSL finish Aug 14
   #   key = 'bhi' # necessary for creating baltic map
+  
   dir_data    = file.path(dir_neptune, 'git-annex/clip-n-ship')
   dir_spatial = file.path(dir_data, key, 'spatial') # baltic: dir_spatial = file.path(dir_data, 'bhi', 'spatial') 
   dir_custom  = file.path(dir_spatial, 'custom')
