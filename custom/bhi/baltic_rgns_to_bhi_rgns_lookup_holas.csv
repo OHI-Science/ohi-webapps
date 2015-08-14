@@ -1,0 +1,43 @@
+"rgn_id","area_km2","cntry_name","basin_name","rgn_name","sc_key","baltic_rgn_key","sc_id"
+1,6565.59,"Sweden","Kattegat","Swe - Kattegat","bhi-swe","swe",1
+2,16315.5,"Denmark","Kattegat","Den - Kattegat","bhi-dnk","dnk",1
+3,9987.81,"Denmark","Great Belt","Den - Great Belt","bhi-dnk","dnk",2
+4,98.6209,"Germany","Great Belt","Ger - Great Belt","bhi-deu","deu",1
+5,594.723,"Sweden","The Sound","Swe - The Sound","bhi-swe","swe",2
+6,577.869,"Denmark","The Sound","Den - The Sound","bhi-dnk","dnk",3
+7,1211.21,"Denmark","Kiel Bay","Den - Kiel Bay","bhi-dnk","dnk",4
+8,1996.89,"Germany","Kiel Bay","Ger - Kiel Bay","bhi-deu","deu",2
+9,1141.11,"Denmark","Bay of Mecklenburg","Den - Bay of Mecklenburg","bhi-dnk","dnk",5
+10,3380.62,"Germany","Bay of Mecklenburg","Ger - Bay of Mecklenburg","bhi-deu","deu",3
+11,4229.1,"Sweden","Arkona Basin","Swe - Arkona Basin","bhi-swe","swe",3
+12,6178.48,"Denmark","Arkona Basin","Den - Arkona Basin","bhi-dnk","dnk",6
+13,6943.74,"Germany","Arkona Basin","Ger - Arkona Basin","bhi-deu","deu",4
+14,15059.2,"Sweden","Bornholm Basin","Swe - Bornholm Basin","bhi-swe","swe",4
+15,7132.67,"Denmark","Bornholm Basin","Den - Bornholm Basin","bhi-dnk","dnk",7
+16,2532.23,"Germany","Bornholm Basin","Ger - Bornholm Basin","bhi-deu","deu",5
+17,17231.1,"Poland","Bornholm Basin","Pol - Bornholm Basin","bhi-pol","pol",1
+18,3598.08,"Poland","Gdansk Basin","Pol - Gdansk Basin","bhi-pol","pol",2
+19,2093.52,"Russia","Gdansk Basin","Rus - Gdansk Basin","bhi-rus","rus",1
+20,21904.3,"Sweden","Eastern Gotland Basin","Swe - Eastern Gotland Basin","bhi-swe","swe",5
+21,11013.7,"Poland","Eastern Gotland Basin","Pol - Eastern Gotland Basin","bhi-pol","pol",3
+22,9402.47,"Russia","Eastern Gotland Basin","Rus - Eastern Gotland Basin","bhi-rus","rus",2
+23,6083.73,"Lithuania","Eastern Gotland Basin","Lit - Eastern Gotland Basin","bhi-ltu","ltu",1
+24,20992.3,"Latvia","Eastern Gotland Basin","Lat - Eastern Gotland Basin","bhi-lva","lva",1
+25,5364.64,"Estonia","Eastern Gotland Basin","Est - Eastern Gotland Basin","bhi-est","est",1
+26,27312.9,"Sweden","Western Gotland Basin","Swe - Western Gotland Basin","bhi-swe","swe",6
+27,7846.04,"Latvia","Gulf of Riga","Lat - Gulf of Riga","bhi-lva","lva",2
+28,10356.9,"Estonia","Gulf of Riga","Est - Gulf of Riga","bhi-est","est",2
+29,17846.8,"Sweden","Northern Baltic Proper","Swe - Northern Baltic Proper","bhi-swe","swe",7
+30,9809.85,"Finland","Northern Baltic Proper","Fin - Northern Baltic Proper","bhi-fin","fin",1
+31,11685.8,"Estonia","Northern Baltic Proper","Est - Northern Baltic Proper","bhi-est","est",3
+32,9376.48,"Finland","Gulf of Finland","Fin - Gulf of Finland","bhi-fin","fin",2
+33,11279.1,"Russia","Gulf of Finland","Rus - Gulf of Finland","bhi-rus","rus",3
+34,8121.92,"Estonia","Gulf of Finland","Est - Gulf of Finland","bhi-est","est",4
+35,2732.12,"Sweden","Åland Sea","Swe - Åland Sea","bhi-swe","swe",8
+36,12812,"Finland","Åland Sea","Fin - Åland Sea","bhi-fin","fin",3
+37,31239.7,"Sweden","Bothnian Sea","Swe - Bothnian Sea","bhi-swe","swe",9
+38,27952.4,"Finland","Bothnian Sea","Fin - Bothnian Sea","bhi-fin","fin",4
+39,3164.65,"Sweden","The Quark","Swe - The Quark","bhi-swe","swe",10
+40,4862.28,"Finland","The Quark","Fin - The Quark","bhi-fin","fin",5
+41,16947.7,"Sweden","Bothnian Bay","Swe - Bothnian Bay","bhi-swe","swe",11
+42,14709.9,"Finland","Bothnian Bay","Fin - Bothnian Bay","bhi-fin","fin",6

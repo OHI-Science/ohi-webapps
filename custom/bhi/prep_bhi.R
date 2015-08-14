@@ -40,7 +40,7 @@ if (redo_shp) {
            layer = 'baltic_shp', driver = 'ESRI Shapefile')
   
   # create lookup table with unique rgn_ids
-  bhi_sc = read_csv('custom/sc_studies_custom.csv'); head(bhi_sc)
+  bhi_sc = read_csv('custom/bhi/sc_studies_custom_bhi.csv'); head(bhi_sc)
   
   baltic_rgns = bhi@data %>%
     left_join(bhi_sc %>%
@@ -53,7 +53,7 @@ if (redo_shp) {
     group_by(cntry_name) %>%
     mutate(sc_id = 1:n()); head(baltic_rgns)
   
-  write_csv(baltic_rgns, 'custom/bhi/baltic_rgns_to_bhi_rgns_lookup.csv')
+  write_csv(baltic_rgns, 'custom/bhi/baltic_rgns_to_bhi_rgns_lookup_plc.csv')
   
 }
 
@@ -110,7 +110,7 @@ if (redo_bhi_dirs) {
   
 }
 
-## 5. run create.r through populate_draft_branch() ----
+## 5. run ohi-webapps/create_all.r through populate_draft_branch() ----
 # note: problems with create_gh_repo; must set `repo_exists = F`
 
 
@@ -134,7 +134,7 @@ file.rename(file.path(dir_bhi, 'bhi-deu.Rproj'),
 setwd('~/github/ohi-webapps')
 
 # read in lookup table
-lkp_baltic = read_csv('~/github/ohi-webapps/custom/bhi/baltic_rgns_to_bhi_rgns_lookup.csv'); lkp_baltic
+lkp_baltic = read_csv('~/github/ohi-webapps/custom/bhi/baltic_rgns_to_bhi_rgns_lookup_plc.csv'); lkp_baltic
 
 # list all layers in b
 lyrs_list = list.files(file.path(dir_repos, 'bhi/baltic2015/layers'), glob2rx('*.csv'), full.names=T) 
@@ -282,7 +282,7 @@ tmp2 = bind_rows(
 write_csv(tmp2, file.path(dir_repos, 'bhi/baltic2015/layers/rgn_georegion_labels_gl2014.csv'))
 
 }
-## 6. proceed create_all.r ----
+## 9. proceed create_all.r ----
 # first copy whole bhi directory to a tmp location because it will be overwritten
 # I copied by hand but this should be scripted!!!
 

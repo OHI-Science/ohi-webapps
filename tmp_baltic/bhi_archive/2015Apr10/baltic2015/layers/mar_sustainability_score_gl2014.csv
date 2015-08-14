@@ -1,0 +1,1325 @@
+"rgn_id","species","sust_coeff"
+1,"Atlantic salmon",0.53
+1,"Blue mussel",0.77
+1,"European flat oyster",0.87
+1,"Rainbow trout",0.53
+2,"Atlantic salmon",0.53
+2,"Blue mussel",0.77
+2,"European flat oyster",0.87
+2,"Rainbow trout",0.53
+3,"Atlantic salmon",0.53
+3,"Blue mussel",0.77
+3,"European flat oyster",0.87
+3,"Rainbow trout",0.53
+4,"Atlantic salmon",0.53
+4,"Blue mussel",0.77
+4,"European flat oyster",0.87
+4,"Rainbow trout",0.53
+5,"Atlantic salmon",0.53
+5,"Blue mussel",0.77
+5,"European flat oyster",0.87
+5,"Rainbow trout",0.53
+6,"Atlantic salmon",0.5
+6,"European whitefish",0.44401
+6,"Rainbow trout",0.566667
+6,"Sea trout",0.466667
+7,"Atlantic salmon",0.5
+7,"European whitefish",0.44401
+7,"Rainbow trout",0.566667
+7,"Sea trout",0.466667
+8,"Atlantic salmon",0.5
+8,"European whitefish",0.44401
+8,"Rainbow trout",0.566667
+8,"Sea trout",0.466667
+9,"Atlantic salmon",0.5
+9,"European whitefish",0.44401
+9,"Rainbow trout",0.566667
+9,"Sea trout",0.466667
+10,NA,NA
+11,"Atlantic cod",0.283333
+11,"Atlantic salmon",0.5
+11,"Blue mussel",0.93
+11,"European eel",0.43
+11,"European flounder",0.44401
+11,"European whitefish",0.44401
+11,"Marine fishes nei",0.477778
+11,"Rainbow trout",0.566667
+11,"Sea trout",0.466667
+11,"Turbot",0.5
+12,"Atlantic cod",0.283333
+12,"Atlantic salmon",0.5
+12,"Blue mussel",0.93
+12,"European eel",0.43
+12,"European flounder",0.44401
+12,"European whitefish",0.44401
+12,"Marine fishes nei",0.477778
+12,"Rainbow trout",0.566667
+12,"Sea trout",0.466667
+12,"Turbot",0.5
+13,"Atlantic cod",0.283333
+13,"Atlantic salmon",0.5
+13,"Blue mussel",0.93
+13,"European eel",0.43
+13,"European flounder",0.44401
+13,"European whitefish",0.44401
+13,"Marine fishes nei",0.477778
+13,"Rainbow trout",0.566667
+13,"Sea trout",0.466667
+13,"Turbot",0.5
+14,"Atlantic cod",0.283333
+14,"Atlantic salmon",0.5
+14,"Blue mussel",0.93
+14,"European eel",0.43
+14,"European flounder",0.44401
+14,"European whitefish",0.44401
+14,"Marine fishes nei",0.477778
+14,"Rainbow trout",0.566667
+14,"Sea trout",0.466667
+14,"Turbot",0.5
+15,"Bastard halibut",0.44401
+15,"Blue mussel",0.93
+15,"Clams, etc. nei",0.811765
+15,"Common edible cockle",0.733333
+15,"European seabass",0.57
+15,"Pacific cupped oyster",0.53
+15,"Rainbow trout",0.566667
+15,"Turbot",0.5
+16,"Bastard halibut",0.44401
+16,"Blue mussel",0.93
+16,"Clams, etc. nei",0.811765
+16,"Common edible cockle",0.733333
+16,"European seabass",0.57
+16,"Pacific cupped oyster",0.53
+16,"Rainbow trout",0.566667
+16,"Turbot",0.5
+17,"Abalones nei",0.547778
+17,"Akiami paste shrimp",0.366667
+17,"Amberjacks nei",0.44401
+17,"American cupped oyster",0.887879
+17,"Anadara clams nei",0.811765
+17,"Aquatic invertebrates nei",0.542157
+17,"Arctic char",0.531667
+17,"Areolate grouper",0.44401
+17,"Atlantic bluefin tuna",0.325
+17,"Atlantic cod",0.303333
+17,"Atlantic ditch shrimp",0.366667
+17,"Atlantic halibut",0.532222
+17,"Atlantic salmon",0.389309
+17,"Atlantic salmon (Atl)",0.17
+17,"Atlantic salmon (br)",0.6
+17,"Atlantic salmon (Pac)",0.27
+17,"Atlantic wolffish",0.53
+17,"Australian mussel",0.811765
+17,"Ballan wrasse",0.44401
+17,"Baltic prawn",0.47
+17,"Banana prawn",0.264286
+17,"Banana prawn (br)",0.27
+17,"Banded carpet shell",0.811765
+17,"Barramundi",0.197386
+17,"Bastard halibut",0.44401
+17,"Bastard halibuts nei",0.44401
+17,"Bear paw clam",0.811765
+17,"Black seabass",0.44401
+17,"Blackhead seabream",0.44401
+17,"Blacklip abalone",0.811765
+17,"Blacklip pearl oyster",0.811765
+17,"Blackspot(=red) seabream",0.44401
+17,"blood cockle",0.811765
+17,"Blood cockle",0.668889
+17,"Blood cockle (Ind)",0.67
+17,"Blood cockle (India)",0.67
+17,"Blue crab",0.416667
+17,"Blue mussel",0.896476
+17,"Blue shrimp",0.372222
+17,"Blue swimming crab",0.416667
+17,"Bluefish",0.44401
+17,"Bluespot mullet",0.44401
+17,"Brill",0.57
+17,"Brine shrimp",0.366667
+17,"Brown meagre",0.44401
+17,"Brown tiger prawn",0.366667
+17,"Brown-marbled grouper",0.333333
+17,"Butter clam",0.811765
+17,"Callinectes swimcrabs nei",0.416667
+17,"Caramote prawn",0.366667
+17,"Carpet shells nei",0.8
+17,"Chars nei",0.44401
+17,"Chilean flat oyster",0.811765
+17,"Chilean mussel",0.811765
+17,"Chinook(=Spring=King)salmon",0.370833
+17,"Cholga mussel",0.811765
+17,"Choro mussel",0.811765
+17,"Clams, etc. nei",0.811765
+17,"Cobia",0.44401
+17,"Cockles nei",0.811765
+17,"Coho(=Silver)salmon",0.342
+17,"Common cuttlefish",0.6
+17,"Common dentex",0.44401
+17,"Common edible cockle",0.732667
+17,"Common pandora",0.44401
+17,"Common prawn",0.366667
+17,"Common snook",0.44401
+17,"Common sole",0.532778
+17,"Common two-banded seabream",0.44401
+17,"Cortez oyster",0.811765
+17,"Crevalle jack",0.44401
+17,"Crimson seabream",0.44401
+17,"Croakers, drums nei",0.44401
+17,"Crocus giant clam",0.811765
+17,"Cupped oysters nei",0.888698
+17,"Cupped oysters nei (br)",1
+17,"Cupped oysters nei (Ind)",0.83
+17,"Cupped oysters nei (India)",0.83
+17,"Daggertooth pike conger",0.44401
+17,"Donax clams",0.811765
+17,"Dotted gizzard shad",0.44401
+17,"Drums nei",0.44401
+17,"Eastern king prawn",0.366667
+17,"Eastern school shrimp",0.366667
+17,"Elongate giant clam",0.811765
+17,"European eel",0.444343
+17,"European eel (br)",0.43
+17,"European flat oyster",0.820905
+17,"European flounder",0.44401
+17,"European seabass",0.457111
+17,"European seabass (br)",0.418
+17,"European whitefish",0.44401
+17,"False abalone",0.73
+17,"Filefishes nei",0.44401
+17,"Filefishes, leatherjackets nei",0.44401
+17,"Finfishes nei",0.44401
+17,"Flat and cupped oysters nei",0.831667
+17,"Flat oysters nei",0.87
+17,"Flatfishes nei",0.465556
+17,"Flathead grey mullet",0.414162
+17,"Flathead grey mullet (br)",0.4
+17,"Flathead lobster",0.416667
+17,"Fleshy prawn",0.366667
+17,"Florida pompano",0.44401
+17,"Fluted giant clam",0.811765
+17,"Fourfinger threadfin",0.44401
+17,"Gasar cupped oyster",0.731667
+17,"Gazami crab",0.416667
+17,"Giant clam",0.811765
+17,"Giant tiger prawn",0.269615
+17,"Giant tiger prawn (br)",0.165
+17,"Gilthead seabream",0.292662
+17,"Gilthead seabream (br)",0.2575
+17,"Globose clam",0.811765
+17,"Gobies nei",0.531667
+17,"Golden carpet shell",0.811765
+17,"Golden trevally",0.44401
+17,"Goldlined seabream",0.44401
+17,"Goldsilk seabream",0.44401
+17,"Greasy grouper",0.44401
+17,"Greasyback shrimp",0.372222
+17,"Great Atlantic scallop",0.811765
+17,"Greater amberjack",0.44401
+17,"Green mussel",0.8
+17,"Green tiger prawn",0.366667
+17,"Grooved carpet shell",0.867222
+17,"Groundfishes nei",0.44401
+17,"Groupers nei",0.331515
+17,"Groupers nei (Ind)",0.33
+17,"Groupers, seabasses nei",0.33
+17,"Groupers, seabasses nei (br)",0.33
+17,"Gudgeons, sleepers nei",0.44401
+17,"Haddock",0.531667
+17,"Hong Kong grouper",0.44401
+17,"Hooded oyster",0.811765
+17,"Horned turban",0.811765
+17,"Horse mussels nei",0.811765
+17,"Humpback grouper",0.44401
+17,"Indian backwater oyster",0.811765
+17,"Indian white prawn",0.41
+17,"Indo-Pacific swamp crab",0.416667
+17,"Indonesian snakehead",0.44401
+17,"Inflated ark",0.811765
+17,"Jacks, crevalles nei",0.44401
+17,"Japanese abalone",0.811765
+17,"Japanese amberjack",0.44401
+17,"Japanese carpet shell",0.841667
+17,"Japanese eel",0.44401
+17,"Japanese hard clam",0.811765
+17,"Japanese jack mackerel",0.44401
+17,"Japanese meagre",0.44401
+17,"Japanese sea cucumber",0.571405
+17,"Japanese seabass",0.44401
+17,"Japanese spiny lobster",0.416667
+17,"Jellyfishes nei",0.571405
+17,"John's snapper",0.433333
+17,"Korean mussel",0.8
+17,"Korean rockfish",0.44401
+17,"Kuruma prawn",0.441368
+17,"Kuruma prawn (br)",0.5
+17,"Large yellow croaker",0.44401
+17,"Largemouth black bass",0.44401
+17,"Lebranche mullet",0.44401
+17,"Lefteye flounders nei",0.44401
+17,"Mackerels nei",0.44401
+17,"Malabar grouper",0.44401
+17,"Mangrove cupped oyster",0.811765
+17,"Mangrove red snapper",0.433333
+17,"Marble goby",0.44401
+17,"Marbled spinefoot",0.44401
+17,"Marine crabs nei",0.416667
+17,"Marine crustaceans nei",0.3
+17,"Marine fishes nei",0.4777
+17,"Marine molluscs nei",0.533125
+17,"Masu(=Cherry) salmon",0.44401
+17,"Meagre",0.44401
+17,"Mediterranean mussel",0.82
+17,"Metapenaeus shrimps nei",0.372222
+17,"Milkfish",0.41219
+17,"Milkfish (br)",0.37
+17,"Mojarras(=Silver-biddies) nei",0.44401
+17,"Mud spiny lobster",0.416667
+17,"Mullets nei",0.553571
+17,"Mullets nei (br)",0.67
+17,"Natantian decapods nei",0.532222
+17,"New Zealand mussel",0.8
+17,"Northern quahog(=Hard clam)",0.811765
+17,"Northern white shrimp",0.366667
+17,"Octopuses nei",0.532222
+17,"Octopuses, etc. nei",0.566667
+17,"Okhotsk atka mackerel",0.44401
+17,"Olympia oyster",0.811765
+17,"Orange mud crab",0.416667
+17,"Orange-spotted grouper",0.333333
+17,"Pacific bluefin tuna",0.44401
+17,"Pacific calico scallop",0.811765
+17,"Pacific cupped oyster",0.770286
+17,"Pacific cupped oyster (Atl)",0.77
+17,"Pacific cupped oyster (br)",1
+17,"Pacific cupped oyster (Med)",0.53
+17,"Pacific geoduck",0.811765
+17,"Pacific horse clam",0.811765
+17,"Pacific lion's paw",0.811765
+17,"Pacific littleneck clam",0.811765
+17,"Palaemonid shrimps nei",0.366667
+17,"Palinurid spiny lobsters nei",0.416667
+17,"Papuan black snapper",0.44401
+17,"Pargo breams nei",0.44401
+17,"Pearl oyster shells nei",0.811765
+17,"Pen shells nei",0.811765
+17,"Penaeus shrimps nei",0.266508
+17,"Penguin wing oyster",0.811765
+17,"Peppery furrow",0.811765
+17,"Percoids nei",0.44401
+17,"Periwinkles nei",0.811765
+17,"Perlemoen abalone",0.631667
+17,"Peruvian calico scallop",0.833333
+17,"Pollack",0.44401
+17,"Porgies, seabreams nei",0.44401
+17,"Portunus swimcrabs nei",0.416667
+17,"Puffers nei",0.44401
+17,"Pullet carpet shell",0.831667
+17,"Queen scallop",0.811765
+17,"Rainbow trout",0.566481
+17,"Red abalone",0.811765
+17,"Red bait",0.6
+17,"Red drum",0.367333
+17,"Red porgy",0.44401
+17,"Redtail prawn",0.366667
+17,"Righteye flounders nei",0.44401
+17,"Rooster venus",0.811765
+17,"Russell's snapper",0.44401
+17,"Salmonids nei",0.44401
+17,"Sand gaper",0.811765
+17,"Sargo breams nei",0.4
+17,"Scallops nei",0.833333
+17,"Scats",0.44401
+17,"Scorpionfishes nei",0.44401
+17,"Sea cucumbers nei",0.571405
+17,"Sea mussels nei",0.794792
+17,"Sea snails",0.811765
+17,"Sea squirts nei",0.6
+17,"Sea trout",0.467333
+17,"Sea urchins nei",0.5
+17,"Seabasses nei",0.5
+17,"Senegalese sole",0.44401
+17,"Sharpsnout seabream",0.44401
+17,"Shi drum",0.44401
+17,"Silversides(=Sand smelts) nei",0.44401
+17,"Slipper cupped oyster",0.811765
+17,"Smooth giant clam",0.811765
+17,"Smooth mactra",0.77
+17,"Snappers nei",0.432857
+17,"Snappers, jobfishes nei",0.44401
+17,"Snooks(=Robalos) nei",0.44401
+17,"Snubnose pompano",0.44401
+17,"So-iuy mullet",0.63
+17,"Sobaity seabream",0.44401
+17,"Solen razor clams nei",0.811765
+17,"Soles nei",0.44401
+17,"South American rock mussel",0.811765
+17,"Southern Australia scallop",0.811765
+17,"Southern bluefin tuna",0.1
+17,"Southern white shrimp",0.366667
+17,"Spinefeet(=Rabbitfishes) nei",0.44401
+17,"Spinous spider crab",0.416667
+17,"Spiny lobsters nei",0.416667
+17,"Spotted coralgrouper",0.333333
+17,"Spotted rose snapper",0.44401
+17,"Spotted wolffish",0.53
+17,"Squaretail mullet",0.44401
+17,"Stony sea urchin",0.5
+17,"Streaked spinefoot",0.44401
+17,"Striped bass, hybrid",0.44401
+17,"Striped venus",0.811765
+17,"Stromboid conchs nei",0.811765
+17,"Sturgeons nei",0.565
+17,"Swimming crabs, etc. nei",0.416667
+17,"Sydney cupped oyster",0.811765
+17,"Tarpon",0.44401
+17,"Thinlip grey mullet",0.44401
+17,"Tropical spiny lobsters nei",0.416667
+17,"Trumpet emperor",0.44401
+17,"Tuberculate abalone",0.811765
+17,"Turbot",0.5
+17,"Two-spot red snapper",0.44401
+17,"Venus clams nei",0.811765
+17,"Warty venus",0.811765
+17,"White seabream",0.44401
+17,"White trevally",0.44401
+17,"White-spotted spinefoot",0.44401
+17,"Whiteleg shrimp",0.373241
+17,"Whiteleg shrimp (Atl)",0.37
+17,"Whiteleg shrimp (br)",0.43
+17,"Whiteleg shrimp (Pac)",0.37
+17,"Whitemouth croaker",0.44401
+17,"Yellowback seabream",0.44401
+17,"Yellowfin seabream",0.44401
+17,"Yellowfin tuna",0.1
+17,"Yesso scallop",0.834
+18,"Aquatic invertebrates nei",0.542157
+18,"Atlantic cod",0.283333
+18,"Atlantic salmon",0.43
+18,"Cupped oysters nei",0.888095
+18,"Flatfishes nei",0.43
+18,"Japanese sea cucumber",0.571405
+18,"Marine fishes nei",0.43
+18,"Mediterranean mussel",0.8
+18,"Mullets nei",0.5
+18,"Sea mussels nei",0.77
+18,"Sea trout",0.47
+18,"Sea urchins nei",0.5
+18,"Sturgeons nei",0.53
+18,"Yesso scallop",0.8
+19,"Aquatic invertebrates nei",0.542157
+19,"Atlantic cod",0.283333
+19,"Atlantic salmon",0.43
+19,"Cupped oysters nei",0.888095
+19,"Flatfishes nei",0.43
+19,"Japanese sea cucumber",0.571405
+19,"Marine fishes nei",0.43
+19,"Mediterranean mussel",0.8
+19,"Mullets nei",0.5
+19,"Sea mussels nei",0.77
+19,"Sea trout",0.47
+19,"Sea urchins nei",0.5
+19,"Sturgeons nei",0.53
+19,"Yesso scallop",0.8
+20,"Abalones nei",0.547778
+20,"Akiami paste shrimp",0.366667
+20,"Amberjacks nei",0.44401
+20,"American cupped oyster",0.887879
+20,"Anadara clams nei",0.811765
+20,"Aquatic invertebrates nei",0.542157
+20,"Arctic char",0.531667
+20,"Areolate grouper",0.44401
+20,"Atlantic bluefin tuna",0.325
+20,"Atlantic cod",0.303333
+20,"Atlantic ditch shrimp",0.366667
+20,"Atlantic halibut",0.532222
+20,"Atlantic salmon",0.389309
+20,"Atlantic salmon (Atl)",0.17
+20,"Atlantic salmon (br)",0.6
+20,"Atlantic salmon (Pac)",0.27
+20,"Atlantic wolffish",0.53
+20,"Australian mussel",0.811765
+20,"Ballan wrasse",0.44401
+20,"Baltic prawn",0.47
+20,"Banana prawn",0.264286
+20,"Banana prawn (br)",0.27
+20,"Banded carpet shell",0.811765
+20,"Barramundi",0.197386
+20,"Bastard halibut",0.44401
+20,"Bastard halibuts nei",0.44401
+20,"Bear paw clam",0.811765
+20,"Black seabass",0.44401
+20,"Blackhead seabream",0.44401
+20,"Blacklip abalone",0.811765
+20,"Blacklip pearl oyster",0.811765
+20,"Blackspot(=red) seabream",0.44401
+20,"blood cockle",0.811765
+20,"Blood cockle",0.668889
+20,"Blood cockle (Ind)",0.67
+20,"Blood cockle (India)",0.67
+20,"Blue crab",0.416667
+20,"Blue mussel",0.896476
+20,"Blue shrimp",0.372222
+20,"Blue swimming crab",0.416667
+20,"Bluefish",0.44401
+20,"Bluespot mullet",0.44401
+20,"Brill",0.57
+20,"Brine shrimp",0.366667
+20,"Brown meagre",0.44401
+20,"Brown tiger prawn",0.366667
+20,"Brown-marbled grouper",0.333333
+20,"Butter clam",0.811765
+20,"Callinectes swimcrabs nei",0.416667
+20,"Caramote prawn",0.366667
+20,"Carpet shells nei",0.8
+20,"Chars nei",0.44401
+20,"Chilean flat oyster",0.811765
+20,"Chilean mussel",0.811765
+20,"Chinook(=Spring=King)salmon",0.370833
+20,"Cholga mussel",0.811765
+20,"Choro mussel",0.811765
+20,"Clams, etc. nei",0.811765
+20,"Cobia",0.44401
+20,"Cockles nei",0.811765
+20,"Coho(=Silver)salmon",0.342
+20,"Common cuttlefish",0.6
+20,"Common dentex",0.44401
+20,"Common edible cockle",0.732667
+20,"Common pandora",0.44401
+20,"Common prawn",0.366667
+20,"Common snook",0.44401
+20,"Common sole",0.532778
+20,"Common two-banded seabream",0.44401
+20,"Cortez oyster",0.811765
+20,"Crevalle jack",0.44401
+20,"Crimson seabream",0.44401
+20,"Croakers, drums nei",0.44401
+20,"Crocus giant clam",0.811765
+20,"Cupped oysters nei",0.888698
+20,"Cupped oysters nei (br)",1
+20,"Cupped oysters nei (Ind)",0.83
+20,"Cupped oysters nei (India)",0.83
+20,"Daggertooth pike conger",0.44401
+20,"Donax clams",0.811765
+20,"Dotted gizzard shad",0.44401
+20,"Drums nei",0.44401
+20,"Eastern king prawn",0.366667
+20,"Eastern school shrimp",0.366667
+20,"Elongate giant clam",0.811765
+20,"European eel",0.444343
+20,"European eel (br)",0.43
+20,"European flat oyster",0.820905
+20,"European flounder",0.44401
+20,"European seabass",0.457111
+20,"European seabass (br)",0.418
+20,"European whitefish",0.44401
+20,"False abalone",0.73
+20,"Filefishes nei",0.44401
+20,"Filefishes, leatherjackets nei",0.44401
+20,"Finfishes nei",0.44401
+20,"Flat and cupped oysters nei",0.831667
+20,"Flat oysters nei",0.87
+20,"Flatfishes nei",0.465556
+20,"Flathead grey mullet",0.414162
+20,"Flathead grey mullet (br)",0.4
+20,"Flathead lobster",0.416667
+20,"Fleshy prawn",0.366667
+20,"Florida pompano",0.44401
+20,"Fluted giant clam",0.811765
+20,"Fourfinger threadfin",0.44401
+20,"Gasar cupped oyster",0.731667
+20,"Gazami crab",0.416667
+20,"Giant clam",0.811765
+20,"Giant tiger prawn",0.269615
+20,"Giant tiger prawn (br)",0.165
+20,"Gilthead seabream",0.292662
+20,"Gilthead seabream (br)",0.2575
+20,"Globose clam",0.811765
+20,"Gobies nei",0.531667
+20,"Golden carpet shell",0.811765
+20,"Golden trevally",0.44401
+20,"Goldlined seabream",0.44401
+20,"Goldsilk seabream",0.44401
+20,"Greasy grouper",0.44401
+20,"Greasyback shrimp",0.372222
+20,"Great Atlantic scallop",0.811765
+20,"Greater amberjack",0.44401
+20,"Green mussel",0.8
+20,"Green tiger prawn",0.366667
+20,"Grooved carpet shell",0.867222
+20,"Groundfishes nei",0.44401
+20,"Groupers nei",0.331515
+20,"Groupers nei (Ind)",0.33
+20,"Groupers, seabasses nei",0.33
+20,"Groupers, seabasses nei (br)",0.33
+20,"Gudgeons, sleepers nei",0.44401
+20,"Haddock",0.531667
+20,"Hong Kong grouper",0.44401
+20,"Hooded oyster",0.811765
+20,"Horned turban",0.811765
+20,"Horse mussels nei",0.811765
+20,"Humpback grouper",0.44401
+20,"Indian backwater oyster",0.811765
+20,"Indian white prawn",0.41
+20,"Indo-Pacific swamp crab",0.416667
+20,"Indonesian snakehead",0.44401
+20,"Inflated ark",0.811765
+20,"Jacks, crevalles nei",0.44401
+20,"Japanese abalone",0.811765
+20,"Japanese amberjack",0.44401
+20,"Japanese carpet shell",0.841667
+20,"Japanese eel",0.44401
+20,"Japanese hard clam",0.811765
+20,"Japanese jack mackerel",0.44401
+20,"Japanese meagre",0.44401
+20,"Japanese sea cucumber",0.571405
+20,"Japanese seabass",0.44401
+20,"Japanese spiny lobster",0.416667
+20,"Jellyfishes nei",0.571405
+20,"John's snapper",0.433333
+20,"Korean mussel",0.8
+20,"Korean rockfish",0.44401
+20,"Kuruma prawn",0.441368
+20,"Kuruma prawn (br)",0.5
+20,"Large yellow croaker",0.44401
+20,"Largemouth black bass",0.44401
+20,"Lebranche mullet",0.44401
+20,"Lefteye flounders nei",0.44401
+20,"Mackerels nei",0.44401
+20,"Malabar grouper",0.44401
+20,"Mangrove cupped oyster",0.811765
+20,"Mangrove red snapper",0.433333
+20,"Marble goby",0.44401
+20,"Marbled spinefoot",0.44401
+20,"Marine crabs nei",0.416667
+20,"Marine crustaceans nei",0.3
+20,"Marine fishes nei",0.4777
+20,"Marine molluscs nei",0.533125
+20,"Masu(=Cherry) salmon",0.44401
+20,"Meagre",0.44401
+20,"Mediterranean mussel",0.82
+20,"Metapenaeus shrimps nei",0.372222
+20,"Milkfish",0.41219
+20,"Milkfish (br)",0.37
+20,"Mojarras(=Silver-biddies) nei",0.44401
+20,"Mud spiny lobster",0.416667
+20,"Mullets nei",0.553571
+20,"Mullets nei (br)",0.67
+20,"Natantian decapods nei",0.532222
+20,"New Zealand mussel",0.8
+20,"Northern quahog(=Hard clam)",0.811765
+20,"Northern white shrimp",0.366667
+20,"Octopuses nei",0.532222
+20,"Octopuses, etc. nei",0.566667
+20,"Okhotsk atka mackerel",0.44401
+20,"Olympia oyster",0.811765
+20,"Orange mud crab",0.416667
+20,"Orange-spotted grouper",0.333333
+20,"Pacific bluefin tuna",0.44401
+20,"Pacific calico scallop",0.811765
+20,"Pacific cupped oyster",0.770286
+20,"Pacific cupped oyster (Atl)",0.77
+20,"Pacific cupped oyster (br)",1
+20,"Pacific cupped oyster (Med)",0.53
+20,"Pacific geoduck",0.811765
+20,"Pacific horse clam",0.811765
+20,"Pacific lion's paw",0.811765
+20,"Pacific littleneck clam",0.811765
+20,"Palaemonid shrimps nei",0.366667
+20,"Palinurid spiny lobsters nei",0.416667
+20,"Papuan black snapper",0.44401
+20,"Pargo breams nei",0.44401
+20,"Pearl oyster shells nei",0.811765
+20,"Pen shells nei",0.811765
+20,"Penaeus shrimps nei",0.266508
+20,"Penguin wing oyster",0.811765
+20,"Peppery furrow",0.811765
+20,"Percoids nei",0.44401
+20,"Periwinkles nei",0.811765
+20,"Perlemoen abalone",0.631667
+20,"Peruvian calico scallop",0.833333
+20,"Pollack",0.44401
+20,"Porgies, seabreams nei",0.44401
+20,"Portunus swimcrabs nei",0.416667
+20,"Puffers nei",0.44401
+20,"Pullet carpet shell",0.831667
+20,"Queen scallop",0.811765
+20,"Rainbow trout",0.566481
+20,"Red abalone",0.811765
+20,"Red bait",0.6
+20,"Red drum",0.367333
+20,"Red porgy",0.44401
+20,"Redtail prawn",0.366667
+20,"Righteye flounders nei",0.44401
+20,"Rooster venus",0.811765
+20,"Russell's snapper",0.44401
+20,"Salmonids nei",0.44401
+20,"Sand gaper",0.811765
+20,"Sargo breams nei",0.4
+20,"Scallops nei",0.833333
+20,"Scats",0.44401
+20,"Scorpionfishes nei",0.44401
+20,"Sea cucumbers nei",0.571405
+20,"Sea mussels nei",0.794792
+20,"Sea snails",0.811765
+20,"Sea squirts nei",0.6
+20,"Sea trout",0.467333
+20,"Sea urchins nei",0.5
+20,"Seabasses nei",0.5
+20,"Senegalese sole",0.44401
+20,"Sharpsnout seabream",0.44401
+20,"Shi drum",0.44401
+20,"Silversides(=Sand smelts) nei",0.44401
+20,"Slipper cupped oyster",0.811765
+20,"Smooth giant clam",0.811765
+20,"Smooth mactra",0.77
+20,"Snappers nei",0.432857
+20,"Snappers, jobfishes nei",0.44401
+20,"Snooks(=Robalos) nei",0.44401
+20,"Snubnose pompano",0.44401
+20,"So-iuy mullet",0.63
+20,"Sobaity seabream",0.44401
+20,"Solen razor clams nei",0.811765
+20,"Soles nei",0.44401
+20,"South American rock mussel",0.811765
+20,"Southern Australia scallop",0.811765
+20,"Southern bluefin tuna",0.1
+20,"Southern white shrimp",0.366667
+20,"Spinefeet(=Rabbitfishes) nei",0.44401
+20,"Spinous spider crab",0.416667
+20,"Spiny lobsters nei",0.416667
+20,"Spotted coralgrouper",0.333333
+20,"Spotted rose snapper",0.44401
+20,"Spotted wolffish",0.53
+20,"Squaretail mullet",0.44401
+20,"Stony sea urchin",0.5
+20,"Streaked spinefoot",0.44401
+20,"Striped bass, hybrid",0.44401
+20,"Striped venus",0.811765
+20,"Stromboid conchs nei",0.811765
+20,"Sturgeons nei",0.565
+20,"Swimming crabs, etc. nei",0.416667
+20,"Sydney cupped oyster",0.811765
+20,"Tarpon",0.44401
+20,"Thinlip grey mullet",0.44401
+20,"Tropical spiny lobsters nei",0.416667
+20,"Trumpet emperor",0.44401
+20,"Tuberculate abalone",0.811765
+20,"Turbot",0.5
+20,"Two-spot red snapper",0.44401
+20,"Venus clams nei",0.811765
+20,"Warty venus",0.811765
+20,"White seabream",0.44401
+20,"White trevally",0.44401
+20,"White-spotted spinefoot",0.44401
+20,"Whiteleg shrimp",0.373241
+20,"Whiteleg shrimp (Atl)",0.37
+20,"Whiteleg shrimp (br)",0.43
+20,"Whiteleg shrimp (Pac)",0.37
+20,"Whitemouth croaker",0.44401
+20,"Yellowback seabream",0.44401
+20,"Yellowfin seabream",0.44401
+20,"Yellowfin tuna",0.1
+20,"Yesso scallop",0.834
+21,"Abalones nei",0.547778
+21,"Akiami paste shrimp",0.366667
+21,"Amberjacks nei",0.44401
+21,"American cupped oyster",0.887879
+21,"Anadara clams nei",0.811765
+21,"Aquatic invertebrates nei",0.542157
+21,"Arctic char",0.531667
+21,"Areolate grouper",0.44401
+21,"Atlantic bluefin tuna",0.325
+21,"Atlantic cod",0.303333
+21,"Atlantic ditch shrimp",0.366667
+21,"Atlantic halibut",0.532222
+21,"Atlantic salmon",0.389309
+21,"Atlantic salmon (Atl)",0.17
+21,"Atlantic salmon (br)",0.6
+21,"Atlantic salmon (Pac)",0.27
+21,"Atlantic wolffish",0.53
+21,"Australian mussel",0.811765
+21,"Ballan wrasse",0.44401
+21,"Baltic prawn",0.47
+21,"Banana prawn",0.264286
+21,"Banana prawn (br)",0.27
+21,"Banded carpet shell",0.811765
+21,"Barramundi",0.197386
+21,"Bastard halibut",0.44401
+21,"Bastard halibuts nei",0.44401
+21,"Bear paw clam",0.811765
+21,"Black seabass",0.44401
+21,"Blackhead seabream",0.44401
+21,"Blacklip abalone",0.811765
+21,"Blacklip pearl oyster",0.811765
+21,"Blackspot(=red) seabream",0.44401
+21,"blood cockle",0.811765
+21,"Blood cockle",0.668889
+21,"Blood cockle (Ind)",0.67
+21,"Blood cockle (India)",0.67
+21,"Blue crab",0.416667
+21,"Blue mussel",0.896476
+21,"Blue shrimp",0.372222
+21,"Blue swimming crab",0.416667
+21,"Bluefish",0.44401
+21,"Bluespot mullet",0.44401
+21,"Brill",0.57
+21,"Brine shrimp",0.366667
+21,"Brown meagre",0.44401
+21,"Brown tiger prawn",0.366667
+21,"Brown-marbled grouper",0.333333
+21,"Butter clam",0.811765
+21,"Callinectes swimcrabs nei",0.416667
+21,"Caramote prawn",0.366667
+21,"Carpet shells nei",0.8
+21,"Chars nei",0.44401
+21,"Chilean flat oyster",0.811765
+21,"Chilean mussel",0.811765
+21,"Chinook(=Spring=King)salmon",0.370833
+21,"Cholga mussel",0.811765
+21,"Choro mussel",0.811765
+21,"Clams, etc. nei",0.811765
+21,"Cobia",0.44401
+21,"Cockles nei",0.811765
+21,"Coho(=Silver)salmon",0.342
+21,"Common cuttlefish",0.6
+21,"Common dentex",0.44401
+21,"Common edible cockle",0.732667
+21,"Common pandora",0.44401
+21,"Common prawn",0.366667
+21,"Common snook",0.44401
+21,"Common sole",0.532778
+21,"Common two-banded seabream",0.44401
+21,"Cortez oyster",0.811765
+21,"Crevalle jack",0.44401
+21,"Crimson seabream",0.44401
+21,"Croakers, drums nei",0.44401
+21,"Crocus giant clam",0.811765
+21,"Cupped oysters nei",0.888698
+21,"Cupped oysters nei (br)",1
+21,"Cupped oysters nei (Ind)",0.83
+21,"Cupped oysters nei (India)",0.83
+21,"Daggertooth pike conger",0.44401
+21,"Donax clams",0.811765
+21,"Dotted gizzard shad",0.44401
+21,"Drums nei",0.44401
+21,"Eastern king prawn",0.366667
+21,"Eastern school shrimp",0.366667
+21,"Elongate giant clam",0.811765
+21,"European eel",0.444343
+21,"European eel (br)",0.43
+21,"European flat oyster",0.820905
+21,"European flounder",0.44401
+21,"European seabass",0.457111
+21,"European seabass (br)",0.418
+21,"European whitefish",0.44401
+21,"False abalone",0.73
+21,"Filefishes nei",0.44401
+21,"Filefishes, leatherjackets nei",0.44401
+21,"Finfishes nei",0.44401
+21,"Flat and cupped oysters nei",0.831667
+21,"Flat oysters nei",0.87
+21,"Flatfishes nei",0.465556
+21,"Flathead grey mullet",0.414162
+21,"Flathead grey mullet (br)",0.4
+21,"Flathead lobster",0.416667
+21,"Fleshy prawn",0.366667
+21,"Florida pompano",0.44401
+21,"Fluted giant clam",0.811765
+21,"Fourfinger threadfin",0.44401
+21,"Gasar cupped oyster",0.731667
+21,"Gazami crab",0.416667
+21,"Giant clam",0.811765
+21,"Giant tiger prawn",0.269615
+21,"Giant tiger prawn (br)",0.165
+21,"Gilthead seabream",0.292662
+21,"Gilthead seabream (br)",0.2575
+21,"Globose clam",0.811765
+21,"Gobies nei",0.531667
+21,"Golden carpet shell",0.811765
+21,"Golden trevally",0.44401
+21,"Goldlined seabream",0.44401
+21,"Goldsilk seabream",0.44401
+21,"Greasy grouper",0.44401
+21,"Greasyback shrimp",0.372222
+21,"Great Atlantic scallop",0.811765
+21,"Greater amberjack",0.44401
+21,"Green mussel",0.8
+21,"Green tiger prawn",0.366667
+21,"Grooved carpet shell",0.867222
+21,"Groundfishes nei",0.44401
+21,"Groupers nei",0.331515
+21,"Groupers nei (Ind)",0.33
+21,"Groupers, seabasses nei",0.33
+21,"Groupers, seabasses nei (br)",0.33
+21,"Gudgeons, sleepers nei",0.44401
+21,"Haddock",0.531667
+21,"Hong Kong grouper",0.44401
+21,"Hooded oyster",0.811765
+21,"Horned turban",0.811765
+21,"Horse mussels nei",0.811765
+21,"Humpback grouper",0.44401
+21,"Indian backwater oyster",0.811765
+21,"Indian white prawn",0.41
+21,"Indo-Pacific swamp crab",0.416667
+21,"Indonesian snakehead",0.44401
+21,"Inflated ark",0.811765
+21,"Jacks, crevalles nei",0.44401
+21,"Japanese abalone",0.811765
+21,"Japanese amberjack",0.44401
+21,"Japanese carpet shell",0.841667
+21,"Japanese eel",0.44401
+21,"Japanese hard clam",0.811765
+21,"Japanese jack mackerel",0.44401
+21,"Japanese meagre",0.44401
+21,"Japanese sea cucumber",0.571405
+21,"Japanese seabass",0.44401
+21,"Japanese spiny lobster",0.416667
+21,"Jellyfishes nei",0.571405
+21,"John's snapper",0.433333
+21,"Korean mussel",0.8
+21,"Korean rockfish",0.44401
+21,"Kuruma prawn",0.441368
+21,"Kuruma prawn (br)",0.5
+21,"Large yellow croaker",0.44401
+21,"Largemouth black bass",0.44401
+21,"Lebranche mullet",0.44401
+21,"Lefteye flounders nei",0.44401
+21,"Mackerels nei",0.44401
+21,"Malabar grouper",0.44401
+21,"Mangrove cupped oyster",0.811765
+21,"Mangrove red snapper",0.433333
+21,"Marble goby",0.44401
+21,"Marbled spinefoot",0.44401
+21,"Marine crabs nei",0.416667
+21,"Marine crustaceans nei",0.3
+21,"Marine fishes nei",0.4777
+21,"Marine molluscs nei",0.533125
+21,"Masu(=Cherry) salmon",0.44401
+21,"Meagre",0.44401
+21,"Mediterranean mussel",0.82
+21,"Metapenaeus shrimps nei",0.372222
+21,"Milkfish",0.41219
+21,"Milkfish (br)",0.37
+21,"Mojarras(=Silver-biddies) nei",0.44401
+21,"Mud spiny lobster",0.416667
+21,"Mullets nei",0.553571
+21,"Mullets nei (br)",0.67
+21,"Natantian decapods nei",0.532222
+21,"New Zealand mussel",0.8
+21,"Northern quahog(=Hard clam)",0.811765
+21,"Northern white shrimp",0.366667
+21,"Octopuses nei",0.532222
+21,"Octopuses, etc. nei",0.566667
+21,"Okhotsk atka mackerel",0.44401
+21,"Olympia oyster",0.811765
+21,"Orange mud crab",0.416667
+21,"Orange-spotted grouper",0.333333
+21,"Pacific bluefin tuna",0.44401
+21,"Pacific calico scallop",0.811765
+21,"Pacific cupped oyster",0.770286
+21,"Pacific cupped oyster (Atl)",0.77
+21,"Pacific cupped oyster (br)",1
+21,"Pacific cupped oyster (Med)",0.53
+21,"Pacific geoduck",0.811765
+21,"Pacific horse clam",0.811765
+21,"Pacific lion's paw",0.811765
+21,"Pacific littleneck clam",0.811765
+21,"Palaemonid shrimps nei",0.366667
+21,"Palinurid spiny lobsters nei",0.416667
+21,"Papuan black snapper",0.44401
+21,"Pargo breams nei",0.44401
+21,"Pearl oyster shells nei",0.811765
+21,"Pen shells nei",0.811765
+21,"Penaeus shrimps nei",0.266508
+21,"Penguin wing oyster",0.811765
+21,"Peppery furrow",0.811765
+21,"Percoids nei",0.44401
+21,"Periwinkles nei",0.811765
+21,"Perlemoen abalone",0.631667
+21,"Peruvian calico scallop",0.833333
+21,"Pollack",0.44401
+21,"Porgies, seabreams nei",0.44401
+21,"Portunus swimcrabs nei",0.416667
+21,"Puffers nei",0.44401
+21,"Pullet carpet shell",0.831667
+21,"Queen scallop",0.811765
+21,"Rainbow trout",0.566481
+21,"Red abalone",0.811765
+21,"Red bait",0.6
+21,"Red drum",0.367333
+21,"Red porgy",0.44401
+21,"Redtail prawn",0.366667
+21,"Righteye flounders nei",0.44401
+21,"Rooster venus",0.811765
+21,"Russell's snapper",0.44401
+21,"Salmonids nei",0.44401
+21,"Sand gaper",0.811765
+21,"Sargo breams nei",0.4
+21,"Scallops nei",0.833333
+21,"Scats",0.44401
+21,"Scorpionfishes nei",0.44401
+21,"Sea cucumbers nei",0.571405
+21,"Sea mussels nei",0.794792
+21,"Sea snails",0.811765
+21,"Sea squirts nei",0.6
+21,"Sea trout",0.467333
+21,"Sea urchins nei",0.5
+21,"Seabasses nei",0.5
+21,"Senegalese sole",0.44401
+21,"Sharpsnout seabream",0.44401
+21,"Shi drum",0.44401
+21,"Silversides(=Sand smelts) nei",0.44401
+21,"Slipper cupped oyster",0.811765
+21,"Smooth giant clam",0.811765
+21,"Smooth mactra",0.77
+21,"Snappers nei",0.432857
+21,"Snappers, jobfishes nei",0.44401
+21,"Snooks(=Robalos) nei",0.44401
+21,"Snubnose pompano",0.44401
+21,"So-iuy mullet",0.63
+21,"Sobaity seabream",0.44401
+21,"Solen razor clams nei",0.811765
+21,"Soles nei",0.44401
+21,"South American rock mussel",0.811765
+21,"Southern Australia scallop",0.811765
+21,"Southern bluefin tuna",0.1
+21,"Southern white shrimp",0.366667
+21,"Spinefeet(=Rabbitfishes) nei",0.44401
+21,"Spinous spider crab",0.416667
+21,"Spiny lobsters nei",0.416667
+21,"Spotted coralgrouper",0.333333
+21,"Spotted rose snapper",0.44401
+21,"Spotted wolffish",0.53
+21,"Squaretail mullet",0.44401
+21,"Stony sea urchin",0.5
+21,"Streaked spinefoot",0.44401
+21,"Striped bass, hybrid",0.44401
+21,"Striped venus",0.811765
+21,"Stromboid conchs nei",0.811765
+21,"Sturgeons nei",0.565
+21,"Swimming crabs, etc. nei",0.416667
+21,"Sydney cupped oyster",0.811765
+21,"Tarpon",0.44401
+21,"Thinlip grey mullet",0.44401
+21,"Tropical spiny lobsters nei",0.416667
+21,"Trumpet emperor",0.44401
+21,"Tuberculate abalone",0.811765
+21,"Turbot",0.5
+21,"Two-spot red snapper",0.44401
+21,"Venus clams nei",0.811765
+21,"Warty venus",0.811765
+21,"White seabream",0.44401
+21,"White trevally",0.44401
+21,"White-spotted spinefoot",0.44401
+21,"Whiteleg shrimp",0.373241
+21,"Whiteleg shrimp (Atl)",0.37
+21,"Whiteleg shrimp (br)",0.43
+21,"Whiteleg shrimp (Pac)",0.37
+21,"Whitemouth croaker",0.44401
+21,"Yellowback seabream",0.44401
+21,"Yellowfin seabream",0.44401
+21,"Yellowfin tuna",0.1
+21,"Yesso scallop",0.834
+22,"Abalones nei",0.547778
+22,"Akiami paste shrimp",0.366667
+22,"Amberjacks nei",0.44401
+22,"American cupped oyster",0.887879
+22,"Anadara clams nei",0.811765
+22,"Aquatic invertebrates nei",0.542157
+22,"Arctic char",0.531667
+22,"Areolate grouper",0.44401
+22,"Atlantic bluefin tuna",0.325
+22,"Atlantic cod",0.303333
+22,"Atlantic ditch shrimp",0.366667
+22,"Atlantic halibut",0.532222
+22,"Atlantic salmon",0.389309
+22,"Atlantic salmon (Atl)",0.17
+22,"Atlantic salmon (br)",0.6
+22,"Atlantic salmon (Pac)",0.27
+22,"Atlantic wolffish",0.53
+22,"Australian mussel",0.811765
+22,"Ballan wrasse",0.44401
+22,"Baltic prawn",0.47
+22,"Banana prawn",0.264286
+22,"Banana prawn (br)",0.27
+22,"Banded carpet shell",0.811765
+22,"Barramundi",0.197386
+22,"Bastard halibut",0.44401
+22,"Bastard halibuts nei",0.44401
+22,"Bear paw clam",0.811765
+22,"Black seabass",0.44401
+22,"Blackhead seabream",0.44401
+22,"Blacklip abalone",0.811765
+22,"Blacklip pearl oyster",0.811765
+22,"Blackspot(=red) seabream",0.44401
+22,"blood cockle",0.811765
+22,"Blood cockle",0.668889
+22,"Blood cockle (Ind)",0.67
+22,"Blood cockle (India)",0.67
+22,"Blue crab",0.416667
+22,"Blue mussel",0.896476
+22,"Blue shrimp",0.372222
+22,"Blue swimming crab",0.416667
+22,"Bluefish",0.44401
+22,"Bluespot mullet",0.44401
+22,"Brill",0.57
+22,"Brine shrimp",0.366667
+22,"Brown meagre",0.44401
+22,"Brown tiger prawn",0.366667
+22,"Brown-marbled grouper",0.333333
+22,"Butter clam",0.811765
+22,"Callinectes swimcrabs nei",0.416667
+22,"Caramote prawn",0.366667
+22,"Carpet shells nei",0.8
+22,"Chars nei",0.44401
+22,"Chilean flat oyster",0.811765
+22,"Chilean mussel",0.811765
+22,"Chinook(=Spring=King)salmon",0.370833
+22,"Cholga mussel",0.811765
+22,"Choro mussel",0.811765
+22,"Clams, etc. nei",0.811765
+22,"Cobia",0.44401
+22,"Cockles nei",0.811765
+22,"Coho(=Silver)salmon",0.342
+22,"Common cuttlefish",0.6
+22,"Common dentex",0.44401
+22,"Common edible cockle",0.732667
+22,"Common pandora",0.44401
+22,"Common prawn",0.366667
+22,"Common snook",0.44401
+22,"Common sole",0.532778
+22,"Common two-banded seabream",0.44401
+22,"Cortez oyster",0.811765
+22,"Crevalle jack",0.44401
+22,"Crimson seabream",0.44401
+22,"Croakers, drums nei",0.44401
+22,"Crocus giant clam",0.811765
+22,"Cupped oysters nei",0.888698
+22,"Cupped oysters nei (br)",1
+22,"Cupped oysters nei (Ind)",0.83
+22,"Cupped oysters nei (India)",0.83
+22,"Daggertooth pike conger",0.44401
+22,"Donax clams",0.811765
+22,"Dotted gizzard shad",0.44401
+22,"Drums nei",0.44401
+22,"Eastern king prawn",0.366667
+22,"Eastern school shrimp",0.366667
+22,"Elongate giant clam",0.811765
+22,"European eel",0.444343
+22,"European eel (br)",0.43
+22,"European flat oyster",0.820905
+22,"European flounder",0.44401
+22,"European seabass",0.457111
+22,"European seabass (br)",0.418
+22,"European whitefish",0.44401
+22,"False abalone",0.73
+22,"Filefishes nei",0.44401
+22,"Filefishes, leatherjackets nei",0.44401
+22,"Finfishes nei",0.44401
+22,"Flat and cupped oysters nei",0.831667
+22,"Flat oysters nei",0.87
+22,"Flatfishes nei",0.465556
+22,"Flathead grey mullet",0.414162
+22,"Flathead grey mullet (br)",0.4
+22,"Flathead lobster",0.416667
+22,"Fleshy prawn",0.366667
+22,"Florida pompano",0.44401
+22,"Fluted giant clam",0.811765
+22,"Fourfinger threadfin",0.44401
+22,"Gasar cupped oyster",0.731667
+22,"Gazami crab",0.416667
+22,"Giant clam",0.811765
+22,"Giant tiger prawn",0.269615
+22,"Giant tiger prawn (br)",0.165
+22,"Gilthead seabream",0.292662
+22,"Gilthead seabream (br)",0.2575
+22,"Globose clam",0.811765
+22,"Gobies nei",0.531667
+22,"Golden carpet shell",0.811765
+22,"Golden trevally",0.44401
+22,"Goldlined seabream",0.44401
+22,"Goldsilk seabream",0.44401
+22,"Greasy grouper",0.44401
+22,"Greasyback shrimp",0.372222
+22,"Great Atlantic scallop",0.811765
+22,"Greater amberjack",0.44401
+22,"Green mussel",0.8
+22,"Green tiger prawn",0.366667
+22,"Grooved carpet shell",0.867222
+22,"Groundfishes nei",0.44401
+22,"Groupers nei",0.331515
+22,"Groupers nei (Ind)",0.33
+22,"Groupers, seabasses nei",0.33
+22,"Groupers, seabasses nei (br)",0.33
+22,"Gudgeons, sleepers nei",0.44401
+22,"Haddock",0.531667
+22,"Hong Kong grouper",0.44401
+22,"Hooded oyster",0.811765
+22,"Horned turban",0.811765
+22,"Horse mussels nei",0.811765
+22,"Humpback grouper",0.44401
+22,"Indian backwater oyster",0.811765
+22,"Indian white prawn",0.41
+22,"Indo-Pacific swamp crab",0.416667
+22,"Indonesian snakehead",0.44401
+22,"Inflated ark",0.811765
+22,"Jacks, crevalles nei",0.44401
+22,"Japanese abalone",0.811765
+22,"Japanese amberjack",0.44401
+22,"Japanese carpet shell",0.841667
+22,"Japanese eel",0.44401
+22,"Japanese hard clam",0.811765
+22,"Japanese jack mackerel",0.44401
+22,"Japanese meagre",0.44401
+22,"Japanese sea cucumber",0.571405
+22,"Japanese seabass",0.44401
+22,"Japanese spiny lobster",0.416667
+22,"Jellyfishes nei",0.571405
+22,"John's snapper",0.433333
+22,"Korean mussel",0.8
+22,"Korean rockfish",0.44401
+22,"Kuruma prawn",0.441368
+22,"Kuruma prawn (br)",0.5
+22,"Large yellow croaker",0.44401
+22,"Largemouth black bass",0.44401
+22,"Lebranche mullet",0.44401
+22,"Lefteye flounders nei",0.44401
+22,"Mackerels nei",0.44401
+22,"Malabar grouper",0.44401
+22,"Mangrove cupped oyster",0.811765
+22,"Mangrove red snapper",0.433333
+22,"Marble goby",0.44401
+22,"Marbled spinefoot",0.44401
+22,"Marine crabs nei",0.416667
+22,"Marine crustaceans nei",0.3
+22,"Marine fishes nei",0.4777
+22,"Marine molluscs nei",0.533125
+22,"Masu(=Cherry) salmon",0.44401
+22,"Meagre",0.44401
+22,"Mediterranean mussel",0.82
+22,"Metapenaeus shrimps nei",0.372222
+22,"Milkfish",0.41219
+22,"Milkfish (br)",0.37
+22,"Mojarras(=Silver-biddies) nei",0.44401
+22,"Mud spiny lobster",0.416667
+22,"Mullets nei",0.553571
+22,"Mullets nei (br)",0.67
+22,"Natantian decapods nei",0.532222
+22,"New Zealand mussel",0.8
+22,"Northern quahog(=Hard clam)",0.811765
+22,"Northern white shrimp",0.366667
+22,"Octopuses nei",0.532222
+22,"Octopuses, etc. nei",0.566667
+22,"Okhotsk atka mackerel",0.44401
+22,"Olympia oyster",0.811765
+22,"Orange mud crab",0.416667
+22,"Orange-spotted grouper",0.333333
+22,"Pacific bluefin tuna",0.44401
+22,"Pacific calico scallop",0.811765
+22,"Pacific cupped oyster",0.770286
+22,"Pacific cupped oyster (Atl)",0.77
+22,"Pacific cupped oyster (br)",1
+22,"Pacific cupped oyster (Med)",0.53
+22,"Pacific geoduck",0.811765
+22,"Pacific horse clam",0.811765
+22,"Pacific lion's paw",0.811765
+22,"Pacific littleneck clam",0.811765
+22,"Palaemonid shrimps nei",0.366667
+22,"Palinurid spiny lobsters nei",0.416667
+22,"Papuan black snapper",0.44401
+22,"Pargo breams nei",0.44401
+22,"Pearl oyster shells nei",0.811765
+22,"Pen shells nei",0.811765
+22,"Penaeus shrimps nei",0.266508
+22,"Penguin wing oyster",0.811765
+22,"Peppery furrow",0.811765
+22,"Percoids nei",0.44401
+22,"Periwinkles nei",0.811765
+22,"Perlemoen abalone",0.631667
+22,"Peruvian calico scallop",0.833333
+22,"Pollack",0.44401
+22,"Porgies, seabreams nei",0.44401
+22,"Portunus swimcrabs nei",0.416667
+22,"Puffers nei",0.44401
+22,"Pullet carpet shell",0.831667
+22,"Queen scallop",0.811765
+22,"Rainbow trout",0.566481
+22,"Red abalone",0.811765
+22,"Red bait",0.6
+22,"Red drum",0.367333
+22,"Red porgy",0.44401
+22,"Redtail prawn",0.366667
+22,"Righteye flounders nei",0.44401
+22,"Rooster venus",0.811765
+22,"Russell's snapper",0.44401
+22,"Salmonids nei",0.44401
+22,"Sand gaper",0.811765
+22,"Sargo breams nei",0.4
+22,"Scallops nei",0.833333
+22,"Scats",0.44401
+22,"Scorpionfishes nei",0.44401
+22,"Sea cucumbers nei",0.571405
+22,"Sea mussels nei",0.794792
+22,"Sea snails",0.811765
+22,"Sea squirts nei",0.6
+22,"Sea trout",0.467333
+22,"Sea urchins nei",0.5
+22,"Seabasses nei",0.5
+22,"Senegalese sole",0.44401
+22,"Sharpsnout seabream",0.44401
+22,"Shi drum",0.44401
+22,"Silversides(=Sand smelts) nei",0.44401
+22,"Slipper cupped oyster",0.811765
+22,"Smooth giant clam",0.811765
+22,"Smooth mactra",0.77
+22,"Snappers nei",0.432857
+22,"Snappers, jobfishes nei",0.44401
+22,"Snooks(=Robalos) nei",0.44401
+22,"Snubnose pompano",0.44401
+22,"So-iuy mullet",0.63
+22,"Sobaity seabream",0.44401
+22,"Solen razor clams nei",0.811765
+22,"Soles nei",0.44401
+22,"South American rock mussel",0.811765
+22,"Southern Australia scallop",0.811765
+22,"Southern bluefin tuna",0.1
+22,"Southern white shrimp",0.366667
+22,"Spinefeet(=Rabbitfishes) nei",0.44401
+22,"Spinous spider crab",0.416667
+22,"Spiny lobsters nei",0.416667
+22,"Spotted coralgrouper",0.333333
+22,"Spotted rose snapper",0.44401
+22,"Spotted wolffish",0.53
+22,"Squaretail mullet",0.44401
+22,"Stony sea urchin",0.5
+22,"Streaked spinefoot",0.44401
+22,"Striped bass, hybrid",0.44401
+22,"Striped venus",0.811765
+22,"Stromboid conchs nei",0.811765
+22,"Sturgeons nei",0.565
+22,"Swimming crabs, etc. nei",0.416667
+22,"Sydney cupped oyster",0.811765
+22,"Tarpon",0.44401
+22,"Thinlip grey mullet",0.44401
+22,"Tropical spiny lobsters nei",0.416667
+22,"Trumpet emperor",0.44401
+22,"Tuberculate abalone",0.811765
+22,"Turbot",0.5
+22,"Two-spot red snapper",0.44401
+22,"Venus clams nei",0.811765
+22,"Warty venus",0.811765
+22,"White seabream",0.44401
+22,"White trevally",0.44401
+22,"White-spotted spinefoot",0.44401
+22,"Whiteleg shrimp",0.373241
+22,"Whiteleg shrimp (Atl)",0.37
+22,"Whiteleg shrimp (br)",0.43
+22,"Whiteleg shrimp (Pac)",0.37
+22,"Whitemouth croaker",0.44401
+22,"Yellowback seabream",0.44401
+22,"Yellowfin seabream",0.44401
+22,"Yellowfin tuna",0.1
+22,"Yesso scallop",0.834
+23,"Rainbow trout",0.566667
+24,"Rainbow trout",0.566667
+25,"Rainbow trout",0.566667
