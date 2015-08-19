@@ -42,6 +42,11 @@ bhi = readOGR(dsn = file.path(dir_neptune, 'git-annex/clip-n-ship/bhi/spatial/cu
               layer = 'Intersect_HELCOMsubbasins_BALTIC_EEZ_Eliminate')
 # bhi_orig = bhi
 
+# # readShapePoly doesn't include a coordinate ref system but also removes orphan holes
+# b = readShapePoly(file.path(dir_neptune, 'git-annex/clip-n-ship/bhi/spatial/custom/raw',
+#                    'Intersect_HELCOMsubbasins_BALTIC_EEZ_Eliminate.shp'), 
+#                   proj4string=CRS("+proj=longlat +init=EPSG:3857")) # EPSG:3857 Mercator--typical for Stamen Maps
+
 # viewing takes a long time
 if (view_shp) plot(bhi)
 
