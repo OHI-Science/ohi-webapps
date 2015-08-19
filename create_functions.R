@@ -1326,7 +1326,7 @@ custom_maps = function(key){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
   #names(shp_orig@data) = c('rgn_id', 'rgn_name', 'area_km2', 'hectares')  # for GYE     ## generalize!
   crs = CRS("+proj=longlat +datum=WGS84")
   shp = spTransform(shp_orig,crs) # inspect as data.frame: shp@data // inspect a column: shp@data$rgn_name
-  writeOGR(shp, dsn=dir_spatial, 'rgn_offshore_gcs', driver='ESRI Shapefile')
+  writeOGR(shp, dsn=dir_spatial, 'rgn_offshore_gcs', driver='ESRI Shapefile', overwrite=T)
   
   # read shapefiles, store as list
   plys = lapply(shp_name, function(x){
