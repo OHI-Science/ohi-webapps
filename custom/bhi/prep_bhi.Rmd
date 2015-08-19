@@ -343,7 +343,7 @@ write_csv(tmp2, file.path(dir_repos, 'bhi/baltic2015/layers/rgn_georegion_labels
 
 ```
 
-## 9. proceed create_all.r - custom_maps() : 
+## 9. proceed create_all.r 
 
 ```{r proceed with create_all.r, eval=FALSE}
 
@@ -352,6 +352,8 @@ write_csv(tmp2, file.path(dir_repos, 'bhi/baltic2015/layers/rgn_georegion_labels
                 file.path(dir_repos, 'bhi'), 
                 '~/github/ohi-webapps/tmp_baltic/_bhi_current')) 
 
+
+# proceed with create_all.r
 keys_redo = 'bhi'
 key = keys_redo[1]
 
