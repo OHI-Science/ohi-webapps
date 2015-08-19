@@ -55,6 +55,11 @@ mybhi.clean2 = mybhi.clean
 # transforming from one CRS (Mercator which is in meters) to another (lat/long)
 bhi_new = spTransform(mybhi.clean, CRS('+init=epsg:4326')) # WGS84
 
+# Still one last orphan hole error further along the WebApp process:
+# Error in createPolygonsComment(p) : 
+  # rgeos_PolyCreateComment: orphaned hole, cannot find containing polygon for hole at index 64 
+# Attempted to fix with http://www.mail-archive.com/r-help@r-project.org/msg140173.html but no luck. 
+
 # uncomment to overwrite bhi and proceed with prep_bhi.rmd
 # bhi = bhi_new   
 
