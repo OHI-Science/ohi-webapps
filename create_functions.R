@@ -1311,7 +1311,7 @@ custom_maps = function(key){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
   source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
   
   # if ( JSL finish Aug 14
-  #   key = 'bhi' # necessary for creating baltic map
+  # key = 'bhi' # necessary for creating baltic map
   
   dir_data    = file.path(dir_neptune, 'git-annex/clip-n-ship')
   dir_spatial = file.path(dir_data, key, 'spatial') # baltic: dir_spatial = file.path(dir_data, 'bhi', 'spatial') 
@@ -1352,6 +1352,9 @@ custom_maps = function(key){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
     x$id = factor(as.character(x$id), rgn_names)
     return(x)
   })         # head(as.data.frame(plys.df))
+  # still erroring for bhi:
+  # Error in createPolygonsComment(p) : 
+  # rgeos_PolyCreateComment: orphaned hole, cannot find containing polygon for hole at index 64 
   
   # keep only coastal subcountry regions
   #   ids_offshore = unique(plys.df[['offshore']][['id']])
@@ -1385,7 +1388,7 @@ custom_maps = function(key){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
     # overlay region buffers as colors; see create_map above for each individual buffer (offshore, offshore3nm etc)
     p = p + geom_polygon(
       aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['offshore']],
-      data=plys.df[[1]])
+      data=a)#plys.df[[1]])
     
     # tweaks
     p = p +

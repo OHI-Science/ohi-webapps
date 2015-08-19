@@ -1,11 +1,16 @@
 # clean_spatial_bhi.r
 # J. Lowndes @jules32, August 2015
+# check for and clean any 'orphaned holes': http://gis.stackexchange.com/questions/113964/fixing-orphaned-holes-in-r
+# ------------------
 
-# check for any 'orphaned hole' error encountered in Step 9 below 
-# # http://gis.stackexchange.com/questions/113964/fixing-orphaned-holes-in-r
+# if reading in BHI region shapefiles, uncomment: 
+# dir_bhi = file.path(dir_neptune, 'git-annex/clip-n-ship/bhi/spatial/custom/raw') # change to local directory
+# bhi = readOGR(dsn = dir_bhi, layer = 'Intersect_HELCOMsubbasins_BALTIC_EEZ_Eliminate')
 
-# if running this script 
 
+# identify any issues in spatial data ----
+library(rgdal)
+library(raster)
 library(cleangeo) # devtools::install_github('eblondel/cleangeo')  # https://github.com/eblondel/cleangeo
 
 #get a report of geometry validity & issues for a spatial object
@@ -13,6 +18,8 @@ report = clgeo_CollectionReport(bhi)
 summary = clgeo_SummaryReport(report)
 issues = report[report$valid == FALSE,]
 issues
+
+# issues
 #              type valid    issue_type error_msg                                                                   warning_msg
 # 2  rgeos_validity FALSE GEOM_VALIDITY      <NA> Ring Self-intersection at or near point 4430577.6700999998 3666341.7962000002
 # 3  rgeos_validity FALSE GEOM_VALIDITY      <NA> Ring Self-intersection at or near point 4328223.1637000004 3639978.0762999998
@@ -30,31 +37,24 @@ issues
 # 41 rgeos_validity FALSE GEOM_VALIDITY      <NA>       Ring Self-intersection at or near point 4968614.6113 4806255.6562000001
 # 42 rgeos_validity FALSE GEOM_VALIDITY      <NA> Ring Self-intersection at or near point 4986423.1500936802 4806660.7997369496
 
+
 # to fix  
 mybhi = bhi
-mybhi.clean = clgeo_Clean(mybhi, print.log=T)
+mybhi.clean = clgeo_Clean(mybhi, print.log=T) # mybhi.clean_archive = mybhi.clean # save a copy
 report.clean = clgeo_CollectionReport(mybhi.clean)
 summary.clean = clgeo_SummaryReport(report.clean)
 issues = report.clean[report.clean$valid == FALSE,]
 issues
+
+# issues
 #[1] type        valid       issue_type  error_msg   warning_msg
 # <0 rows> (or 0-length row.names)
 
-bhi = mybhi.clean
-bhi@data
-
-bhi
-
-# defining coordinate reference system 
-proj4string(bhi_clean) <- CRS("+init=EPSG:3857") # EPSG:3857 Mercator--typical for Stamen Maps
+mybhi.clean2 = mybhi.clean
 
 # transforming from one CRS (Mercator which is in meters) to another (lat/long)
-newBHI = spTransform(bhi_clean, CRS('+init=epsg:4326')) # WGS84
-bhi=newBHI
-# 
+bhi_new = spTransform(mybhi.clean, CRS('+init=epsg:4326')) # WGS84
 
-writeOGR(bhi, dsn = file.path(dir_neptune,
-                              'git-annex/clip-n-ship/bhi/spatial/custom'), 
-         layer = 'baltic_shp', driver = 'ESRI Shapefile',overwrite=T)
+# uncomment to overwrite bhi and proceed with prep_bhi.rmd
+# bhi = bhi_new   
 
-# NEEDS rgn_names!!!
