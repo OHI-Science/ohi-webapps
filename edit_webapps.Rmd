@@ -1,54 +1,103 @@
+# This is edit_webapps.Rmd
+
+Note: this file (`edit_webapps.rmd`) was previously called `edit_webapps.r`.
+
+This file accompanies the `ohi-webapp` repo's `create_all.r` and `create_functions.r` to modify exisiting webapps or to create custom webapps. All the code chunks are set to `eval=F` so that they are not run when the `.rmd` file is rendered. This serves mainly as a record of modifications or processes that were done to update the webapps. Run individual lines within the chunks or add new ones as needed. 
+
+## setup
+
+```{r setup, eval=F}
+
 # set vars and get functions
 setwd('~/github/ohi-webapps')
 source('create_init.R')
 source('create_functions.R')
 
-# 2015-Jan, 2015-May: Uupdate WebApps (gh-pages) by bbest, jules32 ----
-# first, make any changes you want to the files in gh-pages; ex: ohi-webapps/gh-pages/about/index.md
-# keys = sc_studies %>% filter(!is.na(sc_annex_dir)) %>% select(sc_key)
-# keys = keys[,1]
-# sapply(keys, update_website, 'update About using ohi-webapps/create_functions.R - update_website()')
+```
+
+## Update WebApps (gh-pages)
+2015-Jan, 2015-May by bbest, jules32 
+
+1. make any changes you want to the files in `gh-pages`; ex: `ohi-webapps/gh-pages/about/index.md`
+2. run the following chunk:
+
+```{r update webapps, eval=F}
+
+keys = sc_studies %>% filter(!is.na(sc_annex_dir)) %>% select(sc_key)
+keys = keys[,1]
+sapply(keys, update_website, 'update About using ohi-webapps/create_functions.R - update_website()')
 
 # TODO: fix update_draft function to copy functions.R and update layers.csv descriptions.
 #sapply(keys, update_draft, 'update About using ohi-webapps/create_functions.R - update_draft()') 
 
-# 2015-March: Move Apps to NCEAS server ----
-# change app_url to https://ohi-science.nceas.ucsb.edu/ (from https://ohi-science.shinyapps.io) in: 
-#   1. ohi-webapps/gh-pages/_config.brew.yml
-#   2. ohi-webapps/app.brew.yml
+```
+
+## Move Apps to NCEAS server
+2015-March. One-time only
+
+1. change app_url to https://ohi-science.nceas.ucsb.edu/ (from https://ohi-science.shinyapps.io) in 2 files: 
+  - `ohi-webapps/gh-pages/_config.brew.yml`
+  - `ohi-webapps/app.brew.yml`
+2. run the following chunk:
+
+```{r move apps to NCEAS server, eval=F}
+
 keys = sc_studies %>% filter(!is.na(sc_annex_dir)) %>% select(sc_key)
 keys = keys[,1] # keys = 'blz'
-# keys = keys[1:3]
-# sapply(keys, deploy_app_nceas)
-# sapply(keys, update_website,   'move Shiny App onto NCEAS server - update_website()')
 # sapply(keys[1:3], revert_website, '2015-03-23 08:00:00') # done 2015-03-24 by bbest, jules32
 sapply(keys, deploy_app_nceas)
+
 # restart R and run above before line below
 sapply(keys, update_website,   'move Shiny App onto NCEAS server - update_website()')
 
-# fixing GYE 2015-03-25 ----
+```
+
+
+## fixing GYE 
+2015-03-25 
+
+```{r fixing GYE, eval=F}
+
 revert_website('gye', '2015-03-23 08:00:00')
 update_website('gye', 'move Shiny App onto NCEAS server - update_website()')
 deploy_app_nceas('gye', nceas_user='bbest')
 
-# created ohi-global ----
+```
+
+
+## create ohi-global
+
+```{r create ohi-global, eval=F}
+
 key = 'ohi-global'
 update_website(key, msg='update _config.yml branch_scenario, ohi-webapps/create_functions.R - update_website()')
 deploy_app_nceas(key)
 
+```
 
-# 2015-May: Updates to app branch; additions to draft branch ----
+## Updates to app branch; additions to draft branch
+2015-May
+
+```{r updates to app branch + additions to draft branch, eval=F}
+
 keys = sc_studies %>% filter(!is.na(sc_annex_dir)) %>% select(sc_key) %>% 
   filter(!sc_key %in% c('gye', 'bhi', 'chn', 'aia', 'tto', 'asm', 'civ'))
 keys = keys[,1] # keys = keys[1:10,1]
 sapply(keys, additions_draft, msg='update travis.yml + additions, ohi-webapps/create_functions.R - additions_draft()')
 sapply(keys, update_website, msg='update _config.yml branch_scenario, ohi-webapps/create_functions.R - update_website()')
+
 # `jstewart@fitz:/srv/shiny-server$ sudo service shiny-server restart` restart fitz server in terminal
+
 sapply(keys, deploy_app_nceas)
+```
 
 
-# 2015-May: Update .travis.yml with env:global:secure variable w/ encrypted string that sets GH_TOKEN ----
-# with @bbest. We want to compare current travis status to the original status in Nov2014 so that we only focus on repos that have since broken.
+## Update .travis.yml with env:global:secure variable w/ encrypted string that sets GH_TOKEN
+2015-May with @bbest. 
+
+We want to compare current travis status to the original status in Nov2014 so that we only focus on repos that have since broken.
+
+```{r update .travis.yml, eval=F}
 
 # 1. access travis status from November 2014
 keys_2014_11_28 = readr::read_csv(
@@ -75,19 +124,50 @@ sapply(keys$sc_key, status_travis_check) # this logs in 'webapp_travis_status_ch
 sapply(keys, deploy_app_nceas)
 #khm rsync error
 
-# May 22 fix CHN scenario issue: published branch still reads 'subcountry2014' not 'province2015'. merge branches.
+```
+
+## fix CHN scenario issue
+2015-May-22
+published branch still reads 'subcountry2014' not 'province2015'. Fix this; merge branches.
+
+
+```{r fix CHN scenario, eval=F}
 # additions_draft('chn')
 # deploy_app_nceas('chn')
 
-## 2015-July update_webapp_notravis() ----
+```
+
+## update_webapp_notravis() 
+2015-July
+
+For in-progress repos, 
+
+```{r update_webapp_notravis, eval=F}
+
 keys = c('chn', 'per', 'bhi', 'chl', 'esp', 'jpn', 'kor') # 'gye' also done, but with merge_pub=T
 sapply(keys, update_webapp_notravis, run_calc_scores=F, merge_pub=F)
 sapply(keys, deploy_app_nceas)
 
-## 2015-July-7 additions_draft() step 6 brew copy_webapps_templates.r for gye and chn ---
+```
+
+## additions_draft() brew copy_webapps_templates.r for gye and chn
+2015-July-7 
+
+One time only. In this case I just ran Step 6 of `create_functions.r - additions_draft()`
+
+```{r additions_draft for gye+chn, eval=F}
+
 additions_draft(key='chn', msg='ohi-webapps/create_functions.R - additions_draft()')
 
-## 2015-May-20: Create `webapp_yml_secure_recip.csv`, a list of which repos have secure/recipient problems:
+```
+
+## Create `webapp_yml_secure_recip.csv`
+2015-May-20
+
+One-time only. `webapp_yml_secure_recip.csv` is a list of which repos have secure/recipient problems
+
+```{r create webapp_yml_secure_recip.csv, eval=F}
+
 # csv_status=file.path(dir_github, 'ohi-webapps/tmp/webapp_yml_secure_recip.csv')
 # for (dir in list.dirs(dir_repos, recursive=F)){ # dir = '/Users/jstewart/github/clip-n-ship/cog'
 #  
@@ -122,3 +202,5 @@ additions_draft(key='chn', msg='ohi-webapps/create_functions.R - additions_draft
 #       write.csv(csv_status, row.names=F, na='')    
 #   }
 # }
+
+```
