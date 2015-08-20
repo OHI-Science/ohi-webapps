@@ -56,8 +56,7 @@ bhi_tmp = readOGR(dsn = file.path(dir_neptune, 'git-annex/clip-n-ship/bhi/spatia
 # # readShapePoly doesn't include a coordinate ref system (must set it) but also removes orphan holes
 bhi = readShapePoly(file.path(dir_neptune, 'git-annex/clip-n-ship/bhi/spatial/custom/raw',
                    'Intersect_HELCOMsubbasins_BALTIC_EEZ_Eliminate.shp'), 
-                  proj4string=CRS("+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +units=m +no_defs")) 
-                  # CRS set from bhi_tmp above
+                  proj4string=CRS(bhi_tmp@proj4string@projargs) # CRS set from bhi_tmp above
 bhi_orig = bhi # to archive
 
 # viewing takes a long time
@@ -362,7 +361,7 @@ write_csv(tmp2, file.path(dir_repos, 'bhi/baltic2015/layers/rgn_georegion_labels
 
 ```
 
-## 9. proceed create_all.r - custom_maps() : 
+## 9. proceed create_all.r 
 
 ```{r proceed with create_all.r, eval=FALSE}
 
@@ -371,6 +370,8 @@ write_csv(tmp2, file.path(dir_repos, 'bhi/baltic2015/layers/rgn_georegion_labels
                 file.path(dir_repos, 'bhi'), 
                 '~/github/ohi-webapps/tmp_baltic/_bhi_current')) 
 
+
+# proceed with create_all.r
 keys_redo = 'bhi'
 key = keys_redo[1]
 
