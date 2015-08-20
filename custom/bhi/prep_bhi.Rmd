@@ -30,6 +30,8 @@ source('create_functions.R')
 
 ## 1. view map and accompanying data; save with ohi data frame 
 
+NOTE: `read_OGR` didn't take care of the **orphan hole** problems in the `Intersect_HELCOMsubbasins_BALTIC_EEZ_Eliminate` shp files provided by the Baltic group. But `readShapePoly` did, providing we set the coordinate reference system (CRS), which I took directly from the output that `read_OGR` gave.
+
 ```{r view map, eval=F}
 
 # logicals for if statements below
@@ -37,10 +39,25 @@ view_shp = F
 clean_spatial = F 
 redo_shp = F 
 
-# read in shp files and save with desired headers in data frame
-bhi = readOGR(dsn = file.path(dir_neptune, 'git-annex/clip-n-ship/bhi/spatial/custom/raw'),
+
+# read in shp files and save with desired headers in data frame. readOGR includes a CRS but doesn't fix orphan holes
+bhi_tmp = readOGR(dsn = file.path(dir_neptune, 'git-annex/clip-n-ship/bhi/spatial/custom/raw'),
               layer = 'Intersect_HELCOMsubbasins_BALTIC_EEZ_Eliminate')
-# bhi_orig = bhi
+# bhi_tmp
+# class       : SpatialPolygonsDataFrame 
+# features    : 42 
+# extent      : 4210802, 5437429, 3404119, 4812329  (xmin, xmax, ymin, ymax)
+# coord. ref. : +proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +units=m +no_defs 
+# variables   : 15
+# names       : FID_HELCOM, SB_Code,                  Name, AreaKM2, HELCOM_ID,  Shape_STAr, Shape_STLe, FID_BALTIC, OBJECTID, ID,  Name_1, Shape_Leng, Shape_Le_1, Shape_Area,        Area 
+# min values  :          0,       1,             Åland Sea,    1208,   SEA-001,  1207968326,   392729.5,          0,        0,  1, Denmark,   483.7242,    0.00000,    6121.55,    98.62089 
+# max values  :         16,      17, Western Gotland Basin,   75093,   SEA-017, 75093468124, 20986555.1,          8,        4,  9,  Sweden,  7113.7737,   90.77792,  160638.70, 31239.66735 
+
+# # readShapePoly doesn't include a coordinate ref system (must set it) but also removes orphan holes
+bhi = readShapePoly(file.path(dir_neptune, 'git-annex/clip-n-ship/bhi/spatial/custom/raw',
+                   'Intersect_HELCOMsubbasins_BALTIC_EEZ_Eliminate.shp'), 
+                  proj4string=CRS(bhi_tmp@proj4string@projargs) # CRS set from bhi_tmp above
+bhi_orig = bhi # to archive
 
 # viewing takes a long time
 if (view_shp) plot(bhi)
@@ -57,7 +74,8 @@ if (redo_shp) {
                   area_km2 = Area,
                   cntry_name = Name_1,
                   basin_name = Name) %>%
-    mutate(rgn_name = paste(substr(cntry_name, 1, 3),
+    mutate(basin_name = str_replace_all(basin_name, '\xc5land Sea', 'Aland Sea'),
+           rgn_name = paste(substr(cntry_name, 1, 3), # create rgn_name as eez - basin (eg 'Est - Gulf of Riga')
                             '-',
                             basin_name), sep=' ') %>%
     dplyr::select(rgn_id, area_km2, cntry_name, basin_name, rgn_name) # since 'sep' column exists
@@ -343,7 +361,7 @@ write_csv(tmp2, file.path(dir_repos, 'bhi/baltic2015/layers/rgn_georegion_labels
 
 ```
 
-## 9. proceed create_all.r - custom_maps() : 
+## 9. proceed create_all.r 
 
 ```{r proceed with create_all.r, eval=FALSE}
 
@@ -352,6 +370,8 @@ write_csv(tmp2, file.path(dir_repos, 'bhi/baltic2015/layers/rgn_georegion_labels
                 file.path(dir_repos, 'bhi'), 
                 '~/github/ohi-webapps/tmp_baltic/_bhi_current')) 
 
+
+# proceed with create_all.r
 keys_redo = 'bhi'
 key = keys_redo[1]
 
