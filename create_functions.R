@@ -1310,9 +1310,6 @@ custom_maps = function(key){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
   key <<- key
   source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
   
-  # if ( JSL finish Aug 14
-  # key = 'bhi' # necessary for creating baltic map
-  
   dir_data    = file.path(dir_neptune, 'git-annex/clip-n-ship')
   dir_spatial = file.path(dir_data, key, 'spatial') # baltic: dir_spatial = file.path(dir_data, 'bhi', 'spatial') 
   dir_custom  = file.path(dir_spatial, 'custom')
