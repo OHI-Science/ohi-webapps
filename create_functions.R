@@ -1388,7 +1388,7 @@ custom_maps = function(key){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
     # overlay region buffers as colors; see create_map above for each individual buffer (offshore, offshore3nm etc)
     p = p + geom_polygon(
       aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['offshore']],
-      data=a)#plys.df[[1]])
+      data=plys.df[[1]])
     
     # tweaks
     p = p +
