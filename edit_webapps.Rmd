@@ -227,8 +227,7 @@ Arctic nations: USA, Canada, Russia, Norway and Denmark/Greenland
 This workflow will differ from previous approaches because the Arctic is a subset of ohi-global; regions are whole nations (as in ohi-global). This is going to be the simplest case I've done so far (I think). I might be able to just: 
 
 - create arc repo
-- copy the ohi-global repo into arc
-- filter all layers for just the proper Arctic countries
+- combine info from these repos: rus, usa, can, nor, grl (as in Step 7 of `prep_bhi.rmd`)
 - create the maps (see [github.com/OHI-Science/issues/issues/516]())
 
 For reference, previous custom approaches:
@@ -238,13 +237,13 @@ For reference, previous custom approaches:
 Rough workflow: 
 
 - Add entry for arc in `ohi-webapps/custom/sc_studies_custom/csv`
-- create repo named arc (`create_functions.r - rename_gh_repo` exists too if I need it)
+- create repo named arc (fyi `create_functions.r - rename_gh_repo` exists too if I need it)
 - make maps
-- instead of `populate_draft_branch()`, copy all contents from ohi-global repo, filter only arctic countries
+- instead of `populate_draft_branch()`, combine relevant regions from existing 5 repos for arctic countries
 - continue with `create_all.r`
 - don't add travis stuff; add it fitz's `/srv/shiny-server/_update_apps.bash`, see [github.com/OHI-Science/issues/issues/512]()
 
-```{r redo bhi repo+webapp, eval=F}
+```{r redo bhi repo and webapp, eval=F}
 
 # set vars by key
 key = 'arc'
