@@ -1,0 +1,96 @@
+# this is prep_arc.Rmd
+create arctic repo. See Issue #516: https://github.com/OHI-Science/issues/issues/516
+sins_BALTIC_EEZ_excl_small_poly* regions. 
+
+# Overview
+I've got the evals off of all of these at the moment (ie, `{r, eval=F}) so it doesn't run now when I don't want it to. 
+
+
+## 1. setup
+```{r setup, eval=F}
+
+
+library(dplyr)
+library(readr)
+library(stringr)
+library(rgdal)
+library(raster)
+
+dir_neptune = c('Windows' = '//neptune.nceas.ucsb.edu/data_edit',
+                'Darwin'  = '/Volumes/data_edit',
+                'Linux'   = '/var/data/ohi')[[ Sys.info()[['sysname']] ]]
+
+setwd('~/github/ohi-webapps')
+source('create_init.R')
+source('create_functions.R')
+
+```
+
+
+## 1. view map and accompanying data; save with ohi data frame 
+
+NOTE: see `custom/bhi/prep_bhi.rmd` for reasoning behind using `readShapePoly` instead of `read_OGR`.
+
+```{r view map, eval=F}
+
+# logicals for if statements below
+view_shp = F
+clean_spatial = F 
+redo_shp = F 
+
+
+# read in shp files and save with desired headers in data frame. 
+arc_raw = readOGR(dsn = file.path(dir_neptune, 'git-annex/clip-n-ship/arc/spatial/custom/raw'),
+              layer = 'panarctic_region')
+
+arc = spTransform(arc_raw, CRS('+init=epsg:3995'))  # epsg:3527' for arctic use, but in meters
+
+# viewing takes a long time
+if (view_shp) plot(arc)
+
+CONTINUE FROM HERE --COPIED FROM prep_bhi.rmd
+
+# check for errors in shp file: 'orphaned hole' error encountered in Step 9 below 
+# if (clean_spatial) source('~/github/ohi-webapps/custom/bhi/clean_spatial_bhi.r') # will overwrite bhi with cleaned file; be sure the last line is uncommented
+# 
+# 
+# if (redo_shp) {
+#   bhi@data # view data
+#   bhi@data = bhi@data %>%
+#     mutate(rgn_id = 1:42) %>%
+#     dplyr::select(rgn_id,
+#                   area_km2 = Area,
+#                   cntry_name = Name_1,
+#                   basin_name = Name) %>%
+#     mutate(basin_name = str_replace_all(basin_name, '\xc5land Sea', 'Aland Sea'),
+#            rgn_name = paste(substr(cntry_name, 1, 3), # create rgn_name as eez - basin (eg 'Est - Gulf of Riga')
+#                             '-',
+#                             basin_name), sep=' ') %>%
+#     dplyr::select(rgn_id, area_km2, cntry_name, basin_name, rgn_name) # since 'sep' column exists
+#   
+#   
+#   # save as shapefiles
+#   writeOGR(bhi, dsn = file.path(dir_neptune, 'git-annex/clip-n-ship/bhi/spatial/custom'), 
+#            layer = 'baltic_shp', driver = 'ESRI Shapefile', overwrite=T) # will create 4 files: .dbf, .prj, .shp, .shx
+#   
+#   
+#   # create lookup table with unique rgn_ids
+#   bhi_sc = read_csv('custom/bhi/sc_studies_custom_bhi.csv'); head(bhi_sc)
+#   
+#   baltic_rgns = bhi@data %>%
+#     left_join(bhi_sc %>%
+#                 dplyr::select(sc_key, 
+#                               cntry_name = gl_rgn_name, 
+#                               gl_rgn_key), 
+#               by='cntry_name') %>%
+#     mutate(baltic_rgn_key = tolower(gl_rgn_key)) %>%
+#     dplyr::select(-gl_rgn_key) %>%
+#     group_by(cntry_name) %>%
+#     mutate(sc_id = 1:n()); head(baltic_rgns)
+#   
+#   write_csv(baltic_rgns, 'custom/bhi/baltic_rgns_to_bhi_rgns_lookup_holas.csv')
+#   
+}
+
+```
+

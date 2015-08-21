@@ -91,6 +91,49 @@ sapply(keys, update_website, msg='update _config.yml branch_scenario, ohi-webapp
 sapply(keys, deploy_app_nceas)
 ```
 
+## Create `webapp_yml_secure_recip.csv`
+2015-May-20
+
+One-time only. `webapp_yml_secure_recip.csv` is a list of which repos have secure/recipient problems
+
+```{r create webapp_yml_secure_recip.csv, eval=F}
+
+# csv_status=file.path(dir_github, 'ohi-webapps/tmp/webapp_yml_secure_recip.csv')
+# for (dir in list.dirs(dir_repos, recursive=F)){ # dir = '/Users/jstewart/github/clip-n-ship/cog'
+#  
+#   key = str_split_fixed(dir, '/', 6)[6]
+#   key <<- key
+#   source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
+#   
+#   # switch to draft branch and get latest
+#   system('git checkout draft; git pull')
+#   
+#   yml = file.path(dir, '.travis.yml')
+#   
+#   if ( file.exists(yml) ){
+#     y = yaml.load_file(yml)
+#   
+#     # check #1: has secure var?
+#     secure = 'secure' %in% names(unlist(y$env$global))
+#     
+#     # check #2: has lowndes as a recipient # TODO: switch to ohi-science@nceas.ucsb.edu?
+#     recip = 'lowndes@nceas.ucsb.edu' %in% unlist(y$notifications$email$recipients)
+#     
+#     # add to csv_status log
+#     read.csv(csv_status, stringsAsFactors=F, na.strings='') %>%
+#       filter(sc_key != key) %>%
+#       rbind(
+#         data.frame(
+#           sc_key = key,
+#           travis_secure = secure,
+#           travis_recip  = recip,
+#           travis_status = '',
+#           date_checked  = as.character(Sys.time()))) %>%
+#       write.csv(csv_status, row.names=F, na='')    
+#   }
+# }
+
+```
 
 ## Update .travis.yml with env:global:secure variable w/ encrypted string that sets GH_TOKEN
 2015-May with @bbest. 
@@ -161,46 +204,70 @@ additions_draft(key='chn', msg='ohi-webapps/create_functions.R - additions_draft
 
 ```
 
-## Create `webapp_yml_secure_recip.csv`
-2015-May-20
+## redo bhi repo+webapp with new regions
 
-One-time only. `webapp_yml_secure_recip.csv` is a list of which repos have secure/recipient problems
+Rough workflow: 
 
-```{r create webapp_yml_secure_recip.csv, eval=F}
+- identify Baltic countries 
+- create intermediate repos for each as a normal WebApp (in hindsight this was unnecessary; could have just used existing repos but there was a reason I can't remember why I opted not to...)
+- create repo for bhi as a whole
+- populate bhi repo with information for regions-within-baltic-countries
 
-# csv_status=file.path(dir_github, 'ohi-webapps/tmp/webapp_yml_secure_recip.csv')
-# for (dir in list.dirs(dir_repos, recursive=F)){ # dir = '/Users/jstewart/github/clip-n-ship/cog'
-#  
-#   key = str_split_fixed(dir, '/', 6)[6]
-#   key <<- key
-#   source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
-#   
-#   # switch to draft branch and get latest
-#   system('git checkout draft; git pull')
-#   
-#   yml = file.path(dir, '.travis.yml')
-#   
-#   if ( file.exists(yml) ){
-#     y = yaml.load_file(yml)
-#   
-#     # check #1: has secure var?
-#     secure = 'secure' %in% names(unlist(y$env$global))
-#     
-#     # check #2: has lowndes as a recipient # TODO: switch to ohi-science@nceas.ucsb.edu?
-#     recip = 'lowndes@nceas.ucsb.edu' %in% unlist(y$notifications$email$recipients)
-#     
-#     # add to csv_status log
-#     read.csv(csv_status, stringsAsFactors=F, na.strings='') %>%
-#       filter(sc_key != key) %>%
-#       rbind(
-#         data.frame(
-#           sc_key = key,
-#           travis_secure = secure,
-#           travis_recip  = recip,
-#           travis_status = '',
-#           date_checked  = as.character(Sys.time()))) %>%
-#       write.csv(csv_status, row.names=F, na='')    
-#   }
-# }
+```{r redo bhi repo+webapp, eval=F}
+
+# see ohi-webapps/custom/bhi/prep_bhi.r
 
 ```
+
+
+## create arctic repo+webapp
+
+Arctic nations: USA, Canada, Russia, Norway and Denmark/Greenland
+
+This workflow will differ from previous approaches because the Arctic is a subset of ohi-global; regions are whole nations (as in ohi-global). This is going to be the simplest case I've done so far (I think). I might be able to just: 
+
+- create arc repo
+- copy the ohi-global repo into arc
+- filter all layers for just the proper Arctic countries
+- create the maps (see [github.com/OHI-Science/issues/issues/516]())
+
+For reference, previous custom approaches:
+- The Baltic (bhi) is a subset of ohi-global but with sub-regions identified first and created as temporary repos and regions ended up being an intersection of eez x basin
+- Gulf of Guayaquil (gye) was essentially a normal webapp creation, but with custom boundaries.
+
+Rough workflow: 
+
+- Add entry for arc in `ohi-webapps/custom/sc_studies_custom/csv`
+- create repo named arc (`create_functions.r - rename_gh_repo` exists too if I need it)
+- make maps
+- instead of `populate_draft_branch()`, copy all contents from ohi-global repo, filter only arctic countries
+- continue with `create_all.r`
+- don't add travis stuff; add it fitz's `/srv/shiny-server/_update_apps.bash`, see [github.com/OHI-Science/issues/issues/512]()
+
+```{r redo bhi repo+webapp, eval=F}
+
+# set vars by key
+key = 'arc'
+
+setwd(dir_repos)
+source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
+setwd(dir_repo)
+  
+##order of functions to run from create_all.r: 
+
+# create repo on github.com
+repo = create_gh_repo(key) 
+
+# make maps
+# ohi-webapps/custom/arc/prep_arc.rmd  # prep maps ## in progress!
+# custom_maps()
+
+# instead of `populate_draft_branch`, copy all contents from ohi-global repo, filter only arctic countries
+subset_global.r # need to create this!
+# 
+
+```
+
+
+
+
