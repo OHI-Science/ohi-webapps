@@ -22,7 +22,7 @@ create_gh_repo <- function(key, gh_token=gh_token, verbosity=1){ # gh_token=gh_t
   #cmd = sprintf('git ls-remote https://github.com/OHI-Science/%s.git', repo_name)
   cmd = sprintf('git ls-remote git@github.com:ohi-science/%s.git', repo_name)
   res = system(cmd, ignore.stderr=T, intern=T)
-  repo_exists = # ifelse(length(res)==0, T, F) # set to F for bhi-rgns?
+  repo_exists = ifelse(length(res)!=0, T, F) # JSL 2015-08 switched this to !=0 from ==0; logic didn't make sense to me. # set to F for bhi-rgns?
     if (!repo_exists){
       if (verbosity > 0){
         message(sprintf('%s: creating github repo -- %s', repo_name, format(Sys.time(), '%X')))
@@ -40,6 +40,7 @@ create_gh_repo <- function(key, gh_token=gh_token, verbosity=1){ # gh_token=gh_t
     repo_exists = repo_exists,
     cmd         = ifelse(repo_exists, cmd),
     cmd_res     = ifelse(repo_exists, cmd_res))
+  # Error in ifelse(repo_exists, cmd) : argument "no" is missing, with no default
 }
 #lapply(sc_studies$sc_key, create_gh_repo, verbosity=1)
 

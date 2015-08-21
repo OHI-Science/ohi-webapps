@@ -63,7 +63,7 @@ for (key in keys_redo){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1]
   source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
   setwd(dir_repo)
   
-  # create github repo
+  # create github repo on github.com
   # repo = create_gh_repo(key)
   
   # create maps --orignal by @bbest
