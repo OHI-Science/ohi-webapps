@@ -26,6 +26,8 @@ setwd('~/github/ohi-webapps')
 source('create_init.R')
 source('create_functions.R')
 
+arc_cntrys = c('rus', 'can', 'usa', 'nor', 'grl')
+
 ```
 
 
@@ -163,6 +165,7 @@ arc_cntrys regions to arctic regions
 
 
 ```{r, eval=F}
+
 
 #CONTINUE FROM HERE --COPIED FROM prep_bhi.rmd
 
