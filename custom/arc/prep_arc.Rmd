@@ -63,7 +63,7 @@ plot(arc_bsr)
 ```
 
 
-## Create shape file of combined 5 Arctic Countries 
+## Save shape file of combined 5 Arctic Countries 
 
 This takes awhile. Must read in each separately (there is a way to loop it without saving interum files, maybe that would be better). but then can save as one. 
 
@@ -76,6 +76,7 @@ dir_arc = file.path(dir_neptune, 'git-annex/clip-n-ship/arc/spatial/custom/inter
 arctic_extent = extent(-180, 180, 66.5628, 90)
 sp_layer = 'rgn_offshore_gcs'
 
+# read in individual shp files from existing arctic repos and save
 # usa
 sp_usa = readOGR(as.character(dir_cns['usa']), sp_layer)
 sp_usa@data = sp_usa@data %>% dplyr::select(rgn_id, rgn_name, area_km2, Shape_Leng, Shape_Area)
@@ -102,13 +103,12 @@ writeOGR(sp_rus_crop, dsn=dir_arc, layer='sp_rus_crop', driver='ESRI Shapefile',
 
 # grl
 sp_grl = readOGR(as.character(dir_cns['grl']), sp_layer)
-
 sp_grl@data = sp_grl@data %>% dplyr::select(rgn_id, rgn_name, area_km2, Shape_Leng, Shape_Area)
 sp_grl_crop = crop(sp_grl, arctic_extent)
 writeOGR(sp_grl_crop, dsn=dir_arc, layer='sp_grl_crop', driver='ESRI Shapefile', overwrite=T) 
 
- # save as shapefiles
-  
+
+# Come back here to run 
 
 # bind together
 #borrowing from gis.stackexchange.com/questions/32732/proper-way-to-rbind-spatialpolygonsdataframes-with-identical-polygon-ids
