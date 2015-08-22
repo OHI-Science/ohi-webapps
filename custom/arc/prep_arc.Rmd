@@ -15,6 +15,8 @@ library(readr)
 library(stringr)
 library(rgdal)
 library(raster)
+library(rgeos)
+library(maptools)
 
 dir_neptune = c('Windows' = '//neptune.nceas.ucsb.edu/data_edit',
                 'Darwin'  = '/Volumes/data_edit',
@@ -34,21 +36,135 @@ NOTE: see `custom/bhi/prep_bhi.rmd` for reasoning behind using `readShapePoly` i
 ```{r view map, eval=F}
 
 # logicals for if statements below
-view_shp = F
 clean_spatial = F 
 redo_shp = F 
 
 
 # read in shp files and save with desired headers in data frame. 
+
+# without bering strait
 arc_raw = readOGR(dsn = file.path(dir_neptune, 'git-annex/clip-n-ship/arc/spatial/custom/raw'),
-              layer = 'panarctic_region')
+              layer = 'pan_arctic_boundaries'); arc_raw  # also tried panarctic_region but had lat/lon
 
-arc = spTransform(arc_raw, CRS('+init=epsg:3995'))  # epsg:3527' for arctic use, but in meters
+arc = spTransform(arc_raw, CRS('+init=epsg:4326')); arc   # spatialreference.org/ref/epsg/4326/
+projection(arc)<- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 "
 
-# viewing takes a long time
-if (view_shp) plot(arc)
 
-CONTINUE FROM HERE --COPIED FROM prep_bhi.rmd
+# with bering strait
+arc_bsr_raw = readOGR(dsn = file.path(dir_neptune, 'git-annex/clip-n-ship/arc/spatial/custom/raw'),
+              layer = 'panarctic_plus_bsr_region'); arc_bsr_raw
+
+arc_bsr = spTransform(arc_bsr_raw, CRS('+init=epsg:4326')); arc_bsr   # spatialreference.org/ref/epsg/4326/
+plot(arc_bsr)
+
+
+```
+
+
+## Create shape file of combined 5 Arctic Countries 
+
+This takes awhile. Must read in each separately (there is a way to loop it without saving interum files, maybe that would be better). but then can save as one. 
+
+```{r create shape file of binded arctic countries, eval=F}
+
+# setup 
+arc_cntrys = c('usa', 'can', 'nor', 'rus', 'grl')
+dir_cns = file.path(sprintf('%s/git-annex/clip-n-ship/%s/spatial', dir_neptune, arc_cntrys)) %>% setNames(arc_cntrys)
+dir_arc = file.path(dir_neptune, 'git-annex/clip-n-ship/arc/spatial/custom/intermediate')
+arctic_extent = extent(-180, 180, 66.5628, 90)
+sp_layer = 'rgn_offshore_gcs'
+
+# usa
+sp_usa = readOGR(as.character(dir_cns['usa']), sp_layer)
+sp_usa@data = sp_usa@data %>% dplyr::select(rgn_id, rgn_name, area_km2, Shape_Leng, Shape_Area)
+sp_usa_crop = crop(sp_usa, arctic_extent)
+writeOGR(sp_usa_crop, dsn=dir_arc, layer='sp_usa_crop', driver='ESRI Shapefile', overwrite=T) 
+
+# can
+sp_can = readOGR(as.character(dir_cns['can']), sp_layer)
+sp_can@data = sp_can@data %>% dplyr::select(rgn_id, rgn_name, area_km2, Shape_Leng, Shape_Area)
+sp_can_crop = crop(sp_can, arctic_extent)
+writeOGR(sp_can_crop, dsn=dir_arc, layer='sp_can_crop', driver='ESRI Shapefile', overwrite=T) 
+
+# nor
+sp_nor = readOGR(as.character(dir_cns['nor']), sp_layer)
+sp_nor@data = sp_nor@data %>% dplyr::select(rgn_id, rgn_name, area_km2, Shape_Leng, Shape_Area)
+sp_nor_crop = crop(sp_nor, arctic_extent)
+writeOGR(sp_nor_crop, dsn=dir_arc, layer='sp_nor_crop', driver='ESRI Shapefile', overwrite=T) 
+
+# rus
+sp_rus = readOGR(as.character(dir_cns['rus']), sp_layer)
+sp_rus@data = sp_rus@data %>% dplyr::select(rgn_id, rgn_name, area_km2, Shape_Leng, Shape_Area)
+sp_rus_crop = crop(sp_rus, arctic_extent)
+writeOGR(sp_rus_crop, dsn=dir_arc, layer='sp_rus_crop', driver='ESRI Shapefile', overwrite=T) 
+
+# grl
+sp_grl = readOGR(as.character(dir_cns['grl']), sp_layer)
+
+sp_grl@data = sp_grl@data %>% dplyr::select(rgn_id, rgn_name, area_km2, Shape_Leng, Shape_Area)
+sp_grl_crop = crop(sp_grl, arctic_extent)
+writeOGR(sp_grl_crop, dsn=dir_arc, layer='sp_grl_crop', driver='ESRI Shapefile', overwrite=T) 
+
+ # save as shapefiles
+  
+
+# bind together
+#borrowing from gis.stackexchange.com/questions/32732/proper-way-to-rbind-spatialpolygonsdataframes-with-identical-polygon-ids
+
+datanames = c('sp_usa_crop', 'sp_can_crop', 'sp_nor_crop', 'sp_rus_crop', 'sp_grl_crop')
+data(list = datanames)
+lst = lapply(datanames,get)
+
+# example: to get all ID's (since there will be repeats otherwise)
+sapply(slot(sp_usa_crop, "polygons"), function(x) slot(x, "ID"))
+
+
+#To make them uniform we can write a function using the spChFIDs function from sp:
+makeUniform<-function(SPDF){
+  pref<-substitute(SPDF)  #just putting the file name in front.
+  newSPDF<-spChFIDs(SPDF,as.character(paste(pref,rownames(as(SPDF,"data.frame")),sep="_")))
+  return(newSPDF)
+}
+
+#now to do this for all our country files
+newIDs<-lapply(lst,function(x) makeUniform(x))
+
+#back to your code...
+arctic <- do.call( rbind, newIDs )
+
+
+# 
+# # just testing
+# sp_usa_crop@data = sp_usa_crop@data %>% dplyr::select(rgn_id, rgn_name, area_km2, Shape_Leng, Shape_Area)
+# sp_nor_crop@data = sp_nor_crop@data %>% dplyr::select(rgn_id, rgn_name, area_km2, Shape_Leng, Shape_Area)
+# 
+# sp_arc = spRbind(sp_usa_crop, sp_nor_crop, sp_can_crop)
+# sp_arc@data = sp_arc@data %>% mutate(arc_id = 1:6)
+# sp_can_crop@data %>% mutate(arc_id = 1:3)
+# sp_arc = spRbind(sp_arc, sp_can_crop)
+
+
+```
+
+
+## 
+
+
+
+## Create Arctic Lookup Table
+arc_cntrys regions to arctic regions
+
+```{r create lookup, eval=F}
+
+# create lookup table similar to baltic_rgns_to_bhi_rgns_lookup.csv
+
+```
+
+
+
+```{r, eval=F}
+
+#CONTINUE FROM HERE --COPIED FROM prep_bhi.rmd
 
 # check for errors in shp file: 'orphaned hole' error encountered in Step 9 below 
 # if (clean_spatial) source('~/github/ohi-webapps/custom/bhi/clean_spatial_bhi.r') # will overwrite bhi with cleaned file; be sure the last line is uncommented
@@ -93,4 +209,3 @@ CONTINUE FROM HERE --COPIED FROM prep_bhi.rmd
 }
 
 ```
-
