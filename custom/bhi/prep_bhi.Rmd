@@ -370,8 +370,8 @@ important because it will be overwritten in its current location
 
 # copy whole bhi directory to a tmp location because it will be overwritten
 # cp command: `cp -r from to`. the -r means 'including subdirectories'. The `/.` means contents only, not folder itself
- system(sprintf("cp -r %s %s",
-                file.path(dir_repos, 'bhi'), dir_tmp_baltic)) 
+
+system(sprintf("cp -r %s/. %s", file.path(dir_repos, 'bhi'), dir_tmp_baltic)) 
 ```
 
 ## 10. run custom_maps()
