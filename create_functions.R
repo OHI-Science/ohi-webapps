@@ -23,16 +23,16 @@ create_gh_repo <- function(key, gh_token=gh_token, verbosity=1){ # gh_token=gh_t
   cmd = sprintf('git ls-remote git@github.com:ohi-science/%s.git', repo_name)
   res = system(cmd, ignore.stderr=T, intern=T)
   repo_exists = ifelse(length(res)!=0, T, F) # JSL 2015-08 switched this to !=0 from ==0; logic didn't make sense to me. # set to F for bhi-rgns?
-    if (!repo_exists){
-      if (verbosity > 0){
-        message(sprintf('%s: creating github repo -- %s', repo_name, format(Sys.time(), '%X')))
-      }
-      # create using Github API: https://developer.github.com/v3/repos/#create
-      cmd = sprintf('curl --silent -u "jules32:%s" https://api.github.com/orgs/ohi-science/repos -d \'{"name":"%s"}\'', gh_token, repo_name)
-      cmd_res = paste(capture.output(fromJSON(system(cmd, intern=T))), collapse='\n')
-    } else{
-      cmd_res = NA
+  if (!repo_exists){
+    if (verbosity > 0){
+      message(sprintf('%s: creating github repo -- %s', repo_name, format(Sys.time(), '%X')))
     }
+    # create using Github API: https://developer.github.com/v3/repos/#create
+    cmd = sprintf('curl --silent -u "jules32:%s" https://api.github.com/orgs/ohi-science/repos -d \'{"name":"%s"}\'', gh_token, repo_name)
+    cmd_res = paste(capture.output(fromJSON(system(cmd, intern=T))), collapse='\n')
+  } else{
+    cmd_res = NA
+  }
   
   # return data.frame
   data.frame(
@@ -349,12 +349,12 @@ populate_draft_branch <- function(){
     }
   }
   for (f in c(f_js, f_geojson)){ # f = f_spatial[1]
-    file.copy(f, sprintf('spatial/%s', basename(f)), overwrite=T)
-    # file.copy(f, sprintf('baltic2015/spatial/%s', basename(f)), overwrite=T) # BHI hack
+    if (key != 'bhi')  file.copy(f, sprintf('spatial/%s', basename(f)), overwrite=T) # original
+    if (key == 'bhi') file.copy(f, sprintf('baltic2015/spatial/%s', basename(f)), overwrite=T) # BHI hack
   }
   
   
-  if (key != 'bhi') { ## hack: BHI stop here
+  if (key != 'bhi') { ## hack: BHI stop here; loop ends ~line 633
     # modify layers
     lyrs_sc = lyrs_gl %>%
       select(
@@ -629,7 +629,9 @@ populate_draft_branch <- function(){
     # update layers.csv with empty layers now populated by global averages
     CheckLayers('layers.csv', 'layers',
                 flds_id=c('rgn_id','country_id','saup_id','fao_id','fao_saup_id'))
-  } # end (key != 'bhi')
+    
+  } # end (key != 'bhi')  line ~357
+  
   
   # copy configuration files
   conf_files = c('config.R','functions.R','goals.csv','pressures_matrix.csv','resilience_matrix.csv','resilience_weights.csv')
@@ -654,13 +656,12 @@ populate_draft_branch <- function(){
       p_zoom = 12 - as.integer(cut(max(transmute(p_bb, range = max - min)), c(0, 0.25, 0.5, 1, 2.5, 5, 10, 20, 40, 80, 160, 320, 360)))
       
       # set map center and zoom level
-      s = gsub(
-        'map_lat=0; map_lon=0; map_zoom=3',
-        sprintf('map_lat=%g; map_lon=%g; map_zoom=%d', p_ctr['y'], p_ctr['x'], p_zoom),
-        s)
+      s = s %>%
+        str_replace("map_lat.*", sprintf('map_lat=%g; map_lon=%g; map_zoom=%d', p_ctr['y'], p_ctr['x'], p_zoom)) # updated JSL to overwrite any map info
+    
       # use just rgn_labels (not rgn_global)
       s = gsub('rgn_global', 'rgn_labels', s)
-    }
+    } 
     
     # swap out custom functions
     if (f=='functions.R'){
@@ -686,13 +687,14 @@ populate_draft_branch <- function(){
     }
     
     # substitute old layer names with new
-    lyrs_dif = lyrs_sc %>% filter(layer!=layer_gl)
+    lyrs_dif = lyrs_sc %>% filter(!layer %in% layer_gl) # changed from layer != layer_gl JSL 08-24-2015
     for (i in 1:nrow(lyrs_dif)){ # i=1
       s = str_replace_all(s, fixed(lyrs_dif$layer_gl[i]), lyrs_dif$layer[i])
     }
     
     writeLines(s, f_out)
-  }
+  
+  } # end for (f in conf_files)
   
   # swap fields in goals.csv
   goals = read.csv('conf/goals.csv', stringsAsFactors=F)
@@ -1692,52 +1694,52 @@ additions_draft <- function(key, msg='ohi-webapps/create_functions.R - additions
   # switch to draft branch and get latest
   system('git checkout draft; git pull')
   
-#   ## 1. update .travis.yml file a la github.com/OHI-Science/issues/issues/427
-#   readLines('.travis.yml') %>%
-#     str_replace_all('- default_branch_scenario=', '- default_branch_scenario: ') %>%
-#     str_replace_all('- study_area=',              '- study_area: ') %>%
-#     str_replace_all('- secure=',                  '- secure: ') %>%
-#     writeLines('.travis.yml')
-#   
-#   ## 2. update setwd() in assessment/scenario/calculate_scores.r
-#   readLines(file.path(default_scenario, 'calculate_scores.r')) %>%
-#     str_replace("setwd.*", paste0("setwd('", file.path(dir_github, key, default_scenario), "')")) %>%
-#     writeLines(file.path(default_scenario, 'calculate_scores.r'))
-#   
-#   ## 3. update launch_app() call in assessment/scenario/launch_app_code.r
-#   readLines(file.path(default_scenario, 'launch_app_code.r')) %>%
-#     str_replace(".*launch_app.*", paste0("ohicore::launch_app('", file.path(dir_github, key, default_scenario), "')")) %>%
-#     writeLines(file.path(default_scenario, 'launch_app_code.r'))
-#   
-#   ## 4. save ohi-webapps/install_ohicore.r
-#   fn = 'install_ohicore.r'
-#   file.copy(file.path('~/github/ohi-webapps', fn), 
-#             file.path(dir_repo, default_scenario, fn), overwrite=T)
-#   
-#   ## 5a. create and populate prep folder if it doesn't exist
-#   if ( !'prep' %in% list.dirs(default_scenario, full.names=F) ) {
-#     prep_subfolders = c('FIS', 'MAR', 'AO', 'NP', 'CS', 'CP', 'LIV', 'ECO', 'TR', 'CW', 'ICO', 'LSP', 'SPP', 'HAB', 
-#                         'pressures', 'resilience')
-#     # prep folder and README.md
-#     dir.create(file.path(dir_repo, default_scenario, 'prep'))
-#     file.copy(file.path(dir_github, 'ohi-webapps/tmp/README_template_prep.md'), 
-#               file.path(default_scenario, 'prep', 'README.md'), overwrite=T)
-#     # goal folders and README.md's
-#     sapply(file.path(dir_repo, default_scenario, sprintf('prep/%s', prep_subfolders)), dir.create)
-#     file.copy(file.path(dir_github, 'ohi-webapps/tmp/README_template_goal.md'), 
-#               file.path(default_scenario, sprintf('prep/%s', prep_subfolders), 'README.md'), overwrite=T)
-#     
-#     ## 5b. create and populate prep/tutorials folder 
-#     dir_tutes = file.path(dir_github, 'ohimanual/tutorials/R_tutes')
-#     
-#     dir.create(file.path(dir_repo, default_scenario, 'prep/tutorials'))
-#     file.copy(file.path(dir_tutes, 'R_tutes_all.md'), 
-#               file.path(default_scenario, 'prep/tutorials', 'R_intro.md'), overwrite=T)
-#     readLines(file.path(dir_tutes, 'R_tutes.r')) %>%
-#       str_replace("setwd.*", 
-#                   paste0("setwd('", file.path(dir_github, key, default_scenario, 'prep/tutorials'), "')")) %>%
-#       writeLines(file.path(default_scenario, 'prep/tutorials', 'R_tutorial.r'))    
-#   }
+  #   ## 1. update .travis.yml file a la github.com/OHI-Science/issues/issues/427
+  #   readLines('.travis.yml') %>%
+  #     str_replace_all('- default_branch_scenario=', '- default_branch_scenario: ') %>%
+  #     str_replace_all('- study_area=',              '- study_area: ') %>%
+  #     str_replace_all('- secure=',                  '- secure: ') %>%
+  #     writeLines('.travis.yml')
+  #   
+  #   ## 2. update setwd() in assessment/scenario/calculate_scores.r
+  #   readLines(file.path(default_scenario, 'calculate_scores.r')) %>%
+  #     str_replace("setwd.*", paste0("setwd('", file.path(dir_github, key, default_scenario), "')")) %>%
+  #     writeLines(file.path(default_scenario, 'calculate_scores.r'))
+  #   
+  #   ## 3. update launch_app() call in assessment/scenario/launch_app_code.r
+  #   readLines(file.path(default_scenario, 'launch_app_code.r')) %>%
+  #     str_replace(".*launch_app.*", paste0("ohicore::launch_app('", file.path(dir_github, key, default_scenario), "')")) %>%
+  #     writeLines(file.path(default_scenario, 'launch_app_code.r'))
+  #   
+  #   ## 4. save ohi-webapps/install_ohicore.r
+  #   fn = 'install_ohicore.r'
+  #   file.copy(file.path('~/github/ohi-webapps', fn), 
+  #             file.path(dir_repo, default_scenario, fn), overwrite=T)
+  #   
+  #   ## 5a. create and populate prep folder if it doesn't exist
+  #   if ( !'prep' %in% list.dirs(default_scenario, full.names=F) ) {
+  #     prep_subfolders = c('FIS', 'MAR', 'AO', 'NP', 'CS', 'CP', 'LIV', 'ECO', 'TR', 'CW', 'ICO', 'LSP', 'SPP', 'HAB', 
+  #                         'pressures', 'resilience')
+  #     # prep folder and README.md
+  #     dir.create(file.path(dir_repo, default_scenario, 'prep'))
+  #     file.copy(file.path(dir_github, 'ohi-webapps/tmp/README_template_prep.md'), 
+  #               file.path(default_scenario, 'prep', 'README.md'), overwrite=T)
+  #     # goal folders and README.md's
+  #     sapply(file.path(dir_repo, default_scenario, sprintf('prep/%s', prep_subfolders)), dir.create)
+  #     file.copy(file.path(dir_github, 'ohi-webapps/tmp/README_template_goal.md'), 
+  #               file.path(default_scenario, sprintf('prep/%s', prep_subfolders), 'README.md'), overwrite=T)
+  #     
+  #     ## 5b. create and populate prep/tutorials folder 
+  #     dir_tutes = file.path(dir_github, 'ohimanual/tutorials/R_tutes')
+  #     
+  #     dir.create(file.path(dir_repo, default_scenario, 'prep/tutorials'))
+  #     file.copy(file.path(dir_tutes, 'R_tutes_all.md'), 
+  #               file.path(default_scenario, 'prep/tutorials', 'R_intro.md'), overwrite=T)
+  #     readLines(file.path(dir_tutes, 'R_tutes.r')) %>%
+  #       str_replace("setwd.*", 
+  #                   paste0("setwd('", file.path(dir_github, key, default_scenario, 'prep/tutorials'), "')")) %>%
+  #       writeLines(file.path(default_scenario, 'prep/tutorials', 'R_tutorial.r'))    
+  #   }
   
   # 6. brew copy_webapps_templates.r a la github.com/OHI-Science/issues/issues/506
   brew(sprintf('%s/ohi-webapps/copy_webapps_templates.brew.r', dir_github), 'copy_webapps_templates.r')
@@ -1876,20 +1878,20 @@ travis_passing_compare = function(
   
   # 1. access travis status from November 2014
   keys_2014_11_28 = readr::read_csv(status_orig_csv, col_types = 'cc_') # don't need to read in date column, see github.com/hadley/readr
-
+  
   # 2. check and save the current travis status (don't use status_travis() because that will enable travis, we just want to check)
   keys_2015_05_21 = read.csv(status_now_csv)
-
+  
   # 3. identify which keys are now not passing that were in Nov2014
   keys_now_not_passing = keys_2014_11_28 %>%
-  select(sc_key, status_orig = travis_status) %>%
-  full_join(keys_2015_05_21 %>%
-              select(sc_key, status_now = travis_status) %>%
-              mutate(sc_key = as.character(sc_key), 
-                     status_now = as.character(status_now)), 
-            by= 'sc_key') %>%
-  filter(status_orig == 'passed' & status_now != 'passed') 
-
+    select(sc_key, status_orig = travis_status) %>%
+    full_join(keys_2015_05_21 %>%
+                select(sc_key, status_now = travis_status) %>%
+                mutate(sc_key = as.character(sc_key), 
+                       status_now = as.character(status_now)), 
+              by= 'sc_key') %>%
+    filter(status_orig == 'passed' & status_now != 'passed') 
+  
   return(keys_now_not_passing)
 }
 
@@ -1943,10 +1945,10 @@ update_webapp_notravis = function(key, run_calc_scores=T, merge_pub=F) {
   
   # calculate scores (ohi-functions.R - calculate_scores_notravis() modified by JSL)
   if (run_calc_scores) {
-  cat('  running ohi-functions.r - calculate_scores_notravis() \n')
-   calculate_scores_notravis()     
+    cat('  running ohi-functions.r - calculate_scores_notravis() \n')
+    calculate_scores_notravis()     
   }
-    
+  
   # update results (ohi-functions.R - update_results() not modified by JSL but renamed from create_results())
   update_results()      
   

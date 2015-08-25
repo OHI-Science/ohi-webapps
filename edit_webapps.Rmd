@@ -215,7 +215,7 @@ Rough workflow:
 
 ```{r redo bhi repo+webapp, eval=F}
 
-# see ohi-webapps/custom/bhi/prep_bhi.r
+# see ohi-webapps/custom/bhi/prep_bhi.rmd
 
 ```
 

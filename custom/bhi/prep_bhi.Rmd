@@ -20,6 +20,7 @@ library(raster)
 dir_neptune = c('Windows' = '//neptune.nceas.ucsb.edu/data_edit',
                 'Darwin'  = '/Volumes/data_edit',
                 'Linux'   = '/var/data/ohi')[[ Sys.info()[['sysname']] ]]
+dir_tmp_baltic = '~/github/ohi-webapps/tmp_baltic/_bhi_current'
 
 setwd('~/github/ohi-webapps')
 source('create_init.R')
@@ -368,18 +369,18 @@ important because it will be overwritten in its current location
 ```{r copy bhi dir, eval=FALSE}
 
 # copy whole bhi directory to a tmp location because it will be overwritten
- system(sprintf("cp -r %s %s", # the -r means 'including subdirectories'. so `cp -r from to` 
-                file.path(dir_repos, 'bhi'), 
-                '~/github/ohi-webapps/tmp_baltic/_bhi_current')) 
+# cp command: `cp -r from to`. the -r means 'including subdirectories'. The `/.` means contents only, not folder itself
+ system(sprintf("cp -r %s %s",
+                file.path(dir_repos, 'bhi'), dir_tmp_baltic)) 
 ```
 
-## 10. proceed create_all.r 
+## 10. run custom_maps()
+
+proceed with create_all.r: 
 
 - `custom_maps()`
-- `populate_draft_branch()`
-- push draft branch
 
-```{r proceed with create_all.r, eval=FALSE}
+```{r run custom_maps, eval=FALSE}
 
 keys_redo = 'bhi'
 key = keys_redo[1]
@@ -391,8 +392,156 @@ setwd(dir_repo)
 # fun custom_maps
 custom_maps(key) # if orphaned hole, read in original shp file with readShapePoly and run cleangeo rather than readOGR
 
+```
 
-# run populate_draft branch()
+## 11. populate_draft_branch() delete repo
+
+Only run the first part of populate_draft_branch()
+
+- `populate_draft_branch()`
+
+```{r populate_draft_branch delete repo, eval=FALSE}
+
+# setup ----
+keys_redo = 'bhi'
+key = keys_redo[1]
+
+setwd(dir_repos)
+source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
+setwd(dir_repo)
+
+
+## first chunk of `populate_draft_branch(): clone and delete existing repo; ~L270 ----
+wd = getwd()
+library(rgdal)
+
+# clone repo
+setwd(dir_repos)
+unlink(dir_repo, recursive=T, force=T)
+repo = clone(git_url, normalizePath(dir_repo, mustWork=F))
+setwd(dir_repo)
+
+# get remote branches
+remote_branches = sapply(branches(repo, 'remote'), function(x) str_split(x@name, '/')[[1]][2])
+
+# initialize
+if (length(remote_branches)==0){
+  system('touch README.md')
+  system('git add -A; git commit -m "first commit"')
+  try(system('git remote rm origin')) # added by JSL Mar 13 2015; http://stackoverflow.com/questions/1221840/remote-origin-already-exists-on-git-push-to-new-repository
+  system(sprintf('git remote add origin https://github.com/OHI-Science/%s.git', key))
+  system('git push -u origin master')
+  system('git pull')
+  remote_branches = sapply(branches(repo, 'remote'), function(x) str_split(x@name, '/')[[1]][2])
+}
+
+# rename if draft & published don't already exist
+if (length(setdiff(c('draft','published'), remote_branches)) > 0 & length(remote_branches) > 0){
+  rename_branches(key)
+  remote_branches = sapply(branches(repo, 'remote'), function(x) str_split(x@name, '/')[[1]][2])
+}
+
+# ensure on draft branch ----
+checkout(repo, 'draft')
+
+# recreate empty dir, except hidden .git
+del_except = ''
+for (f in setdiff(list.files(dir_repo, all.files=F), del_except)) unlink(file.path(dir_repo, f), recursive=T, force=T)
+
+```
+
+## 12. paste `bhi` info from steps into bhi repo 
+
+copy existing bhi from Chunks 6-9 into this repo
+
+```{r paste created bhi info into bhi repo, eval=F}
+
+
+# cp command: `cp -r from to`. the -r means 'including subdirectories'. The `/.` means contents only, not folder itself
+ system(sprintf("cp -r %s/. %s", 
+                dir_tmp_baltic, file.path(dir_repos, 'bhi'))) 
+
+```
+
+## 13. populate_draft_branch spatial
+
+overwrite existing json and geojson files with new maps from populate_draft_branch()
+
+```{r populate_draft_branch spatial, eval=F}
+
+# from populate_draft_branch, ~L333
+
+ # spatial
+ f_js_old      = file.path(dir_annex_sc, 'regions_gcs.js')
+ f_geojson_old = file.path(dir_annex_sc, 'regions_gcs.geojson')
+ f_js          = file.path(dir_annex_sc, 'spatial', 'regions_gcs.js')
+ f_geojson     = file.path(dir_annex_sc, 'spatial', 'regions_gcs.geojson')
+ if (file.exists(f_js_old)) file.rename(f_js_old, f_js)
+ if (file.exists(f_geojson_old)) file.rename(f_geojson_old, f_geojson)
+ txt_shp_error = sprintf('%s/%s_shp_to_geojson.txt', dir_errors, key)
+ unlink(txt_shp_error)
+ if (!file.exists(f_js)){                                              
+   f_shp = file.path(dir_annex, key, 'spatial', 'rgn_offshore_gcs.shp')
+   cat(sprintf('  shp_to_geojson -- %s\n', format(Sys.time(), '%X')))
+   v = try(shp_to_geojson(f_shp, f_js, f_geojson))
+   if (class(v)=='try-error'){
+     cat(as.character(traceback(v)), file=txt_shp_error)
+     next
+   }
+ }
+ for (f in c(f_js, f_geojson)){ # f = f_spatial[1]
+   if (key != 'bhi')  file.copy(f, sprintf('spatial/%s', basename(f)), overwrite=T) # original
+   if (key == 'bhi') file.copy(f, sprintf('baltic2015/spatial/%s', basename(f)), overwrite=T) # BHI hack
+ }
+ 
+```
+
+## 13. populate_draft_branch config.r
+
+Overwrite line in config.r that sets map's zoom center 
+
+```{r populate_draft_branch config.r, eval=F}
+
+ 
+#  f_in  = sprintf('%s/conf/%s', dir_global, f)
+#  f_out = sprintf('conf/%s', f)
+    
+ f_in  = file.path(dir_repos, 'bhi', 'baltic2015/conf/config.r')
+ f_out = f_in #file.path(dir_repo,  'bhi', 'baltic2015/conf/config.r'
+ 
+ # from populate_draft_branch ~ L647
+ s = readLines(f_in, warn=F, encoding='UTF-8') 
+ 
+ # get map centroid and zoom level
+ # TODO: http://gis.stackexchange.com/questions/76113/dynamically-set-zoom-level-based-on-a-bounding-box
+ # var regions_group = new L.featureGroup(regions); map.fitBounds(regions_group.getBounds());
+ p_shp  = file.path(dir_annex_sc, 'spatial', 'rgn_offshore_gcs.shp')
+ p      = readOGR(dirname(p_shp), tools::file_path_sans_ext(basename(p_shp)))
+ p_bb   = data.frame(p@bbox) # max of 2.25
+ p_ctr  = rowMeans(p_bb)
+ p_zoom = 12 - as.integer(cut(max(transmute(p_bb, range = max - min)), c(0, 0.25, 0.5, 1, 2.5, 5, 10, 20, 40, 80, 160, 320, 360)))
+ 
+ # set map center and zoom level
+ 
+  s = s %>%
+      str_replace("map_lat.*", sprintf('map_lat=%g; map_lon=%g; map_zoom=%d', p_ctr['y'], p_ctr['x'], p_zoom))
+      
+ # use just rgn_labels (not rgn_global)
+ s = gsub('rgn_global', 'rgn_labels', s)
+ 
+ writeLines(s, f_out)
+ 
+ 
+```
+
+## 13. Overwrite certain files
+
+Overwrite: 
+ 
+- .travis.yml
+
+```{r, eval=F}
+# overwrite .travis.yml
 
 
 # push

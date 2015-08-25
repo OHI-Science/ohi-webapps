@@ -93,7 +93,7 @@ for (key in keys_redo){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1]
 
   # push draft branch
   setwd(dir_repo)
-  push_branch('draft')
+  push_branch('draft') # source('ohi-travis-functions.r')
   system('git pull')
   
   # calculate_scores
