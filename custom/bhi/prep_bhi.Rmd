@@ -10,21 +10,32 @@ Not all steps were necessary to run this time around. Steps below that were run:
 ## 1. setup
 ```{r setup, eval=F}
 
-
+# libraries
 library(dplyr)
 library(readr)
 library(stringr)
 library(rgdal)
 library(raster)
 
+# directories
 dir_neptune = c('Windows' = '//neptune.nceas.ucsb.edu/data_edit',
                 'Darwin'  = '/Volumes/data_edit',
                 'Linux'   = '/var/data/ohi')[[ Sys.info()[['sysname']] ]]
-dir_tmp_baltic = '~/github/ohi-webapps/tmp_baltic/_bhi_current'
+dir_custom_bhi = '~/github/ohi-webapps/custom/bhi'
+dir_tmp_baltic = file.path(dir_custom_bhi, 'tmp_bhi_contents')
 
+# setwd
 setwd('~/github/ohi-webapps')
-source('create_init.R')
-source('create_functions.R')
+
+# variables 
+bhi_sc = read_csv('custom/bhi/sc_studies_custom_bhi.csv'); head(bhi_sc)
+ind_bhi = str_detect(bhi_sc$sc_key, 'bhi-')
+bhi_rgn = bhi_sc$sc_key[ind_bhi]; bhi_rgn
+# "bhi-swe" "bhi-fin" "bhi-dnk" "bhi-deu" "bhi-est" "bhi-pol" "bhi-lva" "bhi-ltu" "bhi-rus"
+
+# read in lookup table --if doesn't exist must run Chunk 1: view map
+lkp_baltic = read_csv(file.path(dir_custom_bhi, 'baltic_rgns_to_bhi_rgns_lookup_holas.csv')); lkp_baltic
+
 
 ```
 
@@ -88,8 +99,6 @@ if (redo_shp) {
   
   
   # create lookup table with unique rgn_ids
-  bhi_sc = read_csv('custom/bhi/sc_studies_custom_bhi.csv'); head(bhi_sc)
-  
   baltic_rgns = bhi@data %>%
     left_join(bhi_sc %>%
                 dplyr::select(sc_key, 
@@ -117,12 +126,8 @@ Note: this had already been done previously with `prep_bhi.r`
 
 redo_dirs = F
 
-if(redo_dirs) {
-  ind_bhi = str_detect(bhi_sc$sc_key, 'bhi-')
-  bhi_rgn = bhi_sc$sc_key[ind_bhi] # bhi_rgn = c("bhi-swe", "bhi-fin", "bhi-dnk", "bhi-deu", "bhi-est", "bhi-pol", "bhi-rus", "bhi-lva", "bhi-ltu")
-  
-  sapply(sprintf('~/github/clip-n-ship/%s', bhi_rgn), dir.create)
-  }
+if(redo_dirs) sapply(sprintf('~/github/clip-n-ship/%s', bhi_rgn), dir.create)
+
 ```
 
 ## 4. create directories in git-annex/clip-n-ship and copy required files for populate_draft_branch()
@@ -196,22 +201,30 @@ if (redo_bhirepo) {
 ```
 
 ## 7. bhi layers: bind possible layers for each bhi-xxx
+
 Rerun August 2015 with new HOLAS BHI regions. 
 
-```{r bind bhi layers, eval=F}
+```{r bhi layers: bind from bhi-xxx repos, eval=F}
 
-setwd('~/github/ohi-webapps')
+# clone existing bhi repo
+key = 'bhi'
+setwd(dir_repos)
+source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
 
-# read in lookup table
-lkp_baltic = read_csv('~/github/ohi-webapps/custom/bhi/baltic_rgns_to_bhi_rgns_lookup_holas.csv'); lkp_baltic
+setwd(dir_repos)
+unlink(dir_repo, recursive=T, force=T)
+repo = clone(git_url, normalizePath(dir_repo, mustWork=F))
 
-# list all layers in b
-# cannot handle lsp layers; removed them from the layers folder and dealt with them separately in step 8 below
-tounlink = c('lsp_prot_area_inland1km_gl2014.csv',
+# unlink problem layers: 
+tounlink = c('lsp_prot_area_inland1km_gl2014.csv',         # lsp layers dealt with separately in step 8 below
              'lsp_prot_area_offshore3nm_gl2014.csv',
-             'lsp_prot_area_inland1km_placeholder.csv', # and when rerunning now, must first delete the placeholders
-             'lsp_prot_area_offshore3nm_placeholder.csv')
+             'lsp_prot_area_inland1km_placeholder.csv',    # delete the placeholders to rerun
+             'lsp_prot_area_offshore3nm_placeholder.csv',
+             'cw_nu_status.csv',                           # delete BHI test layers
+             'cw_nu_trend.csv')
 for (f in tounlink) unlink(file.path(dir_repos, 'bhi/baltic2015/layers', f), recursive=T, force=T)
+
+# list all layers to copy to bhi repo
 lyrs_list = list.files(file.path(dir_repos, 'bhi/baltic2015/layers'), glob2rx('*.csv'), full.names=T) 
 
 
@@ -236,7 +249,7 @@ for (f in lyrs_list){ # f = "~/github/clip-n-ship/bhi/baltic2015/layers/ao_acces
     for (b in bhi_rgn) { # b = 'bhi-deu'  # could rename this as key (confusing?)
       
       key = b
-      source('create_init_sc.r')
+      source('~/github/ohi-webapps/create_init_sc.r')
       default_scenario = 'region2015'
       
       # read in b's layer
@@ -276,70 +289,63 @@ for (f in lyrs_list){ # f = "~/github/clip-n-ship/bhi/baltic2015/layers/ao_acces
       # "/Users/jstewart/github/clip-n-ship/bhi/baltic2015/layers/fis_meancatch_gl2014.csv"
       # "/Users/jstewart/github/clip-n-ship/bhi/baltic2015/layers/mar_harvest_species_gl2014.csv"
       }
-  }
-# These errors with MAR: I had to also move them temporarily out of the folder, although they seemed to have processed
-# In addition: Warning messages:
-# 1: 15 problems parsing '~/github/clip-n-ship/bhi-pol/region2015/layers/mar_harvest_tonnes_gl2014.csv'. See problems(...) for more details. 
-# 2: 10 problems parsing '~/github/clip-n-ship/bhi-lva/region2015/layers/mar_harvest_tonnes_gl2014.csv'. See problems(...) for more details. 
-# 3: 5 problems parsing '~/github/clip-n-ship/bhi-ltu/region2015/layers/mar_harvest_tonnes_gl2014.csv'. See problems(...) for more details. 
+}
 
 ```
  
-## 8. bhi layers: handle several layers individually 
+## 8. bhi layers: handle problem layers 
 
-```{r individual bhi layers, eval=FALSE}
+Handle several problem layers individually 
 
-  # recreate rgn_global_gl2014.csv
-  tmp = lkp_baltic %>%
-    select(rgn_id, 
-           label = rgn_name)
-  write_csv(tmp, file.path(dir_repos, 'bhi/baltic2015/layers/rgn_global_gl2014.csv'))
-  
-  
-  # recreate rgn_labels.csv 
-  tmp = lkp_baltic %>%
-    mutate(type = 'eez',
-           label = paste(str_extract(cntry_name, pattern='[A-Z][a-z][a-z]'),
-                         basin_name, sep = ' - ')) %>%
-    select(rgn_id, type, label)
-  write_csv(tmp, file.path(dir_repos, 'bhi/baltic2015/layers/rgn_labels.csv'))
-  
-  # recreate rgn_area_sc2014-area.csv
-  tmp = lkp_baltic %>%
-    select(rgn_id, rgn_name, area_km2)
-  write_csv(tmp, file.path(dir_repos, 'bhi/baltic2015/layers/rgn_area_sc2014-area.csv'))
-  
-  # recreate rgn_area_inland1km_gl2014.csv and rgn_area_offshore3nm_gl2014.csv
-  tmp = lkp_baltic %>%
-    select(rgn_id) %>%
-    mutate(area_km2 = 5) # placeholder
-  write_csv(tmp, file.path(dir_repos, 'bhi/baltic2015/layers/rgn_area_inland1km_gl2014.csv'))
-  write_csv(tmp, file.path(dir_repos, 'bhi/baltic2015/layers/rgn_area_offshore3nm_gl2014.csv'))
-  
-  # recreate lsp_prot_area_inland1km_gl2014.csv and lsp_prot_area_offshore3nm_gl2014.csv
-  # weird errors with not being able to see areakm2: Error in eval(expr, envir, enclos) : object 'area_km2' not found 
-  tmp = read_csv(file.path(dir_repos, 'bhi/baltic2015/layers/mar_coastalpopn_inland25km_sc2014-raster.csv')) %>%
-    mutate(area_km2 = 10) %>% # placeholder; NA caused errors
-    select(-popsum)
-  write_csv(tmp, file.path(dir_repos, 'bhi/baltic2015/layers/lsp_prot_area_inland1km_gl2014.csv'))
-  write_csv(tmp, file.path(dir_repos, 'bhi/baltic2015/layers/lsp_prot_area_offshore3nm_gl2014.csv'))
-  ## !!! BB came upon this too, from populate_draft_branch:  if (class(a[[fld_value]]) %in% c('factor','character')){
-#       cat(sprintf('  DOH! For empty layer "%s" field "%s" is factor/character but continuing with presumption of numeric.\n', lyr, fld_value))
-#     }
-#   
+```{r bhi_layers: handle individuals, eval=FALSE}
+
+# recreate rgn_global_gl2014.csv
+tmp = lkp_baltic %>%
+  select(rgn_id, 
+         label = rgn_name)
+write_csv(tmp, file.path(dir_repos, 'bhi/baltic2015/layers/rgn_global_gl2014.csv'))
+
+
+# recreate rgn_labels.csv 
+tmp = lkp_baltic %>%
+  mutate(type = 'eez',
+         label = paste(str_extract(cntry_name, pattern='[A-Z][a-z][a-z]'),
+                       basin_name, sep = ' - ')) %>%
+  select(rgn_id, type, label)
+write_csv(tmp, file.path(dir_repos, 'bhi/baltic2015/layers/rgn_labels.csv'))
+
+# recreate rgn_area_sc2014-area.csv
+tmp = lkp_baltic %>%
+  select(rgn_id, rgn_name, area_km2)
+write_csv(tmp, file.path(dir_repos, 'bhi/baltic2015/layers/rgn_area_sc2014-area.csv'))
+
+# recreate rgn_area_inland1km_gl2014.csv and rgn_area_offshore3nm_gl2014.csv
+tmp = lkp_baltic %>%
+  select(rgn_id) %>%
+  mutate(area_km2 = 5) # placeholder
+write_csv(tmp, file.path(dir_repos, 'bhi/baltic2015/layers/rgn_area_inland1km_gl2014.csv'))
+write_csv(tmp, file.path(dir_repos, 'bhi/baltic2015/layers/rgn_area_offshore3nm_gl2014.csv'))
+
+# recreate lsp_prot_area_inland1km_gl2014.csv and lsp_prot_area_offshore3nm_gl2014.csv
+tmp = data.frame(rgn_id  = 1:dim(lkp_baltic)[1], 
+           year = rep(2010:2015, dim(lkp_baltic)[1]),
+           area_km2  = rep(c(10, 10, 10, 10, 10, 10), dim(lkp_baltic)[1]))
+write_csv(file.path(dir_repos, 'bhi/baltic2015/layers', 'lsp_prot_area_inland1km_placeholder.csv'))
+write_csv(file.path(dir_repos, 'bhi/baltic2015/layers', 'lsp_prot_area_offshore3nm_placeholder.csv'))
+
 
 # recreate rgn_georegions_gl2014.csv very hacky 
- tmp = read_csv(file.path(dir_repos, 'bhi/baltic2015/layers/rgn_georegions_gl2014.csv')) %>%
+tmp = read_csv(file.path(dir_repos, 'bhi/baltic2015/layers/rgn_georegions_gl2014.csv')) %>%
   select(-rgn_id) %>%
   distinct()
 tmp2 = bind_rows(
-  data.frame(rgn_id = 1:25) %>%
+  data.frame(rgn_id = 1:dim(lkp_baltic)[1]) %>%
     mutate(level = tmp$level[1]) %>%
     mutate(georgn_id = tmp$georgn_id[1]), 
-  data.frame(rgn_id = 1:25) %>%
+  data.frame(rgn_id = 1:dim(lkp_baltic)[1]) %>%
     mutate(level = tmp$level[2]) %>%
     mutate(georgn_id = tmp$georgn_id[2]),
-  data.frame(rgn_id = 1:25) %>%
+  data.frame(rgn_id = 1:dim(lkp_baltic)[1]) %>%
     mutate(level = tmp$level[3]) %>%
     mutate(georgn_id = tmp$georgn_id[3]))
 write_csv(tmp2, file.path(dir_repos, 'bhi/baltic2015/layers/rgn_georegions_gl2014.csv'))
@@ -349,16 +355,49 @@ tmp = read_csv(file.path(dir_repos, 'bhi/baltic2015/layers/rgn_georegion_labels_
   select(-rgn_id) %>%
   distinct()
 tmp2 = bind_rows(
-  data.frame(rgn_id = 1:25) %>%
+  data.frame(rgn_id = 1:dim(lkp_baltic)[1]) %>%
     mutate(level = tmp$level[1]) %>%
     mutate(label = tmp$label[1]), 
-  data.frame(rgn_id = 1:25) %>%
+  data.frame(rgn_id = 1:dim(lkp_baltic)[1]) %>%
     mutate(level = tmp$level[2]) %>%
     mutate(label = tmp$label[2]),
-  data.frame(rgn_id = 1:25) %>%
+  data.frame(rgn_id = 1:dim(lkp_baltic)[1]) %>%
     mutate(level = tmp$level[3]) %>%
     mutate(label = tmp$label[3]))
 write_csv(tmp2, file.path(dir_repos, 'bhi/baltic2015/layers/rgn_georegion_labels_gl2014.csv'))
+
+
+# overwrite np_harvest_product_weight_gl2014.csv layer; update layers.csv 
+# see https://github.com/OHI-Science/issues/issues/407#issuecomment-96237694
+data.frame(rgn_id  = 1:dim(lkp_baltic)[1], 
+           product = rep(c('fish_oil', 'ornamentals', 'seaweeds', 'shells', 'sponges'), dim(lkp_baltic)[1]),
+           weight  = rep(c(0.2, 0.2, 0.2, 0.2, 0.2), dim(lkp_baltic)[1])) %>%
+  write_csv(file.path(dir_repos, 'bhi/baltic2015/layers', 'np_harvest_product_weight_placeholder.csv'))
+
+l_csv = file.path(dir_repos, 'bhi/baltic2015/layers.csv')
+readLines(l_csv, warn=F, encoding='UTF-8') %>%
+  str_replace("np_harvest_product_weight_gl2014.csv", 
+              "np_harvest_product_weight_placeholder.csv") %>%
+  writeLines(l_csv)
+
+
+# create dummy cs_nu_status and cs_nu_trend files
+data.frame(rgn_id  = 1:dim(lkp_baltic)[1], 
+           score = rep(0.5, dim(lkp_baltic)[1])) %>%
+  write_csv(file.path(dir_repos, 'bhi/baltic2015/layers', 'cw_nu_status_placeholder.csv'))
+
+data.frame(rgn_id  = 1:dim(lkp_baltic)[1], 
+           score = rep(0, dim(lkp_baltic)[1])) %>%
+  write_csv(file.path(dir_repos, 'bhi/baltic2015/layers', 'cw_nu_trend_placeholder.csv'))
+
+# and update layers.csv
+l_csv = file.path(dir_repos, 'bhi/baltic2015/layers.csv')
+readLines(l_csv, warn=F, encoding='UTF-8') %>%
+  str_replace("cw_nu_status.csv", 
+              "cw_nu_status_placeholder.csv") %>%
+   str_replace("cw_nu_trend.csv", 
+              "cw_nu_trend_placeholder.csv") %>%
+  writeLines(l_csv)
 
 ```
 
@@ -371,7 +410,12 @@ important because it will be overwritten in its current location
 # copy whole bhi directory to a tmp location because it will be overwritten
 # cp command: `cp -r from to`. the -r means 'including subdirectories'. The `/.` means contents only, not folder itself
 
-system(sprintf("cp -r %s/. %s", file.path(dir_repos, 'bhi'), dir_tmp_baltic)) 
+system(sprintf("cp -r %s %s", file.path(dir_repos, 'bhi'), dir_tmp_baltic)) 
+
+# save dated archive too
+dir_archive = file.path(dir_tmp_baltic, sprintf('archive/%s', Sys.Date())) #dir.create(dir_archive)
+system(sprintf("cp -r %s %s", file.path(dir_repos, 'bhi'), dir_archive)) 
+
 ```
 
 ## 10. run custom_maps()
@@ -402,10 +446,9 @@ Only run the first part of populate_draft_branch()
 
 ```{r populate_draft_branch delete repo, eval=FALSE}
 
-# setup ----
-keys_redo = 'bhi'
-key = keys_redo[1]
+# key setup
 
+key = 'bhi'
 setwd(dir_repos)
 source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
 setwd(dir_repo)
@@ -428,7 +471,8 @@ remote_branches = sapply(branches(repo, 'remote'), function(x) str_split(x@name,
 if (length(remote_branches)==0){
   system('touch README.md')
   system('git add -A; git commit -m "first commit"')
-  try(system('git remote rm origin')) # added by JSL Mar 13 2015; http://stackoverflow.com/questions/1221840/remote-origin-already-exists-on-git-push-to-new-repository
+  try(system('git remote rm origin')) # added by JSL Mar 13 2015;
+  # http://stackoverflow.com/questions/1221840/remote-origin-already-exists-on-git-push-to-new-repository
   system(sprintf('git remote add origin https://github.com/OHI-Science/%s.git', key))
   system('git push -u origin master')
   system('git pull')
@@ -458,8 +502,7 @@ copy existing bhi from Chunks 6-9 into this repo
 
 
 # cp command: `cp -r from to`. the -r means 'including subdirectories'. The `/.` means contents only, not folder itself
- system(sprintf("cp -r %s/. %s", 
-                dir_tmp_baltic, file.path(dir_repos, 'bhi'))) 
+ system(sprintf("cp -r %s/%s/. %s", dir_tmp_baltic, 'bhi', file.path(dir_repos, 'bhi')))
 
 ```
 
@@ -501,13 +544,10 @@ overwrite existing json and geojson files with new maps from populate_draft_bran
 Overwrite line in config.r that sets map's zoom center 
 
 ```{r populate_draft_branch config.r, eval=F}
-
- 
-#  f_in  = sprintf('%s/conf/%s', dir_global, f)
-#  f_out = sprintf('conf/%s', f)
     
+ # filenames
  f_in  = file.path(dir_repos, 'bhi', 'baltic2015/conf/config.r')
- f_out = f_in #file.path(dir_repo,  'bhi', 'baltic2015/conf/config.r'
+ f_out = f_in 
  
  # from populate_draft_branch ~ L647
  s = readLines(f_in, warn=F, encoding='UTF-8') 
@@ -522,7 +562,6 @@ Overwrite line in config.r that sets map's zoom center
  p_zoom = 12 - as.integer(cut(max(transmute(p_bb, range = max - min)), c(0, 0.25, 0.5, 1, 2.5, 5, 10, 20, 40, 80, 160, 320, 360)))
  
  # set map center and zoom level
- 
   s = s %>%
       str_replace("map_lat.*", sprintf('map_lat=%g; map_lon=%g; map_zoom=%d', p_ctr['y'], p_ctr['x'], p_zoom))
       
@@ -534,7 +573,30 @@ Overwrite line in config.r that sets map's zoom center
  
 ```
 
-## 13. Overwrite certain files
+
+## 13. Test bhi's calculate_scores.r
+
+```{r test bhi calculate_scores, eval=F}
+
+setwd(file.path(dir_repos, 'bhi', 'baltic2015'))
+
+# load scenario configuration
+conf = Conf('conf')
+
+# run checks on scenario layers
+CheckLayers('layers.csv', 'layers', flds_id=conf$config$layers_id_fields)
+
+# load scenario layers
+layers = Layers('layers.csv', 'layers')
+
+# calculate scenario scores
+scores = CalculateAll(conf, layers, debug=F)
+
+
+```
+
+
+## 14. Push repo back to github
 
 Overwrite: 
  
