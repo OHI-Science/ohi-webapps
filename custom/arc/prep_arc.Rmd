@@ -1,15 +1,20 @@
 # this is prep_arc.Rmd
 create arctic repo. See Issue #516: https://github.com/OHI-Science/issues/issues/516
-sins_BALTIC_EEZ_excl_small_poly* regions. 
 
 # Overview
 I've got the evals off of all of these at the moment (ie, `{r, eval=F}) so it doesn't run now when I don't want it to. 
 
+- called from `ohi-webapps/edit_webapps.rmd`
+- using spatial files from existing OHI+ repos for 5 Arctic countries, clip to Arctic circle and save
+- bind these together
+- using these regions for the Arctic repo `arc`, create populate draft branch.
+
 
 ## 1. setup
+
 ```{r setup, eval=F}
 
-
+# libraries
 library(dplyr)
 library(readr)
 library(stringr)
@@ -18,6 +23,7 @@ library(raster)
 library(rgeos)
 library(maptools)
 
+# directories and source files
 dir_neptune = c('Windows' = '//neptune.nceas.ucsb.edu/data_edit',
                 'Darwin'  = '/Volumes/data_edit',
                 'Linux'   = '/var/data/ohi')[[ Sys.info()[['sysname']] ]]
@@ -26,131 +32,102 @@ setwd('~/github/ohi-webapps')
 source('create_init.R')
 source('create_functions.R')
 
-arc_cntrys = c('rus', 'can', 'usa', 'nor', 'grl')
 
-```
-
-
-## 1. view map and accompanying data; save with ohi data frame 
-
-NOTE: see `custom/bhi/prep_bhi.rmd` for reasoning behind using `readShapePoly` instead of `read_OGR`.
-
-```{r view map, eval=F}
-
-# logicals for if statements below
-clean_spatial = F 
-redo_shp = F 
-
-
-# read in shp files and save with desired headers in data frame. 
-
-# without bering strait
-arc_raw = readOGR(dsn = file.path(dir_neptune, 'git-annex/clip-n-ship/arc/spatial/custom/raw'),
-              layer = 'pan_arctic_boundaries'); arc_raw  # also tried panarctic_region but had lat/lon
-
-arc = spTransform(arc_raw, CRS('+init=epsg:4326')); arc   # spatialreference.org/ref/epsg/4326/
-projection(arc)<- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 "
-
-
-# with bering strait
-arc_bsr_raw = readOGR(dsn = file.path(dir_neptune, 'git-annex/clip-n-ship/arc/spatial/custom/raw'),
-              layer = 'panarctic_plus_bsr_region'); arc_bsr_raw
-
-arc_bsr = spTransform(arc_bsr_raw, CRS('+init=epsg:4326')); arc_bsr   # spatialreference.org/ref/epsg/4326/
-plot(arc_bsr)
-
-
-```
-
-
-## Save shape file of combined 5 Arctic Countries 
-
-This takes awhile. Must read in each separately (there is a way to loop it without saving interum files, maybe that would be better). but then can save as one. 
-
-```{r create shape file of binded arctic countries, eval=F}
-
-# setup 
+# arctic-specific variables 
 arc_cntrys = c('usa', 'can', 'nor', 'rus', 'grl')
 dir_cns = file.path(sprintf('%s/git-annex/clip-n-ship/%s/spatial', dir_neptune, arc_cntrys)) %>% setNames(arc_cntrys)
 dir_arc = file.path(dir_neptune, 'git-annex/clip-n-ship/arc/spatial/custom/intermediate')
-arctic_extent = extent(-180, 180, 66.5628, 90)
-sp_layer = 'rgn_offshore_gcs'
-
-# read in individual shp files from existing arctic repos and save
-# usa
-sp_usa = readOGR(as.character(dir_cns['usa']), sp_layer)
-sp_usa@data = sp_usa@data %>% dplyr::select(rgn_id, rgn_name, area_km2, Shape_Leng, Shape_Area)
-sp_usa_crop = crop(sp_usa, arctic_extent)
-writeOGR(sp_usa_crop, dsn=dir_arc, layer='sp_usa_crop', driver='ESRI Shapefile', overwrite=T) 
-
-# can
-sp_can = readOGR(as.character(dir_cns['can']), sp_layer)
-sp_can@data = sp_can@data %>% dplyr::select(rgn_id, rgn_name, area_km2, Shape_Leng, Shape_Area)
-sp_can_crop = crop(sp_can, arctic_extent)
-writeOGR(sp_can_crop, dsn=dir_arc, layer='sp_can_crop', driver='ESRI Shapefile', overwrite=T) 
-
-# nor
-sp_nor = readOGR(as.character(dir_cns['nor']), sp_layer)
-sp_nor@data = sp_nor@data %>% dplyr::select(rgn_id, rgn_name, area_km2, Shape_Leng, Shape_Area)
-sp_nor_crop = crop(sp_nor, arctic_extent)
-writeOGR(sp_nor_crop, dsn=dir_arc, layer='sp_nor_crop', driver='ESRI Shapefile', overwrite=T) 
-
-# rus
-sp_rus = readOGR(as.character(dir_cns['rus']), sp_layer)
-sp_rus@data = sp_rus@data %>% dplyr::select(rgn_id, rgn_name, area_km2, Shape_Leng, Shape_Area)
-sp_rus_crop = crop(sp_rus, arctic_extent)
-writeOGR(sp_rus_crop, dsn=dir_arc, layer='sp_rus_crop', driver='ESRI Shapefile', overwrite=T) 
-
-# grl
-sp_grl = readOGR(as.character(dir_cns['grl']), sp_layer)
-sp_grl@data = sp_grl@data %>% dplyr::select(rgn_id, rgn_name, area_km2, Shape_Leng, Shape_Area)
-sp_grl_crop = crop(sp_grl, arctic_extent)
-writeOGR(sp_grl_crop, dsn=dir_arc, layer='sp_grl_crop', driver='ESRI Shapefile', overwrite=T) 
-
-
-# Come back here to run 
-
-# bind together
-#borrowing from gis.stackexchange.com/questions/32732/proper-way-to-rbind-spatialpolygonsdataframes-with-identical-polygon-ids
-
-datanames = c('sp_usa_crop', 'sp_can_crop', 'sp_nor_crop', 'sp_rus_crop', 'sp_grl_crop')
-data(list = datanames)
-lst = lapply(datanames,get)
-
-# example: to get all ID's (since there will be repeats otherwise)
-sapply(slot(sp_usa_crop, "polygons"), function(x) slot(x, "ID"))
-
-
-#To make them uniform we can write a function using the spChFIDs function from sp:
-makeUniform<-function(SPDF){
-  pref<-substitute(SPDF)  #just putting the file name in front.
-  newSPDF<-spChFIDs(SPDF,as.character(paste(pref,rownames(as(SPDF,"data.frame")),sep="_")))
-  return(newSPDF)
-}
-
-#now to do this for all our country files
-newIDs<-lapply(lst,function(x) makeUniform(x))
-
-#back to your code...
-arctic <- do.call( rbind, newIDs )
-
-
-# 
-# # just testing
-# sp_usa_crop@data = sp_usa_crop@data %>% dplyr::select(rgn_id, rgn_name, area_km2, Shape_Leng, Shape_Area)
-# sp_nor_crop@data = sp_nor_crop@data %>% dplyr::select(rgn_id, rgn_name, area_km2, Shape_Leng, Shape_Area)
-# 
-# sp_arc = spRbind(sp_usa_crop, sp_nor_crop, sp_can_crop)
-# sp_arc@data = sp_arc@data %>% mutate(arc_id = 1:6)
-# sp_can_crop@data %>% mutate(arc_id = 1:3)
-# sp_arc = spRbind(sp_arc, sp_can_crop)
-
 
 ```
 
+## 2. Clip to Arctic Circle and save shape files of 5 Arctic Countries 
 
-## 
+Run one-time only. Very time-intensive. 
 
+This takes awhile. Must read in each separately (there is a way to loop it without saving interum files, maybe that would be better). but then can save as one. 
+
+```{r clip and save 5 shape files, eval=F}
+
+# to rerun
+reclip_resave = F
+
+# setup
+arctic_extent = extent(-180, 180, 66.5628, 90)
+sp_layer = 'rgn_offshore_gcs'
+
+if (reclip_resave) { 
+  
+  # read in individual shp files from existing arctic repos and save
+  # usa
+  sp_usa = readOGR(as.character(dir_cns['usa']), sp_layer)
+  sp_usa@data = sp_usa@data %>% dplyr::select(rgn_id, rgn_name, area_km2, Shape_Leng, Shape_Area)
+  sp_usa_crop = crop(sp_usa, arctic_extent)
+  writeOGR(sp_usa_crop, dsn=dir_arc, layer='sp_usa_crop', driver='ESRI Shapefile', overwrite=T) 
+  
+  # can
+  sp_can = readOGR(as.character(dir_cns['can']), sp_layer)
+  sp_can@data = sp_can@data %>% dplyr::select(rgn_id, rgn_name, area_km2, Shape_Leng, Shape_Area)
+  sp_can_crop = crop(sp_can, arctic_extent)
+  writeOGR(sp_can_crop, dsn=dir_arc, layer='sp_can_crop', driver='ESRI Shapefile', overwrite=T) 
+  
+  # nor
+  sp_nor = readOGR(as.character(dir_cns['nor']), sp_layer)
+  sp_nor@data = sp_nor@data %>% dplyr::select(rgn_id, rgn_name, area_km2, Shape_Leng, Shape_Area)
+  sp_nor_crop = crop(sp_nor, arctic_extent)
+  writeOGR(sp_nor_crop, dsn=dir_arc, layer='sp_nor_crop', driver='ESRI Shapefile', overwrite=T) 
+  
+  # rus
+  sp_rus = readOGR(as.character(dir_cns['rus']), sp_layer)
+  sp_rus@data = sp_rus@data %>% dplyr::select(rgn_id, rgn_name, area_km2, Shape_Leng, Shape_Area)
+  sp_rus_crop = crop(sp_rus, arctic_extent)
+  writeOGR(sp_rus_crop, dsn=dir_arc, layer='sp_rus_crop', driver='ESRI Shapefile', overwrite=T) 
+  
+  # grl
+  sp_grl = readOGR(as.character(dir_cns['grl']), sp_layer)
+  sp_grl@data = sp_grl@data %>% dplyr::select(rgn_id, rgn_name, area_km2, Shape_Leng, Shape_Area)
+  sp_grl_crop = crop(sp_grl, arctic_extent)
+  writeOGR(sp_grl_crop, dsn=dir_arc, layer='sp_grl_crop', driver='ESRI Shapefile', overwrite=T) 
+  
+} 
+
+```
+
+## 2. Bind and save shape files for 1 Arctic Study Area 
+
+Run one-time only as well, although this doesn't take long to execute.
+
+```{r bind and save arctic shape files, eval=F}
+
+# read in separate sp files
+sp_usa_crop = readOGR(dir_arc, 'sp_usa_crop')
+sp_can_crop = readOGR(dir_arc, 'sp_can_crop')
+sp_nor_crop = readOGR(dir_arc, 'sp_nor_crop')
+sp_rus_crop = readOGR(dir_arc, 'sp_rus_crop')
+sp_grl_crop = readOGR(dir_arc, 'sp_grl_crop')
+
+# give all unique polygon IDs to be able to rbind and 
+# avoid Error in validObject(res) : invalid class “SpatialPolygons” object: non-unique Polygons ID slot values
+# https://stat.ethz.ch/pipermail/r-sig-geo/2009-May/005666.html
+sp_usa_crop <- spChFIDs(sp_usa_crop, paste("usa", sapply(slot(sp_usa_crop, "polygons"), slot, "ID"), sep="_"))
+sp_can_crop <- spChFIDs(sp_can_crop, paste("can", sapply(slot(sp_can_crop, "polygons"), slot, "ID"), sep="_"))
+sp_nor_crop <- spChFIDs(sp_nor_crop, paste("nor", sapply(slot(sp_nor_crop, "polygons"), slot, "ID"), sep="_"))
+sp_rus_crop <- spChFIDs(sp_rus_crop, paste("rus", sapply(slot(sp_rus_crop, "polygons"), slot, "ID"), sep="_"))
+sp_grl_crop <- spChFIDs(sp_grl_crop, paste("grl", sapply(slot(sp_grl_crop, "polygons"), slot, "ID"), sep="_"))
+
+
+# bind together. rbind allows you to bind multiple; spRbind allows you to bind 2
+sp_arc = rbind(sp_usa_crop, sp_can_crop, sp_nor_crop, sp_rus_crop, sp_grl_crop)
+plot(sp_arc)
+sp_arc@data
+sp_arc@data = sp_arc@data %>%
+  rename(rgn_id_sc = rgn_id) # %>% # non-unique region ids from original 5 repos
+#   mutate(rgn_id = 1:20) %>%
+#   select(rgn_id, rgn_id_sc, rgn_name, area_km2)
+
+# save shapefiles
+writeOGR(sp_arc, dsn=dir_arc, layer='sp_arc', driver='ESRI Shapefile', overwrite=T) 
+
+```
 
 
 ## Create Arctic Lookup Table
