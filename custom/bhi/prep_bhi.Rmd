@@ -300,24 +300,22 @@ Handle several problem layers individually
 ```{r bhi_layers: handle individuals, eval=FALSE}
 
 # recreate rgn_global_gl2014.csv
-tmp = lkp_baltic %>%
-  select(rgn_id, 
-         label = rgn_name)
-write_csv(tmp, file.path(dir_repos, 'bhi/baltic2015/layers/rgn_global_gl2014.csv'))
+lkp_baltic %>% select(rgn_id, label = rgn_name) %>%
+  write_csv(file.path(dir_repos, 'bhi/baltic2015/layers/rgn_global_gl2014.csv'))
 
 
 # recreate rgn_labels.csv 
-tmp = lkp_baltic %>%
-  mutate(type = 'eez',
-         label = paste(str_extract(cntry_name, pattern='[A-Z][a-z][a-z]'),
+lkp_baltic %>% mutate(type = 'eez', 
+                      label = paste(str_extract(cntry_name, pattern='[A-Z][a-z][a-z]'),
                        basin_name, sep = ' - ')) %>%
-  select(rgn_id, type, label)
-write_csv(tmp, file.path(dir_repos, 'bhi/baltic2015/layers/rgn_labels.csv'))
+  select(rgn_id, type, label) %>%
+  write_csv(file.path(dir_repos, 'bhi/baltic2015/layers/rgn_labels.csv'))
+
 
 # recreate rgn_area_sc2014-area.csv
-tmp = lkp_baltic %>%
-  select(rgn_id, rgn_name, area_km2)
-write_csv(tmp, file.path(dir_repos, 'bhi/baltic2015/layers/rgn_area_sc2014-area.csv'))
+lkp_baltic %>% select(rgn_id, rgn_name, area_km2) %>%
+  write_csv(file.path(dir_repos, 'bhi/baltic2015/layers/rgn_area_sc2014-area.csv'))
+
 
 # recreate rgn_area_inland1km_gl2014.csv and rgn_area_offshore3nm_gl2014.csv
 tmp = lkp_baltic %>%
@@ -326,12 +324,15 @@ tmp = lkp_baltic %>%
 write_csv(tmp, file.path(dir_repos, 'bhi/baltic2015/layers/rgn_area_inland1km_gl2014.csv'))
 write_csv(tmp, file.path(dir_repos, 'bhi/baltic2015/layers/rgn_area_offshore3nm_gl2014.csv'))
 
+
 # recreate lsp_prot_area_inland1km_gl2014.csv and lsp_prot_area_offshore3nm_gl2014.csv
-tmp = data.frame(rgn_id  = 1:dim(lkp_baltic)[1], 
-           year = rep(2010:2015, dim(lkp_baltic)[1]),
-           area_km2  = rep(c(10, 10, 10, 10, 10, 10), dim(lkp_baltic)[1]))
-write_csv(file.path(dir_repos, 'bhi/baltic2015/layers', 'lsp_prot_area_inland1km_placeholder.csv'))
-write_csv(file.path(dir_repos, 'bhi/baltic2015/layers', 'lsp_prot_area_offshore3nm_placeholder.csv'))
+tmp_yrs = 2010:2015
+tmp = data.frame(rgn_id = rep(1:dim(lkp_baltic)[1], length(tmp_yrs))) %>%
+  arrange(rgn_id) %>%
+  mutate(year = rep(tmp_yrs, dim(lkp_baltic)[1]), 
+         area_km2 = 10)
+write_csv(tmp, file.path(dir_repos, 'bhi/baltic2015/layers', 'lsp_prot_area_inland1km_placeholder.csv'))
+write_csv(tmp, file.path(dir_repos, 'bhi/baltic2015/layers', 'lsp_prot_area_offshore3nm_placeholder.csv'))
 
 
 # recreate rgn_georegions_gl2014.csv very hacky 
@@ -349,6 +350,7 @@ tmp2 = bind_rows(
     mutate(level = tmp$level[3]) %>%
     mutate(georgn_id = tmp$georgn_id[3]))
 write_csv(tmp2, file.path(dir_repos, 'bhi/baltic2015/layers/rgn_georegions_gl2014.csv'))
+
 
 # recreate rgn_georegion_labels_gl2014.csv
 tmp = read_csv(file.path(dir_repos, 'bhi/baltic2015/layers/rgn_georegion_labels_gl2014.csv')) %>%
@@ -369,9 +371,11 @@ write_csv(tmp2, file.path(dir_repos, 'bhi/baltic2015/layers/rgn_georegion_labels
 
 # overwrite np_harvest_product_weight_gl2014.csv layer; update layers.csv 
 # see https://github.com/OHI-Science/issues/issues/407#issuecomment-96237694
-data.frame(rgn_id  = 1:dim(lkp_baltic)[1], 
-           product = rep(c('fish_oil', 'ornamentals', 'seaweeds', 'shells', 'sponges'), dim(lkp_baltic)[1]),
-           weight  = rep(c(0.2, 0.2, 0.2, 0.2, 0.2), dim(lkp_baltic)[1])) %>%
+tmp_prod = c('fish_oil', 'ornamentals', 'seaweeds', 'shells', 'sponges')
+data.frame(rgn_id = rep(1:dim(lkp_baltic)[1], length(tmp_prod))) %>%
+  arrange(rgn_id) %>%
+  mutate(product = rep(tmp_prod, dim(lkp_baltic)[1]),
+         weight  = 0.2) %>%
   write_csv(file.path(dir_repos, 'bhi/baltic2015/layers', 'np_harvest_product_weight_placeholder.csv'))
 
 l_csv = file.path(dir_repos, 'bhi/baltic2015/layers.csv')
@@ -512,30 +516,36 @@ overwrite existing json and geojson files with new maps from populate_draft_bran
 
 ```{r populate_draft_branch spatial, eval=F}
 
+key = 'bhi'
+setwd(dir_repos)
+source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
+setwd(dir_repo)
+
 # from populate_draft_branch, ~L333
 
- # spatial
- f_js_old      = file.path(dir_annex_sc, 'regions_gcs.js')
- f_geojson_old = file.path(dir_annex_sc, 'regions_gcs.geojson')
- f_js          = file.path(dir_annex_sc, 'spatial', 'regions_gcs.js')
- f_geojson     = file.path(dir_annex_sc, 'spatial', 'regions_gcs.geojson')
- if (file.exists(f_js_old)) file.rename(f_js_old, f_js)
- if (file.exists(f_geojson_old)) file.rename(f_geojson_old, f_geojson)
- txt_shp_error = sprintf('%s/%s_shp_to_geojson.txt', dir_errors, key)
- unlink(txt_shp_error)
- if (!file.exists(f_js)){                                              
-   f_shp = file.path(dir_annex, key, 'spatial', 'rgn_offshore_gcs.shp')
-   cat(sprintf('  shp_to_geojson -- %s\n', format(Sys.time(), '%X')))
-   v = try(shp_to_geojson(f_shp, f_js, f_geojson))
-   if (class(v)=='try-error'){
-     cat(as.character(traceback(v)), file=txt_shp_error)
-     next
-   }
- }
- for (f in c(f_js, f_geojson)){ # f = f_spatial[1]
-   if (key != 'bhi')  file.copy(f, sprintf('spatial/%s', basename(f)), overwrite=T) # original
-   if (key == 'bhi') file.copy(f, sprintf('baltic2015/spatial/%s', basename(f)), overwrite=T) # BHI hack
- }
+# spatial
+f_js_old      = file.path(dir_annex_sc, 'regions_gcs.js')
+f_geojson_old = file.path(dir_annex_sc, 'regions_gcs.geojson')
+f_js          = file.path(dir_annex_sc, 'spatial', 'regions_gcs.js')
+f_geojson     = file.path(dir_annex_sc, 'spatial', 'regions_gcs.geojson')
+if (file.exists(f_js_old)) file.rename(f_js_old, f_js)
+if (file.exists(f_geojson_old)) file.rename(f_geojson_old, f_geojson)
+txt_shp_error = sprintf('%s/%s_shp_to_geojson.txt', dir_errors, key)
+unlink(txt_shp_error)
+if (!file.exists(f_js)){                                              
+  f_shp = file.path(dir_annex, key, 'spatial', 'rgn_offshore_gcs.shp')
+  cat(sprintf('  shp_to_geojson -- %s\n', format(Sys.time(), '%X')))
+  v = try(shp_to_geojson(f_shp, f_js, f_geojson))
+  if (class(v)=='try-error'){
+    cat(as.character(traceback(v)), file=txt_shp_error)
+    next
+  }
+}
+for (f in c(f_js, f_geojson)){ # f = f_spatial[1]
+  if (key != 'bhi')  file.copy(f, sprintf('spatial/%s', basename(f)), overwrite=T) # original
+  if (key == 'bhi') file.copy(f, sprintf('baltic2015/spatial/%s', basename(f)), overwrite=T) # BHI hack
+  cat(sprintf('copying from %s', f))
+}
  
 ```
 
@@ -545,31 +555,36 @@ Overwrite line in config.r that sets map's zoom center
 
 ```{r populate_draft_branch config.r, eval=F}
     
- # filenames
- f_in  = file.path(dir_repos, 'bhi', 'baltic2015/conf/config.r')
- f_out = f_in 
- 
- # from populate_draft_branch ~ L647
- s = readLines(f_in, warn=F, encoding='UTF-8') 
- 
- # get map centroid and zoom level
- # TODO: http://gis.stackexchange.com/questions/76113/dynamically-set-zoom-level-based-on-a-bounding-box
- # var regions_group = new L.featureGroup(regions); map.fitBounds(regions_group.getBounds());
- p_shp  = file.path(dir_annex_sc, 'spatial', 'rgn_offshore_gcs.shp')
- p      = readOGR(dirname(p_shp), tools::file_path_sans_ext(basename(p_shp)))
- p_bb   = data.frame(p@bbox) # max of 2.25
- p_ctr  = rowMeans(p_bb)
- p_zoom = 12 - as.integer(cut(max(transmute(p_bb, range = max - min)), c(0, 0.25, 0.5, 1, 2.5, 5, 10, 20, 40, 80, 160, 320, 360)))
- 
- # set map center and zoom level
-  s = s %>%
-      str_replace("map_lat.*", sprintf('map_lat=%g; map_lon=%g; map_zoom=%d', p_ctr['y'], p_ctr['x'], p_zoom))
-      
- # use just rgn_labels (not rgn_global)
- s = gsub('rgn_global', 'rgn_labels', s)
- 
- writeLines(s, f_out)
- 
+key = 'bhi'
+setwd(dir_repos)
+source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
+setwd(dir_repo)
+
+# filenames
+f_in  = file.path(dir_repos, 'bhi', 'baltic2015/conf/config.r')
+f_out = f_in 
+
+# from populate_draft_branch ~ L647
+s = readLines(f_in, warn=F, encoding='UTF-8') 
+
+# get map centroid and zoom level
+# TODO: http://gis.stackexchange.com/questions/76113/dynamically-set-zoom-level-based-on-a-bounding-box
+# var regions_group = new L.featureGroup(regions); map.fitBounds(regions_group.getBounds());
+p_shp  = file.path(dir_annex_sc, 'spatial', 'rgn_offshore_gcs.shp')
+p      = readOGR(dirname(p_shp), tools::file_path_sans_ext(basename(p_shp)))
+p_bb   = data.frame(p@bbox) # max of 2.25
+p_ctr  = rowMeans(p_bb)
+p_zoom = 12 - as.integer(cut(max(transmute(p_bb, range = max - min)), c(0, 0.25, 0.5, 1, 2.5, 5, 10, 20, 40, 80, 160, 320, 360)))
+
+# set map center and zoom level
+s = s %>%
+  str_replace("map_lat.*", sprintf('map_lat=%g; map_lon=%g; map_zoom=%d', p_ctr['y'], p_ctr['x'], p_zoom))
+
+# use just rgn_labels (not rgn_global)
+s = gsub('rgn_global', 'rgn_labels', s)
+
+writeLines(s, f_out)
+
  
 ```
 
@@ -591,37 +606,58 @@ layers = Layers('layers.csv', 'layers')
 
 # calculate scenario scores
 scores = CalculateAll(conf, layers, debug=F)
-
+write.csv(scores, 'scores.csv', na='', row.names=F)
 
 ```
 
 
 ## 14. Push repo back to github
 
-Overwrite: 
- 
-- .travis.yml
+no need to overwrite `.travis.yml` since based on existing `bhi` repo
+
 
 ```{r, eval=F}
-# overwrite .travis.yml
+
+# run the following:
+
+# push draft branch
+
+# from create.all
+source(sprintf('%s/ohi-webapps/ohi-travis-functions.r', dir_github))
+setwd(dir_repo)
+push_branch('draft') 
+system('git pull')
+
+```
+
+## 15. reset fitz
+
+And from terminal, run the following. 
+This is based on what the cron job does, see https://github.com/OHI-Science/issues/issues/512. 
+
+```{bash, eval=F}
+
+ssh jstewart@fitz.nceas.ucsb.edu
+cd /srv/shiny-server
+rm -rf bhi github
+sudo service shiny-server restart
+/srv/shiny-server$ wget http://ohi-science.nceas.ucsb.edu/bhi > /dev/null 2>&1
+  
+```
 
 
-# push
-
-
-
-
-# make a temporary resilience placeholder file since errors with calculating resilince
-a = read_csv('~/github/ohi-global/eez2014/scores.csv') %>%
-  filter(dimension == 'resilience', 
-         region_id < 26 & region_id != 0) %>%
-  mutate(score = 70)
-write_csv(a, '~/github/ohi-webapps/custom/bhi/resilience_scores_baltic_placeholder.csv') 
-
-
-# plot(bhi) # see image below
-# balt# view data
-#
+# archive from prep_bhi.r
+# # make a temporary resilience placeholder file since errors with calculating resilince
+# a = read_csv('~/github/ohi-global/eez2014/scores.csv') %>%
+#   filter(dimension == 'resilience', 
+#          region_id < 26 & region_id != 0) %>%
+#   mutate(score = 70)
+# write_csv(a, '~/github/ohi-webapps/custom/bhi/resilience_scores_baltic_placeholder.csv') 
+# 
+# 
+# # plot(bhi) # see image below
+# # balt# view data
+# #
 
 
 ```
