@@ -163,6 +163,9 @@ Note: not run to recreated `bhi`; this had already been done previously with `pr
 
 Create directories in `git-annex/clip-n-ship` and copy files required for populate_draft_branch(). These are storage directories.
 
+
+Create directories in `git-annex/clip-n-ship` and copy files required for populate_draft_branch(). These are storage directories.
+
 ```{r populate bhi-xxx annex, eval=F}
 
 redo_bhi_dirs = F
@@ -205,6 +208,7 @@ if (redo_bhi_dirs) {
 }
 
 ```
+
 
 ## 6. create bhi-xxx repos
 
@@ -480,9 +484,11 @@ system(sprintf("cp -r %s %s", file.path(dir_repos, 'bhi'), dir_archive))
 
 ```
 
+
 ## 11. populate_draft_branch() spatial
 
 overwrite existing json and geojson files with new maps from `populate_draft_branch()`
+
 
 ```{r populate_draft_branch spatial, eval=F}
 
