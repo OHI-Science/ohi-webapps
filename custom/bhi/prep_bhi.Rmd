@@ -12,6 +12,7 @@ Not all steps were necessary to run this time around. Steps below that were run:
 
 # libraries
 library(dplyr)
+library(tidyr)
 library(readr)
 library(stringr)
 library(rgdal)
@@ -611,53 +612,63 @@ write.csv(scores, 'scores.csv', na='', row.names=F)
 ```
 
 
-## 14. Push repo back to github
+## 14. Run altered create_all fxns
 
-no need to overwrite `.travis.yml` since based on existing `bhi` repo
+Run these with `ohi-functions.r`, not `ohi-travis-functions.r`
+
+- push repo back to github
+- no need to overwrite `.travis.yml` since based on existing `bhi` repo
 
 
-```{r, eval=F}
+```{r create_all push etc, eval=F}
+
+key = 'bhi'
+setwd(dir_repos)
+source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
+source(sprintf('%s/ohi-webapps/ohi-functions.r', dir_github)) 
+setwd(dir_repo)
+
 
 # run the following:
 
-# push draft branch
-
-# from create.all
-source(sprintf('%s/ohi-webapps/ohi-travis-functions.r', dir_github))
+# push draft branch ~ adapted from create.all
 setwd(dir_repo)
-push_branch('draft') 
+push_branch('draft') # source('ohi-functions.r')
 system('git pull')
 
+# calculate scores ~~ adapted from create.all
+setwd(dir_repo)
+calculate_scores_notravis() # JSL ERRORING ON ECO
+
+# create flower plot and table
+setwd(dir_repo)
+update_results()
+
+# push draft and published branches --h
+setwd(dir_repo)
+push_branch('draft')
+merge_published_draft(key) # from create_functions
+  ## error fixes here because of merge conflict with layers.csv
+  # Manually fixed head issues in layers.csv (published branch)
+  # system('git status') # which branch am I on?
+  # system('git add -A layers.csv')
+  # system('git commit -m "fixed merge prob in layers.csv" ')
+  # system('git push')
+  # system('git pull')
+system('git checkout draft')
+
+
+# don't need to run create_functions.r - populate_website()
+
+# from ohi-functions.r --not create_functions.r - create_pages() 
+# create pages based on results
+setwd(dir_repo)
+system('git pull; git checkout draft; git pull')
+update_pages()
+system('git checkout gh-pages; git pull; git checkout published; git pull')
+
+deploy_app_nceas(key, nceas_user)
+
 ```
 
-## 15. reset fitz
-
-And from terminal, run the following. 
-This is based on what the cron job does, see https://github.com/OHI-Science/issues/issues/512. 
-
-```{bash, eval=F}
-
-ssh jstewart@fitz.nceas.ucsb.edu
-cd /srv/shiny-server
-rm -rf bhi github
-sudo service shiny-server restart
-/srv/shiny-server$ wget http://ohi-science.nceas.ucsb.edu/bhi > /dev/null 2>&1
-  
-```
-
-
-# archive from prep_bhi.r
-# # make a temporary resilience placeholder file since errors with calculating resilince
-# a = read_csv('~/github/ohi-global/eez2014/scores.csv') %>%
-#   filter(dimension == 'resilience', 
-#          region_id < 26 & region_id != 0) %>%
-#   mutate(score = 70)
-# write_csv(a, '~/github/ohi-webapps/custom/bhi/resilience_scores_baltic_placeholder.csv') 
-# 
-# 
-# # plot(bhi) # see image below
-# # balt# view data
-# #
-
-
-```
+`
