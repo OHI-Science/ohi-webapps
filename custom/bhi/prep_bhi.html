@@ -132,6 +132,7 @@ bhi_sc = read_csv('custom/bhi/sc_studies_custom_bhi.csv'); head(bhi_sc)
 ind_bhi = str_detect(bhi_sc$sc_key, 'bhi-')
 bhi_rgn = bhi_sc$sc_key[ind_bhi]; bhi_rgn
 # &quot;bhi-swe&quot; &quot;bhi-fin&quot; &quot;bhi-dnk&quot; &quot;bhi-deu&quot; &quot;bhi-est&quot; &quot;bhi-pol&quot; &quot;bhi-lva&quot; &quot;bhi-ltu&quot; &quot;bhi-rus&quot;
+bhi_name = bhi_sc %&gt;% filter(sc_key == 'bhi') %&gt;% select(sc_name)
 
 # read in lookup table --if doesn't exist must run Chunk 1: view map
 lkp_baltic = read_csv(file.path(dir_custom_bhi, 'baltic_rgns_to_bhi_rgns_lookup_holas.csv')); lkp_baltic</code></pre>
@@ -219,6 +220,7 @@ if(redo_dirs) sapply(sprintf('~/github/clip-n-ship/%s', bhi_rgn), dir.create)</c
 <div id="populate-bhi-xxx-directories-in-git-annex" class="section level2">
 <h2>5. populate bhi-xxx directories in git-annex</h2>
 <p>Note: not run to recreated <code>bhi</code>; this had already been done previously with <code>prep_bhi.r</code>.</p>
+<p>Create directories in <code>git-annex/clip-n-ship</code> and copy files required for populate_draft_branch(). These are storage directories.</p>
 <p>Create directories in <code>git-annex/clip-n-ship</code> and copy files required for populate_draft_branch(). These are storage directories.</p>
 <pre class="r"><code>redo_bhi_dirs = F
 
@@ -612,9 +614,48 @@ merge_published_draft(key) # from create_functions
 system('git checkout draft')
 
 
-# don't need to run create_functions.r - populate_website()
+# populate_website(). 
+# this would be run when making the original repo, but not for updating regions. 
+# Here I ran just portions to update the flag for the webapp. 
+
+# copy national flag
+file.copy(file.path(dir_custom_bhi, 'flag_80x40.png'), 
+          sprintf('~/github/ohi-webapps/flags/small/%s.png', as.character(bhi_name)), overwrite=T) 
+
+key = 'bhi'
+source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
+  
+# cd into repo, checkout gh-pages
+wd = getwd()
+if (!file.exists(dir_repo)) system(sprintf('git clone %s %s', git_url, dir_repo))
+setwd(dir_repo)
+repo = repository(dir_repo)
+remote_branches = sapply(branches(repo, 'remote'), function(x) str_split(x@name, '/')[[1]][2])
+if (!'gh-pages' %in% remote_branches){
+  system('git checkout --orphan gh-pages')
+  system('git rm -rf .')
+} else {
+  system('git checkout gh-pages; git pull')
+}
+
+# copy flag, i.e., national flag
+flag_in = sprintf('%s/ohi-webapps/flags/small/%s.png', dir_github, as.character(bhi_name))
+if (file.exists(flag_in)){
+  flag_out = file.path(dir_repo, 'images/flag_80x40.png')
+  unlink(flag_out)
+  system(sprintf(&quot;convert -resize '80x40' %s %s&quot;, flag_in, flag_out))   
+  # Requires that imageMagick be installed. sww åpopulate_website()
+}
+
+# git add, commit and push
+system(sprintf('git add -A; git commit -a -m &quot;add baltic flag&quot;'))
+system('git push origin gh-pages')
+system('git branch --set-upstream-to=origin/gh-pages gh-pages')
+system('git fetch; git pull')
+setwd(wd)
 
 
+  
 # update pages based on results (not create_pages())
 setwd(dir_repo)
 system('git pull; git checkout draft; git pull')
@@ -622,7 +663,8 @@ update_pages()     # source('ohi-functions.r')
 system('git checkout gh-pages; git pull; git checkout published; git pull')
 
 # deploy app to fitz!
-deploy_app_nceas(key, nceas_user)</code></pre>
+deploy_app_nceas(key, nceas_user)
+system('git checkout draft; git pull')</code></pre>
 </div>
 </div>
 
