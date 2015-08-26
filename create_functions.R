@@ -351,6 +351,7 @@ populate_draft_branch <- function(){
   for (f in c(f_js, f_geojson)){ # f = f_spatial[1]
     if (key != 'bhi')  file.copy(f, sprintf('spatial/%s', basename(f)), overwrite=T) # original
     if (key == 'bhi') file.copy(f, sprintf('baltic2015/spatial/%s', basename(f)), overwrite=T) # BHI hack
+    cat(sprintf('copying from %s', f))
   }
   
   

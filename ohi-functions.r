@@ -382,7 +382,7 @@ update_pages <- function(){
   setwd(wd)
 }
 
-push_branch <- function(branch='draft'){ 
+push_branch <- function(branch='draft', current_msg='pushing draft branch no travis'){ 
   
   # working locally, gh_token set in create_init.R, repo_name set in create_init_sc.Rs
   system(sprintf('git add -A; git commit -a -m "calculated scores from commit %s" ', current_msg))
