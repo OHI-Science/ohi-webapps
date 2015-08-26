@@ -208,10 +208,12 @@ additions_draft(key='chn', msg='ohi-webapps/create_functions.R - additions_draft
 
 Rough workflow: 
 
+- receive Baltic spatial files with region boundaries
 - identify Baltic countries 
-- create intermediate repos for each as a normal WebApp (in hindsight this was unnecessary; could have just used existing repos but there was a reason I can't remember why I opted not to...)
 - create repo for bhi as a whole
-- populate bhi repo with information for regions-within-baltic-countries
+- create Baltic layers by binding layers for each Baltic country's repo
+- populate bhi repo with layers and maps
+- push to bhi repo branches, including webapp
 
 ```{r redo bhi repo+webapp, eval=F}
 
@@ -243,7 +245,7 @@ Rough workflow:
 - continue with `create_all.r`
 - don't add travis stuff; add it fitz's `/srv/shiny-server/_update_apps.bash`, see [github.com/OHI-Science/issues/issues/512]()
 
-```{r redo bhi repo and webapp, eval=F}
+```{r create arctic repo and webapp, eval=F}
 
 # set vars by key
 key = 'arc'
