@@ -1,10 +1,16 @@
-# prep_bhi.Rmd
-create baltic repo. See Issue #407: https://github.com/OHI-Science/issues/issues/407
+# This is prep_bhi.Rmd
 
-NOTE: This script superceded `prep_bhi.r`, which originally created the BHI WebApp in April 2015 with PLC Basin *Inters_BALTIC_EEZ_PLC1* regions. `prep_bhi.rmd` here recreates the BHI WebApp in August 2015 with HOLAS Basin *Intersect_HELCOMsubbasins_BALTIC_EEZ_excl_small_poly* regions. 
+This script recreates the Baltic Health Index (BHI) repository with 42 regions instead of 25. See Issue #407: https://github.com/OHI-Science/issues/issues/407. Note: This script superceded `prep_bhi.r`, which originally created the BHI WebApp in April 2015 with PLC Basin *Inters_BALTIC_EEZ_PLC1* regions. `prep_bhi.rmd` here recreates the BHI WebApp in August 2015 with HOLAS Basin *Intersect_HELCOMsubbasins_BALTIC_EEZ_excl_small_poly* regions. 
 
 # Overview
-Not all steps were necessary to run this time around. Steps below that were run: Setup, 1, 7. However, I've got the evals off of all of these at the moment (ie, `{r, eval=F}) so it doesn't run now when I don't want it to. 
+Not all steps were necessary to run this time, since the `bhi` repo already existed and was just being edited. Each R chunk below will not be evaluated (ie, `{r, eval=F}). Steps below that were run when recreating `bhi`: 
+
+- 1. setup
+- 2. prepping map from received shape files  
+- 3. prepping map with custom_maps()
+
+## 0. add all Baltic countries to custom/bhi/sc_studies_custom_bhi.csv by hand
+This has the same structure as `custom/sc_studies_custom.csv`. 
 
 
 ## 1. setup
@@ -41,33 +47,25 @@ lkp_baltic = read_csv(file.path(dir_custom_bhi, 'baltic_rgns_to_bhi_rgns_lookup_
 ```
 
 
-## 1. view map and accompanying data; save with ohi data frame 
+## 2. prepping map from received shape files  
+
+Read in BHI's shapefile and begin formatting for OHI.
 
 NOTE: `read_OGR` didn't take care of the **orphan hole** problems in the `Intersect_HELCOMsubbasins_BALTIC_EEZ_Eliminate` shp files provided by the Baltic group. But `readShapePoly` did, providing we set the coordinate reference system (CRS), which I took directly from the output that `read_OGR` gave.
 
-```{r view map, eval=F}
+```{r prep map from shapefile, eval=F}
 
 # logicals for if statements below
 view_shp = F
 clean_spatial = F 
-redo_shp = F 
 
 
 # read in shp files and save with desired headers in data frame. readOGR includes a CRS but doesn't fix orphan holes
-bhi_tmp = readOGR(dsn = file.path(dir_neptune, 'git-annex/clip-n-ship/bhi/spatial/custom/raw'),
+bhi_tmp = readOGR(dsn = file.path(dir_annex, 'bhi/spatial/custom/raw'),
               layer = 'Intersect_HELCOMsubbasins_BALTIC_EEZ_Eliminate')
-# bhi_tmp
-# class       : SpatialPolygonsDataFrame 
-# features    : 42 
-# extent      : 4210802, 5437429, 3404119, 4812329  (xmin, xmax, ymin, ymax)
-# coord. ref. : +proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +units=m +no_defs 
-# variables   : 15
-# names       : FID_HELCOM, SB_Code,                  Name, AreaKM2, HELCOM_ID,  Shape_STAr, Shape_STLe, FID_BALTIC, OBJECTID, ID,  Name_1, Shape_Leng, Shape_Le_1, Shape_Area,        Area 
-# min values  :          0,       1,             Åland Sea,    1208,   SEA-001,  1207968326,   392729.5,          0,        0,  1, Denmark,   483.7242,    0.00000,    6121.55,    98.62089 
-# max values  :         16,      17, Western Gotland Basin,   75093,   SEA-017, 75093468124, 20986555.1,          8,        4,  9,  Sweden,  7113.7737,   90.77792,  160638.70, 31239.66735 
 
-# # readShapePoly doesn't include a coordinate ref system (must set it) but also removes orphan holes
-bhi = readShapePoly(file.path(dir_neptune, 'git-annex/clip-n-ship/bhi/spatial/custom/raw',
+# readShapePoly doesn't include a coordinate ref system (must set it) but does remove orphan holes
+bhi = readShapePoly(file.path(dir_annex, 'bhi/spatial/custom/raw',
                    'Intersect_HELCOMsubbasins_BALTIC_EEZ_Eliminate.shp'), 
                   proj4string=CRS(bhi_tmp@proj4string@projargs) # CRS set from bhi_tmp above
 bhi_orig = bhi # to archive
@@ -75,53 +73,68 @@ bhi_orig = bhi # to archive
 # viewing takes a long time
 if (view_shp) plot(bhi)
 
-# check for errors in shp file: 'orphaned hole' error encountered in Step 9 below 
-if (clean_spatial) source('~/github/ohi-webapps/custom/bhi/clean_spatial_bhi.r') # will overwrite bhi with cleaned file; be sure the last line is uncommented
+# check for errors in shp file: 'orphaned hole' error encountered in custom_maps()
+if (clean_spatial) source('~/github/ohi-webapps/custom/bhi/clean_spatial_bhi.r') # will overwrite bhi with cleaned file
+
+# tidy dataframe
+bhi@data # view data
+bhi@data = bhi@data %>%
+  mutate(rgn_id = 1:42) %>%
+  dplyr::select(rgn_id,
+                area_km2 = Area,
+                cntry_name = Name_1,
+                basin_name = Name) %>%
+  mutate(basin_name = str_replace_all(basin_name, '\xc5land Sea', 'Aland Sea'),
+         rgn_name = paste(substr(cntry_name, 1, 3), # rgn_name: 'eez - basin' (eg 'Est - Aland')
+                          '-',
+                          basin_name), sep=' ') %>%
+  dplyr::select(rgn_id, area_km2, cntry_name, basin_name, rgn_name) # since 'sep' column exists
 
 
-if (redo_shp) {
-  bhi@data # view data
-  bhi@data = bhi@data %>%
-    mutate(rgn_id = 1:42) %>%
-    dplyr::select(rgn_id,
-                  area_km2 = Area,
-                  cntry_name = Name_1,
-                  basin_name = Name) %>%
-    mutate(basin_name = str_replace_all(basin_name, '\xc5land Sea', 'Aland Sea'),
-           rgn_name = paste(substr(cntry_name, 1, 3), # create rgn_name as eez - basin (eg 'Est - Gulf of Riga')
-                            '-',
-                            basin_name), sep=' ') %>%
-    dplyr::select(rgn_id, area_km2, cntry_name, basin_name, rgn_name) # since 'sep' column exists
-  
-  
-  # save as shapefiles
-  writeOGR(bhi, dsn = file.path(dir_neptune, 'git-annex/clip-n-ship/bhi/spatial/custom'), 
-           layer = 'baltic_shp', driver = 'ESRI Shapefile', overwrite=T) # will create 4 files: .dbf, .prj, .shp, .shx
-  
-  
-  # create lookup table with unique rgn_ids
-  baltic_rgns = bhi@data %>%
-    left_join(bhi_sc %>%
-                dplyr::select(sc_key, 
-                              cntry_name = gl_rgn_name, 
-                              gl_rgn_key), 
-              by='cntry_name') %>%
-    mutate(baltic_rgn_key = tolower(gl_rgn_key)) %>%
-    dplyr::select(-gl_rgn_key) %>%
-    group_by(cntry_name) %>%
-    mutate(sc_id = 1:n()); head(baltic_rgns)
-  
-  write_csv(baltic_rgns, 'custom/bhi/baltic_rgns_to_bhi_rgns_lookup_holas.csv')
-  
-}
+# save as shapefiles. will create 4 files: .dbf, .prj, .shp, .shx
+writeOGR(bhi, dsn = file.path(dir_annex, 'bhi/spatial/custom'), 
+         layer = 'baltic_shp', driver = 'ESRI Shapefile', overwrite=T) 
+
+
+# create lookup table with unique rgn_ids
+baltic_rgns = bhi@data %>%
+  left_join(bhi_sc %>%
+              dplyr::select(sc_key, 
+                            cntry_name = gl_rgn_name, 
+                            gl_rgn_key), 
+            by='cntry_name') %>%
+  mutate(baltic_rgn_key = tolower(gl_rgn_key)) %>%
+  dplyr::select(-gl_rgn_key) %>%
+  group_by(cntry_name) %>%
+  mutate(sc_id = 1:n()); head(baltic_rgns)
+
+write_csv(baltic_rgns, 'custom/bhi/baltic_rgns_to_bhi_rgns_lookup_holas.csv')
+
 
 ```
 
-## 2. add all Baltic countries to custom/bhi/sc_studies_custom_bhi.csv by hand
-Note: this had already been done previously with `prep_bhi.r`
+## 3. prepping map with custom_maps()
+Proceed as in `create_all.r` and run `custom_maps()`
 
-## 3. create directories in github/clip-n-ship 
-Note: this had already been done previously with `prep_bhi.r`
+```{r prep map custom_maps, eval=FALSE}
+
+keys_redo = 'bhi'
+key = keys_redo[1]
+
+setwd(dir_repos)
+source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
+setwd(dir_repo)
+
+# fun custom_maps
+custom_maps(key) 
+
+```
+
+
+## 4. create bhi-xxx directories 
+Note: not run to recreated `bhi`; this had already been done previously with `prep_bhi.r`.
+
+Create directories in in `github/clip-n-ship` as temporary working directories.
 
 ```{r create bhi-xxx dirs, eval=F}
 
@@ -131,8 +144,10 @@ if(redo_dirs) sapply(sprintf('~/github/clip-n-ship/%s', bhi_rgn), dir.create)
 
 ```
 
-## 4. create directories in git-annex/clip-n-ship and copy required files for populate_draft_branch()
-Note: this had already been done previously with `prep_bhi.r`
+## 5. populate bhi-xxx directories in git-annex
+Note: not run to recreated `bhi`; this had already been done previously with `prep_bhi.r`.
+
+Create directories in `git-annex/clip-n-ship` and copy files required for populate_draft_branch(). These are storage directories.
 
 ```{r populate bhi-xxx dirs, eval=F}
 
@@ -140,37 +155,44 @@ redo_bhi_dirs = F
 
 if (redo_bhi_dirs) {
   # first create the directories
-  sapply(sprintf(file.path(dir_neptune, 'git-annex/clip-n-ship/%s'), bhi_rgn), dir.create)
-  sapply(sprintf(file.path(dir_neptune, 'git-annex/clip-n-ship/%s/spatial'), bhi_rgn), dir.create)
-  sapply(sprintf(file.path(dir_neptune, 'git-annex/clip-n-ship/%s/layers'), bhi_rgn), dir.create)
+  sapply(file.path(dir_annex, bhi_rgn), dir.create)
+  sapply(file.path(dir_annex, bhi_rgn, 'spatial'), dir.create)
+  sapply(file.path(dir_annex, bhi_rgn, 'layers'), dir.create)
   
   # for each bhi_rgn
   for (b in bhi_rgn) { # b = 'bhi-rus'
     
     # copy the spatial files
-    dir_in  = sprintf(file.path(dir_neptune, 'git-annex/clip-n-ship/%s/spatial'), str_replace(b, 'bhi-', ''))
-    dir_out = sprintf(file.path(dir_neptune, 'git-annex/clip-n-ship/%s/spatial'), b)
+    dir_in  = file.path(dir_annex, str_replace(b, 'bhi-', ''), 'spatial')
+    dir_out = file.path(dir_annex, b, 'spatial')
     
     f_gcs = extension(list.files(dir_in, pattern = 'rgn_offshore_gcs'))
     
     for (f in f_gcs) {
-      file.copy(sprintf(file.path(dir_neptune, 'git-annex/clip-n-ship/%s/spatial/rgn_offshore_gcs%s'), str_replace(b, 'bhi-', ''), f),
-                sprintf(file.path(dir_neptune, 'git-annex/clip-n-ship/%s/spatial/rgn_offshore_gcs%s'), b, f), overwrite=T)
+      file.copy(file.path(dir_annex, 
+                          str_replace(b, 'bhi-', ''), 
+                          paste0('spatial/rgn_offshore_gcs', f)),
+                file.path(dir_annex, b, 
+                          paste0('spatial/rgn_offshore_gcs', f)), overwrite=T)
     }
     
     # copy rgn_offshore_data.csv
-    file.copy(sprintf(file.path(dir_neptune, 'git-annex/clip-n-ship/%s/spatial/rgn_offshore_data.csv'), str_replace(b, 'bhi-', '')),
-              sprintf(file.path(dir_neptune, 'git-annex/clip-n-ship/%s/spatial/rgn_offshore_data.csv'), b), overwrite=T)
+    file.copy(file.path(dir_annex, 
+                        str_replace(b, 'bhi-', ''),
+                        'spatial/rgn_offshore_data.csv'),
+              file.path(dir_annex, b, 'spatial/rgn_offshore_data.csv'), overwrite=T)
     
     # copy mar_coastalpopn_inland25km_lyr.csv
-    file.copy(sprintf(file.path(dir_neptune, 'git-annex/clip-n-ship/%s/layers/mar_coastalpopn_inland25km_lyr.csv'), str_replace(b, 'bhi-', '')),
-              sprintf(file.path(dir_neptune, 'git-annex/clip-n-ship/%s/layers/mar_coastalpopn_inland25km_lyr.csv'), b), overwrite=T)
-    
+    file.copy(file.path(dir_annex, 
+                        str_replace(b, 'bhi-', ''),
+                        'layers/mar_coastalpopn_inland25km_lyr.csv'),
+              file.path(dir_annex, b, 'layers/mar_coastalpopn_inland25km_lyr.csv'), overwrite=T)
   }  
 }
+
 ```
 
-## 5. run ohi-webapps/create_all.r through populate_draft_branch()
+## 6. run ohi-webapps/create_all.r through populate_draft_branch()
 Note: this had already been done previously with `prep_bhi.r`
 
 Also, when run previously with `prep_bhi.r`, problems with `create_gh_repo`; must set `repo_exists = F`
@@ -423,25 +445,6 @@ system(sprintf("cp -r %s %s", file.path(dir_repos, 'bhi'), dir_archive))
 
 ```
 
-## 10. run custom_maps()
-
-proceed with create_all.r: 
-
-- `custom_maps()`
-
-```{r run custom_maps, eval=FALSE}
-
-keys_redo = 'bhi'
-key = keys_redo[1]
-
-setwd(dir_repos)
-source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
-setwd(dir_repo)
-
-# fun custom_maps
-custom_maps(key) # if orphaned hole, read in original shp file with readShapePoly and run cleangeo rather than readOGR
-
-```
 
 ## 11. populate_draft_branch() delete repo
 

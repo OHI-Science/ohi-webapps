@@ -60,6 +60,6 @@ bhi_new = spTransform(mybhi.clean, CRS('+init=epsg:4326')) # WGS84
   # rgeos_PolyCreateComment: orphaned hole, cannot find containing polygon for hole at index 64 
 # Attempted to fix with http://www.mail-archive.com/r-help@r-project.org/msg140173.html but no luck. 
 
-# uncomment to overwrite bhi and proceed with prep_bhi.rmd
-# bhi = bhi_new   
+# overwrite bhi and proceed with prep_bhi.rmd
+bhi = bhi_new   
 
