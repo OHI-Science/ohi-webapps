@@ -687,6 +687,5 @@ system('git checkout draft; git pull')
 # sudo chown -R jstewart /srv/shiny-server
 # sudo service shiny-server restart
 
-
 ```
 
