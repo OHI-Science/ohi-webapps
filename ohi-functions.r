@@ -228,7 +228,7 @@ update_pages <- function(){
   # get template brew files, updated to grab local template brew files if they exist
   # update vector: sprintf("'%s'", paste(list.files('~/github/ohi-webapps/results'), collapse="','"))
  
-  dir_gh_local = 'gh-pages_templates'
+  dir_gh_local = 'webapps_templates'
   if (file.exists(dir_gh_local)) {
    
     # brew navbar
