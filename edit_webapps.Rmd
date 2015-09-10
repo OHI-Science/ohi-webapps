@@ -191,6 +191,11 @@ keys = c('chn', 'per', 'bhi', 'chl', 'esp', 'jpn', 'kor') # 'gye' also done, but
 sapply(keys, update_webapp_notravis, run_calc_scores=F, merge_pub=F)
 sapply(keys, deploy_app_nceas)
 
+# 2015 Sept
+keys = 'gye'
+sapply(keys, update_webapp_notravis, run_calc_scores=F, merge_pub=T)
+sapply(keys, deploy_app_nceas)
+
 ```
 
 ## additions_draft() brew copy_webapps_templates.r for gye and chn
