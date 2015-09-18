@@ -1,0 +1,668 @@
+# This is prep_ohibc.Rmd
+
+This script creates the British Columbia webapp. 
+
+Each R chunk below will not be evaluated (ie, `{r, eval=F}`). Steps below that were run when recreating `bhi`: 
+
+- 1. setup
+- 2. prep bhi map from received shape files  
+- 3. prep bhi map with custom_maps()
+- 8. bhi layers: bind possible layers for each bhi-xxx
+- 9. bhi layers: handle problem layers 
+- 10. archive populated bhi directory
+- 11. populate_draft_branch() spatial
+- 12. populate_draft_branch() config.r
+- 13. Test bhi's calculate_scores.r
+- 14. Final create_all.r fxns (altered)
+
+
+## 1. setup
+```{r setup, eval=F}
+
+# libraries
+library(dplyr)
+library(tidyr)
+library(readr)
+library(stringr)
+library(rgdal)
+library(raster)
+
+# directories
+dir_neptune = c('Windows' = '//neptune.nceas.ucsb.edu/data_edit',
+                'Darwin'  = '/Volumes/data_edit',
+                'Linux'   = '/var/data/ohi')[[ Sys.info()[['sysname']] ]]
+dir_annex = file.path(dir_neptune, 'git-annex')
+dir_custom_bc = '~/github/ohi-webapps/custom/ohibc'
+
+# setwd
+setwd('~/github/ohi-webapps')
+
+# variables 
+# bhi_sc = read_csv('custom/bhi/sc_studies_custom_bhi.csv'); head(bhi_sc)
+# ind_bhi = str_detect(bhi_sc$sc_key, 'bhi-')
+# bhi_rgn = bhi_sc$sc_key[ind_bhi]; bhi_rgn
+# # "bhi-swe" "bhi-fin" "bhi-dnk" "bhi-deu" "bhi-est" "bhi-pol" "bhi-lva" "bhi-ltu" "bhi-rus"
+# bhi_name = bhi_sc %>% filter(sc_key == 'bhi') %>% select(sc_name)
+# 
+# # read in lookup table --if doesn't exist must run Chunk 1: view map
+# lkp_baltic = read_csv(file.path(dir_custom_bhi, 'baltic_rgns_to_bhi_rgns_lookup_holas.csv')); lkp_baltic
+
+
+```
+
+
+## 2. prep BC map from @oharac's shape files  
+
+Read in BC shapefile and begin formatting for OHI.
+
+
+```{r prep bhi map from shapefile, eval=F}
+
+# read in shp files and save with desired headers in data frame. 
+bc = readOGR(dsn = file.path(dir_annex, 'bcprep/regions'),
+              layer = 'ohibc_rgn')
+plot(bc)
+
+# COME BACK HERE and name scenario in sc_studies_custom.csv
+# @oharac will add km2 to .dbf file
+
+
+# tidy dataframe
+bc@data # view data
+
+bc@data = bc@data %>%
+  mutate(rgn_id = 1:42) %>%
+  dplyr::select(rgn_id,
+                area_km2 = Area,
+                cntry_name = Name_1,
+                basin_name = Name) %>%
+  mutate(basin_name = str_replace_all(basin_name, '\xc5land Sea', 'Aland Sea'),
+         rgn_name = paste(substr(cntry_name, 1, 3), # rgn_name: 'eez - basin' (eg 'Est - Aland')
+                          '-',
+                          basin_name), sep=' ') %>%
+  dplyr::select(rgn_id, area_km2, cntry_name, basin_name, rgn_name) # since 'sep' column exists
+
+
+# save as shapefiles. will create 4 files: .dbf, .prj, .shp, .shx
+writeOGR(bc, dsn = file.path(dir_annex, 'bc/spatial/custom'), 
+         layer = 'baltic_shp', driver = 'ESRI Shapefile', overwrite=T) 
+
+
+# create lookup table with unique rgn_ids
+baltic_rgns = bc@data %>%
+  left_join(bhi_sc %>%
+              dplyr::select(sc_key, 
+                            cntry_name = gl_rgn_name, 
+                            gl_rgn_key), 
+            by='cntry_name') %>%
+  mutate(baltic_rgn_key = tolower(gl_rgn_key)) %>%
+  dplyr::select(-gl_rgn_key) %>%
+  group_by(cntry_name) %>%
+  mutate(sc_id = 1:n()); head(baltic_rgns)
+
+write_csv(baltic_rgns, 'custom/bhi/baltic_rgns_to_bhi_rgns_lookup_holas.csv')
+
+
+```
+
+## 3. prep bhi map with custom_maps()
+Proceed as in `create_all.r` and run `custom_maps()`
+
+```{r prep bhi map custom_maps, eval=FALSE}
+
+keys_redo = 'bhi'
+key = keys_redo[1]
+
+setwd(dir_repos)
+source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
+setwd(dir_repo)
+
+# fun custom_maps
+custom_maps(key) 
+
+```
+
+
+## 4. create bhi-xxx directories 
+Note: not run to recreated `bhi`; this had already been done previously with `prep_bhi.r`.
+
+Create directories in in `github/clip-n-ship` as temporary working directories.
+
+```{r create bhi-xxx dirs, eval=F}
+
+redo_dirs = F
+
+if(redo_dirs) sapply(sprintf('~/github/clip-n-ship/%s', bhi_rgn), dir.create)
+
+```
+
+## 5. populate bhi-xxx directories in git-annex
+Note: not run to recreated `bhi`; this had already been done previously with `prep_bhi.r`.
+
+Create directories in `git-annex/clip-n-ship` and copy files required for populate_draft_branch(). These are storage directories.
+
+
+Create directories in `git-annex/clip-n-ship` and copy files required for populate_draft_branch(). These are storage directories.
+
+```{r populate bhi-xxx annex, eval=F}
+
+redo_bhi_dirs = F
+
+if (redo_bhi_dirs) {
+  # first create the directories
+  sapply(file.path(dir_annex, bhi_rgn), dir.create)
+  sapply(file.path(dir_annex, bhi_rgn, 'spatial'), dir.create)
+  sapply(file.path(dir_annex, bhi_rgn, 'layers'), dir.create)
+  
+  # for each bhi_rgn
+  for (b in bhi_rgn) { # b = 'bhi-rus'
+    
+    # copy the spatial files
+    dir_in  = file.path(dir_annex, str_replace(b, 'bhi-', ''), 'spatial')
+    dir_out = file.path(dir_annex, b, 'spatial')
+    
+    f_gcs = extension(list.files(dir_in, pattern = 'rgn_offshore_gcs'))
+    
+    for (f in f_gcs) {
+      file.copy(file.path(dir_annex, 
+                          str_replace(b, 'bhi-', ''), 
+                          paste0('spatial/rgn_offshore_gcs', f)),
+                file.path(dir_annex, b, 
+                          paste0('spatial/rgn_offshore_gcs', f)), overwrite=T)
+    }
+    
+    # copy rgn_offshore_data.csv
+    file.copy(file.path(dir_annex, 
+                        str_replace(b, 'bhi-', ''),
+                        'spatial/rgn_offshore_data.csv'),
+              file.path(dir_annex, b, 'spatial/rgn_offshore_data.csv'), overwrite=T)
+    
+    # copy mar_coastalpopn_inland25km_lyr.csv
+    file.copy(file.path(dir_annex, 
+                        str_replace(b, 'bhi-', ''),
+                        'layers/mar_coastalpopn_inland25km_lyr.csv'),
+              file.path(dir_annex, b, 'layers/mar_coastalpopn_inland25km_lyr.csv'), overwrite=T)
+  }  
+}
+
+```
+
+
+## 6. create bhi-xxx repos
+
+Note: this had already been done previously with `prep_bhi.r` But it was an unnecessary step: could have just used existing repos for all Baltic countries. Even if they were made, running custom_maps() was unnecessary.
+
+These repos are created at github.com and locally, and populated locally, but never pushed. So on github.com they are essentially empty. This code is from `ohi-webapps/create_all.r`, through `populate_draft_branch()`. This looks like the following. 
+
+```{r create bhi-xxx repos, eval=F, echo=FALSE}
+
+for (key in bhi_rgn){ 
+  
+  # set vars by subcountry key
+  setwd(dir_repos)
+  source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
+  setwd(dir_repo)
+  
+  # create github repo on github.com
+  repo = create_gh_repo(key) # if errors, set `repo_exists = F`
+  
+  # create custom maps with custom_maps() by @jules32
+  custom_maps(key)
+
+  # populate draft branch
+  populate_draft_branch() 
+
+}
+
+```
+
+
+## 7. create bhi repo
+Note: this had already been done previously with `prep_bhi.r`
+
+```{r create bhi repo, eval=F}
+redo_bhirepo = F
+
+if (redo_bhirepo) {
+  dir_bhi = file.path(dir_repos, 'bhi')
+  
+  # Apr 17 this was giving an error; I copied by hand
+  # file.copy(list.dirs(file.path(dir_repos, 'bhi-deu')), dir_bhi) 
+  
+  # rename .Rproj
+  file.rename(file.path(dir_bhi, 'bhi-deu.Rproj'),
+              file.path(dir_bhi, 'bhi.Rproj'))
+  
+  # rename scenario folder
+  # by hand for the moment
+  }
+```
+
+## 8. bhi layers: bind possible layers for each bhi-xxx
+
+Rerun August 2015 with new HOLAS BHI regions. 
+
+```{r bhi layers: bind from bhi-xxx repos, eval=F}
+
+# clone existing bhi repo
+key = 'bhi'
+setwd(dir_repos)
+source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
+
+setwd(dir_repos)
+unlink(dir_repo, recursive=T, force=T)
+repo = clone(git_url, normalizePath(dir_repo, mustWork=F))
+
+# delete/unlink problem layers, dealt with separately in next step
+tounlink = c('lsp_prot_area_inland1km_gl2014.csv',      # lsp layers 
+             'lsp_prot_area_offshore3nm_gl2014.csv',
+             'lsp_prot_area_inland1km_placeholder.csv', # placeholders
+             'lsp_prot_area_offshore3nm_placeholder.csv',
+             'cw_nu_status.csv',                        # BHI test layers
+             'cw_nu_trend.csv')
+for (f in tounlink) {
+  unlink(file.path(dir_repos, 'bhi/baltic2015/layers', f), 
+         recursive=T, force=T)
+}
+
+# list all layers to copy to bhi repo
+lyrs_list = list.files(file.path(dir_repos, 'bhi/baltic2015/layers'), 
+                       glob2rx('*.csv'), full.names=T) 
+
+
+# loop through all layers, all bhi-xxx repos to create correct # of regions per bhi layer
+for (f in lyrs_list){ 
+  
+  cat(sprintf('processing %s ... \n', basename(f)))
+  
+  # read in layer, save names, delete all but headers (a bit hacky this way)
+  lyr_tmp = read_csv(f)
+  lyr_col = names(lyr_tmp)
+  
+  # only works for rgn_ids; FIS layers different
+  if ('rgn_id' %in% lyr_col){
+    
+    # delete all data in layer
+    lyr_bind = lyr_tmp %>%
+      filter(rgn_id == 0)
+    
+    
+    # for every b repo in bhi_rgn list
+    for (b in bhi_rgn) { # b = 'bhi-deu'
+      
+      key = b
+      source('~/github/ohi-webapps/create_init_sc.r')
+      default_scenario = 'region2015'
+      
+      # read in b's layer
+      s = read_csv(file.path(dir_repo, default_scenario, 'layers', basename(f)))
+      
+      # make sure classes are correct; was a problem for ico_spp_extinction_status_gl2014.csv. 
+      # See http://stackoverflow.com/questions/27361081/r-assign-or-copy-column-classes-from-a-data-frame-to-another
+      s[] = mapply(FUN = as, s, sapply(lyr_tmp, class), SIMPLIFY=F)
+      
+      # filter baltic lookp for b
+      lkp_b = lkp_baltic %>%
+        filter(sc_key == b)
+      
+      if ('area_km2' %in% lyr_col) s = s %>% select(-area_km2) # use area_km2 from lkp_b (regions) not s (nations)
+      if ('rgn_name' %in% lyr_col) s = s %>% select(-rgn_name) # use rgn_name from lkp_b (regions) not s (nations)
+      
+      # join lookup with layer, select orig columns using non-standard evaluation, ie dplyr::*_()
+      t = s %>%
+        rename(sc_id = rgn_id) %>%
+        right_join(lkp_b, by='sc_id') %>%
+        select_(.dots = lyr_col)
+      
+      # bind all together
+      lyr_bind = bind_rows(lyr_bind, t)  
+      
+      }
+    
+    # save file
+    lyr_save = lyr_bind %>%
+      arrange(rgn_id)
+    write_csv(lyr_save, f)
+    
+    } else {
+      cat(sprintf('layer does not have rgn_id variable, do separately: %s', f))
+    }
+}
+
+```
+ 
+## 9. bhi layers: handle problem layers 
+
+Handle several problem layers individually 
+
+```{r bhi_layers: handle individuals, eval=FALSE}
+
+dir_bhi_lyrs = file.path(dir_repos, 'bhi/baltic2015/layers')
+
+# recreate rgn_global_gl2014.csv
+lkp_baltic %>% select(rgn_id, label = rgn_name) %>%
+  write_csv(file.path(dir_bhi_lyrs, 'rgn_global_gl2014.csv'))
+
+
+# recreate rgn_labels.csv 
+lkp_baltic %>% mutate(type = 'eez', 
+                      label = paste(str_extract(cntry_name, pattern='[A-Z][a-z][a-z]'),
+                       basin_name, sep = ' - ')) %>%
+  select(rgn_id, type, label) %>%
+  write_csv(file.path(dir_bhi_lyrs, 'rgn_labels.csv'))
+
+
+# recreate rgn_area_sc2014-area.csv
+lkp_baltic %>% select(rgn_id, rgn_name, area_km2) %>%
+  write_csv(file.path(dir_bhi_lyrs, 'rgn_area_sc2014-area.csv'))
+
+
+# recreate rgn_area_inland1km_gl2014.csv and rgn_area_offshore3nm_gl2014.csv
+tmp = lkp_baltic %>%
+  select(rgn_id) %>%
+  mutate(area_km2 = 5) # placeholder
+write_csv(tmp, file.path(dir_bhi_lyrs, 'rgn_area_inland1km_gl2014.csv'))
+write_csv(tmp, file.path(dir_bhi_lyrs, 'rgn_area_offshore3nm_gl2014.csv'))
+
+
+# recreate lsp_prot_area_inland1km_gl2014.csv and lsp_prot_area_offshore3nm_gl2014.csv
+tmp_yrs = 2010:2015
+tmp = data.frame(rgn_id = rep(1:dim(lkp_baltic)[1], length(tmp_yrs))) %>%
+  arrange(rgn_id) %>%
+  mutate(year = rep(tmp_yrs, dim(lkp_baltic)[1]), 
+         area_km2 = 10)
+write_csv(tmp, file.path(dir_bhi_lyrs, 'lsp_prot_area_inland1km_placeholder.csv'))
+write_csv(tmp, file.path(dir_bhi_lyrs, 'lsp_prot_area_offshore3nm_placeholder.csv'))
+
+
+# recreate rgn_georegions_gl2014.csv very hacky 
+tmp = read_csv(file.path(dir_bhi_lyrs, 'rgn_georegions_gl2014.csv')) %>%
+  select(-rgn_id) %>%
+  distinct()
+tmp2 = bind_rows(
+  data.frame(rgn_id = 1:dim(lkp_baltic)[1]) %>%
+    mutate(level = tmp$level[1]) %>%
+    mutate(georgn_id = tmp$georgn_id[1]), 
+  data.frame(rgn_id = 1:dim(lkp_baltic)[1]) %>%
+    mutate(level = tmp$level[2]) %>%
+    mutate(georgn_id = tmp$georgn_id[2]),
+  data.frame(rgn_id = 1:dim(lkp_baltic)[1]) %>%
+    mutate(level = tmp$level[3]) %>%
+    mutate(georgn_id = tmp$georgn_id[3]))
+write_csv(tmp2, file.path(dir_bhi_lyrs, 'rgn_georegions_gl2014.csv'))
+
+
+# recreate rgn_georegion_labels_gl2014.csv
+tmp = read_csv(file.path(dir_bhi_lyrs, 'rgn_georegion_labels_gl2014.csv')) %>%
+  select(-rgn_id) %>%
+  distinct()
+tmp2 = bind_rows(
+  data.frame(rgn_id = 1:dim(lkp_baltic)[1]) %>%
+    mutate(level = tmp$level[1]) %>%
+    mutate(label = tmp$label[1]), 
+  data.frame(rgn_id = 1:dim(lkp_baltic)[1]) %>%
+    mutate(level = tmp$level[2]) %>%
+    mutate(label = tmp$label[2]),
+  data.frame(rgn_id = 1:dim(lkp_baltic)[1]) %>%
+    mutate(level = tmp$level[3]) %>%
+    mutate(label = tmp$label[3]))
+write_csv(tmp2, file.path(dir_bhi_lyrs, 'rgn_georegion_labels_gl2014.csv'))
+
+
+# overwrite np_harvest_product_weight_gl2014.csv layer; update layers.csv 
+# see https://github.com/OHI-Science/issues/issues/407#issuecomment-96237694
+tmp_prod = c('fish_oil', 'ornamentals', 'seaweeds', 'shells', 'sponges')
+data.frame(rgn_id = rep(1:dim(lkp_baltic)[1], length(tmp_prod))) %>%
+  arrange(rgn_id) %>%
+  mutate(product = rep(tmp_prod, dim(lkp_baltic)[1]),
+         weight  = 0.2) %>%
+  write_csv(file.path(dir_bhi_lyrs, 'np_harvest_product_weight_placeholder.csv'))
+
+l_csv = file.path(dir_repos, 'bhi/baltic2015/layers.csv')
+readLines(l_csv, warn=F, encoding='UTF-8') %>%
+  str_replace("np_harvest_product_weight_gl2014.csv", 
+              "np_harvest_product_weight_placeholder.csv") %>%
+  writeLines(l_csv)
+
+
+# create dummy cs_nu_status and cs_nu_trend files
+data.frame(rgn_id  = 1:dim(lkp_baltic)[1], 
+           score = rep(0.5, dim(lkp_baltic)[1])) %>%
+  write_csv(file.path(dir_bhi_lyrs, 'cw_nu_status_placeholder.csv'))
+
+data.frame(rgn_id  = 1:dim(lkp_baltic)[1], 
+           score = rep(0, dim(lkp_baltic)[1])) %>%
+  write_csv(file.path(dir_bhi_lyrs, 'cw_nu_trend_placeholder.csv'))
+
+# and update layers.csv
+l_csv = file.path(dir_repos, 'bhi/baltic2015/layers.csv')
+readLines(l_csv, warn=F, encoding='UTF-8') %>%
+  str_replace("cw_nu_status.csv", 
+              "cw_nu_status_placeholder.csv") %>%
+   str_replace("cw_nu_trend.csv", 
+              "cw_nu_trend_placeholder.csv") %>%
+  writeLines(l_csv)
+
+```
+
+
+## 10. archive populated bhi directory
+
+As an archive
+
+```{r archive bhi dir, eval=FALSE}
+
+# cp command: `cp -r from to`. the -r means 'including subdirectories'. The `/.` means contents only, not folder itself
+
+system(sprintf("cp -r %s %s", file.path(dir_repos, 'bhi'), dir_tmp_baltic)) 
+
+# save dated archive too
+dir_archive = file.path(dir_tmp_baltic, sprintf('archive/%s', Sys.Date())) #dir.create(dir_archive)
+system(sprintf("cp -r %s %s", file.path(dir_repos, 'bhi'), dir_archive)) 
+
+```
+
+
+## 11. populate_draft_branch() spatial
+
+overwrite existing json and geojson files with new maps from `populate_draft_branch()`
+
+
+```{r populate_draft_branch spatial, eval=F}
+
+key = 'bhi'
+setwd(dir_repos)
+source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
+setwd(dir_repo)
+
+# from populate_draft_branch, ~L333
+f_js_old      = file.path(dir_annex_sc, 'regions_gcs.js')
+f_geojson_old = file.path(dir_annex_sc, 'regions_gcs.geojson')
+f_js          = file.path(dir_annex_sc, 'spatial', 'regions_gcs.js')
+f_geojson     = file.path(dir_annex_sc, 'spatial', 'regions_gcs.geojson')
+if (file.exists(f_js_old)) file.rename(f_js_old, f_js)
+if (file.exists(f_geojson_old)) file.rename(f_geojson_old, f_geojson)
+txt_shp_error = sprintf('%s/%s_shp_to_geojson.txt', dir_errors, key)
+unlink(txt_shp_error)
+if (!file.exists(f_js)){                                              
+  f_shp = file.path(dir_annex, key, 'spatial', 'rgn_offshore_gcs.shp')
+  cat(sprintf('  shp_to_geojson -- %s\n', format(Sys.time(), '%X')))
+  v = try(shp_to_geojson(f_shp, f_js, f_geojson))
+  if (class(v)=='try-error'){
+    cat(as.character(traceback(v)), file=txt_shp_error)
+    next
+  }
+}
+for (f in c(f_js, f_geojson)){ # f = f_spatial[1]
+  if (key != 'bhi')  file.copy(f, sprintf('spatial/%s', basename(f)), overwrite=T) # original
+  if (key == 'bhi') file.copy(f, sprintf('baltic2015/spatial/%s', basename(f)), overwrite=T) # bhi
+  cat(sprintf('copying from %s', f))
+}
+ 
+```
+
+## 12. populate_draft_branch() config.r
+
+Reset map's zoom center in `config.r`
+(Note: no need to also overwrite `.travis.yml` since based on existing `bhi` repo)
+
+```{r populate_draft_branch config.r, eval=F}
+    
+key = 'bhi'
+setwd(dir_repos)
+source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
+setwd(dir_repo)
+
+# from populate_draft_branch ~ L647
+f_in  = file.path(dir_repos, 'bhi', 'baltic2015/conf/config.r')
+f_out = f_in 
+
+s = readLines(f_in, warn=F, encoding='UTF-8') 
+
+# get map centroid and zoom level
+# TODO: http://gis.stackexchange.com/questions/76113/dynamically-set-zoom-level-based-on-a-bounding-box
+# var regions_group = new L.featureGroup(regions); map.fitBounds(regions_group.getBounds());
+p_shp  = file.path(dir_annex_sc, 'spatial', 'rgn_offshore_gcs.shp')
+p      = readOGR(dirname(p_shp), tools::file_path_sans_ext(basename(p_shp)))
+p_bb   = data.frame(p@bbox) # max of 2.25
+p_ctr  = rowMeans(p_bb)
+p_zoom = 12 - as.integer(cut(max(transmute(p_bb, range = max - min)), c(0, 0.25, 0.5, 1, 2.5, 5, 10, 20, 40, 80, 160, 320, 360)))
+
+# set map center and zoom level
+s = s %>%
+  str_replace("map_lat.*", sprintf('map_lat=%g; map_lon=%g; map_zoom=%d', p_ctr['y'], p_ctr['x'], p_zoom))
+
+# use just rgn_labels (not rgn_global)
+s = gsub('rgn_global', 'rgn_labels', s)
+
+writeLines(s, f_out)
+ 
+```
+
+
+## 13. Test bhi's calculate_scores.r
+
+Make sure no errors in calculating goal scores. 
+
+```{r test bhi calculate_scores, eval=F}
+
+setwd(file.path(dir_repos, 'bhi', 'baltic2015'))
+
+# load scenario configuration
+conf = Conf('conf')
+
+# run checks on scenario layers
+CheckLayers('layers.csv', 'layers', flds_id=conf$config$layers_id_fields)
+
+# load scenario layers
+layers = Layers('layers.csv', 'layers')
+
+# calculate scenario scores
+scores = CalculateAll(conf, layers, debug=F)
+write.csv(scores, 'scores.csv', na='', row.names=F) # save goal scores
+
+```
+
+
+## 14. Final create_all.r fxns (altered)
+
+Run these with `ohi-functions.r`, not `ohi-travis-functions.r`. The function order below is from `create_all.r`; some functions from `ohi-functions.r` not `ohi-travis-functions.r`
+
+```{r final create_all fxns, eval=F}
+
+key = 'bhi'
+setwd(dir_repos)
+source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
+source(sprintf('%s/ohi-webapps/ohi-functions.r', dir_github)) 
+setwd(dir_repo)
+
+
+# function order from create_all.r; some functions from `ohi-functions.r` 
+
+# push draft branch ~ adapted from create.all
+setwd(dir_repo)
+push_branch('draft') # source('ohi-functions.r')
+system('git pull')
+
+# calculate scores ~~ adapted from create.all
+setwd(dir_repo)
+calculate_scores_notravis() # JSL RSTUDIO ABORTING ON ECO
+
+# create flower plot and table
+setwd(dir_repo)
+update_results()
+
+# push/merge draft and published branches 
+setwd(dir_repo)
+push_branch('draft')
+merge_published_draft(key) # from create_functions
+  ## error fixes here because of merge conflict with layers.csv
+  # Manually fixed head issues in layers.csv (published branch)
+  # system('git status') # which branch am I on?
+  # system('git add -A layers.csv')
+  # system('git commit -m "fixed merge prob in layers.csv" ')
+  # system('git push')
+  # system('git pull')
+system('git checkout draft')
+
+
+# populate_website(). 
+# this would be run when making the original repo, but not for updating regions. 
+# Here I ran just portions to update the flag for the webapp. 
+
+# copy national flag
+file.copy(file.path(dir_custom_bhi, 'flag_80x40.png'), 
+          sprintf('~/github/ohi-webapps/flags/small/%s.png', as.character(bhi_name)), overwrite=T) 
+
+key = 'bhi'
+source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
+  
+# cd into repo, checkout gh-pages
+wd = getwd()
+if (!file.exists(dir_repo)) system(sprintf('git clone %s %s', git_url, dir_repo))
+setwd(dir_repo)
+repo = repository(dir_repo)
+remote_branches = sapply(branches(repo, 'remote'), function(x) str_split(x@name, '/')[[1]][2])
+if (!'gh-pages' %in% remote_branches){
+  system('git checkout --orphan gh-pages')
+  system('git rm -rf .')
+} else {
+  system('git checkout gh-pages; git pull')
+}
+
+# copy flag, i.e., national flag
+flag_in = sprintf('%s/ohi-webapps/flags/small/%s.png', dir_github, as.character(bhi_name))
+if (file.exists(flag_in)){
+  flag_out = file.path(dir_repo, 'images/flag_80x40.png')
+  unlink(flag_out)
+  system(sprintf("convert -resize '80x40' %s %s", flag_in, flag_out))   
+  # Requires that imageMagick be installed. sww åpopulate_website()
+}
+
+# git add, commit and push
+system(sprintf('git add -A; git commit -a -m "add baltic flag"'))
+system('git push origin gh-pages')
+system('git branch --set-upstream-to=origin/gh-pages gh-pages')
+system('git fetch; git pull')
+setwd(wd)
+
+
+  
+# update pages based on results (not create_pages())
+setwd(dir_repo)
+system('git pull; git checkout draft; git pull')
+update_pages()     # source('ohi-functions.r')
+system('git checkout gh-pages; git pull; git checkout published; git pull')
+
+# deploy app to fitz!
+deploy_app_nceas(key, nceas_user)
+system('git checkout draft; git pull')
+
+# might have to run from terminal:
+# ssh jstewart@fitz.nceas.ucsb.edu
+# cd /srv/shiny-server
+# sudo chown -R jstewart /srv/shiny-server
+# sudo service shiny-server restart
+
+```
+
