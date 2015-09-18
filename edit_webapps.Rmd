@@ -274,6 +274,44 @@ subset_global.r # need to create this!
 
 ```
 
+## populate OHIBC repo and create webapp
+
+The repo already exists: https://github.com/OHI-Science/ohibc
+
+Rough workflow:
+
+- Add entry for ohibc in `ohi-webapps/custom/sc_studies_custom/csv`
+- `populate_draft_branch()`
+- continue with `create_all.r`
+- don't add travis stuff; add it fitz's `/srv/shiny-server/_update_apps.bash`, see [github.com/OHI-Science/issues/issues/512]()
+
+```{r populate ohibc repo and webapp, eval=F}
+
+# set vars by key
+key = 'ohibc'
+
+setwd(dir_repos)
+source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
+setwd(dir_repo)
+  
+##order of functions to run from create_all.r: 
+
+# create repo on github.com
+repo = create_gh_repo(key) 
+
+# make maps
+# ohi-webapps/custom/ohibc/prep_ohibc.rmd  # prep maps ## in progress!
+# custom_maps()
+
+# instead of `populate_draft_branch`, copy all contents from ohi-global repo, filter only arctic countries
+subset_global.r # need to create this!
+# 
+
+```
+
+
+
+
 
 
 
