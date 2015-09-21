@@ -3,6 +3,9 @@ i             = which(sc_studies$sc_key==key)
 sc            = sc_studies[i,]
 name          = sc$sc_name
 study_area    = name
+name_gl_rgn       = sc$sc_key_old
+name_gl_rgn_cap   = sc$gl_rgn_name
+gl_rgn_id         = sc$gl_rgn_id
 #  Country       = Countries[i](cntries[i], '_', ' ')
 #  country       = tolower(str_replace_all(cntries[i], ' ', '_')
 #  cntry         = tolower(as.character(subset(rgn_keys_gl, rgn_name==Country, rgn_key, drop=T)))  

@@ -23,7 +23,7 @@
 # install packages to render goals.Rmd
 devtools::install_github("rstudio/rmarkdown")
 
-# setup for dopying WebApp template files
+# setup for copying WebApp template files
 library(httr)
 dir_gh  = '~/github/<%=git_repo%>/webapps_templates'
 url_loc = 'https://raw.githubusercontent.com/OHI-Science/ohi-webapps/master/results'

@@ -309,9 +309,29 @@ subset_global.r # need to create this!
 
 ```
 
+## compare OHI+ scores to global scores
+
+the color-coded .html file produced is by @Melsteroni and @oharac in [Reporting.Rmd](https://github.com/OHI-Science/ohi-global/blob/f53f4b55e6809433c4c62317115642bc57be4fac/global2015/Reporting/Reporting.Rmd#difference-between-old-and-new-scores-using-2013-benchmark)
+
+So far I've only run this for `ohi-israel`
 
 
+```{r compare ohiplus_global, eval=F}
+
+# set vars by key
+keys = 'ohi-israel' # 'gye'
+
+for (key in keys){ # key = 'gye'
+  
+  setwd(dir_repos)
+  source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
+  
+  # brew .R template and README
+  brew(sprintf('%s/ohi-webapps/compare_scores_global_OHIplus.brew.R', dir_github),
+       '~/github/ohi-israel/med2014/reports/compare_scores_global_OHIplus.R')
+  brew(sprintf('%s/ohi-webapps/README_compare_scores_global_OHIplus.brew.md', dir_github),
+       '~/github/ohi-israel/med2014/reports/README.md')
+}
 
 
-
-
+```
