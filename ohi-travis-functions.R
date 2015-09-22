@@ -60,7 +60,7 @@ create_results <- function(){
   
   # iterate through all scenarios (by finding scores.csv)
   wd = getwd() # presumably in top level folder of repo containing scenario folders
-  dirs_scenario = normalizePath(dirname(list.files('.', 'scores.csv', recursive=T, full.names=T)))
+  dirs_scenario = normalizePath(dirname(list.files('.', '^scores.csv$', recursive=T, full.names=T)))
   for (dir_scenario in dirs_scenario){ # dir_scenario = '~/github/clip-n-ship/alb/alb2014' # dir_scenario = dirs_scenario[1]
     
     # load scenario configuration, layers and scores
@@ -264,7 +264,7 @@ create_pages <- function(){
   checkout(repo, branch='gh-pages', force=T)
   
   # get list of all branch/scenarios and directory to output
-  branch_scenarios = dirname(list.files(dir_archive, 'scores.csv', recursive=T))
+  branch_scenarios = dirname(list.files(dir_archive, '^scores.csv$', recursive=T))
   dir_bs_pages = setNames(
     ifelse(
       branch_scenarios == default_branch_scenario, 

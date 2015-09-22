@@ -60,7 +60,7 @@ update_results <- function(){
   
   # iterate through all scenarios (by finding scores.csv)
   wd = getwd() # presumably in top level folder of repo containing scenario folders
-  dirs_scenario = normalizePath(dirname(list.files('.', 'scores.csv', recursive=T, full.names=T)))
+  dirs_scenario = normalizePath(dirname(list.files('.', '^scores.csv$', recursive=T, full.names=T)))
   for (dir_scenario in dirs_scenario){ # dir_scenario = '~/github/clip-n-ship/alb/alb2014' # dir_scenario = dirs_scenario[1]
     
     # load scenario configuration, layers and scores
@@ -231,7 +231,10 @@ update_pages <- function(){
   dir_webapps_templates = 'webapps_templates'
   dir_brew   = '~/tmp/ohi-webapps'
   
-  if (file.exists(dir_webapps_templates)) {
+  if (dir.exists(dir_webapps_templates)) {
+    
+    unlink(dir_brew, recursive=T)
+    dir.create(dir_brew, recursive=T, showWarnings=F)
     
     # brew navbar
     f = 'navbar.brew.html'
@@ -285,7 +288,7 @@ update_pages <- function(){
   checkout(repo, branch='gh-pages', force=T)
   
   # get list of all branch/scenarios and directory to output
-  branch_scenarios = dirname(list.files(dir_archive, 'scores.csv', recursive=T))
+  branch_scenarios = dirname(list.files(dir_archive, '^scores.csv$', recursive=T))
   dir_bs_pages = setNames(
     ifelse(
       branch_scenarios == default_branch_scenario,
@@ -325,7 +328,7 @@ update_pages <- function(){
     file.copy(list.files(dir_data_results, full.names=T), dir_pages_results, recursive=T)
     
     # brew markdown files
-    for (f_brew in list.files(dir_brew, '.*\\.brew\\.md', full.names=T)){ #f_brew=list.files(dir_brew,'.*\\.brew\\.md',full.names=T)[1]
+    for (f_brew in list.files(dir_brew, '.*\\.brew\\.md', full.names=T)){ # f_brew = "/Users/jstewart/tmp/ohi-webapps/goals.brew.md"
       section = str_replace(basename(f_brew), fixed('.brew.md'), '')
       branch_scenario_navbar = utils::capture.output({ suppressWarnings(brew(file.path(dir_brew, 'navbar.brew.html'))) })
       f_md = file.path(dir_bs_pages[[branch_scenario]], section, 'index.md')
@@ -338,7 +341,7 @@ update_pages <- function(){
     file.copy(file.path(dir_data_results, 'tables/region_titles.csv'), 
               sprintf('_data/regions_%s.csv', str_replace(branch_scenario, '/', '_')), overwrite=T)
   
-  } # end  for (branch_scenario in branch_scenarios)
+  } #end (branch_scenario in branch_scenarios)
   
   # copy scores_400x250.png used in navigation menu
   file.copy(file.path(dir_archive, default_branch_scenario, 'reports/figures/scores_400x250.png'), 
@@ -370,7 +373,8 @@ update_pages <- function(){
   
   # update status
   i = which(d$repo == git_repo)
-  d$status[i]    = sprintf('[![](https://api.travis-ci.org/OHI-Science/%s.svg?branch=draft)](https://travis-ci.org/OHI-Science/%s/branches)', git_repo, git_repo)
+  d$status[i]    = sprintf('[![](https://api.travis-ci.org/OHI-Science/%s.svg?branch=draft)](https://travis-ci.org/OHI-Science/%s/branches)', 
+                           git_repo, git_repo)
   d$last_mod[i]  = sprintf('%0.10s', as(k@author@when, 'character'))
   d$last_sha[i]  = sprintf('%0.7s', k@sha)
   d$last_msg[i]  = k@summary
