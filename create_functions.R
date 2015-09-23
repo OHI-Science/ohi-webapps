@@ -1913,8 +1913,16 @@ merge_published_draft <- function(key, msg='ohi-webapps/create_functions.R - mer
   
   # merge published with the draft branch
   system('git checkout published')
+  system('git pull')
   system('git merge draft')
   system('git push origin published')
+  
+  #   # merge draft with the published branch
+  #   # not the elegant way but CHN branches were each ahead of each other...
+  #   system('git checkout draft')
+  #   system('git pull')
+  #   system('git merge published')
+  #   system('git push origin draft')
   
   setwd(wd)
 }

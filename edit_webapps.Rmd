@@ -12,6 +12,7 @@ This file accompanies the `ohi-webapp` repo's `create_all.r` and `create_functio
 setwd('~/github/ohi-webapps')
 source('create_init.R')
 source('create_functions.R')
+source('ohi-functions.R')
 
 ```
 
@@ -187,7 +188,8 @@ For in-progress repos,
 
 ```{r update_webapp_notravis, eval=F}
 
-keys = c('chn', 'per', 'bhi', 'chl', 'esp', 'jpn', 'kor') # 'gye' also done, but with merge_pub=T
+
+keys = c('chn', 'per', 'bhi', 'chl', 'esp', 'jpn', 'kor') # 'gye' also done, but with merge_pub=T below
 sapply(keys, update_webapp_notravis, run_calc_scores=F, merge_pub=F)
 sapply(keys, deploy_app_nceas)
 
@@ -195,6 +197,12 @@ sapply(keys, deploy_app_nceas)
 keys = 'gye'
 sapply(keys, update_webapp_notravis, run_calc_scores=F, merge_pub=T)
 sapply(keys, deploy_app_nceas)
+
+# 2015 Sept
+keys = 'chn'
+sapply(keys, update_webapp_notravis, run_calc_scores=F, merge_pub=T)
+sapply(keys, deploy_app_nceas)
+
 
 ```
 
@@ -292,16 +300,13 @@ key = 'ohibc'
 
 setwd(dir_repos)
 source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
+# dir.create('~/github/clip-n-ship/ohibc', 'layers')
 setwd(dir_repo)
   
 ##order of functions to run from create_all.r: 
+ohi-webapps/custom/ohibc/prep_ohibc.rmd
 
-# create repo on github.com
-repo = create_gh_repo(key) 
 
-# make maps
-# ohi-webapps/custom/ohibc/prep_ohibc.rmd  # prep maps ## in progress!
-# custom_maps()
 
 # instead of `populate_draft_branch`, copy all contents from ohi-global repo, filter only arctic countries
 subset_global.r # need to create this!
