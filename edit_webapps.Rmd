@@ -314,7 +314,7 @@ subset_global.r # need to create this!
 
 ```
 
-## compare OHI+ scores to global scores
+## compare global scores to OHI+ scores
 
 the color-coded .html file produced is by @Melsteroni and @oharac in [Reporting.Rmd](https://github.com/OHI-Science/ohi-global/blob/f53f4b55e6809433c4c62317115642bc57be4fac/global2015/Reporting/Reporting.Rmd#difference-between-old-and-new-scores-using-2013-benchmark)
 
