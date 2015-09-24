@@ -64,9 +64,10 @@ for (key in keys_redo){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1]
   # populate draft branch of repo
   populate_draft_branch()    # turn buffers back on if making buffers
   
-  if (enable_travis) { { # enable_travis = T
+  if (enable_travis) { # enable_travis = T
+    
     source('ohi-travis-functions.R')   # all functions to update the webapp with Travis
-
+    
     # push draft branch
     setwd(dir_repo)
     push_branch('draft') # source('ohi-travis-functions.r')
@@ -125,73 +126,106 @@ for (key in keys_redo){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1]
     }
     
   } else { # enable_travis = F
-    source('ohi-functions.R')          # all functions to update the webapp without Travis
-    COME BACK HERE JULIE
-  }
     
-  } # end for (key in keys)
+    source('ohi-functions.R')          # all functions to update the webapp without Travis
+    
+    # push draft branch ~ adapted from create.all
+    setwd(dir_repo)
+    push_branch('draft') # source('ohi-functions.r')
+    system('git pull')
+    
+    # calculate scores ~~ adapted from create.all
+    setwd(dir_repo)
+    calculate_scores_notravis() # JSL RSTUDIO ABORTING ON ECO
+    
+    # create flower plot and table
+    setwd(dir_repo)
+    update_results()
+    
+    # push/merge draft and published branches 
+    setwd(dir_repo)
+    push_branch('draft')
+    merge_published_draft(key) # from create_functions
+    system('git checkout draft')
+    
+    # populate website
+    populate_website(key)
+    
+    # update pages based on results (not create_pages())
+    setwd(dir_repo)
+    system('git pull; git checkout draft; git pull')
+    update_pages()     # source('ohi-functions.r')
+    system('git checkout gh-pages; git pull; git checkout published; git pull')
+    
+    # deploy app to fitz!
+    deploy_app_nceas(key, nceas_user)
+    system('git checkout draft; git pull')
+    
+  } # end if (enable_travis)
   
-  
-  ## @bbest's original notes ----
-  
-  # AT THE BOTTOM OF CREATE.R
-  # y = y %>%
-  #   select(Country, init_app, status, url_github_repo, url_shiny_app, error) %>%
-  #   arrange(desc(init_app), status, error, Country)
-  # 
-  # write.csv(y, '~/github/ohi-webapps/tmp/webapp_status.csv', row.names=F, na='')
-  # 
-  # table(y$error) %>%
-  #   as.data.frame() %>% 
-  #   select(error = Var1, count=Freq) %>%
-  #   filter(error != '') %>%
-  #   arrange(desc(count)) %>%
-  #   knitr::kable()
-  
-  # AT THE TOP OF CREATE.R
-  # limit to those that were able to calculate scores last time
-  # status_prev = read.csv('tmp/webapp_status_2014-10-23.csv')
-  # sc_studies = sc_studies %>%
-  #   semi_join(
-  #     status_prev %>% 
-  #       filter(finished==T),
-  #     by=c('sc_name'='Country')) %>%  # n=138
-  #   arrange(sc_key) %>%
-  #   filter(sc_key >= 'mar') 
-  # TODO:
-  # - are : create_maps: readOGR('/Volumes/data_edit/git-annex/clip-n-ship/are/spatial', 'rgn_inland1km_gcs') # Error in ogrInfo(dsn = dsn, layer = layer, encoding = encoding, use_iconv = use_iconv) : Multiple # dimensions:
-  # - aus : create_maps: ggmap tile not found prob
-  # - nic : missing spatial/rgn_offshore3nm_data.csv
-  # - zaf : inland1km Error in ogrInfo(dsn = dsn, layer = layer, encoding = encoding, use_iconv = use_iconv) : Multiple # dimensions: 
-  
-  # studies not part of loop
-  # sc_studies %>%
-  #   anti_join(
-  #     status_prev %>% 
-  #       filter(finished==T),
-  #     by=c('sc_name'='Country')) %>%
-  #   select(sc_key, sc_name) %>%
-  #   arrange(sc_key)
-  # priority areas todo:
-  # c('esp','usa','chn','chl','fin','kor','fji') # 'isr' no spatial
-  
-  
-  # fix "/" in names for Trinidad and Tobago (tto)
-  # for (csv in list.files('/Volumes/data_edit/git-annex/clip-n-ship/tto', '\\.csv$', recursive=T, full.names=T)){ # csv = list.files('/Volumes/data_edit/git-annex/clip-n-ship/tto', '\\.csv$', recursive=T, full.names=T)[1]
-  #   d = read.csv(csv)
-  #   if ('rgn_name' %in% names(d)){
-  #     d %>%
-  #       mutate(
-  #         rgn_name = str_replace_all(rgn_name, '/', '-')) %>%
-  #       write.csv(csv, row.names=F, na='')
-  #   }
-  # }
-  
-  #for (key in sc_studies$sc_key){ # key = 'fji' # key = sc_studies$sc_key[1]
-  #sc_run = c('can'=T,'chn'=T,'fin','fji','fro','grl','idn','ind','irl','irn','irq','isl','ita','jpn','kna','lca','lka','mmr','mne','nld','nzl','rus','sau','sdn','sen','shn','slb','sle', 'som','spm','stp','sur','svn','syr')
-  #keys_redo = c('bih','bvt','cog','cpt','cuw','egy','est','fin','fra','fro','ggy','gtm','guy','hmd','ind','iot','jey','jpn','kor','ltu','lva','maf','mco','nfk','nld','pol','sgs')
-  
-  # TODO: 'rus','spm' after neptune process_rasters
-  # TODO: 'syr' inland1km, vnm offshore3nm
-  #
-  
+} # end for (key in keys)
+
+
+
+## @bbest's original notes ----
+
+# AT THE BOTTOM OF CREATE.R
+# y = y %>%
+#   select(Country, init_app, status, url_github_repo, url_shiny_app, error) %>%
+#   arrange(desc(init_app), status, error, Country)
+# 
+# write.csv(y, '~/github/ohi-webapps/tmp/webapp_status.csv', row.names=F, na='')
+# 
+# table(y$error) %>%
+#   as.data.frame() %>% 
+#   select(error = Var1, count=Freq) %>%
+#   filter(error != '') %>%
+#   arrange(desc(count)) %>%
+#   knitr::kable()
+
+# AT THE TOP OF CREATE.R
+# limit to those that were able to calculate scores last time
+# status_prev = read.csv('tmp/webapp_status_2014-10-23.csv')
+# sc_studies = sc_studies %>%
+#   semi_join(
+#     status_prev %>% 
+#       filter(finished==T),
+#     by=c('sc_name'='Country')) %>%  # n=138
+#   arrange(sc_key) %>%
+#   filter(sc_key >= 'mar') 
+# TODO:
+# - are : create_maps: readOGR('/Volumes/data_edit/git-annex/clip-n-ship/are/spatial', 'rgn_inland1km_gcs') # Error in ogrInfo(dsn = dsn, layer = layer, encoding = encoding, use_iconv = use_iconv) : Multiple # dimensions:
+# - aus : create_maps: ggmap tile not found prob
+# - nic : missing spatial/rgn_offshore3nm_data.csv
+# - zaf : inland1km Error in ogrInfo(dsn = dsn, layer = layer, encoding = encoding, use_iconv = use_iconv) : Multiple # dimensions: 
+
+# studies not part of loop
+# sc_studies %>%
+#   anti_join(
+#     status_prev %>% 
+#       filter(finished==T),
+#     by=c('sc_name'='Country')) %>%
+#   select(sc_key, sc_name) %>%
+#   arrange(sc_key)
+# priority areas todo:
+# c('esp','usa','chn','chl','fin','kor','fji') # 'isr' no spatial
+
+
+# fix "/" in names for Trinidad and Tobago (tto)
+# for (csv in list.files('/Volumes/data_edit/git-annex/clip-n-ship/tto', '\\.csv$', recursive=T, full.names=T)){ # csv = list.files('/Volumes/data_edit/git-annex/clip-n-ship/tto', '\\.csv$', recursive=T, full.names=T)[1]
+#   d = read.csv(csv)
+#   if ('rgn_name' %in% names(d)){
+#     d %>%
+#       mutate(
+#         rgn_name = str_replace_all(rgn_name, '/', '-')) %>%
+#       write.csv(csv, row.names=F, na='')
+#   }
+# }
+
+#for (key in sc_studies$sc_key){ # key = 'fji' # key = sc_studies$sc_key[1]
+#sc_run = c('can'=T,'chn'=T,'fin','fji','fro','grl','idn','ind','irl','irn','irq','isl','ita','jpn','kna','lca','lka','mmr','mne','nld','nzl','rus','sau','sdn','sen','shn','slb','sle', 'som','spm','stp','sur','svn','syr')
+#keys_redo = c('bih','bvt','cog','cpt','cuw','egy','est','fin','fra','fro','ggy','gtm','guy','hmd','ind','iot','jey','jpn','kor','ltu','lva','maf','mco','nfk','nld','pol','sgs')
+
+# TODO: 'rus','spm' after neptune process_rasters
+# TODO: 'syr' inland1km, vnm offshore3nm
+#
