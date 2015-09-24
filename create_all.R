@@ -1,12 +1,13 @@
 # create_all.R. 
 # by @bbest, cleaned up by @jules32. See original notes at the bottom or @bbest's last commit, 9c7a3f152. 
+# edit_webapps.rmd is now a companion script for updating existing repos.
 
 ## summary ----
 # This script will create repos and webapps for each 'key', which is the 
 # 3-letter code (there are exceptions) for each study/assessment area. Study
 # areas were originally every country from the global assessment, but we now do
 # custom study areas as well (eg. Gulf of Guayaquil, GYE).
-
+# 
 
 ## setup ----
 

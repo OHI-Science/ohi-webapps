@@ -1,3 +1,6 @@
+# create_init_sc.R
+# by @bbest. # load all variables, set directories specific to individual key
+
 stopifnot(exists('key'))
 i             = which(sc_studies$sc_key==key)
 sc            = sc_studies[i,]

@@ -1,3 +1,7 @@
+# create.R
+# by @bbest. All functions called by create_all.r for original creation of repos and webapps for each key. 
+# Slight modifications and 'updating' functions added by @jules32
+
 
 # one-time fixes ----
 

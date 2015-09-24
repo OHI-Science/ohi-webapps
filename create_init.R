@@ -1,3 +1,6 @@
+# create_init.R
+# by @bbest. load all libraries, set directories relevant to all keys
+
 # devtools::install_github('ohi-science/ohicore@dev')
 library(stringr)
 library(git2r)     # install.packages('git2r')
