@@ -322,18 +322,37 @@ So far I've only run this for `ohi-israel`
 ```{r compare ohiplus_global, eval=F}
 
 # set vars by key
-keys = 'ohi-israel' # 'gye'
+keys = c('chn', 'gye', 'ohi-israel') # 'gye'
 
-for (key in keys){ # key = 'gye'
+for (key in keys){ # key = 'gye', key='chn'
   
   setwd(dir_repos)
   source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
   
+  # clone repo
+  if (!file.exists(dir_repo)) system(sprintf('git clone %s %s', git_url, dir_repo))
+  setwd(dir_repo)
+  repo = repository(dir_repo)
+  
+  # switch to draft branch and get latest
+  # if there's a draft branch {
+  system('git checkout draft; git pull') 
+  # system('git pull')
+ 
+
   # brew .R template and README
+  compare_script = sprintf('%s/%s/reports/compare_scores_global_OHIplus.R', dir_repo, default_scenario) 
   brew(sprintf('%s/ohi-webapps/compare_scores_global_OHIplus.brew.R', dir_github),
-       '~/github/ohi-israel/med2014/reports/compare_scores_global_OHIplus.R')
+       compare_script)
   brew(sprintf('%s/ohi-webapps/README_compare_scores_global_OHIplus.brew.md', dir_github),
-       '~/github/ohi-israel/med2014/reports/README.md')
+       sprintf('%s/%s/reports/README.md', dir_repo, default_scenario))
+       
+  source(compare_script) # think about how to have this run 
+  
+  msg = 'brew compare README and table script'
+  system(sprintf('git add -A; git commit -a -m "%s"', msg))
+  push_branch('draft')
+  
 }
 
 

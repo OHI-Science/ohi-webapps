@@ -42,7 +42,7 @@ scores_compare = scores_global_<%=name_gl_rgn%> %>%
   filter(dimension %in% c('future', 'score', 'status')) %>%
   mutate(score_global = round(score_global, 1),
          score_local  = round(score_local, 1),
-         score_diff = round(score_global - score_local, 1))
+         score_diff = round(score_local - score_global, 1))
 
 
 ## make an html file that is color coded ----
@@ -56,7 +56,7 @@ cols = assign('score_diff', cut(cols,
                                  include.lowest = TRUE, labels=pal))
  
 hwrite(scores_compare, 
-       file.path(wd, 'reports', 'compare_scores_OHIplus_global.html'), br=TRUE, center=TRUE, border=0, 
+       file.path(wd, 'reports', 'compare_scores_global_OHIplus.html'), br=TRUE, center=TRUE, border=0, 
        row.style=list(goal='text-align:center'), table.style='padding: 10px; margin:20px;', 
        col.bgcolor=list(scenario='#fff',dimension='#fff',country='#fff', region_id='#fff', score_diff=cols))
       
