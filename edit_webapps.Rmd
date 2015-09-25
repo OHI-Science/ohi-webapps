@@ -289,28 +289,26 @@ The repo already exists: https://github.com/OHI-Science/ohibc
 Rough workflow:
 
 - Add entry for ohibc in `ohi-webapps/custom/sc_studies_custom/csv`
-- `populate_draft_branch()`
-- continue with `create_all.r`
-- don't add travis stuff; add it fitz's `/srv/shiny-server/_update_apps.bash`, see [github.com/OHI-Science/issues/issues/512]()
+- save shapefile with `prep_ohibc.rmd`
+- run through `create_all.r`
+    + don't add travis stuff; add it fitz's `/srv/shiny-server/_update_apps.bash`, see [github.com/OHI-Science/issues/issues/512]()
 
 ```{r populate ohibc repo and webapp, eval=F}
 
 # set vars by key
 key = 'ohibc'
 
-setwd(dir_repos)
-source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
-# dir.create('~/github/clip-n-ship/ohibc', 'layers')
-setwd(dir_repo)
-  
-##order of functions to run from create_all.r: 
-ohi-webapps/custom/ohibc/prep_ohibc.rmd
+# prep spatial file from @oharac
+source('ohi-webapps/custom/ohibc/prep_ohibc.rmd')
+
+## NOTE Sept 25;
+# there are still orphan holes so have copied `rgn_offshore_gcs` files from GUY (also 8 rgns) so we can go ahead and just redo the map later
 
 
+# create working folder in ~/github/clip-n-ship
+dir.create(file.path(dir_repo), showWarnings=F)
 
-# instead of `populate_draft_branch`, copy all contents from ohi-global repo, filter only arctic countries
-subset_global.r # need to create this!
-# 
+# continue with create_all.r!
 
 ```
 
