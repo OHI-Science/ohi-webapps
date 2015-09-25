@@ -10,7 +10,7 @@ cleangeo_spatial = function(sp_data) {
   library(raster)
   library(cleangeo) # devtools::install_github('eblondel/cleangeo')  # https://github.com/eblondel/cleangeo
   
-  cat('checking for orphan holes or invalid geometries...')
+  cat('checking for orphan holes or invalid geometries...\n')
   
   #get a report of geometry validity & issues for a spatial object
   report = clgeo_CollectionReport(sp_data)
@@ -18,19 +18,15 @@ cleangeo_spatial = function(sp_data) {
   issues = report[report$valid == FALSE,]
   cat(sprintf('these are the issues pre-clean: \n %s \n\n', issues %>% select(warning_msg)))
   
-  # to fix  
-  cat('fixing any orphan holes or invalid geometries...')
+  # fix identify any issues in spatial sp_data ----
+  cat('fixing any orphan holes or invalid geometries...\n')
   
   sp_data_tmp = sp_data
-  sp_data_clean = clgeo_Clean(sp_data_tmp, print.log=T) # mybhi.clean_archive = mybhi.clean # save a copy
+  sp_data_clean = clgeo_Clean(sp_data_tmp, print.log=T) 
   report_clean = clgeo_CollectionReport(sp_data_clean)
   summary_clean = clgeo_SummaryReport(report_clean)
   issues = report_clean[report_clean$valid == FALSE,]
   cat(sprintf('these are the issues post-clean: \n %s \n\n', issues %>% select(warning_msg)))
-  
-  
-  # transforming from one CRS (Mercator which is in meters) to another (lat/long)
-  sp_data_clean = spTransform(sp_data_clean, CRS('+init=epsg:4326')) # WGS84
   
   return(sp_data_clean)
 } 

@@ -37,13 +37,19 @@ Read in BC shapefile and begin formatting for OHI.
 # read in shp files and save with desired headers in data frame. 
 bc = readOGR(dsn = path.expand('~/github/ohibc/regions'),
               layer = 'ohibc_rgn_clean')
-
+# plot 
 plot(bc)
 
+# view data
+bc@data
 
-bc@data # view data
-
+# clean orphan holes or invalid geometries 
+source('~/github/ohi-webapps/custom/cleangeo_spatial_fxn.r')
 bc_clean = cleangeo_spatial(bc)
+
+# transforming from one CRS (Mercator which is in meters) to another (lat/long)
+bc = spTransform(bc, CRS('+init=epsg:4326')) # WGS84
+ 
 
 # save as shapefiles. will create 4 files: .dbf, .prj, .shp, .shx
 writeOGR(bc_clean, dsn = file.path(dir_annex, 'ohibc/spatial/custom'), 
