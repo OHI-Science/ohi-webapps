@@ -18,7 +18,7 @@ cleangeo_spatial = function(sp_data) {
   issues = report[report$valid == FALSE,]
   cat(sprintf('these are the issues pre-clean: \n %s \n\n', issues %>% select(warning_msg)))
   
-  # fix any issues in spatial sp_data ----
+  # to fix  
   cat('fixing any orphan holes or invalid geometries...')
   
   sp_data_tmp = sp_data
@@ -27,6 +27,10 @@ cleangeo_spatial = function(sp_data) {
   summary_clean = clgeo_SummaryReport(report_clean)
   issues = report_clean[report_clean$valid == FALSE,]
   cat(sprintf('these are the issues post-clean: \n %s \n\n', issues %>% select(warning_msg)))
+  
+  
+  # transforming from one CRS (Mercator which is in meters) to another (lat/long)
+  sp_data_clean = spTransform(sp_data_clean, CRS('+init=epsg:4326')) # WGS84
   
   return(sp_data_clean)
 } 
