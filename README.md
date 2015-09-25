@@ -4,11 +4,11 @@ See below for @bbest developer notes
 
 ## Overview
 
-- **`ohi-webapps` is an OHI-Science repo that creates all repos and webapps per **'key'**, which identifies the study/assessment area (usually a 3-letter code). Each repo has 4 branches ('draft', 'published', 'app', 'gh-pages'), and .Rproj, .git files, etc. Example repo for Aruba (key = 'abw': [OHI-Science/abw](https://github.com/OHI-Science/abw), example webapp: [ohi-science.org/abw](http://ohi-science.org/abw).**
+- **`ohi-webapps` is an OHI-Science repo that creates all repos and webapps per 'key'**, which identifies the study/assessment area (usually a 3-letter code). Each repo has 4 branches ('draft', 'published', 'app', 'gh-pages'), and .Rproj, .git files, etc. Example repo for Aruba (key = 'abw': [OHI-Science/abw](https://github.com/OHI-Science/abw), example webapp: [ohi-science.org/abw](http://ohi-science.org/abw).**
 - **All functions are stored in**:
     + `create_functions.r` -- *all functions for creating and updating repos and webapps*
     + `ohi-travis-functions.r` -- *all functions to update the webapp with Travis*
-    + `ohi-functions.r` -- *all functions to update the webapp without Travis*
+    + `ohi-functions.r` -- *all functions to update the webapp without Travis (created as a result of issues with travis)*
 - **Initalizing scripts**: 
     + `create_init.r` -- *load all libraries, set directories relevant to all keys* 
     + `create_init_sc.r` -- *load all variables, set directories specific to individual key*  
@@ -21,7 +21,7 @@ See below for @bbest developer notes
     + `system()`: how you run things on the commandline but from R
     + to be an RStudio project, needs a .Rproj. To be traced by github, needs a .git
     + `.yml` = 'yet another markdown language'
-    + many directories involved in this workflow. Most steps begin with cloning the existing repo to your local workspace `~/github/clip-n-ship` (but `clip-n-ship` is **not** version-controlled
+    + many directories involved in this workflow. Most steps begin with cloning the existing repo to your local workspace `~/github/clip-n-ship` (but `clip-n-ship` is **not** version-controlled) and should be created in your own github local directory
     + `.travis.yml` is how scores are calculated automatically. Still exists for active repos that don't use travis-CI; all branches are blacklisted
     + `FITZ` is our server that houses the shiny apps: `ssh jstewart@fitz.nceas.ucsb.edu; cd /srv/shiny-server`
 
