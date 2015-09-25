@@ -13,7 +13,7 @@ library(tidyr)
 library(readr)
 library(stringr)
 library(rgdal)
-library(raster)
+# library(raster)
 
 # directories
 # dir_neptune = c('Windows' = '//neptune.nceas.ucsb.edu/data_edit',
@@ -36,7 +36,7 @@ Read in BC shapefile and begin formatting for OHI.
 
 # read in shp files and save with desired headers in data frame. 
 bc = readOGR(dsn = path.expand('~/github/ohibc/regions'),
-              layer = 'ohibc_rgn_clean')
+              layer = 'ohibc_rgn')
 # plot 
 plot(bc)
 
@@ -48,8 +48,8 @@ source('~/github/ohi-webapps/custom/cleangeo_spatial_fxn.r')
 bc_clean = cleangeo_spatial(bc)
 
 # transforming from one CRS (Mercator which is in meters) to another (lat/long)
-bc = spTransform(bc, CRS('+init=epsg:4326')) # WGS84
- 
+bc_proj = spTransform(bc, CRS('+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0')) # WGS84
+bc_proj_clean <- cleangeo_spatial(bc_proj)
 
 # save as shapefiles. will create 4 files: .dbf, .prj, .shp, .shx
 writeOGR(bc_clean, dsn = file.path(dir_annex, 'ohibc/spatial/custom'), 
