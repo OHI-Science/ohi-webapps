@@ -3,11 +3,10 @@
 # check for and clean any 'orphaned holes': http://gis.stackexchange.com/questions/113964/fixing-orphaned-holes-in-r
 # ------------------
 
-cleangeo_spatial = function(sp_data) {
+cleangeo_spatial <- function(sp_data) {
   
   # identify any issues in spatial sp_data ----
   library(rgdal)
-  library(raster)
   library(cleangeo) # devtools::install_github('eblondel/cleangeo')  # https://github.com/eblondel/cleangeo
   
   cat('checking for orphan holes or invalid geometries...\n')
