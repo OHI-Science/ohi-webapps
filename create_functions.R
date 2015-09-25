@@ -1350,16 +1350,13 @@ custom_maps = function(key){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
   }
   plys = plys[bufs_valid]
   
-  # fortify and set rgn_names as factor of all inland rgns
+  # fortify and set rgn_names as factor of all inland rgns. ***This is where invalid geometries/orphan hole errors may occur***
   rgn_names = factor(plys[[1]][['rgn_name']])  # orig: rgn_name, gye:Zona, bhi:rgn_name # need to generalize this
   plys.df = lapply(plys, function(x){
     x = fortify(x, region='rgn_name')              # orig: rgn_name, gye:Zona, bhi:rgn_name # need to generalize this
     x$id = factor(as.character(x$id), rgn_names)
     return(x)
   })         # head(as.data.frame(plys.df))
-  # still erroring for bhi:
-  # Error in createPolygonsComment(p) : 
-  # rgeos_PolyCreateComment: orphaned hole, cannot find containing polygon for hole at index 64 
   
   # keep only coastal subcountry regions
   #   ids_offshore = unique(plys.df[['offshore']][['id']])
