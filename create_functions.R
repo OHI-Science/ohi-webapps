@@ -329,7 +329,7 @@ populate_draft_branch <- function(){
     # create dirs
     for (dir in c('tmp','layers','conf','spatial', 'prep')) dir.create(dir, showWarnings=F)
     
-    # copy layers from global
+    # copy layers.csv from global
     write.csv(lyrs_gl, sprintf('tmp/layers_%s.csv', sfx_global), na='', row.names=F)
   } # end (key != 'bhi')
   
@@ -728,8 +728,8 @@ populate_draft_branch <- function(){
   
   
   # create subfolders in prep folder
-  prep_subfolders = c('1.1_FIS', '1.2_MAR', '2_AO', '3_NP', '4_CS', '5_CP', '6.1_LIV', '6.2_ECO', '7_TR', '8_CW',
-                      '9.1_ICO', '9.2_LSP', '10.1_SPP', '10.2_HAB', 'pressures', 'resilience')
+  prep_subfolders = c('FIS', 'MAR', 'AO', 'NP', 'CS', 'CP', 'LIV', 'ECO', 'TR', 'CW',
+                      'ICO', 'LSP', 'SPP', 'HAB', 'pressures', 'resilience')
   sapply(file.path(default_scenario, sprintf('prep/%s', prep_subfolders)), dir.create)
   
   # populate prep folder's supfolders
