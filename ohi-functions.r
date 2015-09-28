@@ -251,6 +251,7 @@ update_pages <- function(){
     
   } else {
     
+    # brew navbar and all other files
     unlink(dir_brew, recursive=T)
     dir.create(dir_brew, recursive=T, showWarnings=F)
     for (f in c('navbar.brew.html','regions.brew.md','layers.brew.md','goals.brew.md','scores.brew.md')){
@@ -371,7 +372,7 @@ update_pages <- function(){
   n_rgns = file.path(dir_archive, default_branch_scenario, 'reports/tables/region_titles.csv') %>% read.csv() %>% nrow() - 1
   k = branch_commits[['draft']][[1]]
   
-  # update status
+  # update status log
   i = which(d$repo == git_repo)
   d$status[i]    = sprintf('[![](https://api.travis-ci.org/OHI-Science/%s.svg?branch=draft)](https://travis-ci.org/OHI-Science/%s/branches)', 
                            git_repo, git_repo)
