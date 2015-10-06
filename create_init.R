@@ -60,9 +60,9 @@ travis_pages_yaml_brew <- sprintf('%s/ohi-webapps/travis_gh-pages.brew.yml', dir
 # load ohicore
 library(ohicore) # devtools::load_all(dir_ohicore)
 
-# read global layers, add clip_n_ship columns from Google version
+# read global layers, add clip_n_ship columns from Master layers doc (originally layers_global on Google docs)
 lyrs_gl     <- read.csv(file.path(dir_global, 'layers.csv'), stringsAsFactors = F)
-lyrs_google <- read.csv(file.path(dir_global, 'temp/layers_0-google.csv'), stringsAsFactors = F)
+lyrs_google <- read.csv(file.path('~/github/ohi-global', 'layers_eez.csv'), stringsAsFactors = F)
 lyrs_gl <- lyrs_gl %>%
   left_join(
     lyrs_google %>%
