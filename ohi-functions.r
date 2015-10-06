@@ -42,6 +42,9 @@ calculate_scores_notravis <- function(){ # to distinguish from assessmt/scenario
 
 update_results <- function(){
   
+  # ---- STALE ---- JSL Sept 30 2015 each WebApp should have a report.r sourced
+  # from their calculate_scores.r that creates their own figures and tables. See CHN
+  
   library(methods)
   library(ohicore)
   library(tidyr)
@@ -57,6 +60,7 @@ update_results <- function(){
   
   # ensure draft repo
   system('git checkout draft --force')
+  system('git push')
   
   # iterate through all scenarios (by finding scores.csv)
   wd = getwd() # presumably in top level folder of repo containing scenario folders

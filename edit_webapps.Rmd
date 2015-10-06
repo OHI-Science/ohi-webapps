@@ -200,7 +200,7 @@ sapply(keys, deploy_app_nceas)
 
 # 2015 Sept
 keys = 'chn'
-sapply(keys, update_webapp_notravis, run_calc_scores=F, merge_pub=T)
+sapply(keys, update_webapp_notravis, run_calc_scores=F, run_update_results=F, merge_pub=T)
 sapply(keys, deploy_app_nceas)
 
 

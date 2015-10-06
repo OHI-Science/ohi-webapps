@@ -1929,7 +1929,7 @@ merge_published_draft <- function(key, msg='ohi-webapps/create_functions.R - mer
 }
 
 
-update_webapp_notravis = function(key, run_calc_scores=T, merge_pub=F) {
+update_webapp_notravis = function(key, run_calc_scores=T, run_update_results=F, merge_pub=F) {
   # Jul 6 2015 by jules32
   
   # get subcountry vars specific to key
@@ -1960,7 +1960,8 @@ update_webapp_notravis = function(key, run_calc_scores=T, merge_pub=F) {
   }
   
   # update results (ohi-functions.R - update_results() not modified by JSL but renamed from create_results())
-  update_results()      
+  # not run because repo/scenario/reports/report.r will do this
+  if(run_update_results) update_results()       # look at most recent 2 commits system('git log -2 --stat')
   
   # push draft and published branches
   push_branch('draft') # ohi-functions.R - push_branch() modified by JSL)
@@ -1973,7 +1974,7 @@ update_webapp_notravis = function(key, run_calc_scores=T, merge_pub=F) {
   
   # update pages (ohi-functions.R - update_pages() modified by JSL and renamed from create_pages())
   setwd(dir_repo)
-  cat('  running ohi-functions.r - update_pages() \n')
+  cat(' running ohi-functions.r - update_pages() \n')
   update_pages()
   
   setwd(wd)
