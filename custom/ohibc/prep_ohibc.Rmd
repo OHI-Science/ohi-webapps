@@ -35,8 +35,10 @@ Read in BC shapefile and begin formatting for OHI.
 ```{r copy bc map from shapefile, eval=F}
 
 # read in shp files and save with desired headers in data frame. 
+# from the master branch!!
 bc = readOGR(dsn = path.expand('~/github/ohibc/regions'),
-              layer = 'ohibc_rgn')
+              layer = 'ohibc_rgn_wgs84')
+
 # plot 
 plot(bc)
 

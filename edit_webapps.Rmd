@@ -308,7 +308,7 @@ source('ohi-webapps/custom/ohibc/prep_ohibc.rmd')
 # create working folder in ~/github/clip-n-ship
 dir.create(file.path(dir_repo), showWarnings=F)
 
-# continue with create_all.r!
+# because ohibc repo already exists with important content, add to it but don't overwrite. So instead of continuing normally with create_all.r, do the following: 
 
 ```
 
