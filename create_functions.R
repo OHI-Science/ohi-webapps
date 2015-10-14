@@ -697,9 +697,7 @@ populate_draft_branch <- function(){
       s = s %>%
         str_replace("write.csv\\(tmp, 'temp/.*", '') %>%
         str_replace('^.*sprintf\\(\'temp\\/.*', "")
-      
-        # write.csv(np_risk, sprintf('temp/%s_NP_2
-      
+
       ## iterate over goals with functions to swap
       for (g in names(fxn_swap)){ # g = names(fxn_swap)[1]
         
