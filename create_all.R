@@ -137,11 +137,11 @@ for (key in keys_redo){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1]
     
     # calculate scores ~~ adapted from create.all
     setwd(dir_repo)
-    calculate_scores_notravis() # JSL RSTUDIO ABORTING ON ECO
+    calculate_scores_notravis() # consider just calling CalculateAll() here instead of this function. Will need to add git2r info
     
     # create flower plot and table
     setwd(dir_repo)
-    update_results()
+    update_results() # run this one time only; afterwards let webapps generate their own figures with report.r
     
     # push/merge draft and published branches 
     setwd(dir_repo)

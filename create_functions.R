@@ -276,16 +276,16 @@ populate_draft_branch <- function(){
   wd = getwd()
   library(rgdal)
   
-  # clone repo
+  ## clone repo
   setwd(dir_repos)
   unlink(dir_repo, recursive=T, force=T)
   repo = clone(git_url, normalizePath(dir_repo, mustWork=F))
   setwd(dir_repo)
   
-  # get remote branches
+  ## get remote branches
   remote_branches = sapply(branches(repo, 'remote'), function(x) str_split(x@name, '/')[[1]][2])
   
-  # initialize
+  ## initialize
   if (length(remote_branches)==0){
     system('touch README.md')
     system('git add -A; git commit -m "first commit"')
@@ -296,27 +296,27 @@ populate_draft_branch <- function(){
     remote_branches = sapply(branches(repo, 'remote'), function(x) str_split(x@name, '/')[[1]][2])
   }
   
-  # rename if draft & published don't already exist
+  ## rename if draft & published don't already exist
   if (length(setdiff(c('draft','published'), remote_branches)) > 0 & length(remote_branches) > 0){
     rename_branches(key)
     remote_branches = sapply(branches(repo, 'remote'), function(x) str_split(x@name, '/')[[1]][2])
   }
   
-  # ensure on draft branch ----
+  ## ensure on draft branch ----
   checkout(repo, 'draft')
   
   #   dir_errors = file.path(dir_repos, '_errors')
   #   dir.create(dir_errors, showWarnings=F)
   #
   
-  # recreate empty dir, except hidden .git
+  ## recreate empty dir, except hidden .git
   del_except = ''
   for (f in setdiff(list.files(dir_repo, all.files=F), del_except)) unlink(file.path(dir_repo, f), recursive=T, force=T)
   
-  # README
+  ## README
   brew(sprintf('%s/ohi-webapps/README.brew.md', dir_github), 'README.md')
   
-  # add Rstudio project files. cannabalized devtools::add_rstudio_project() which only works for full R packages.
+  ## add Rstudio project files. cannabalized devtools::add_rstudio_project() which only works for full R packages.
   file.copy(system.file('templates/template.Rproj', package='devtools'), sprintf('%s.Rproj', key))
   writeLines(c('.Rproj.user', '.Rhistory', '.RData'), '.gitignore')
   
@@ -334,7 +334,7 @@ populate_draft_branch <- function(){
   } # end (key != 'bhi')
   
   
-  # spatial: create regions_gcs.geojson and regions_gcs.js
+  ## spatial: create regions_gcs.geojson and regions_gcs.js
   f_js_old      = file.path(dir_annex_sc, 'regions_gcs.js')
   f_geojson_old = file.path(dir_annex_sc, 'regions_gcs.geojson')
   f_js          = file.path(dir_annex_sc, 'spatial', 'regions_gcs.js')
@@ -373,10 +373,10 @@ populate_draft_branch <- function(){
         filename = sprintf('%s_%s.csv', layer, sfx_global)) %>%
       arrange(targets, layer)
     
-    # csvs for regions and countries
+    ## csvs for regions and countries
     sc_rgns_csv = file.path(dir_annex_sc, 'spatial', 'rgn_offshore_data.csv')
     
-    # old global to new subcountry regions
+    ## old global to new subcountry regions
     # rgn_id_sc->sc_rgn_id, rgn_name_sc->sc_rgn_name, rgn_id_gl-> gl_rgn_id, rgn_name_gl-> gl_rgn_name
     sc_rgns = read.csv(sc_rgns_csv) %>%
       select(sc_rgn_id=rgn_id, sc_rgn_name=rgn_name) %>%
@@ -388,14 +388,14 @@ populate_draft_branch <- function(){
       select(sc_rgn_id, sc_rgn_name, gl_rgn_id, gl_rgn_name) %>%
       arrange(sc_rgn_name)
     
-    # old global to new custom regions by JSL
+    ## old global to new custom regions by JSL
     if (all(is.na(sc_rgns$gl_rgn_id))){
       
-      # hack for BHI #1/2
+      ## hack for BHI #1/2
       if ( str_detect(key, 'bhi-') ) sc_rgns$gl_rgn_name = bhi_sc$gl_rgn_name[bhi_sc$sc_key == key] # this is a hack for bhi-swe
       if (key == 'bhi') sc_rgns$gl_rgn_name = sc_studies$gl_rgn_name[sc_studies$sc_key == key] 
       
-      # for all custom repos
+      ## for all custom repos
       sc_rgns = sc_rgns %>%
         select(-gl_rgn_id) %>%
         left_join(sc_studies %>%
@@ -403,12 +403,12 @@ populate_draft_branch <- function(){
                            gl_rgn_id), 
                   by= 'gl_rgn_name')
       
-      # hack for BHI #2/2
+      ## hack for BHI #2/2
       if (key == 'bhi') sc_rgns = distinct(sc_rgns)
       
     }
     
-    # old global to new subcountry countries
+    ## old global to new subcountry countries
     sc_cntry = gl_cntries %>%
       select(gl_cntry_key, gl_rgn_id) %>%
       merge(
@@ -419,7 +419,7 @@ populate_draft_branch <- function(){
       select(cntry_key = gl_cntry_key, sc_rgn_id) %>%
       as.data.frame()
     
-    # old global to new custom countries
+    ## old global to new custom countries
     if (dim(sc_cntry)[1] != dim(sc_rgns)[1]) { # make sure Guayaquil doesn't match to both ECU and Galapagos
       #dots = list(subset(sc_studies$gl_rgn_key, sc_studies$sc_key == key))
       sc_cntries = subset(sc_studies, sc_key == key, gl_rgn_key, drop=T)
@@ -428,7 +428,7 @@ populate_draft_branch <- function(){
         filter(cntry_key %in% sc_cntries)
     }
     
-    # swap out custom mar_coastalpopn_inland25mi for mar_coastalpopn_inland25km (NOTE: mi -> km)
+    ## swap out custom mar_coastalpopn_inland25mi for mar_coastalpopn_inland25km (NOTE: mi -> km)
     ix = which(lyrs_sc$layer=='mar_coastalpopn_inland25mi')
     lyrs_sc$layer[ix]       = 'mar_coastalpopn_inland25km'
     lyrs_sc$path_in[ix]     = file.path(dir_annex, key, 'layers', 'mar_coastalpopn_inland25km_lyr.csv')
@@ -437,7 +437,7 @@ populate_draft_branch <- function(){
     lyrs_sc$filename[ix]    = 'mar_coastalpopn_inland25km_sc2014-raster.csv'
     lyrs_sc$rgns_in[ix]     = 'subcountry'
     
-    # get layers used to downweight from global: area_offshore, area_offshore_3nm, equal, equal , population_inland25km,
+    ## get layers used to downweight from global: area_offshore, area_offshore_3nm, equal, equal , population_inland25km,
     population_inland25km = read.csv(file.path(dir_annex_sc, 'layers' , 'mar_coastalpopn_inland25km_lyr.csv')) %>%     
       filter(year == dw_year) %>%
       mutate(
@@ -470,10 +470,10 @@ populate_draft_branch <- function(){
       lyrs_sc$filename[ix]    = str_replace(lyrs_sc$filename[ix], fixed('_gl2014.csv'), '_sc2014-area.csv')
     }
     
-    # drop cntry_* layers
+    ## drop cntry_* layers
     lyrs_sc = filter(lyrs_sc, !grepl('^cntry_', layer))
     
-    # drop LE layers no longer being used
+    ## drop LE layers no longer being used
     lyrs_le_rm = c(
       'le_gdp_pc_ppp','le_jobs_cur_adj_value','le_jobs_cur_base_value','le_jobs_ref_adj_value','le_jobs_ref_base_value',
       'le_rev_cur_adj_value','le_rev_cur_base_value','le_rev_cur_base_value','le_rev_ref_adj_value','le_rev_ref_base_value',
@@ -481,7 +481,7 @@ populate_draft_branch <- function(){
       'le_wage_ref_base_value','liveco_status','liveco_trend')
     lyrs_sc = filter(lyrs_sc, !layer %in% lyrs_le_rm)
     
-    # write layers data files
+    ## write layers data files
     for (j in 1:nrow(lyrs_sc)){ # j=93
       
       lyr     = lyrs_sc$layer[j]
@@ -523,13 +523,13 @@ populate_draft_branch <- function(){
             arrange(rgn_id)
         }
         
-        # downweight: area_offshore, equal, equal , population_inland25km,
+        ## downweight: area_offshore, equal, equal , population_inland25km,
         # shp = '/Volumes/data_edit/git-annex/clip-n-ship/data/Albania/rgn_inland25km_mol.shp'
         downweight = str_trim(lyrs_sc$clip_n_ship_disag[j])
         downweightings = c('area_offshore'='area-offshore', 'population_inland25km'='popn-inland25km')
         if (downweight %in% names(downweightings) & nrow(d) > 0){
           
-          # update data frame with downweighting
+          ## update data frame with downweighting
           i.v  = ncol(d) # assume value in right most column
           #if (downweight=='population_inland25km') browser()
           d = inner_join(d, get(downweight), by='rgn_id')
@@ -537,7 +537,7 @@ populate_draft_branch <- function(){
           d[i.v] = d[i.v] * d[i.dw]
           d = d[,-i.dw]
           
-          # update layer filename to reflect downweighting
+          ## update layer filename to reflect downweighting
           csv_out = file.path(
             'layers',
             str_replace(
@@ -551,7 +551,7 @@ populate_draft_branch <- function(){
    
      }  # end for (j in 1:nrow(lyrs_sc))
     
-    # layers registry
+    ## create layers.csv registry
     lyrs_reg = lyrs_sc %>%
       select(
         targets,
@@ -564,10 +564,10 @@ populate_draft_branch <- function(){
         clip_n_ship_disag,
         clip_n_ship_disag_description,
         layer_gl, 
-        path_in) %>%
-        write.csv('layers.csv', row.names=F, na='')
+        path_in)  
+    write.csv(lyrs_reg, 'layers.csv', row.names=F, na='')
     
-    # check for empty layers
+    ## check for empty layers
     CheckLayers('layers.csv', 'layers',
                 flds_id=c('rgn_id','country_id','saup_id','fao_id','fao_saup_id'))
     lyrs = read.csv('layers.csv', na='')
@@ -577,12 +577,12 @@ populate_draft_branch <- function(){
       write.csv(lyrs_empty, 'layers-empty_swapping-global-mean.csv', row.names=F, na='')
     }
     
-    # populate empty layers with global averages.
+    ## populate empty layers with global averages.
     for (lyr in subset(lyrs, data_na, layer, drop=T)){ # lyr = subset(lyrs, data_na, layer, drop=T)[1]
       
       message(' for empty layer ', lyr, ', getting global avg')
       
-      # get all global data for layer
+      ## get all global data for layer
       l = subset(lyrs, layer==lyr)
       csv_gl  = as.character(l$path_in)
       csv_tmp = sprintf('tmp/layers-empty_global-values/%s', l$filename)
@@ -590,7 +590,7 @@ populate_draft_branch <- function(){
       file.copy(csv_gl, csv_tmp, overwrite=T)
       a = read.csv(csv_tmp)
       
-      # calculate global categorical means using non-standard evaluation, ie dplyr::*_()
+      ## calculate global categorical means using non-standard evaluation, ie dplyr::*_()
       fld_key         = names(a)[1]
       fld_value       = names(a)[ncol(a)]
       flds_other = setdiff(names(a), c(fld_key, fld_value))
@@ -599,7 +599,7 @@ populate_draft_branch <- function(){
         cat(sprintf('  DOH! For empty layer "%s" field "%s" is factor/character but registered as [fld_val_num] not [fld_val_chr].\n', lyr, fld_value))
       }
       
-      # exceptions
+      ## exceptions
       if (lyr == 'mar_trend_years'){
         sc_rgns %>%
           mutate(trend_yrs = '5_yr') %>%
@@ -614,8 +614,8 @@ populate_draft_branch <- function(){
         cat(sprintf('  DOH! For empty layer "%s" field "%s" is factor/character but continuing with presumption of numeric.\n', lyr, fld_value))
       }
       
-      # presuming numeric...
-      # get mean
+      ## presuming numeric...
+      ## get mean
       #if (lyr == 'mar_coastalpopn_inland25km') browser()
       if (length(flds_other) > 0){
         b = a %>%
@@ -632,7 +632,7 @@ populate_draft_branch <- function(){
               fld_value))
       }
       
-      # bind many rgn_ids
+      ## bind many rgn_ids
       if ('rgn_id' %in% names(a) | 'cntry_key' %in% names(a)){
         # get outer join, aka Cartesian product
         b = b %>%
@@ -649,14 +649,14 @@ populate_draft_branch <- function(){
     
     } # end for (lyr in subset(lyrs, data_na, layer, drop=T))
      
-    # update layers.csv with empty layers now populated by global averages
+    ## update layers.csv with empty layers now populated by global averages
     CheckLayers('layers.csv', 'layers',
                 flds_id=c('rgn_id','country_id','saup_id','fao_id','fao_saup_id'))
     
   } # end (key != 'bhi')  line ~357
   
   
-  # copy configuration files
+  ## copy configuration files
   conf_files = c('config.R','functions.R','goals.csv','pressures_matrix.csv','resilience_matrix.csv','resilience_weights.csv')
   for (f in conf_files){ # f = conf_files[2]
     
@@ -666,10 +666,10 @@ populate_draft_branch <- function(){
     # read in file
     s = readLines(f_in, warn=F, encoding='UTF-8')
     
-    # update confugration
+    ## update confugration
     if (f=='config.R'){
       
-      # get map centroid and zoom level
+      ## get map centroid and zoom level
       # TODO: http://gis.stackexchange.com/questions/76113/dynamically-set-zoom-level-based-on-a-bounding-box
       # var regions_group = new L.featureGroup(regions); map.fitBounds(regions_group.getBounds());
       p_shp  = file.path(dir_annex_sc, 'spatial', 'rgn_offshore_gcs.shp')
@@ -679,22 +679,31 @@ populate_draft_branch <- function(){
       p_zoom = 12 - as.integer(cut(max(transmute(p_bb, range = max - min)), 
                                    c(0, 0.25, 0.5, 1, 2.5, 5, 10, 20, 40, 80, 160, 320, 360)))
       
-      # set map center and zoom level
+      ## set map center and zoom level
       s = s %>%
         str_replace("map_lat.*", sprintf('map_lat=%g; map_lon=%g; map_zoom=%d', 
                                          p_ctr['y'], p_ctr['x'], p_zoom)) # updated JSL to overwrite any map info
     
-      # use just rgn_labels (not rgn_global)
+      ## use just rgn_labels (not rgn_global)
       s = gsub('rgn_global', 'rgn_labels', s)
     } 
     
-    # swap out custom functions
+    ## swap out custom functions
     if (f=='functions.R'){
       
-      # iterate over goals with functions to swap
+      ## deal with intermediary output files from ohi-global
+      # TODO:: these ohi-global temp files are for debugging and communication. Would be great to
+      # figure out a way to integrate them in OHI+. But for now, deleting them.
+      s = s %>%
+        str_replace("write.csv\\(tmp, 'temp/.*", '') %>%
+        str_replace('^.*sprintf\\(\'temp\\/.*', "")
+      
+        # write.csv(np_risk, sprintf('temp/%s_NP_2
+      
+      ## iterate over goals with functions to swap
       for (g in names(fxn_swap)){ # g = names(fxn_swap)[1]
         
-        # get goal=line# index for functions.R
+        ## get goal=line# index for functions.R
         fxn_idx = setNames(
           grep('= function', s),
           str_trim(str_replace(grep('= function', s, value=T), '= function.*', '')))
@@ -711,7 +720,7 @@ populate_draft_branch <- function(){
       }
     }
     
-    # substitute old layer names with new
+    ## substitute old layer names with new
     lyrs_dif = lyrs_sc %>% filter(!layer %in% layer_gl) # changed from layer != layer_gl JSL 08-24-2015
     for (i in 1:nrow(lyrs_dif)){ # i=1
       s = str_replace_all(s, fixed(lyrs_dif$layer_gl[i]), lyrs_dif$layer[i])
@@ -721,7 +730,7 @@ populate_draft_branch <- function(){
   
   } # end for (f in conf_files)
   
-  # swap fields in goals.csv
+  ## swap fields in goals.csv
   goals = read.csv('conf/goals.csv', stringsAsFactors=F)
   for (g in names(goal_swap)){ # g = names(goal_swap)[1]
     for (fld in names(goal_swap[[g]])){
@@ -730,29 +739,29 @@ populate_draft_branch <- function(){
   }
   write.csv(goals, 'conf/goals.csv', row.names=F, na='')
   
-  # copy goals documentation
+  ## copy goals documentation
   file.copy(file.path(dir_github, 'ohi-webapps/subcountry2014/conf/goals.Rmd'), 'conf/goals.Rmd', overwrite=T)
   
-  # save shortcut files not specific to operating system
+  ## save shortcut files not specific to operating system
   write_shortcuts('.', os_files=0)
   
-  # add travis.yml file
+  ## add travis.yml file
   setwd(dir_repo)
   brew(travis_draft_yaml_brew, '.travis.yml')
   
-  # copy regions map image
+  ## copy regions map image
   dir.create(sprintf('%s/reports/figures', default_scenario), showWarnings=F, recursive=T)
   file.copy(
     file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'gh-pages/images/regions_600x400.png'),
     sprintf('%s/reports/figures/regions_600x400.png', default_scenario), overwrite=T)
   
   
-  # create subfolders in prep folder
+  ## create subfolders in prep folder
   prep_subfolders = c('FIS', 'MAR', 'AO', 'NP', 'CS', 'CP', 'LIV', 'ECO', 'TR', 'CW',
                       'ICO', 'LSP', 'SPP', 'HAB', 'pressures', 'resilience')
   sapply(file.path(default_scenario, sprintf('prep/%s', prep_subfolders)), dir.create)
   
-  # populate prep folder's supfolders
+  ## populate prep folder's supfolders
   file.create(file.path(default_scenario, sprintf('prep/%s', prep_subfolders), 'README.md'))
   file.copy(file.path(dir_github, 'ohi-webapps/tmp/README_template_prep.md'), 
             file.path(default_scenario, 'prep/README.md'), overwrite=T)
@@ -852,11 +861,11 @@ update_draft <- function(key, msg='ohi-webapps/create_functions.R - update_websi
 
 populate_website <- function(key, delete_first=T, copy_images=T, copy_flag=T, msg='populate_website()'){
   
-  # get subcountry vars specific to key
+  ## get subcountry vars specific to key
   key <<- key
   source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
   
-  # cd into repo, checkout gh-pages
+  ## cd into repo, checkout gh-pages
   wd = getwd()
   if (!file.exists(dir_repo)) system(sprintf('git clone %s %s', git_url, dir_repo))
   setwd(dir_repo)
@@ -872,11 +881,11 @@ populate_website <- function(key, delete_first=T, copy_images=T, copy_flag=T, ms
     system('rm -rf *') # clear existing
   }
   
-  # copy template files from ohi-webapps/gh-pages (including _config.brew.yml, which identifies the shiny server location (app_url))
+  ## copy template files from ohi-webapps/gh-pages (including _config.brew.yml, which identifies the shiny server location (app_url))
   file.copy(list.files(file.path(dir_github, 'ohi-webapps/gh-pages'), full.names=T), '.', overwrite=T, recursive=T)
   file.copy(file.path(dir_github, 'ohi-webapps/gh-pages', c('.travis.yml','.gitignore')), '.', overwrite=T, recursive=T)
   
-  # copy images
+  ## copy images
   if (copy_images){
     for (f in c('app_400x250.png','regions_1600x800.png',	'regions_30x20.png', 'regions_400x250.png')){
       f_from = file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'gh-pages/images', f)
@@ -885,13 +894,18 @@ populate_website <- function(key, delete_first=T, copy_images=T, copy_flag=T, ms
     }
   }
   
-  # copy flag, i.e., national flag
+  ## copy flag, i.e., national flag. 
+  # Requires that imageMagick be installed. Terminal commands follow. 
+  # See also stackoverflow.com/questions/25460047/cants-install-imagemagick-with-brew-on-mac-os-x-mavericks
   if (copy_flag){
-    flag_in = sprintf('%s/ohi-webapps/flags/small/%s.png', dir_github, str_replace(subset(sc_studies, sc_key==key, gl_rgn_name, drop=T), ' ', '_'))
+    flag_in = sprintf('%s/ohi-webapps/flags/small/%s.png', 
+                      dir_github, str_replace(subset(sc_studies, sc_key==key, gl_rgn_name, drop=T), ' ', '_'))
     if (file.exists(flag_in)){
       flag_out = file.path(dir_repo, 'images/flag_80x40.png')
       unlink(flag_out)
-      system(sprintf("convert -resize '80x40' %s %s", flag_in, flag_out)) } }  # Requires that imageMagick be installed. See below and http://stackoverflow.com/questions/25460047/cants-install-imagemagick-with-brew-on-mac-os-x-mavericks
+      system(sprintf("convert -resize '80x40' %s %s", flag_in, flag_out)) 
+      } 
+    }  
   # From terminal:
   # $ brew update
   # $ brew install imagemagick --disable-openmp --build-from-source
@@ -903,7 +917,8 @@ populate_website <- function(key, delete_first=T, copy_images=T, copy_flag=T, ms
   
   # add Rstudio project files, plus _site to ignore if testing with local jekyll serve --baseurl ''
   file.copy(system.file('templates/template.Rproj', package='devtools'), sprintf('%s.Rproj', key))
-  writeLines(c('.Rproj.user', '.Rhistory', '.RData', '_site','_asset_bundler_cache','.sass','.sass-cache','.DS_Store'), '.gitignore')
+  writeLines(c('.Rproj.user', '.Rhistory', '.RData', '_site','_asset_bundler_cache','.sass','.sass-cache','.DS_Store'), 
+             '.gitignore')
   
   # git add, commit and push
   system(sprintf('git add -A; git commit -a -m "%s"', msg))

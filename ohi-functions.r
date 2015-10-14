@@ -65,7 +65,7 @@ update_results <- function(){
   # iterate through all scenarios (by finding scores.csv)
   wd = getwd() # presumably in top level folder of repo containing scenario folders
   dirs_scenario = normalizePath(dirname(list.files('.', '^scores.csv$', recursive=T, full.names=T)))
-  for (dir_scenario in dirs_scenario){ # dir_scenario = '~/github/clip-n-ship/alb/alb2014' # dir_scenario = dirs_scenario[1]
+  for (dir_scenario in dirs_scenario){ # dir_scenario = dirs_scenario[1]
     
     # load scenario configuration, layers and scores
     setwd(dir_scenario)
@@ -276,7 +276,10 @@ update_pages <- function(){
   dir_archive = sprintf('~/tmp/%s_archive', git_repo)
   dir.create(dir_archive, recursive=T, showWarnings=F)
   unlink(dir_archive, recursive=T)
-  git_branches   = setdiff(sapply(git2r::branches(repo, flags='remote'), function(x) str_replace(x@name, 'origin/', '')), c('HEAD','gh-pages','app'))
+  git_branches = setdiff(
+    sapply(
+      git2r::branches(repo, flags='remote'), function(x) str_replace(x@name, 'origin/', '')), 
+    c('HEAD','gh-pages','app'))
   branch_commits = list()
   for (branch in git_branches){ # branch = 'published'
     checkout(repo, branch, force=T)
@@ -360,7 +363,7 @@ update_pages <- function(){
   system(sprintf('git push https://${GH_TOKEN}@github.com/%s.git HEAD:gh-pages', git_slug))
   
   
-  # update status ----
+  # update status log: documentation ----
   
   # get status repo  depth of 1 only
   if (file.exists('~/tmp/subcountry')){

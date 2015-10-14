@@ -81,7 +81,7 @@ file.copy(file.path(dir_custom_bc,
 read.csv(file.path(dir_annex, 
                    'can/layers/mar_coastalpopn_inland25km_lyr.csv')) %>%
   filter(rgn_id <= length(unique(ohi_bc_data$rgn_id))) %>%
-  write.csv(file.path(dir_annex, key, 'layers/mar_coastalpopn_inland25km_lyr.csv'))
+  write.csv(file.path(dir_annex, key, 'layers/mar_coastalpopn_inland25km_lyr.csv'), row.names=F)
     
 ```
 

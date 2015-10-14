@@ -5,6 +5,7 @@
 library(stringr)
 library(git2r)     # install.packages('git2r')
 library(dplyr)
+library(tidyr)
 library(readr)
 library(rgdal)
 library(shiny)
