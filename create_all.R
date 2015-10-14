@@ -29,7 +29,7 @@ for (key in keys_redo){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1]
   
   # set vars by subcountry key
   setwd(dir_repos)
-  source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))    # load all variables, set directories specific to individual key
+  source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))    # load all variables, set dirs specific to individual key
   setwd(dir_repo)
   
   # create github repo on github.com
@@ -67,7 +67,7 @@ for (key in keys_redo){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1]
   
   if (enable_travis) { # enable_travis = T
     
-    source('ohi-travis-functions.R')   # all functions to update the webapp with Travis
+    source('~/github/ohi-webapps/ohi-travis-functions.R')   # all functions to update the webapp with Travis
     
     # push draft branch
     setwd(dir_repo)
@@ -128,7 +128,7 @@ for (key in keys_redo){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1]
     
   } else { # enable_travis = F
     
-    source('ohi-functions.R')          # all functions to update the webapp without Travis
+    source('~/github/ohi-webapps/ohi-functions.R')          # all functions to update the webapp without Travis
     
     # push draft branch ~ adapted from create.all
     setwd(dir_repo)

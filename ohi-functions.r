@@ -11,7 +11,7 @@ calculate_scores_notravis <- function(){ # to distinguish from assessmt/scenario
   checkout(repo, 'draft')
   
   # iterate through all scenarios (by finding layers.csv)
-  dirs_scenario = normalizePath(dirname(list.files('.', 'layers.csv', recursive=T, full.names=T)))
+  dirs_scenario = normalizePath(dirname(list.files('.', '^layers.csv$', recursive=T, full.names=T)))
   for (dir_scenario in dirs_scenario){ # dir_scenario=dirs_scenario[1]
     
     # set working directory to scenario

@@ -13,16 +13,9 @@ library(tidyr)
 library(readr)
 library(stringr)
 library(rgdal)
-# library(raster)
 
-# directories
-# dir_neptune = c('Windows' = '//neptune.nceas.ucsb.edu/data_edit',
-#                 'Darwin'  = '/Volumes/data_edit',
-#                 'Linux'   = '/var/data/ohi')[[ Sys.info()[['sysname']] ]]
 dir_custom_bc = '~/github/ohi-webapps/custom/ohibc'
 
-# setwd
-setwd('~/github/ohi-webapps')
 
 ```
 
@@ -34,49 +27,61 @@ Read in BC shapefile and begin formatting for OHI.
 
 ```{r copy bc map from shapefile, eval=F}
 
-# read in shp files and save with desired headers in data frame. 
-# from the master branch!!
+# read in shp files and save with desired headers in data frame. ohibc_rgn_wgs84 is in the correct projection for webapps
 bc = readOGR(dsn = path.expand('~/github/ohibc/regions'),
               layer = 'ohibc_rgn_wgs84')
 
 # plot 
-plot(bc)
+#plot(bc)
 
 # view data
-bc@data
+ohi_bc_data = bc@data; ohi_bc_data
 
 # clean orphan holes or invalid geometries 
 source('~/github/ohi-webapps/custom/cleangeo_spatial_fxn.r')
 bc_clean = cleangeo_spatial(bc)
 
-# transforming from one CRS (Mercator which is in meters) to another (lat/long)
-bc_proj = spTransform(bc, CRS('+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0')) # WGS84
-bc_proj_clean <- cleangeo_spatial(bc_proj)
 
 # save as shapefiles. will create 4 files: .dbf, .prj, .shp, .shx
 writeOGR(bc_clean, dsn = file.path(dir_annex, 'ohibc/spatial/custom'), 
          layer = 'ohibc_shp', driver = 'ESRI Shapefile', overwrite=T) 
 
-# create lookup table with unique rgn_ids
-ohibc_rgns = bc_clean@data %>%
+# save lookup table with unique rgn_ids
+ohi_bc_data %>%
   select(rgn_name, rgn_id) %>%
-  arrange(rgn_id)
+  arrange(rgn_id) %>%
+  write_csv(file.path(dir_custom_bc, 'ohibc_rgns_lookup.csv'))
 
-write_csv(ohibc_rgns, 'custom/ohibc/ohibc_rgns_lookup.csv')
-
-```
-
-Temporary work-around for cleaned files
-
-```{r tmp guy maps}
-
-x = readOGR(dsn = file.path(dir_annex, 'ohibc/spatial'),
-              layer = 'rgn_offshore_gcs')
-
-writeOGR(x, dsn = file.path(dir_annex, 'ohibc/spatial/custom'), 
-         layer = 'ohibc_shp_tmp_guy', driver = 'ESRI Shapefile', overwrite=T) 
-
-# `ohibc_shp_tmp_guy` will be listed first which will work with algorithm of custom_maps()
-
+# save rgn_offshore_data.csv
+ohi_bc_data %>%
+  select(rgn_id, rgn_name, area_km2) %>%
+  arrange(rgn_id) %>%
+  write_csv(file.path(dir_custom_bc, 'rgn_offshore_data.csv'))
 
 ```
+
+
+## 3. populate ohibc directory in git-annex
+Create directories in `git-annex/clip-n-ship` and copy files required for populate_draft_branch(). These are storage directories.
+
+```{r}
+
+# first create the directories
+dir.create(file.path(dir_annex, key))
+dir.create(file.path(dir_annex, key, 'spatial'))
+dir.create(file.path(dir_annex, key, 'layers'))
+
+
+# copy rgn_offshore_data.csv
+file.copy(file.path(dir_custom_bc, 
+                    'rgn_offshore_data.csv'),
+          file.path(dir_annex, key, 'spatial/rgn_offshore_data.csv'), overwrite=T)
+
+# make TEMPLATE mar_coastalpopn_inland25km_lyr.csv
+read.csv(file.path(dir_annex, 
+                   'can/layers/mar_coastalpopn_inland25km_lyr.csv')) %>%
+  filter(rgn_id <= length(unique(ohi_bc_data$rgn_id))) %>%
+  write.csv(file.path(dir_annex, key, 'layers/mar_coastalpopn_inland25km_lyr.csv'))
+    
+```
+

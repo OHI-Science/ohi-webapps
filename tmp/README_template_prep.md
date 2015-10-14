@@ -1,5 +1,5 @@
 # README
 
-This folder is to prepare data for the Toolbox. Files within this `prep` folder will also sync with GitHub. 
+This folder is to prepare data for the OHI calculations. Files within this `prep` folder will also sync with GitHub. 
 
-Avoid .xls and .doc files if possible, as GitHub has trouble with large files. 
+GitHub can have trouble with large files; minimizing .xls and .doc files is advised. 

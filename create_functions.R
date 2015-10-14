@@ -327,14 +327,14 @@ populate_draft_branch <- function(){
     setwd(dir_scenario)
     
     # create dirs
-    for (dir in c('tmp','layers','conf','spatial', 'prep')) dir.create(dir, showWarnings=F)
+    for (dir in c('tmp','layers','conf','spatial','prep')) dir.create(dir, showWarnings=F)
     
     # copy layers.csv from global
     write.csv(lyrs_gl, sprintf('tmp/layers_%s.csv', sfx_global), na='', row.names=F)
   } # end (key != 'bhi')
   
   
-  # spatial
+  # spatial: create regions_gcs.geojson and regions_gcs.js
   f_js_old      = file.path(dir_annex_sc, 'regions_gcs.js')
   f_geojson_old = file.path(dir_annex_sc, 'regions_gcs.geojson')
   f_js          = file.path(dir_annex_sc, 'spatial', 'regions_gcs.js')
@@ -438,7 +438,7 @@ populate_draft_branch <- function(){
     lyrs_sc$rgns_in[ix]     = 'subcountry'
     
     # get layers used to downweight from global: area_offshore, area_offshore_3nm, equal, equal , population_inland25km,
-    population_inland25km = read.csv(file.path(dir_annex_sc, 'layers' , 'mar_coastalpopn_inland25km_lyr.csv')) %>%      # DUMMY file March 16.
+    population_inland25km = read.csv(file.path(dir_annex_sc, 'layers' , 'mar_coastalpopn_inland25km_lyr.csv')) %>%     
       filter(year == dw_year) %>%
       mutate(
         dw = popsum / sum(popsum)) %>%
@@ -482,7 +482,7 @@ populate_draft_branch <- function(){
     lyrs_sc = filter(lyrs_sc, !layer %in% lyrs_le_rm)
     
     # write layers data files
-    for (j in 1:nrow(lyrs_sc)){ # j=56
+    for (j in 1:nrow(lyrs_sc)){ # j=93
       
       lyr     = lyrs_sc$layer[j]
       rgns_in = lyrs_sc$rgns_in[j]
@@ -499,7 +499,8 @@ populate_draft_branch <- function(){
             filter(rgn_id %in% sc_rgns$gl_rgn_id) %>%
             merge(sc_rgns, by.x='rgn_id', by.y='gl_rgn_id') %>%
             mutate(rgn_id=sc_rgn_id) %>%
-            subset(select=flds)
+            subset(select=flds) %>%
+            arrange(rgn_id)
         }
         
         if ('cntry_key' %in% names(d)){
@@ -509,7 +510,8 @@ populate_draft_branch <- function(){
               sc_cntry,
               by='cntry_key') %>%
             dplyr::rename(rgn_id=sc_rgn_id) %>%
-            select_(.dots = as.list(c('rgn_id', setdiff(names(d), 'cntry_key'))))
+            select_(.dots = as.list(c('rgn_id', setdiff(names(d), 'cntry_key')))) %>%
+            arrange(rgn_id)
         }
         
         if (lyrs_sc$layer[j]=='rgn_labels'){
@@ -517,7 +519,8 @@ populate_draft_branch <- function(){
           lyrs_sc$filename[j] = basename(csv_out)
           d = d %>%
             merge(sc_rgns, by.x='rgn_id', by.y='sc_rgn_id') %>%
-            select(rgn_id, type, label=sc_rgn_name)
+            select(rgn_id, type, label=sc_rgn_name) %>%
+            arrange(rgn_id)
         }
         
         # downweight: area_offshore, equal, equal , population_inland25km,
@@ -545,10 +548,24 @@ populate_draft_branch <- function(){
         }
       }
       write.csv(d, csv_out, row.names=F, na='')
-    }
+   
+     }  # end for (j in 1:nrow(lyrs_sc))
     
     # layers registry
-    write.csv(lyrs_sc, 'layers.csv', row.names=F, na='')
+    lyrs_reg = lyrs_sc %>%
+      select(
+        targets,
+        layer,
+        filename,
+        fld_value,
+        units,
+        name,
+        description,
+        clip_n_ship_disag,
+        clip_n_ship_disag_description,
+        layer_gl, 
+        path_in) %>%
+        write.csv('layers.csv', row.names=F, na='')
     
     # check for empty layers
     CheckLayers('layers.csv', 'layers',
@@ -629,8 +646,9 @@ populate_draft_branch <- function(){
       
       #if (lyr == 'mar_harvest_tonnes') browser()
       write.csv(b, csv_out, row.names=F, na='')
-    }
     
+    } # end for (lyr in subset(lyrs, data_na, layer, drop=T))
+     
     # update layers.csv with empty layers now populated by global averages
     CheckLayers('layers.csv', 'layers',
                 flds_id=c('rgn_id','country_id','saup_id','fao_id','fao_saup_id'))
@@ -658,11 +676,13 @@ populate_draft_branch <- function(){
       p      = readOGR(dirname(p_shp), tools::file_path_sans_ext(basename(p_shp)))
       p_bb   = data.frame(p@bbox) # max of 2.25
       p_ctr  = rowMeans(p_bb)
-      p_zoom = 12 - as.integer(cut(max(transmute(p_bb, range = max - min)), c(0, 0.25, 0.5, 1, 2.5, 5, 10, 20, 40, 80, 160, 320, 360)))
+      p_zoom = 12 - as.integer(cut(max(transmute(p_bb, range = max - min)), 
+                                   c(0, 0.25, 0.5, 1, 2.5, 5, 10, 20, 40, 80, 160, 320, 360)))
       
       # set map center and zoom level
       s = s %>%
-        str_replace("map_lat.*", sprintf('map_lat=%g; map_lon=%g; map_zoom=%d', p_ctr['y'], p_ctr['x'], p_zoom)) # updated JSL to overwrite any map info
+        str_replace("map_lat.*", sprintf('map_lat=%g; map_lon=%g; map_zoom=%d', 
+                                         p_ctr['y'], p_ctr['x'], p_zoom)) # updated JSL to overwrite any map info
     
       # use just rgn_labels (not rgn_global)
       s = gsub('rgn_global', 'rgn_labels', s)
@@ -733,12 +753,9 @@ populate_draft_branch <- function(){
   sapply(file.path(default_scenario, sprintf('prep/%s', prep_subfolders)), dir.create)
   
   # populate prep folder's supfolders
-  file.create(file.path(default_scenario, sprintf('prep/%s', prep_subfolders), 'README.txt'))
-  #   file.append(file.path(dir_github, 'ohi-webapps/tmp/README_template_prepgoals.txt'),  # this should append, but doesn't. Also tried file.create
-  #     file.path(default_scenario, sprintf('prep/%s', prep_subfolders), 'README.txt'))  
-  #  
-  file.copy(file.path(dir_github, 'ohi-webapps/tmp/README_template_prep.txt'), 
-            file.path(default_scenario, 'prep/README.txt'), overwrite=T)
+  file.create(file.path(default_scenario, sprintf('prep/%s', prep_subfolders), 'README.md'))
+  file.copy(file.path(dir_github, 'ohi-webapps/tmp/README_template_prep.md'), 
+            file.path(default_scenario, 'prep/README.md'), overwrite=T)
   
   setwd(wd)
 }

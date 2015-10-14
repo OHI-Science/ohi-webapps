@@ -164,9 +164,6 @@ Note: not run to recreated `bhi`; this had already been done previously with `pr
 
 Create directories in `git-annex/clip-n-ship` and copy files required for populate_draft_branch(). These are storage directories.
 
-
-Create directories in `git-annex/clip-n-ship` and copy files required for populate_draft_branch(). These are storage directories.
-
 ```{r populate bhi-xxx annex, eval=F}
 
 redo_bhi_dirs = F
