@@ -750,7 +750,7 @@ populate_draft_branch <- function(){
   brew(travis_draft_yaml_brew, '.travis.yml')
   
   ## copy regions map image
-  # TODO: strongly recommend moving this to map section. 
+  # TODO: strongly recommend moving this to a dedicated map section. 
   dir.create(sprintf('%s/reports/figures', default_scenario), showWarnings=F, recursive=T)
   file.copy(
     file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'gh-pages/images/regions_600x400.png'),
@@ -766,6 +766,40 @@ populate_draft_branch <- function(){
   file.create(file.path(default_scenario, sprintf('prep/%s', prep_subfolders), 'README.md'))
   file.copy(file.path(dir_github, 'ohi-webapps/tmp/README_template_prep.md'), 
             file.path(default_scenario, 'prep/README.md'), overwrite=T)
+  
+  
+  ### The following are also in additions_draft() below. Consider making funcions. 
+  ## update setwd() in assessment/scenario/calculate_scores.r
+  readLines(file.path(dir_repo, default_scenario, 'calculate_scores.r')) %>%
+    str_replace("setwd.*", paste0("setwd('", file.path(dir_github, key, default_scenario), "')")) %>%
+    writeLines(file.path(default_scenario, 'calculate_scores.r'))
+  
+  ## update launch_app() call in assessment/scenario/launch_app_code.r
+  readLines(file.path(dir_repo, default_scenario, 'launch_app_code.r')) %>%
+    str_replace(".*launch_app.*", paste0("ohicore::launch_app('", file.path(dir_github, key, default_scenario), "')")) %>%
+    writeLines(file.path(default_scenario, 'launch_app_code.r'))
+  
+  ## save ohi-webapps/install_ohicore.r
+  fn = 'install_ohicore.r'
+  file.copy(file.path('~/github/ohi-webapps', fn), 
+            file.path(dir_repo, default_scenario, fn), overwrite=T)
+  
+  ## create and populate prep/tutorials folder 
+  dir_tutes = file.path(dir_github, 'ohimanual/tutorials/R_tutes')
+  
+  dir.create(file.path(dir_repo, default_scenario, 'prep/tutorials'))
+  file.copy(file.path(dir_tutes, 'R_tutes_all.md'), 
+            file.path(default_scenario, 'prep/tutorials', 'R_intro.md'), overwrite=T)
+  readLines(file.path(dir_tutes, 'R_tutes.r')) %>%
+    str_replace("setwd.*", 
+                paste0("setwd('", file.path(dir_github, key, default_scenario, 'prep/tutorials'), "')")) %>%
+    writeLines(file.path(default_scenario, 'prep/tutorials', 'R_tutorial.r'))    
+  
+  
+  ## brew copy_webapps_templates.r a la github.com/OHI-Science/issues/issues/506
+  brew(sprintf('%s/ohi-webapps/copy_webapps_templates.brew.r', dir_github), 
+       'copy_webapps_templates.r')
+  
   
   setwd(wd)
 }

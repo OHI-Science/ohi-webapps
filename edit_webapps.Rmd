@@ -311,7 +311,7 @@ dir.create(file.path(dir_repo), showWarnings=F)
 # because ohibc repo already exists with important content, add to it but don't overwrite. So instead of continuing normally with create_all.r, do the following: 
 
 # run only some of populate_draft_branch(), but then continue normally with create_all.r
-
+additions_draft()
 
 ```
 

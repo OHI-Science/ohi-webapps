@@ -86,22 +86,35 @@ Functions are from `create_functions.r` unless otherwise noted
     + copy config files: `config.r`, `functions.r` (swap LE), `goals.rmd`, `pressures_matrix.csv`,  `resilience_matrix.csv`
     + brew `.travis.yml`
     + make prep subfolders per goal and pressures/resilience, populate with READMEs
-4. `push_branch()` -- from `ohi-travis-functions.r` or `ohi-functions.r`
-5. `calculate_scores()` or `calculate_scores_notravis()` -- from `ohi-travis-functions.r` or `ohi-functions.r`
-6. `create_results()` or `update_results()` -- from `ohi-travis-functions.r` or `ohi-functions.r`
+    + update setwd() in assessment/scenario/calculate_scores.r
+    + update launch_app() call in assessment/scenario/launch_app_code.r
+    + save ohi-webapps/install_ohicore.r
+    + create and populate prep/tutorials folder
+    + brew copy_webapps_templates.r
+4. `additions_branch()`: optional additions    
+    + update .travis.yml syntax
+    + update setwd() in assessment/scenario/calculate_scores.r
+    + update launch_app() call in assessment/scenario/launch_app_code.r
+    + save ohi-webapps/install_ohicore.r
+    + make prep subfolders per goal and pressures/resilience, populate with READMEs
+    + create and populate prep/tutorials folder
+    + brew copy_webapps_templates.r 
+5. `push_branch()` -- from `ohi-travis-functions.r` or `ohi-functions.r`
+6. `calculate_scores()` or `calculate_scores_notravis()` -- from `ohi-travis-functions.r` or `ohi-functions.r`
+7. `create_results()` or `update_results()` -- from `ohi-travis-functions.r` or `ohi-functions.r`
     + <span style = "color:pink">draft branch</span>, find `^scores.csv$`
     + get goal weightings and scores
     + make flower plots
     + make table 
-7. `push_branch()` -- from `ohi-travis-functions.r` or `ohi-functions.r`
+8. `push_branch()` -- from `ohi-travis-functions.r` or `ohi-functions.r`
     + `merge_published_branch()`
-8. `populate_website` or `update_website`
+9. `populate_website` or `update_website`
     + <span style = "color:pink">checkout gh-pages branch</span>
     + copy templates from ohi-webapps/gh-pages
     + copy maps, images, national flag
     + brew config and README
     + add .Rproj, .git
-9. `create_pages` or `update_pages()` -- from `ohi-travis-functions.r` or `ohi-functions.r`    
+10. `create_pages` or `update_pages()` -- from `ohi-travis-functions.r` or `ohi-functions.r`    
     + <span style = "color:pink">pull draft branch</span>
     + git owner stuff
     + copy gh-pages: regions, layers, goals, scores, navbar (check if any OHI+ updates)
@@ -111,7 +124,7 @@ Functions are from `create_functions.r` unless otherwise noted
     + brew gh-pages regions, layers, goals, scores, navbar
     + push gh-pages
     + update internal status log
-10. `deploy_app_nceas()` -- *previously `deploy_app()` was used to push to RStudio Shiny server
+11. `deploy_app_nceas()` -- *previously `deploy_app()` was used to push to RStudio Shiny server
     + <span style = "color:pink">clone repo</span>, checkout app branch
     + copy shiny app files from `ohicore`
     + get version commit

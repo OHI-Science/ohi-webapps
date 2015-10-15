@@ -64,6 +64,7 @@ for (key in keys_redo){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1]
   
   # populate draft branch of repo
   populate_draft_branch()    # turn buffers back on if making buffers
+  additions_draft() 
   
   if (enable_travis) { # enable_travis = T
     
