@@ -24,6 +24,7 @@ See below for @bbest developer notes
     + many directories involved in this workflow. Most steps begin with cloning the existing repo to your local workspace `~/github/clip-n-ship` (but `clip-n-ship` is **not** version-controlled) and should be created in your own github local directory
     + `.travis.yml` is how scores are calculated automatically. Still exists for active repos that don't use travis-CI; all branches are blacklisted
     + `FITZ` is our server that houses the shiny apps: `ssh jstewart@fitz.nceas.ucsb.edu; cd /srv/shiny-server`
+    + **maps** are generated from shapefiles and turned into geojson files and static images (.pngs) for display. These steps happen in different places; this will be consolidated.
 
 ## Important directories
 

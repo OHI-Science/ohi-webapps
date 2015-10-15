@@ -329,13 +329,13 @@ update_pages <- function(){
           title = name)  %>%
         arrange(title))
     
-    # copy results: figures and tables
+    # copy results: map-images, flowerplots and tables to display on gh-pages tabs
     dir_data_results  =  file.path(dir_archive, branch_scenario, 'reports')
     dir_pages_results =  file.path('results', branch_scenario)
     dir.create(dir_pages_results, showWarnings=F, recursive=T)
     file.copy(list.files(dir_data_results, full.names=T), dir_pages_results, recursive=T)
     
-    # brew markdown files
+    # brew markdown files for index.md tabs on gh-pages
     for (f_brew in list.files(dir_brew, '.*\\.brew\\.md', full.names=T)){ # f_brew = "/Users/jstewart/tmp/ohi-webapps/goals.brew.md"
       section = str_replace(basename(f_brew), fixed('.brew.md'), '')
       branch_scenario_navbar = utils::capture.output({ suppressWarnings(brew(file.path(dir_brew, 'navbar.brew.html'))) })

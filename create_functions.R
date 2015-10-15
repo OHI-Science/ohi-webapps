@@ -335,6 +335,7 @@ populate_draft_branch <- function(){
   
   
   ## spatial: create regions_gcs.geojson and regions_gcs.js
+  # TODO: JSL: strongly consider moving this into create_maps() so that if region boundaries are updated, this will too
   f_js_old      = file.path(dir_annex_sc, 'regions_gcs.js')
   f_geojson_old = file.path(dir_annex_sc, 'regions_gcs.geojson')
   f_js          = file.path(dir_annex_sc, 'spatial', 'regions_gcs.js')
@@ -355,7 +356,7 @@ populate_draft_branch <- function(){
   for (f in c(f_js, f_geojson)){ # f = f_spatial[1]
     if (key != 'bhi')  file.copy(f, sprintf('spatial/%s', basename(f)), overwrite=T) # original
     if (key == 'bhi') file.copy(f, sprintf('baltic2015/spatial/%s', basename(f)), overwrite=T) # BHI hack
-    cat(sprintf('copying from %s', f))
+    cat(sprintf('\n copying from %s', f))
   }
   
   
@@ -658,7 +659,7 @@ populate_draft_branch <- function(){
   
   ## copy configuration files
   conf_files = c('config.R','functions.R','goals.csv','pressures_matrix.csv','resilience_matrix.csv','resilience_weights.csv')
-  for (f in conf_files){ # f = conf_files[2]
+  for (f in conf_files){ # f = conf_files[1]
     
     f_in  = sprintf('%s/conf/%s', dir_global, f)
     f_out = sprintf('conf/%s', f)
@@ -670,6 +671,7 @@ populate_draft_branch <- function(){
     if (f=='config.R'){
       
       ## get map centroid and zoom level
+      # TODO: would be great to set this info when making maps so center is reset if map changes, not sure that's feasible...
       # TODO: http://gis.stackexchange.com/questions/76113/dynamically-set-zoom-level-based-on-a-bounding-box
       # var regions_group = new L.featureGroup(regions); map.fitBounds(regions_group.getBounds());
       p_shp  = file.path(dir_annex_sc, 'spatial', 'rgn_offshore_gcs.shp')
@@ -748,6 +750,7 @@ populate_draft_branch <- function(){
   brew(travis_draft_yaml_brew, '.travis.yml')
   
   ## copy regions map image
+  # TODO: strongly recommend moving this to map section. 
   dir.create(sprintf('%s/reports/figures', default_scenario), showWarnings=F, recursive=T)
   file.copy(
     file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'gh-pages/images/regions_600x400.png'),
@@ -1322,7 +1325,7 @@ create_maps = function(key='ecu'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
 
 custom_maps = function(key){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
   
-  # load libraries quietly
+  ## load libraries quietly
   suppressWarnings(suppressPackageStartupMessages({
     library(sp)
     library(rgdal)
@@ -1338,13 +1341,13 @@ custom_maps = function(key){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
     diff  = base::diff
   }))
   
-  # vars
+  ## variables
   buffers = c('offshore'=0.2, 'inland'=0.2, 'inland1km'=0.8, 'inland25km'=0.4, 'offshore3nm'=0.4, 'offshore1km'=0.8) # and transparency
   if (key=='usa'){ # extra buffers making R crash presumably at fortify step b/c so big for USA
     buffers = c('offshore'=0.2, 'inland25km'=0.2, 'inland25km'=0.4) # and transparency
   }
   
-  # paths (dir_neptune, dir_github already set by source('~/github/ohi-webapps/create_init.R')
+  ## paths; see also ohi-webapps/create_init.R
   key <<- key
   source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
   
@@ -1353,9 +1356,9 @@ custom_maps = function(key){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
   dir_custom  = file.path(dir_spatial, 'custom')
   dir_pages   = file.path(dir_data, key, 'gh-pages')
   
-  # process shapefiles:
+  ## process shapefiles:
   
-  # read shapefiles, rename headers and save in dir_spatial
+  ## read shapefiles, rename headers and save in dir_spatial
   shp_name = file_path_sans_ext(list.files(dir_custom))[1]
   shp_orig = readOGR(dir_custom, shp_name) # inspect: shp_orig
   #names(shp_orig@data) = c('rgn_id', 'rgn_name', 'area_km2', 'hectares')  # for GYE     ## generalize!
@@ -1363,7 +1366,7 @@ custom_maps = function(key){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
   shp = spTransform(shp_orig,crs) # inspect as data.frame: shp@data // inspect a column: shp@data$rgn_name
   writeOGR(shp, dsn=dir_spatial, 'rgn_offshore_gcs', driver='ESRI Shapefile', overwrite=T)
   
-  # read shapefiles, store as list
+  ## read shapefiles, store as list
   plys = lapply(shp_name, function(x){
     shp_orig = readOGR(dir_custom, shp_name)
     crs = CRS("+proj=longlat +datum=WGS84")
@@ -1371,7 +1374,7 @@ custom_maps = function(key){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
     return(shp)
   })
   
-  # drop failed buffers
+  ## drop failed buffers
   bufs_valid = sapply(plys, function(x) !'try-error' %in% class(x))
   txt_shp_error = sprintf('%s/%s_readOGR_fails.txt', dir_errors, key)
   unlink(txt_shp_error)
@@ -1380,7 +1383,7 @@ custom_maps = function(key){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
   }
   plys = plys[bufs_valid]
   
-  # fortify and set rgn_names as factor of all inland rgns. ***This is where invalid geometries/orphan hole errors may occur***
+  ## fortify and set rgn_names as factor of all inland rgns. ***This is where invalid geometries/orphan hole errors may occur***
   rgn_names = factor(plys[[1]][['rgn_name']])  # orig: rgn_name, gye:Zona, bhi:rgn_name # need to generalize this
   plys.df = lapply(plys, function(x){
     x = fortify(x, region='rgn_name')              # orig: rgn_name, gye:Zona, bhi:rgn_name # need to generalize this
@@ -1388,10 +1391,10 @@ custom_maps = function(key){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
     return(x)
   })         # head(as.data.frame(plys.df))
   
-  # keep only coastal subcountry regions
+  ## keep only coastal subcountry regions
   #   ids_offshore = unique(plys.df[['offshore']][['id']])
   
-  # get extent from inland and offshore, expanded 10%
+  ## get extent from inland and offshore, expanded 10%
   #   bb_inland25km = bbox(plys[['inland25km']])
   bb_offshore   = bbox(plys[[1]])
   #
@@ -1400,7 +1403,7 @@ custom_maps = function(key){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
     x  = extendrange(c(bb_offshore['x',], bb_offshore['x',]), f=0.1)
     y  = extendrange(c(bb_offshore['y',], bb_offshore['y',]), f=0.1)
     
-    # make bbox proportional to desired output image dimensions
+    ## make bbox proportional to desired output image dimensions
     if (diff(x) < width / height * diff(y)){
       x = c(-1, 1) * diff(y)/2 * width/height + mean(x)
     } else {
@@ -1408,7 +1411,7 @@ custom_maps = function(key){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
     }
     bb = c(x[1], y[1], x[2], y[2])
     
-    # plot basemap
+    ## plot basemap
     cat('bb:',bb,'\n')
     m = try(get_map(location=bb, source='stamen', maptype='toner-lite', crop=T))
     if (class(m) == 'try-error'){
@@ -1417,12 +1420,12 @@ custom_maps = function(key){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
     }
     p = ggmap(m, extent='device')
     
-    # overlay region buffers as colors; see create_map above for each individual buffer (offshore, offshore3nm etc)
+    ## overlay region buffers as colors; see create_map above for each individual buffer (offshore, offshore3nm etc)
     p = p + geom_polygon(
       aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['offshore']],
       data=plys.df[[1]])
     
-    # tweaks
+    ## tweaks
     p = p +
       labs(fill='', xlab='', ylab='') +
       theme(
@@ -1446,11 +1449,11 @@ custom_maps = function(key){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
     #system(sprintf('open %s', f_png))
   }
   
-  # create gh-pages/images directory
+  ## create gh-pages/images directory
   dir_pfx = file.path(dir_annex, key, 'gh-pages/images')
   dir.create(dir_pfx, showWarnings=F, recursive=T)
   
-  # create maps
+  ## create maps
   custom_map( # for home page banner
     f_png = file.path(dir_pfx, 'regions_1600x800.png'),
     res=72, width=1600, height=800, effect='toycamera')

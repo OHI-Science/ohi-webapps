@@ -23,6 +23,7 @@ dir_custom_bc = '~/github/ohi-webapps/custom/ohibc'
 ## 2. copy BC map from @oharac's shape files  
 
 Read in BC shapefile and begin formatting for OHI.
+I also copied the Canada national flag for British Columbia.
 
 
 ```{r copy bc map from shapefile, eval=F}
