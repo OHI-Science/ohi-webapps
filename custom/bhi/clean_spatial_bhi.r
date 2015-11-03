@@ -11,7 +11,7 @@
 # identify any issues in spatial data ----
 library(rgdal)
 library(raster)
-library(cleangeo) # devtools::install_github('eblondel/cleangeo')  # https://github.com/eblondel/cleangeo
+library(cleangeo) # on CRAN now - source code at https://github.com/eblondel/cleangeo
 
 #get a report of geometry validity & issues for a spatial object
 report = clgeo_CollectionReport(bhi)
