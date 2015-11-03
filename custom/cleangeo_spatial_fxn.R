@@ -7,7 +7,7 @@ cleangeo_spatial <- function(sp_data) {
   
   # identify any issues in spatial sp_data ----
   library(rgdal)
-  library(cleangeo) # devtools::install_github('eblondel/cleangeo')  # https://github.com/eblondel/cleangeo
+  library(cleangeo) # on CRAN now - source code at https://github.com/eblondel/cleangeo
   
   cat('checking for orphan holes or invalid geometries...\n')
   
