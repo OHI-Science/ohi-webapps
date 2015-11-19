@@ -4,7 +4,7 @@ This script creates the Baltic Health Index (BHI) repository and webapp.
 
 It was originally run in April 2015 with 25 regions; it was rerun in August 2015 with new spatial boundaries and 42 regions. See Issue [#407](https://github.com/OHI-Science/issues/issues/407). 
 
-Note: This script superceded `prep_bhi.r`, created in April 2015 with `Inters_BALTIC_EEZ_PLC1` spatial files . This script recreates regions with `Intersect_HELCOMsubbasins_BALTIC_EEZ_excl_small_poly` spatial files.  
+Note: This script superceded `prep_bhi.r`, created in April 2015 with `Inters_BALTIC_EEZ_PLC1` spatial files. This script recreates regions with `Intersect_HELCOMsubbasins_BALTIC_EEZ_excl_small_poly` spatial files.  
 
 # Overview
 Not all steps were necessary to run when recreating the bhi repo with new spatial boundaries, since the `bhi` repo already existed and was just being edited. Each R chunk below will not be evaluated (ie, `{r, eval=F}`). Steps below that were run when recreating `bhi`: 

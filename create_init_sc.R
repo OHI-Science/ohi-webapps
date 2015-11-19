@@ -29,7 +29,11 @@ if (key %in% sc_custom$sc_key){
 } else {
   default_scenario = 'subcountry2014'
 }
+
+# set custom default_scenario
 if (key == 'chn') default_scenario = 'province2015'
+
+# set default branch
 default_branch          = 'published'
 default_branch_scenario = sprintf('%s/%s', default_branch, default_scenario)
 

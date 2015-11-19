@@ -117,8 +117,8 @@ sc_studies <- gl_rgns %>%
 # read in custom sc studies
 sc_custom = read.csv('custom/sc_studies_custom.csv', stringsAsFactors=F) 
 sc_studies = sc_studies %>%
-  anti_join(sc_custom, by = c('sc_key', 'sc_name', 'gl_rgn_id')) %>%  # removes original chn; 
-    rbind(                                                            # rbinds custom chn
+  anti_join(sc_custom, by = c('sc_key', 'sc_name', 'gl_rgn_id')) %>%  # removes original chn, col
+    rbind(                                                            # rbinds custom chn, col
   sc_custom[, names(sc_studies)])
 stopifnot(count(sc_studies, sc_key) %>% filter(n > 1) %>% nrow == 0) 
 

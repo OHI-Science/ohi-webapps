@@ -360,3 +360,26 @@ for (key in keys){ # key = 'gye', key='chn'
 
 
 ```
+
+
+## redo COL repo+webapp with custom regions
+
+Rough workflow: 
+
+- receive Baltic spatial files with region boundaries
+- identify Baltic countries 
+- create repo for bhi as a whole
+- create Baltic layers by binding layers for each Baltic country's repo
+- populate bhi repo with layers and maps
+- push to bhi repo branches, including webapp
+
+```{r redo col repo+webapp, eval=F}
+
+# see ohi-webapps/custom/col/prep_col.rmd
+
+```
+
+
+
+
+
