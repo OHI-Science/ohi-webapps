@@ -750,7 +750,7 @@ populate_draft_branch <- function(){
   brew(travis_draft_yaml_brew, '.travis.yml')
   
   ## copy regions map image
-  # TODO: strongly recommend moving this to a dedicated map section. 
+  # TODO: strongly recommend moving this to a dedicated map section. However, can't be with create_maps() because these folders don't exist yet. Rethink a bit more. 
   dir.create(sprintf('%s/reports/figures', default_scenario), showWarnings=F, recursive=T)
   file.copy(
     file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'gh-pages/images/regions_600x400.png'),
@@ -1503,6 +1503,7 @@ custom_maps = function(key){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
   custom_map( # for status thumbnail
     f_png = file.path(dir_pfx, 'regions_30x20.png'),
     res=72, width=30, height=20, effect='')
+  
 }
 
 status_travis = function(key, clone=F, enable=T, 
@@ -1777,7 +1778,8 @@ additions_draft <- function(key, msg='ohi-webapps/create_functions.R - additions
     
     ## 3. update launch_app() call in assessment/scenario/launch_app_code.r
     readLines(file.path(default_scenario, 'launch_app_code.r')) %>%
-      str_replace(".*launch_app.*", paste0("ohicore::launch_app('", file.path(dir_github, key, default_scenario), "')")) %>%
+      str_replace(".*launch_app.*", 
+                  paste0("ohicore::launch_app('", file.path(dir_github, key, default_scenario), "')")) %>%
       writeLines(file.path(default_scenario, 'launch_app_code.r'))
     
     ## 4. save ohi-webapps/install_ohicore.r
@@ -1810,11 +1812,16 @@ additions_draft <- function(key, msg='ohi-webapps/create_functions.R - additions
         writeLines(file.path(default_scenario, 'prep/tutorials', 'R_tutorial.r'))    
     }
   
-  # 6. brew copy_webapps_templates.r a la github.com/OHI-Science/issues/issues/506
+  ## 6. brew copy_webapps_templates.r a la github.com/OHI-Science/issues/issues/506
   brew(sprintf('%s/ohi-webapps/copy_webapps_templates.brew.r', dir_github), 'copy_webapps_templates.r')
   
+  ## 7. save map in figures folder: will be displayed on the gh-pages Regions page. 
+  file.copy(
+    file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'gh-pages/images/regions_600x400.png'),
+    file.path('reports/figures/regions_600x400.png'), overwrite=T)
   
-#   # 7. remove evil characters from layers.csv that prevent gh-pages from displaying. In progress Dec 4
+  
+#   ## 8. remove evil characters from layers.csv that prevent gh-pages from displaying. In progress Dec 4
 #   https://github.com/hadley/stringr/blob/master/vignettes/stringr.Rmd
 #   http://www.regular-expressions.info/rlanguage.html
   # http://regexr.com/

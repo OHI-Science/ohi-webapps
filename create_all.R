@@ -29,7 +29,7 @@ for (key in keys_redo){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1]
   
   # set vars by subcountry key
   setwd(dir_repos)
-  source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))    # load all variables, set dirs specific to individual key
+  source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))    
   setwd(dir_repo)
   
   # create github repo on github.com
@@ -44,7 +44,8 @@ for (key in keys_redo){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1]
     if (!all(file.exists(
       file.path(dir_annex, key, 
                 'gh-pages/images', 
-                c('regions_1600x800.png', 'regions_600x400.png', 'regions_400x250.png', 'app_400x250.png', 'regions_30x20.png')))) 
+                c('regions_1600x800.png', 'regions_600x400.png', 'regions_400x250.png', 
+                  'app_400x250.png', 'regions_30x20.png')))) 
       | redo_maps){
       res = try(create_maps(key))
       if (class(res)=='try-error'){
@@ -56,7 +57,8 @@ for (key in keys_redo){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1]
     if (!all(file.exists(
       file.path(dir_annex, key,
                 'gh-pages/images', 
-                c('regions_1600x800.png', 'regions_600x400.png', 'regions_400x250.png', 'app_400x250.png', 'regions_30x20.png'))))
+                c('regions_1600x800.png', 'regions_600x400.png', 'regions_400x250.png', 
+                  'app_400x250.png', 'regions_30x20.png'))))
       | redo_maps){
       res = try(custom_maps(key))
     }

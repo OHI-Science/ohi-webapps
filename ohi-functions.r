@@ -117,12 +117,6 @@ update_results <- function(){
       levels = names(conf$config$dimension_descriptions),
       ordered=T)
     
-    ## update the map displayed on the gh-pages Regions page! added Dec 4 JSL (poached from create_functions.r)
-    file.copy(
-      file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'gh-pages/images/regions_600x400.png'),
-      file.path('reports/figures/regions_600x400.png'), overwrite=T)
-    
-    
     ## loop through regions
     for (rgn_id in unique(scores$region_id)){ # rgn_id=0
       
