@@ -1763,55 +1763,81 @@ additions_draft <- function(key, msg='ohi-webapps/create_functions.R - additions
   # switch to draft branch and get latest
   system('git checkout draft; git pull')
   
-  #   ## 1. update .travis.yml file a la github.com/OHI-Science/issues/issues/427
-  #   readLines('.travis.yml') %>%
-  #     str_replace_all('- default_branch_scenario=', '- default_branch_scenario: ') %>%
-  #     str_replace_all('- study_area=',              '- study_area: ') %>%
-  #     str_replace_all('- secure=',                  '- secure: ') %>%
-  #     writeLines('.travis.yml')
-  #   
-  #   ## 2. update setwd() in assessment/scenario/calculate_scores.r
-  #   readLines(file.path(default_scenario, 'calculate_scores.r')) %>%
-  #     str_replace("setwd.*", paste0("setwd('", file.path(dir_github, key, default_scenario), "')")) %>%
-  #     writeLines(file.path(default_scenario, 'calculate_scores.r'))
-  #   
-  #   ## 3. update launch_app() call in assessment/scenario/launch_app_code.r
-  #   readLines(file.path(default_scenario, 'launch_app_code.r')) %>%
-  #     str_replace(".*launch_app.*", paste0("ohicore::launch_app('", file.path(dir_github, key, default_scenario), "')")) %>%
-  #     writeLines(file.path(default_scenario, 'launch_app_code.r'))
-  #   
-  #   ## 4. save ohi-webapps/install_ohicore.r
-  #   fn = 'install_ohicore.r'
-  #   file.copy(file.path('~/github/ohi-webapps', fn), 
-  #             file.path(dir_repo, default_scenario, fn), overwrite=T)
-  #   
-  #   ## 5a. create and populate prep folder if it doesn't exist
-  #   if ( !'prep' %in% list.dirs(default_scenario, full.names=F) ) {
-  #     prep_subfolders = c('FIS', 'MAR', 'AO', 'NP', 'CS', 'CP', 'LIV', 'ECO', 'TR', 'CW', 'ICO', 'LSP', 'SPP', 'HAB', 
-  #                         'pressures', 'resilience')
-  #     # prep folder and README.md
-  #     dir.create(file.path(dir_repo, default_scenario, 'prep'))
-  #     file.copy(file.path(dir_github, 'ohi-webapps/tmp/README_template_prep.md'), 
-  #               file.path(default_scenario, 'prep', 'README.md'), overwrite=T)
-  #     # goal folders and README.md's
-  #     sapply(file.path(dir_repo, default_scenario, sprintf('prep/%s', prep_subfolders)), dir.create)
-  #     file.copy(file.path(dir_github, 'ohi-webapps/tmp/README_template_goal.md'), 
-  #               file.path(default_scenario, sprintf('prep/%s', prep_subfolders), 'README.md'), overwrite=T)
-  #     
-  #     ## 5b. create and populate prep/tutorials folder 
-  #     dir_tutes = file.path(dir_github, 'ohimanual/tutorials/R_tutes')
-  #     
-  #     dir.create(file.path(dir_repo, default_scenario, 'prep/tutorials'))
-  #     file.copy(file.path(dir_tutes, 'R_tutes_all.md'), 
-  #               file.path(default_scenario, 'prep/tutorials', 'R_intro.md'), overwrite=T)
-  #     readLines(file.path(dir_tutes, 'R_tutes.r')) %>%
-  #       str_replace("setwd.*", 
-  #                   paste0("setwd('", file.path(dir_github, key, default_scenario, 'prep/tutorials'), "')")) %>%
-  #       writeLines(file.path(default_scenario, 'prep/tutorials', 'R_tutorial.r'))    
-  #   }
+    ## 1. update .travis.yml file a la github.com/OHI-Science/issues/issues/427
+    readLines('.travis.yml') %>%
+      str_replace_all('- default_branch_scenario=', '- default_branch_scenario: ') %>%
+      str_replace_all('- study_area=',              '- study_area: ') %>%
+      str_replace_all('- secure=',                  '- secure: ') %>%
+      writeLines('.travis.yml')
+    
+    ## 2. update setwd() in assessment/scenario/calculate_scores.r
+    readLines(file.path(default_scenario, 'calculate_scores.r')) %>%
+      str_replace("setwd.*", paste0("setwd('", file.path(dir_github, key, default_scenario), "')")) %>%
+      writeLines(file.path(default_scenario, 'calculate_scores.r'))
+    
+    ## 3. update launch_app() call in assessment/scenario/launch_app_code.r
+    readLines(file.path(default_scenario, 'launch_app_code.r')) %>%
+      str_replace(".*launch_app.*", paste0("ohicore::launch_app('", file.path(dir_github, key, default_scenario), "')")) %>%
+      writeLines(file.path(default_scenario, 'launch_app_code.r'))
+    
+    ## 4. save ohi-webapps/install_ohicore.r
+    fn = 'install_ohicore.r'
+    file.copy(file.path('~/github/ohi-webapps', fn), 
+              file.path(dir_repo, default_scenario, fn), overwrite=T)
+    
+    ## 5a. create and populate prep folder if it doesn't exist
+    if ( !'prep' %in% list.dirs(default_scenario, full.names=F) ) {
+      prep_subfolders = c('FIS', 'MAR', 'AO', 'NP', 'CS', 'CP', 'LIV', 'ECO', 'TR', 'CW', 'ICO', 'LSP', 'SPP', 'HAB', 
+                          'pressures', 'resilience')
+      # prep folder and README.md
+      dir.create(file.path(dir_repo, default_scenario, 'prep'))
+      file.copy(file.path(dir_github, 'ohi-webapps/tmp/README_template_prep.md'), 
+                file.path(default_scenario, 'prep', 'README.md'), overwrite=T)
+      # goal folders and README.md's
+      sapply(file.path(dir_repo, default_scenario, sprintf('prep/%s', prep_subfolders)), dir.create)
+      file.copy(file.path(dir_github, 'ohi-webapps/tmp/README_template_goal.md'), 
+                file.path(default_scenario, sprintf('prep/%s', prep_subfolders), 'README.md'), overwrite=T)
+      
+      ## 5b. create and populate prep/tutorials folder 
+      dir_tutes = file.path(dir_github, 'ohimanual/tutorials/R_tutes')
+      
+      dir.create(file.path(dir_repo, default_scenario, 'prep/tutorials'))
+      file.copy(file.path(dir_tutes, 'R_tutes_all.md'), 
+                file.path(default_scenario, 'prep/tutorials', 'R_intro.md'), overwrite=T)
+      readLines(file.path(dir_tutes, 'R_tutes.r')) %>%
+        str_replace("setwd.*", 
+                    paste0("setwd('", file.path(dir_github, key, default_scenario, 'prep/tutorials'), "')")) %>%
+        writeLines(file.path(default_scenario, 'prep/tutorials', 'R_tutorial.r'))    
+    }
   
   # 6. brew copy_webapps_templates.r a la github.com/OHI-Science/issues/issues/506
   brew(sprintf('%s/ohi-webapps/copy_webapps_templates.brew.r', dir_github), 'copy_webapps_templates.r')
+  
+  
+#   # 7. remove evil characters from layers.csv that prevent gh-pages from displaying. In progress Dec 4
+#   https://github.com/hadley/stringr/blob/master/vignettes/stringr.Rmd
+#   http://www.regular-expressions.info/rlanguage.html
+  # http://regexr.com/
+#   http://www.r-bloggers.com/regular-expressions-in-r-vs-rstudio/
+# a =    readLines(file.path(default_scenario, 'layers.csv')) %>% head(40) %>%
+#       str_split(boundary("word")) %>%
+#       # str_detect(coll("FAO"))
+#       str_replace(grep("(FAO).*"),   
+#                   "FAO")
+#   
+#      # str_extract_all(regex("\\[FAO.+"))
+#      str_detect("\\[FAO")
+#    
+#       str_replace("[FAO.+\s",   
+#                   "[FAO")) %>%
+#      head(40)
+#    
+#    
+#    %>%
+#        writeLines(file.path(default_scenario, 'layers.csv'))
+#     
+  
+  
   
   # git add, commit and push
   system(sprintf('git add -A; git commit -a -m "%s"', msg))
