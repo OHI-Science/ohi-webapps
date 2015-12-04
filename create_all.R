@@ -152,6 +152,7 @@ for (key in keys_redo){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1]
     
     # populate website
     populate_website(key)
+    update_website(key)
     
     # update pages based on results (not create_pages())
     setwd(dir_repo)

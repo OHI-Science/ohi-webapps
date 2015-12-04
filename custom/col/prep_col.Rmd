@@ -380,26 +380,15 @@ setwd(dir_repo)
 push_branch('draft') # source('ohi-functions.r')
 system('git pull')
 
-## calculate scores ~~ adapted from create.all
-setwd(dir_repo)
-calculate_scores_notravis() 
-
-## create flower plot and table
-setwd(dir_repo)
-update_results()
-
-## push/merge draft and published branches 
-setwd(dir_repo)
-push_branch('draft')
-merge_published_draft(key) # from create_functions
-system('git checkout draft')
-  
-
-## update pages based on results (not create_pages())
-setwd(dir_repo)
-system('git pull; git checkout draft; git pull')
-update_pages()     # source('ohi-functions.r')
+# populate website and update_webapp_notravis (which calls 
+   # 1. calculate_scores_notravis()
+   # 2. update_results()
+   # 3. merge_published_draft()
+   # 4. update_pages()
+update_website(key)
+update_webapp_notravis(key, run_calc_scores=T, run_update_results=T, merge_pub=T)
 system('git checkout gh-pages; git pull; git checkout published; git pull')
+
 
 ## deploy app to fitz!
 deploy_app_nceas(key, nceas_user)
