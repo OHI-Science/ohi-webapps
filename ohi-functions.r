@@ -105,19 +105,25 @@ update_results <- function(){
     
     # use factors to sort by goal and dimension in scores
     conf$goals = arrange(conf$goals, order_hierarchy)
+    
     scores$goal_label = factor(
       scores$goal,
       levels = c('Index', conf$goals$goal),
       labels = c('Index', ifelse(!is.na(conf$goals$parent),
                                  sprintf('. %s', conf$goals$name),
-                                 conf$goals$name)),
-      ordered=T)
+                                 conf$goals$name)),ordered=T)
     scores$dimension_label = factor(
       scores$dimension,
       levels = names(conf$config$dimension_descriptions),
       ordered=T)
     
-    # loop through regions
+    ## update the map displayed on the gh-pages Regions page! added Dec 4 JSL (poached from create_functions.r)
+    file.copy(
+      file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'gh-pages/images/regions_600x400.png'),
+      file.path('reports/figures/regions_600x400.png'), overwrite=T)
+    
+    
+    ## loop through regions
     for (rgn_id in unique(scores$region_id)){ # rgn_id=0
       
       # rgn vars
@@ -188,6 +194,7 @@ update_results <- function(){
         write.csv(scores_csv, row.names=F, na='')
     }
   }
+  
   setwd(wd)
 }
 
@@ -288,14 +295,15 @@ update_pages <- function(){
     files = list.files(path='.', recursive=T)
     for (f in files){ # f = files[1]
       dir.create(dirname(file.path(dir_branch, f)), showWarnings=F, recursive=T)
-      file.copy(file.path(dir_repo, f), file.path(dir_branch, f), overwrite = T, copy.mode=T, copy.date=T) # suppressWarnings)
+      file.copy(file.path(dir_repo, f), 
+                file.path(dir_branch, f), overwrite = T, copy.mode=T, copy.date=T) # suppressWarnings)
     }
   }
   
-  # switch to gh-pages branch
+  ## switch to gh-pages branch
   checkout(repo, branch='gh-pages', force=T)
   
-  # get list of all branch/scenarios and directory to output
+  ## get list of all branch/scenarios and directory to output
   branch_scenarios = dirname(list.files(dir_archive, '^scores.csv$', recursive=T))
   dir_bs_pages = setNames(
     ifelse(
@@ -336,9 +344,11 @@ update_pages <- function(){
     file.copy(list.files(dir_data_results, full.names=T), dir_pages_results, recursive=T)
     
     # brew markdown files for index.md tabs on gh-pages
-    for (f_brew in list.files(dir_brew, '.*\\.brew\\.md', full.names=T)){ # f_brew = "/Users/jstewart/tmp/ohi-webapps/goals.brew.md"
+    for (f_brew in list.files(dir_brew, '.*\\.brew\\.md', full.names=T)){ 
+      # f_brew = "/Users/jstewart/tmp/ohi-webapps/goals.brew.md"
       section = str_replace(basename(f_brew), fixed('.brew.md'), '')
-      branch_scenario_navbar = utils::capture.output({ suppressWarnings(brew(file.path(dir_brew, 'navbar.brew.html'))) })
+      branch_scenario_navbar = 
+        utils::capture.output({ suppressWarnings(brew(file.path(dir_brew, 'navbar.brew.html'))) })
       f_md = file.path(dir_bs_pages[[branch_scenario]], section, 'index.md')
       dir.create(dirname(f_md), showWarnings=F, recursive=T)
       cat(sprintf('%s -> %s\n', f_brew, f_md))
@@ -351,7 +361,7 @@ update_pages <- function(){
   
   } #end (branch_scenario in branch_scenarios)
   
-  # copy scores_400x250.png used in navigation menu
+  # copy scores_400x250.png used in navigation menu (not working 12/04/15 for COL but we can omit nav menu)
   file.copy(file.path(dir_archive, default_branch_scenario, 'reports/figures/scores_400x250.png'), 
             'images/scores_400x250.png', overwrite=T)
   
@@ -401,7 +411,7 @@ update_pages <- function(){
 push_branch <- function(branch='draft', current_msg='pushing draft branch no travis'){ 
   
   # working locally, gh_token set in create_init.R, repo_name set in create_init_sc.Rs
-  system(sprintf('git add -A; git commit -a -m "calculated scores from commit %s" ', current_msg))
+  system(sprintf('git add -A; git commit -a -m " %s" ', current_msg))
   system(sprintf('git push https://%s@github.com/%s.git HEAD:%s', gh_token, git_slug, branch))
   
 }
