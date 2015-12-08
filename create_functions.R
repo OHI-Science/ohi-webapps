@@ -32,7 +32,8 @@ create_gh_repo <- function(key, gh_token=gh_token, verbosity=1){ # gh_token=gh_t
       message(sprintf('%s: creating github repo -- %s', repo_name, format(Sys.time(), '%X')))
     }
     # create using Github API: https://developer.github.com/v3/repos/#create
-    cmd = sprintf('curl --silent -u "jules32:%s" https://api.github.com/orgs/ohi-science/repos -d \'{"name":"%s"}\'', gh_token, repo_name)
+    cmd = sprintf('curl --silent -u "jules32:%s" https://api.github.com/orgs/ohi-science/repos -d \'{"name":"%s"}\'', 
+                  gh_token, repo_name)
     cmd_res = paste(capture.output(fromJSON(system(cmd, intern=T))), collapse='\n')
   } else{
     cmd_res = NA
@@ -1818,7 +1819,7 @@ additions_draft <- function(key, msg='ohi-webapps/create_functions.R - additions
   ## 7. save map in figures folder: will be displayed on the gh-pages Regions page. 
   file.copy(
     file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'gh-pages/images/regions_600x400.png'),
-    file.path('reports/figures/regions_600x400.png'), overwrite=T)
+    file.path(dir_repo, default_scenario,'reports/figures/regions_600x400.png'), overwrite=T)
   
   
 #   ## 8. remove evil characters from layers.csv that prevent gh-pages from displaying. In progress Dec 4

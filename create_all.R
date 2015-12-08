@@ -20,20 +20,23 @@ source('create_functions.R')       # all functions for creating and updating rep
 # this is in order of steps from start to finish, but these functions can also be run individually
 
 map_custom = T  # make a custom map based on map from OHI+ group
+create_new_repo = F
 redo_maps = F
 enable_travis = F
 
-keys_redo = c('ohibc')             # list whichever keys to make repos and webapps (originally was full list)
+keys_redo = c('cdz')             # list whichever keys to make repos and webapps (originally was full list)
 
 for (key in keys_redo){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1] 
   
   # set vars by subcountry key
   setwd(dir_repos)
   source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))    
-  setwd(dir_repo)
   
   # create github repo on github.com
-  repo = create_gh_repo(key)
+  if (create_new_repo) repo = create_gh_repo(key)
+  
+  # set working dir
+  setwd(dir_repo)
   
   # create maps
   if (!map_custom) {  # create_maps() original by @bbest
@@ -66,7 +69,7 @@ for (key in keys_redo){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1]
   
   # populate draft branch of repo
   populate_draft_branch()    # turn buffers back on if making buffers
-  additions_draft() 
+  additions_draft(key) 
   
   if (enable_travis) { # enable_travis = T
     
@@ -112,14 +115,18 @@ for (key in keys_redo){ # key = 'usa' # key = 'rus' # key = sc_studies$sc_key[1]
     system('git checkout gh-pages; git pull; git checkout published; git pull')
     
     # enable Travis if on Mac
-    # install Travis client: `sudo gem install travis; travis login --org --auto` on Terminal (https://github.com/travis-ci/travis.rb)
+    # install Travis client: `sudo gem install travis; travis login --org --auto` on Terminal 
+    # (https://github.com/travis-ci/travis.rb)
     if (Sys.info()[['sysname']] == 'Darwin'){
-      source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))   # Error in system(sprintf("travis history -i -r %s -b draft -l 1 2>&1",  :error in running command 
+      source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))   
+      # Error in system(sprintf("travis history -i -r %s -b draft -l 1 2>&1",  :error in running command 
       status_travis(key)
     }
     
     # deploy app
-    #devtools::install_github('ohi-science/ohicore@dev') # install latest ohicore, with DESCRIPTION having commit etc to add to app
+    #devtools::install_github('ohi-science/ohicore@dev') 
+    # install latest ohicore, with DESCRIPTION having commit etc to add to app
+    
     res = try(deploy_app_nceas(key, nceas_user))
     # if problem calculating, log problem and move on to next subcountry key
     txt_app_error = sprintf('%s/%s_app.txt', dir_errors, key)
