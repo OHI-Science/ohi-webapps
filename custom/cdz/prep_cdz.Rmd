@@ -16,11 +16,14 @@ library(stringr)
 library(rgdal)
 library(raster)
 
+key = 'cdz'
+
 # directories
 dir_neptune = c('Windows' = '//neptune.nceas.ucsb.edu/data_edit',
                 'Darwin'  = '/Volumes/data_edit',
                 'Linux'   = '/var/data/ohi')[[ Sys.info()[['sysname']] ]]
 dir_custom_cdz = '~/github/ohi-webapps/custom/cdz'
+dir_annex_sc   = file.path(dir_neptune, 'git-annex/clip-n-ship', key)
 
 # setwd
 setwd('~/github/ohi-webapps')
@@ -30,42 +33,43 @@ setwd('~/github/ohi-webapps')
 ## 2. maps
 ```{r setup, eval=F}
 
-# read in shp files and save with desired headers in data frame.
+## read in shp files and save with desired headers in data frame.
 cdz = readOGR(dsn = file.path(dir_annex, 'cdz/spatial/custom/raw'),
               layer = 'eez_GoC')
 
-# view dataframe and map
-cdz@data
-
-#   objectid                             eez country  id sovereign remarks sov_id eez_id iso_3digit mrgid date_chang      area_m2 longitude latitude mrgid_eez
-# 0      362 Spanish Exclusive Economic Zone   Spain 182     Spain    <NA>    182    182        ESP  5693    2012-10 554721777400 -4.081704 41.62652      5693
-
+## view dataframe and map
+cdz@data = cdz@data %>%
+  mutate(rgn_id   = 1,
+         rgn_name = 'gulfo', 
+         area_km2 = area_m2 * 1e-6)
 
 plot(cdz)
 
-cdz1 = readOGR(dsn = file.path(dir_annex, 'cdz/spatial/custom/raw'),
-              layer = 'ESP_adm4')
+## save as shapefiles. will create 4 files: .dbf, .prj, .shp, .shx
+writeOGR(cdz, dsn = file.path(dir_annex, 'cdz/spatial/custom'), 
+         layer = 'cdz_shp', driver = 'ESRI Shapefile', overwrite=T) 
 
-# view dataframe and map
-cdz1@data
+## create lookup table with unique rgn_ids
+cdz_rgns = cdz@data %>%
+  select(rgn_id, rgn_name, area_km2)
 
-#  ID_0  ISO NAME_0 ID_1    NAME_1 ID_2   NAME_2 ID_3             NAME_3 ID_4                       NAME_4 VARNAME_4 CCN_4 CCA_4       TYPE_4    ENGTYPE_4
-# 0   215  ESP  Spain    1 Andalucía    2 C\xe1diz    9     Bahía de Cádiz  104                     C\xe1diz      <NA>     0  <NA> Municipality Municipality
-#...
-# 21  215  ESP  Spain    1 Andalucía    5   Huelva   37         n.a. (137)  462                       Moguer      <NA>     0  <NA> Municipality Municipality
-
-plot(cdz1)
+write_csv(cdz_rgns, '~/github/ohi-webapps/custom/cdz/cdz_rgns_custom.csv')
+write_csv(cdz_rgns, file.path(dir_annex_sc, 'spatial/rgn_offshore_data.csv'))
 
 
+## copy mar_coastalpopn_inland25km.csv from ESP
 
-# # save as shapefiles. will create 4 files: .dbf, .prj, .shp, .shx
-# writeOGR(cdz, dsn = file.path(dir_annex, 'cdz/spatial/custom'), 
-#          layer = 'cdz_shp', driver = 'ESRI Shapefile', overwrite=T) 
-# 
-# # create lookup table with unique rgn_ids
-# cdz_rgns = cdz@data
-# write_csv(cdz_rgns, '~/github/ohi-webapps/custom/cdz/cdz_rgns_custom.csv')
+dir.create(dir_annex_sc, 'layers')
+file.copy(file.path(dir_neptune, 'git-annex/clip-n-ship/esp/layers/mar_coastalpopn_inland25km_lyr.csv'),
+          file.path(dir_neptune, 'git-annex/clip-n-ship/cdz/layers/mar_coastalpopn_inland25km_lyr.csv'))
 
+# need to delete all rgns but rgn 2, Andalucia, and change it to 1. Done by hand, could do it here:
+# readLines(file.path(dir_annex_sc, 'layers/mar_coastalpopn_inland25km_lyr.csv')) %>%
+#   str_extract_all(
+
+
+          
+          
 
 
 ```

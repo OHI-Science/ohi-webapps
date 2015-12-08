@@ -364,15 +364,6 @@ for (key in keys){ # key = 'gye', key='chn'
 
 ## redo COL repo+webapp with custom regions
 
-Rough workflow: 
-
-- receive Baltic spatial files with region boundaries
-- identify Baltic countries 
-- create repo for bhi as a whole
-- create Baltic layers by binding layers for each Baltic country's repo
-- populate bhi repo with layers and maps
-- push to bhi repo branches, including webapp
-
 ```{r redo col repo+webapp, eval=F}
 
 # see ohi-webapps/custom/col/prep_col.rmd
@@ -380,6 +371,21 @@ Rough workflow:
 ```
 
 
+## create CDZ repo+webapp with custom regions
 
+```{r create cdz repo+webapp, eval=F}
+
+key = 'cdz'
+# see ohi-webapps/custom/cdz/prep_cdz.rmd for prepping spatial
+
+map_custom = T  
+create_new_repo = T
+redo_maps = T
+enable_travis = F
+
+
+# run create_all.r straight through!
+
+```
 
 
