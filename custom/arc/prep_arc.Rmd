@@ -1,6 +1,8 @@
 # this is prep_arc.Rmd
 create arctic repo. See Issue #516: https://github.com/OHI-Science/issues/issues/516
 
+Note: approach has changed. No longer clipping existing maps to Arctic Circle. See previous commits for that approach.
+
 # Overview
 I've got the evals off of all of these at the moment (ie, `{r, eval=F}) so it doesn't run now when I don't want it to. 
 
@@ -36,156 +38,99 @@ source('create_functions.R')
 # arctic-specific variables 
 arc_cntrys = c('usa', 'can', 'nor', 'rus', 'grl')
 dir_cns = file.path(sprintf('%s/git-annex/clip-n-ship/%s/spatial', dir_neptune, arc_cntrys)) %>% setNames(arc_cntrys)
-dir_arc = file.path(dir_neptune, 'git-annex/clip-n-ship/arc/spatial/custom/intermediate')
+dir_neptune_arc = file.path(dir_neptune, 'git-annex/clip-n-ship/arc/spatial/custom/raw')
+dir_webapps_arc = '~/github/ohi-webapps/custom/arc'
 
 ```
 
-## 2. Clip to Arctic Circle and save shape files of 5 Arctic Countries 
+```{r read in mikes shapefiles, eval=F}
+# read in shp files and save with desired headers in data frame.
 
-Run one-time only. Very time-intensive. 
+shps = c('Canada/Beaufort Loma'                          = 'LOMA_CDA_DFO_2007', 
+         'Canada/Fwd__Arctic_Ocean_Health_Index'         = 'Priority Sub-regions',
+         'Greenland/FAO_AREAS'                           = 'FAO_AREAS', 
+         'USA/planarea'                                  = 'AK_PLAN', 
+         'Norway/Norw_Manageplans/PSA_BarentsSea_utm33'  = 'svo_barentshavetf',
+         'Norway/Norw_Manageplans/PSA_NorwSe_utm33'      = 'svo_norskehavetf',
+         'Norway/Norw_Manageplans/management_plan_areas' = 'fp_barentshavet_grenser',
+         'Norway/Norw_Manageplans/management_plan_areas' = 'fp_barentshavet',
+         'Norway/Norw_Manageplans/management_plan_areas' = 'fp_nordsjoen_grenser',
+         'Norway/Norw_Manageplans/management_plan_areas' = 'fp_nordsjoen',
+         'Norway/Norw_Manageplans/management_plan_areas' = 'fp_norskehavet_grenser',
+         'Norway/Norw_Manageplans/management_plan_areas' = 'fp_norskehavet')
 
-This takes awhile. Must read in each separately (there is a way to loop it without saving interum files, maybe that would be better). but then can save as one. 
 
-```{r clip and save 5 shape files, eval=F}
-
-# to rerun
-reclip_resave = F
-
-# setup
-arctic_extent = extent(-180, 180, 66.5628, 90)
-sp_layer = 'rgn_offshore_gcs'
-
-if (reclip_resave) { 
+for (l in 1:length(shps)) {
   
-  # read in individual shp files from existing arctic repos and save
-  # usa
-  sp_usa = readOGR(as.character(dir_cns['usa']), sp_layer)
-  sp_usa@data = sp_usa@data %>% dplyr::select(rgn_id, rgn_name, area_km2, Shape_Leng, Shape_Area)
-  sp_usa_crop = crop(sp_usa, arctic_extent)
-  writeOGR(sp_usa_crop, dsn=dir_arc, layer='sp_usa_crop', driver='ESRI Shapefile', overwrite=T) 
+  s = shps[l]
+  dir_relative = names(s)
+  layername = s[[1]][1]
+  filesave = str_replace_all(dir_relative, '/', '_')
+  if (filesave == 'Norway_Norw_Manageplans_management_plan_areas') {
+    filesave = str_replace(filesave, 'management_plan_areas', layername)
+  }
   
-  # can
-  sp_can = readOGR(as.character(dir_cns['can']), sp_layer)
-  sp_can@data = sp_can@data %>% dplyr::select(rgn_id, rgn_name, area_km2, Shape_Leng, Shape_Area)
-  sp_can_crop = crop(sp_can, arctic_extent)
-  writeOGR(sp_can_crop, dsn=dir_arc, layer='sp_can_crop', driver='ESRI Shapefile', overwrite=T) 
+  shp = readOGR(dsn = file.path(dir_neptune_arc, dir_relative),
+                layer = s[[1]][1])
+  shp@data
   
-  # nor
-  sp_nor = readOGR(as.character(dir_cns['nor']), sp_layer)
-  sp_nor@data = sp_nor@data %>% dplyr::select(rgn_id, rgn_name, area_km2, Shape_Leng, Shape_Area)
-  sp_nor_crop = crop(sp_nor, arctic_extent)
-  writeOGR(sp_nor_crop, dsn=dir_arc, layer='sp_nor_crop', driver='ESRI Shapefile', overwrite=T) 
-  
-  # rus
-  sp_rus = readOGR(as.character(dir_cns['rus']), sp_layer)
-  sp_rus@data = sp_rus@data %>% dplyr::select(rgn_id, rgn_name, area_km2, Shape_Leng, Shape_Area)
-  sp_rus_crop = crop(sp_rus, arctic_extent)
-  writeOGR(sp_rus_crop, dsn=dir_arc, layer='sp_rus_crop', driver='ESRI Shapefile', overwrite=T) 
-  
-  # grl
-  sp_grl = readOGR(as.character(dir_cns['grl']), sp_layer)
-  sp_grl@data = sp_grl@data %>% dplyr::select(rgn_id, rgn_name, area_km2, Shape_Leng, Shape_Area)
-  sp_grl_crop = crop(sp_grl, arctic_extent)
-  writeOGR(sp_grl_crop, dsn=dir_arc, layer='sp_grl_crop', driver='ESRI Shapefile', overwrite=T) 
-  
-} 
-
-```
-
-## 2. Bind and save shape files for 1 Arctic Study Area 
-
-Run one-time only as well, although this doesn't take long to execute.
-
-```{r bind and save arctic shape files, eval=F}
-
-# read in separate sp files
-sp_usa_crop = readOGR(dir_arc, 'sp_usa_crop')
-sp_can_crop = readOGR(dir_arc, 'sp_can_crop')
-sp_nor_crop = readOGR(dir_arc, 'sp_nor_crop')
-sp_rus_crop = readOGR(dir_arc, 'sp_rus_crop')
-sp_grl_crop = readOGR(dir_arc, 'sp_grl_crop')
-
-# give all unique polygon IDs to be able to rbind and 
-# avoid Error in validObject(res) : invalid class “SpatialPolygons” object: non-unique Polygons ID slot values
-# https://stat.ethz.ch/pipermail/r-sig-geo/2009-May/005666.html
-sp_usa_crop <- spChFIDs(sp_usa_crop, paste("usa", sapply(slot(sp_usa_crop, "polygons"), slot, "ID"), sep="_"))
-sp_can_crop <- spChFIDs(sp_can_crop, paste("can", sapply(slot(sp_can_crop, "polygons"), slot, "ID"), sep="_"))
-sp_nor_crop <- spChFIDs(sp_nor_crop, paste("nor", sapply(slot(sp_nor_crop, "polygons"), slot, "ID"), sep="_"))
-sp_rus_crop <- spChFIDs(sp_rus_crop, paste("rus", sapply(slot(sp_rus_crop, "polygons"), slot, "ID"), sep="_"))
-sp_grl_crop <- spChFIDs(sp_grl_crop, paste("grl", sapply(slot(sp_grl_crop, "polygons"), slot, "ID"), sep="_"))
-
-
-# bind together. rbind allows you to bind multiple; spRbind allows you to bind 2
-sp_arc = rbind(sp_usa_crop, sp_can_crop, sp_nor_crop, sp_rus_crop, sp_grl_crop)
-plot(sp_arc)
-sp_arc@data
-sp_arc@data = sp_arc@data %>%
-  rename(rgn_id_sc = rgn_id) # %>% # non-unique region ids from original 5 repos
-#   mutate(rgn_id = 1:20) %>%
-#   select(rgn_id, rgn_id_sc, rgn_name, area_km2)
-
-# save shapefiles
-writeOGR(sp_arc, dsn=dir_arc, layer='sp_arc', driver='ESRI Shapefile', overwrite=T) 
-
-```
-
-
-## Create Arctic Lookup Table
-arc_cntrys regions to arctic regions
-
-```{r create lookup, eval=F}
-
-# create lookup table similar to baltic_rgns_to_bhi_rgns_lookup.csv
-
-```
-
-
-
-```{r, eval=F}
-
-
-#CONTINUE FROM HERE --COPIED FROM prep_bhi.rmd
-
-# check for errors in shp file: 'orphaned hole' error encountered in Step 9 below 
-# if (clean_spatial) source('~/github/ohi-webapps/custom/bhi/clean_spatial_bhi.r') # will overwrite bhi with cleaned file; be sure the last line is uncommented
-# 
-# 
-# if (redo_shp) {
-#   bhi@data # view data
-#   bhi@data = bhi@data %>%
-#     mutate(rgn_id = 1:42) %>%
-#     dplyr::select(rgn_id,
-#                   area_km2 = Area,
-#                   cntry_name = Name_1,
-#                   basin_name = Name) %>%
-#     mutate(basin_name = str_replace_all(basin_name, '\xc5land Sea', 'Aland Sea'),
-#            rgn_name = paste(substr(cntry_name, 1, 3), # create rgn_name as eez - basin (eg 'Est - Gulf of Riga')
-#                             '-',
-#                             basin_name), sep=' ') %>%
-#     dplyr::select(rgn_id, area_km2, cntry_name, basin_name, rgn_name) # since 'sep' column exists
-#   
-#   
-#   # save as shapefiles
-#   writeOGR(bhi, dsn = file.path(dir_neptune, 'git-annex/clip-n-ship/bhi/spatial/custom'), 
-#            layer = 'baltic_shp', driver = 'ESRI Shapefile', overwrite=T) # will create 4 files: .dbf, .prj, .shp, .shx
-#   
-#   
-#   # create lookup table with unique rgn_ids
-#   bhi_sc = read_csv('custom/bhi/sc_studies_custom_bhi.csv'); head(bhi_sc)
-#   
-#   baltic_rgns = bhi@data %>%
-#     left_join(bhi_sc %>%
-#                 dplyr::select(sc_key, 
-#                               cntry_name = gl_rgn_name, 
-#                               gl_rgn_key), 
-#               by='cntry_name') %>%
-#     mutate(baltic_rgn_key = tolower(gl_rgn_key)) %>%
-#     dplyr::select(-gl_rgn_key) %>%
-#     group_by(cntry_name) %>%
-#     mutate(sc_id = 1:n()); head(baltic_rgns)
-#   
-#   write_csv(baltic_rgns, 'custom/bhi/baltic_rgns_to_bhi_rgns_lookup_holas.csv')
-#   
+  png(file.path(dir_webapps_arc, 'maps', paste(filesave, '.png')))
+  plot(shp) 
+  dev.off()
 }
 
 ```
+
+
+
+## READMEs from Mike
+
+### Canada
+
+Based on these shape files and supporting information. I think best to have
+
+1. Beaufort LOMA
+2. Canadian Archipelago (minus bit included in Beaufort LOMA and including top bit of Hudson Bay)
+3. Bafin Bay / Davis Strait
+
+### Greenland
+
+1. FAO Area 27 Sub-Areas clipped appropriately - can talk about this maybe?
+2. FAO Area 21 Sub-Areas clipped Appropriately - 1A, 1B, 1C, 1D, 1E, 1F
+3. FAO Area 18 clipped appropriately
+
+### Norway
+
+1. Norweigan Sea
+2. Barents Sea
+
+Is it possible to divide up between Svalbard Barents and Norewigan mainland Barents so we have 3 regions?
+I think that is perhaps the best option.
+
+
+### Russia
+
+OHI Admin Boundaries:
+
+```{r, eval=F}
+# sp_rus_crop@data
+#   rgn_id     rgn_name  area_km2 Shape_Leng Shape_Area	New Name			Fisheries Region
+# 0     18 Arkhangel'sk 1054640.0   25481810 452.167880 	Arkhangel'sk			Dvina-Pechora
+# 1     13       Chukot  661515.0   27108098 147.769066	Chukotka Autonomous Okrug	Northeastern
+# 2     12      Karelia   13142.2    3508675   2.527018	Republic of Karelia		Barents and White Sea
+# 3     16     Murmansk  214718.0    6337033  51.776979	Murmansk Oblast			North-West	
+# 4     15       Nenets  222881.0    8272890  51.238354	N/A				N/A
+# 5     17        Sakha 1195680.0   34297026 372.929268	Republic of Sakha (Yakutia)	Lena
+# 6     19       Taymyr  998142.0   33455400 423.222425	Krasnoyarsk Krai		Yenisey
+# 7     14 Yamal-Nenets  200965.0   13055544  52.359965	Yamal-Nenets Auto. Okrug	Nizhneobskoe
+```
+
+I've matched OHI region names up with regions from my research. 
+Nenets region is now part of Arkhangel'sk so should be included within that
+The rest seem to match up pretty perfectly? Is it possible to give it a quick check first and see if there are
+any discrepancies?
+
+### USA
+
+1. Chukchi Sea
+2. Beaufort Sea
