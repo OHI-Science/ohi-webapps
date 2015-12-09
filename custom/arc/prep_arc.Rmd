@@ -7,10 +7,6 @@ Note: approach has changed. No longer clipping existing maps to Arctic Circle. S
 I've got the evals off of all of these at the moment (ie, `{r, eval=F}) so it doesn't run now when I don't want it to. 
 
 - called from `ohi-webapps/edit_webapps.rmd`
-- using spatial files from existing OHI+ repos for 5 Arctic countries, clip to Arctic circle and save
-- bind these together
-- using these regions for the Arctic repo `arc`, create populate draft branch.
-
 
 ## 1. setup
 
@@ -43,7 +39,9 @@ dir_webapps_arc = '~/github/ohi-webapps/custom/arc'
 
 ```
 
-```{r read in mikes shapefiles, eval=F}
+## Explore Mike's Shapefiles
+
+```{r explore shapefiles, eval=F}
 # read in shp files and save with desired headers in data frame.
 
 shps = c('Canada/Beaufort Loma'                          = 'LOMA_CDA_DFO_2007', 
