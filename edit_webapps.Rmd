@@ -401,7 +401,7 @@ source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
 setwd(dir_repo)
 
 system('git pull')
-push_branch('draft')
+# push_branch('draft')
 merge_published_draft(key) # from create_functions
 system('git checkout draft')
     
