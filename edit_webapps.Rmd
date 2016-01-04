@@ -388,4 +388,27 @@ enable_travis = F
 
 ```
 
+## refresh WebApp pages
 
+- do this for gye Dec 16
+
+```{r refresh WebApp pages, eval=F}
+
+key = 'gye'
+
+setwd(dir_repos)
+source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))    
+setwd(dir_repo)
+
+system('git pull')
+push_branch('draft')
+merge_published_draft(key) # from create_functions
+system('git checkout draft')
+    
+update_website(key)
+system('git pull; git checkout draft; git pull')
+update_pages()     # source('ohi-functions.r')
+system('git checkout gh-pages; git pull; git checkout published; git pull')
+   
+
+```
