@@ -744,7 +744,7 @@ populate_draft_branch <- function(){
   file.copy(file.path(dir_github, 'ohi-webapps/subcountry2014/conf/goals.Rmd'), 'conf/goals.Rmd', overwrite=T)
   
   ## save shortcut files not specific to operating system
-  # write_shortcuts('.', os_files=0) # write_shortcuts() removed from ohicore; if required move to ohi-webapps 
+  write_shortcuts('.', os_files=0)
   
   ## add travis.yml file
   setwd(dir_repo)
@@ -775,7 +775,7 @@ populate_draft_branch <- function(){
     str_replace("setwd.*", paste0("setwd('", file.path(dir_github, key, default_scenario), "')")) %>%
     writeLines(file.path(default_scenario, 'calculate_scores.r'))
   
-  ## update launch_app() call in assessment/scenario/launch_app_code.r
+  ## update launch_app() call in assessment/scenario/launch_app_code.r TODO - delete once ohi-shiny2
   readLines(file.path(dir_repo, default_scenario, 'launch_app_code.r')) %>%
     str_replace(".*launch_app.*", paste0("ohicore::launch_app('", file.path(dir_github, key, default_scenario), "')")) %>%
     writeLines(file.path(default_scenario, 'launch_app_code.r'))
@@ -1777,7 +1777,7 @@ additions_draft <- function(key, msg='ohi-webapps/create_functions.R - additions
       str_replace("setwd.*", paste0("setwd('", file.path(dir_github, key, default_scenario), "')")) %>%
       writeLines(file.path(default_scenario, 'calculate_scores.r'))
     
-    ## 3. update launch_app() call in assessment/scenario/launch_app_code.r
+    ## 3. update launch_app() call in assessment/scenario/launch_app_code.r  TODO - delete once ohi-shiny2
     readLines(file.path(default_scenario, 'launch_app_code.r')) %>%
       str_replace(".*launch_app.*", 
                   paste0("ohicore::launch_app('", file.path(dir_github, key, default_scenario), "')")) %>%
