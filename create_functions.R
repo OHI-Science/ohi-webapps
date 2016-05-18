@@ -744,7 +744,7 @@ populate_draft_branch <- function(){
   file.copy(file.path(dir_github, 'ohi-webapps/subcountry2014/conf/goals.Rmd'), 'conf/goals.Rmd', overwrite=T)
   
   ## save shortcut files not specific to operating system
-  write_shortcuts('.', os_files=0)
+  # write_shortcuts('.', os_files=0) # write_shortcuts() removed from ohicore; if required move to ohi-webapps 
   
   ## add travis.yml file
   setwd(dir_repo)
