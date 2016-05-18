@@ -1,0 +1,100 @@
+---
+title: "arctic shapefile"
+author: "Jamie Afflerbach"
+date: "4/29/2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# libraries
+
+library(readr)
+library(stringr)
+library(rgdal)
+library(raster)
+library(tools)
+library(rgeos)
+library(maptools)
+library(dplyr)
+
+# directories and source files
+dir_M     <- c('Windows' = '//mazu.nceas.ucsb.edu/ohi',
+               'Darwin'  = '/Volumes/ohi',
+               'Linux'   = '/home/shares/ohi')[[ Sys.info()[['sysname']] ]]
+
+#arctic extent
+#projection
+laeaCRS <- CRS("+init=epsg:3572")
+
+```
+
+Read in each country
+```{r ctry}
+
+alaska = readOGR(dsn='spatial/alaska',layer='US_arc')%>%spTransform(laeaCRS)
+canada = readOGR(dsn='spatial/canada',layer='canada_and_beaufort')%>%spTransform(laeaCRS)
+greenland = readOGR(dsn='spatial/greenland',layer='greenland_eez_east_west')%>%spTransform(laeaCRS)
+janmayen = readOGR(dsn='spatial/janmayen',layer='Jan Mayen')%>%spTransform(laeaCRS)
+russia   = readOGR(dsn='spatial/russia',layer='russia_in_arctic')%>%spTransform(laeaCRS)
+svalbard = readOGR(dsn='spatial/svalbard',layer='svalbard')%>%spTransform(laeaCRS)
+norway   = readOGR(dsn='spatial/norway',layer='norway_no_svalbard')%>%spTransform(laeaCRS)
+
+```
+
+Get dataframes in the same format
+
+```{r df}
+
+alaska@data = alaska@data%>%
+              mutate(country = 'United States')
+
+canada@data <- canada@data%>%
+                mutate(rgn_name = c('Nunavut','Beaufort Sea'))%>%
+                select(rgn_name, country=Country)
+
+greenland@data <- greenland@data%>%
+                mutate(rgn_name = c('west','east'))%>%
+                select(rgn_name, country=Country)
+                    
+janmayen@data = janmayen@data%>%
+                  mutate(country = 'Norway')%>%
+                select(rgn_name=rgn_nam, country)
+
+russia@data = russia@data%>%
+              mutate(rgn_name = 'Russia')%>%
+              select(rgn_name,country = Country)
+          
+svalbard@data = svalbard@data%>%
+                  mutate(rgn_name = 'svalbard',
+                         Country = 'Norway')%>%
+                  select(rgn_name,country = Country)
+
+norway@data = norway@data%>%
+                  mutate(rgn_name = 'norway')%>%
+                  select(rgn_name,country = Country)
+
+
+```
+
+
+Combine them all together
+
+```{r combine}
+
+#install.packages('taRifx.geo')
+library(taRifx.geo) #helps with the fix.duplicated.IDs=TRUE
+
+
+all = rbind(alaska, canada, russia, svalbard, norway, janmayen, greenland, fix.duplicated.IDs=TRUE)
+
+writeOGR(all,dsn='spatial',layer='arctic_eezs',driver="ESRI Shapefile")
+
+
+
+
+```
+
+
+
