@@ -37,11 +37,13 @@ library(readr)
 library(stringr)
 library(rgdal)
 library(raster)
+library(maptools)
 
 # directories
-dir_neptune = c('Windows' = '//neptune.nceas.ucsb.edu/data_edit',
-                'Darwin'  = '/Volumes/data_edit',
-                'Linux'   = '/var/data/ohi')[[ Sys.info()[['sysname']] ]]
+dir_M = c('Windows' = '//mazu.nceas.ucsb.edu/ohi',
+           'Darwin'  = '/Volumes/ohi',    ### connect (cmd-K) to smb://mazu/ohi
+           'Linux'   = '/home/shares/ohi')[[ Sys.info()[['sysname']] ]]
+dir_annex = file.path(dir_M, 'git-annex')  
 dir_custom_bhi = '~/github/ohi-webapps/custom/bhi'
 dir_tmp_baltic = file.path(dir_custom_bhi, 'tmp_bhi_contents')
 
@@ -76,14 +78,17 @@ clean_spatial = F
 
 
 # read in shp files and save with desired headers in data frame. readOGR includes a CRS but doesn't fix orphan holes
-bhi_tmp = readOGR(dsn = file.path(dir_annex, 'bhi/spatial/custom/raw'),
-              layer = 'Intersect_HELCOMsubbasins_BALTIC_EEZ_Eliminate')
+bhi = readOGR(dsn = file.path(dir_annex, 'Baltic/BHI_MCG_shapefile'),
+              layer = 'BHI_MCG_11052016')
+  ## old, orphan-holed file from corrupted HELCOM shapefiles
+    # bhi_tmp = readOGR(dsn = file.path(dir_annex, 'clip-n-ship/bhi/spatial/custom/raw'),
+    #             layer = 'Intersect_HELCOMsubbasins_BALTIC_EEZ_Eliminate')
 
-# readShapePoly doesn't include a coordinate ref system (must set it) but does remove orphan holes
-bhi = readShapePoly(file.path(dir_annex, 'bhi/spatial/custom/raw',
-                   'Intersect_HELCOMsubbasins_BALTIC_EEZ_Eliminate.shp'), 
-                  proj4string=CRS(bhi_tmp@proj4string@projargs) # CRS set from bhi_tmp above
-bhi_orig = bhi # to archive
+    # # readShapePoly doesn't include a coordinate ref system (must set it) but does remove orphan holes
+    # bhi = maptools::readShapePoly(file.path(dir_annex, 'clip-n-ship/bhi/spatial/custom/raw',
+    #                                         'Intersect_HELCOMsubbasins_BALTIC_EEZ_Eliminate.shp'), 
+    #                               proj4string=CRS(bhi_tmp@proj4string@projargs)) # CRS set from bhi_tmp above
+    # bhi_orig = bhi # to archive
 
 # viewing takes a long time
 if (view_shp) plot(bhi)
@@ -107,7 +112,7 @@ bhi@data = bhi@data %>%
 
 
 # save as shapefiles. will create 4 files: .dbf, .prj, .shp, .shx
-writeOGR(bhi, dsn = file.path(dir_annex, 'bhi/spatial/custom'), 
+writeOGR(bhi, dsn = file.path(dir_annex, 'clip-n-ship/bhi/spatial/custom'), 
          layer = 'baltic_shp', driver = 'ESRI Shapefile', overwrite=T) 
 
 
