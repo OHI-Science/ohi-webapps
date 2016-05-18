@@ -6,7 +6,7 @@
   # 3. Run the following as a one-time install:
 
 # remove old packages
-for (p in c('ohicore')){
+for (p in c('ohicore', 'rCharts')){
   if (p %in% rownames(installed.packages())){
     lib = subset(as.data.frame(installed.packages()), Package==p, LibPath, drop=T)
     remove.packages(p, lib)
@@ -16,6 +16,7 @@ for (p in c('ohicore')){
 
 # install ohicore package from github using the devtools package
 if (!"devtools" %in% rownames(installed.packages())) install.packages('devtools')
+devtools::install_github('ohi-science/rCharts')
 devtools::install_github('ohi-science/ohicore')
 
 # Note: you will get warning messages like the following; this is nothing to worry about.
