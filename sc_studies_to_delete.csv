@@ -1,0 +1,206 @@
+sc_key,sc_name,sc_key_old,gl_rgn_id,gl_rgn_name,gl_rgn_key,sc_annex_dir
+xwk,Wake Island,wake_island,12,Wake Island,XWK,NA
+xpx,Phoenix Group,phoenix_group,157,Phoenix Group,XPX,NA
+xpv,Puerto Rico and Virgin Islands of the United States,puerto_rico_and_virgin_islands_of_the_united_states,116,Puerto Rico and Virgin Islands of the United States,XPV,NA
+xpa,Palmyra Atoll,palmyra_atoll,150,Palmyra Atoll,XPA,NA
+xoa,Oecussi Ambeno,oecussi_ambeno,237,Oecussi Ambeno,XOA,NA
+xma,Madeira,madeira,57,Madeira,XMA,NA
+xlg,Line Group,line_group,148,Line Group,XLG,NA
+xkg,Kerguelen Islands,kerguelen_islands,93,Kerguelen Islands,XKG,NA
+xjv,Jarvis Island,jarvis_island,149,Jarvis Island,XJV,NA
+xjo,Johnston Atoll,johnston_atoll,159,Johnston Atoll,XJO,NA
+xjn,Juan de Nova Island,juan_de_nova_island,33,Juan de Nova Island,XJN,NA
+xit,Ile Tromelin,ile_tromelin,36,Ile Tromelin,XIT,NA
+xgm,Guadeloupe and Martinique,guadeloupe_and_martinique,140,Guadeloupe and Martinique,XGM,NA
+xgl,Glorioso Islands,glorioso_islands,30,Glorioso Islands,XGL,NA
+xeu,Ile Europa,ile_europa,35,Ile Europa,XEU,NA
+xcz,Crozet Islands,crozet_islands,91,Crozet Islands,XCZ,NA
+xci,Canary Islands,canary_islands,58,Canary Islands,XCI,NA
+xbq,Bonaire,bonaire,245,Bonaire,XBQ,NA
+xbi,Bassas da India,bassas_da_india,34,Bassas da India,XBI,NA
+xaz,Azores,azores,55,Azores,XAZ,NA
+xas,Amsterdam Island and Saint Paul Island,amsterdam_island_and_saint_paul_island,92,Amsterdam Island and Saint Paul Island,XAS,NA
+xan,Andaman and Nicobar,andaman_and_nicobar,26,Andaman and Nicobar,XAN,NA
+wsm,Samoa,samoa,152,Samoa,WSM,/Volumes/data_edit/git-annex/clip-n-ship/wsm
+wlf,Wallis and Futuna,wallis_and_futuna,161,Wallis and Futuna,WLF,/Volumes/data_edit/git-annex/clip-n-ship/wlf
+vut,Vanuatu,vanuatu,6,Vanuatu,VUT,/Volumes/data_edit/git-annex/clip-n-ship/vut
+vnm,Vietnam,vietnam,207,Vietnam,VNM,/Volumes/data_edit/git-annex/clip-n-ship/vnm
+vgb,British Virgin Islands,british_virgin_islands,117,British Virgin Islands,VGB,/Volumes/data_edit/git-annex/clip-n-ship/vgb
+vct,Saint Vincent and the Grenadines,saint_vincent_and_the_grenadines,127,Saint Vincent and the Grenadines,VCT,/Volumes/data_edit/git-annex/clip-n-ship/vct
+usa,United States,united_states,163,United States,USA,/Volumes/data_edit/git-annex/clip-n-ship/usa
+ury,Uruguay,uruguay,173,Uruguay,URY,/Volumes/data_edit/git-annex/clip-n-ship/ury
+ukr,Ukraine,ukraine,75,Ukraine,UKR,/Volumes/data_edit/git-annex/clip-n-ship/ukr
+twn,Taiwan,taiwan,14,Taiwan,TWN,/Volumes/data_edit/git-annex/clip-n-ship/twn
+tuv,Tuvalu,tuvalu,19,Tuvalu,TUV,/Volumes/data_edit/git-annex/clip-n-ship/tuv
+tur,Turkey,turkey,76,Turkey,TUR,/Volumes/data_edit/git-annex/clip-n-ship/tur
+tun,Tunisia,tunisia,61,Tunisia,TUN,/Volumes/data_edit/git-annex/clip-n-ship/tun
+tto,Trinidad and Tobago,trinidad_and_tobago,126,Trinidad and Tobago,TTO,/Volumes/data_edit/git-annex/clip-n-ship/tto
+tls,East Timor,east_timor,231,East Timor,TLS,/Volumes/data_edit/git-annex/clip-n-ship/tls
+tkl,Tokelau,tokelau,156,Tokelau,TKL,/Volumes/data_edit/git-annex/clip-n-ship/tkl
+tha,Thailand,thailand,25,Thailand,THA,/Volumes/data_edit/git-annex/clip-n-ship/tha
+tgo,Togo,togo,98,Togo,TGO,/Volumes/data_edit/git-annex/clip-n-ship/tgo
+tca,Turks and Caicos Islands,turks_and_caicos_islands,111,Turks and Caicos Islands,TCA,/Volumes/data_edit/git-annex/clip-n-ship/tca
+ton,Tonga,tonga,155,Tonga,TON,/Volumes/data_edit/git-annex/clip-n-ship/ton
+taa,Tristan da Cunha,tristan_da_cunha,88,Tristan da Cunha,TAA,NA
+syr,Syria,syria,77,Syria,SYR,/Volumes/data_edit/git-annex/clip-n-ship/syr
+syc,Seychelles,seychelles,31,Seychelles,SYC,/Volumes/data_edit/git-annex/clip-n-ship/syc
+sxm,Sint Maarten,sint_maarten,220,Sint Maarten,SXM,/Volumes/data_edit/git-annex/clip-n-ship/sxm
+svn,Slovenia,slovenia,188,Slovenia,SVN,/Volumes/data_edit/git-annex/clip-n-ship/svn
+sur,Suriname,suriname,168,Suriname,SUR,/Volumes/data_edit/git-annex/clip-n-ship/sur
+stp,Sao Tome and Principe,sao_tome_and_principe,103,Sao Tome and Principe,STP,/Volumes/data_edit/git-annex/clip-n-ship/stp
+spm,Saint Pierre and Miquelon,saint_pierre_and_miquelon,219,Saint Pierre and Miquelon,SPM,/Volumes/data_edit/git-annex/clip-n-ship/spm
+som,Somalia,somalia,44,Somalia,SOM,/Volumes/data_edit/git-annex/clip-n-ship/som
+slv,El Salvador,el_salvador,134,El Salvador,SLV,/Volumes/data_edit/git-annex/clip-n-ship/slv
+sle,Sierra Leone,sierra_leone,96,Sierra Leone,SLE,/Volumes/data_edit/git-annex/clip-n-ship/sle
+slb,Solomon Islands,solomon_islands,7,Solomon Islands,SLB,/Volumes/data_edit/git-annex/clip-n-ship/slb
+sjm,Jan Mayen,jan_mayen,144,Jan Mayen,SJM,NA
+shn,Saint Helena,saint_helena,86,Saint Helena,SHN,/Volumes/data_edit/git-annex/clip-n-ship/shn
+sgs,South Georgia and the South Sandwich Islands,south_georgia_and_the_south_sandwich_islands,89,South Georgia and the South Sandwich Islands,SGS,/Volumes/data_edit/git-annex/clip-n-ship/sgs
+sgp,Singapore,singapore,208,Singapore,SGP,/Volumes/data_edit/git-annex/clip-n-ship/sgp
+sdn,Sudan,sudan,49,Sudan,SDN,/Volumes/data_edit/git-annex/clip-n-ship/sdn
+reu,Reunion,reunion,32,Reunion,REU,/Volumes/data_edit/git-annex/clip-n-ship/reu
+qat,Qatar,qatar,190,Qatar,QAT,/Volumes/data_edit/git-annex/clip-n-ship/qat
+pyf,French Polynesia,french_polynesia,147,French Polynesia,PYF,/Volumes/data_edit/git-annex/clip-n-ship/pyf
+prt,Portugal,portugal,183,Portugal,PRT,/Volumes/data_edit/git-annex/clip-n-ship/prt
+prk,North Korea,north_korea,21,North Korea,PRK,/Volumes/data_edit/git-annex/clip-n-ship/prk
+plw,Palau,palau,8,Palau,PLW,/Volumes/data_edit/git-annex/clip-n-ship/plw
+phl,Philippines,philippines,15,Philippines,PHL,/Volumes/data_edit/git-annex/clip-n-ship/phl
+per,Peru,peru,138,Peru,PER,/Volumes/data_edit/git-annex/clip-n-ship/per
+pcn,Pitcairn,pitcairn,146,Pitcairn,PCN,NA
+pan,Panama,panama,129,Panama,PAN,/Volumes/data_edit/git-annex/clip-n-ship/pan
+pak,Pakistan,pakistan,53,Pakistan,PAK,/Volumes/data_edit/git-annex/clip-n-ship/pak
+omn,Oman,oman,48,Oman,OMN,/Volumes/data_edit/git-annex/clip-n-ship/omn
+nzl,New Zealand,new_zealand,162,New Zealand,NZL,/Volumes/data_edit/git-annex/clip-n-ship/nzl
+nru,Nauru,nauru,10,Nauru,NRU,/Volumes/data_edit/git-annex/clip-n-ship/nru
+nor,Norway,norway,223,Norway,NOR,/Volumes/data_edit/git-annex/clip-n-ship/nor
+nld,Netherlands,netherlands,177,Netherlands,NLD,/Volumes/data_edit/git-annex/clip-n-ship/nld
+nic,Nicaragua,nicaragua,131,Nicaragua,NIC,/Volumes/data_edit/git-annex/clip-n-ship/nic
+ncl,New Caledonia,new_caledonia,5,New Caledonia,NCL,/Volumes/data_edit/git-annex/clip-n-ship/ncl
+nam,Namibia,namibia,101,Namibia,NAM,/Volumes/data_edit/git-annex/clip-n-ship/nam
+myt,Mayotte,mayotte,29,Mayotte,MYT,/Volumes/data_edit/git-annex/clip-n-ship/myt
+mys,Malaysia,malaysia,206,Malaysia,MYS,/Volumes/data_edit/git-annex/clip-n-ship/mys
+mus,Mauritius,mauritius,37,Mauritius,MUS,/Volumes/data_edit/git-annex/clip-n-ship/mus
+msr,Montserrat,montserrat,121,Montserrat,MSR,/Volumes/data_edit/git-annex/clip-n-ship/msr
+mrt,Mauritania,mauritania,64,Mauritania,MRT,/Volumes/data_edit/git-annex/clip-n-ship/mrt
+moz,Mozambique,mozambique,41,Mozambique,MOZ,/Volumes/data_edit/git-annex/clip-n-ship/moz
+sen,Senegal,senegal,66,Senegal,SEN,/Volumes/data_edit/git-annex/clip-n-ship/sen
+mnp,Northern Mariana Islands and Guam,northern_mariana_islands_and_guam,13,Northern Mariana Islands and Guam,MNP,NA
+nfk,Norfolk Island,norfolk_island,3,Norfolk Island,NFK,/Volumes/data_edit/git-annex/clip-n-ship/nfk
+mne,Montenegro,montenegro,186,Montenegro,MNE,/Volumes/data_edit/git-annex/clip-n-ship/mne
+mmr,Myanmar,myanmar,205,Myanmar,MMR,/Volumes/data_edit/git-annex/clip-n-ship/mmr
+mlt,Malta,malta,68,Malta,MLT,/Volumes/data_edit/git-annex/clip-n-ship/mlt
+mhl,Marshall Islands,marshall_islands,11,Marshall Islands,MHL,/Volumes/data_edit/git-annex/clip-n-ship/mhl
+mex,Mexico,mexico,135,Mexico,MEX,/Volumes/data_edit/git-annex/clip-n-ship/mex
+mdv,Maldives,maldives,39,Maldives,MDV,/Volumes/data_edit/git-annex/clip-n-ship/mdv
+mdg,Madagascar,madagascar,42,Madagascar,MDG,/Volumes/data_edit/git-annex/clip-n-ship/mdg
+mco,Monaco,monaco,185,Monaco,MCO,/Volumes/data_edit/git-annex/clip-n-ship/mco
+niu,Niue,niue,154,Niue,NIU,/Volumes/data_edit/git-annex/clip-n-ship/niu
+mar,Morocco,morocco,62,Morocco,MAR,/Volumes/data_edit/git-annex/clip-n-ship/mar
+maf,Northern Saint-Martin,northern_saint-martin,221,Northern Saint-Martin,MAF,/Volumes/data_edit/git-annex/clip-n-ship/maf
+lka,Sri Lanka,sri_lanka,40,Sri Lanka,LKA,/Volumes/data_edit/git-annex/clip-n-ship/lka
+xmq,Macquarie Island,macquarie_island,4,Macquarie Island,XMQ,NA
+lca,Saint Lucia,saint_lucia,122,Saint Lucia,LCA,/Volumes/data_edit/git-annex/clip-n-ship/lca
+lby,Libya,libya,67,Libya,LBY,/Volumes/data_edit/git-annex/clip-n-ship/lby
+lbr,Liberia,liberia,97,Liberia,LBR,/Volumes/data_edit/git-annex/clip-n-ship/lbr
+yem,Yemen,yemen,47,Yemen,YEM,/Volumes/data_edit/git-annex/clip-n-ship/yem
+lbn,Lebanon,lebanon,78,Lebanon,LBN,/Volumes/data_edit/git-annex/clip-n-ship/lbn
+kor,South Korea,south_korea,20,South Korea,KOR,/Volumes/data_edit/git-annex/clip-n-ship/kor
+xpe,Prince Edward Islands,prince_edward_islands,90,Prince Edward Islands,XPE,NA
+kna,Saint Kitts and Nevis,saint_kitts_and_nevis,119,Saint Kitts and Nevis,KNA,/Volumes/data_edit/git-annex/clip-n-ship/kna
+kir,Kiribati,kiribati,212,Kiribati,KIR,/Volumes/data_edit/git-annex/clip-n-ship/kir
+khm,Cambodia,cambodia,24,Cambodia,KHM,/Volumes/data_edit/git-annex/clip-n-ship/khm
+ken,Kenya,kenya,43,Kenya,KEN,/Volumes/data_edit/git-annex/clip-n-ship/ken
+jpn,Japan,japan,210,Japan,JPN,/Volumes/data_edit/git-annex/clip-n-ship/jpn
+jor,Jordan,jordan,215,Jordan,JOR,/Volumes/data_edit/git-annex/clip-n-ship/jor
+jey,Jersey,jersey,227,Jersey,JEY,/Volumes/data_edit/git-annex/clip-n-ship/jey
+jam,Jamaica,jamaica,166,Jamaica,JAM,/Volumes/data_edit/git-annex/clip-n-ship/jam
+ita,Italy,italy,184,Italy,ITA,/Volumes/data_edit/git-annex/clip-n-ship/ita
+isr,Israel,israel,79,Israel,ISR,NA
+zaf,South Africa,south_africa,102,South Africa,ZAF,/Volumes/data_edit/git-annex/clip-n-ship/zaf
+isl,Iceland,iceland,143,Iceland,ISL,/Volumes/data_edit/git-annex/clip-n-ship/isl
+rou,Romania,romania,72,Romania,ROU,/Volumes/data_edit/git-annex/clip-n-ship/rou
+irq,Iraq,iraq,192,Iraq,IRQ,/Volumes/data_edit/git-annex/clip-n-ship/irq
+irn,Iran,iran,191,Iran,IRN,/Volumes/data_edit/git-annex/clip-n-ship/irn
+irl,Ireland,ireland,181,Ireland,IRL,/Volumes/data_edit/git-annex/clip-n-ship/irl
+iot,British Indian Ocean Territory,british_indian_ocean_territory,38,British Indian Ocean Territory,IOT,/Volumes/data_edit/git-annex/clip-n-ship/iot
+ind,India,india,203,India,IND,/Volumes/data_edit/git-annex/clip-n-ship/ind
+idn,Indonesia,indonesia,216,Indonesia,IDN,/Volumes/data_edit/git-annex/clip-n-ship/idn
+hti,Haiti,haiti,114,Haiti,HTI,/Volumes/data_edit/git-annex/clip-n-ship/hti
+hrv,Croatia,croatia,187,Croatia,HRV,/Volumes/data_edit/git-annex/clip-n-ship/hrv
+hnd,Honduras,honduras,133,Honduras,HND,/Volumes/data_edit/git-annex/clip-n-ship/hnd
+xhb,Howland Island and Baker Island,howland_island_and_baker_island,158,Howland Island and Baker Island,XHB,NA
+hmd,Heard and McDonald Islands,heard_and_mcdonald_islands,94,Heard and McDonald Islands,HMD,/Volumes/data_edit/git-annex/clip-n-ship/hmd
+sau,Saudi Arabia,saudi_arabia,50,Saudi Arabia,SAU,/Volumes/data_edit/git-annex/clip-n-ship/sau
+guy,Guyana,guyana,167,Guyana,GUY,/Volumes/data_edit/git-annex/clip-n-ship/guy
+guf,French Guiana,french_guiana,169,French Guiana,GUF,/Volumes/data_edit/git-annex/clip-n-ship/guf
+grl,Greenland,greenland,145,Greenland,GRL,/Volumes/data_edit/git-annex/clip-n-ship/grl
+grd,Grenada,grenada,125,Grenada,GRD,/Volumes/data_edit/git-annex/clip-n-ship/grd
+grc,Greece,greece,80,Greece,GRC,/Volumes/data_edit/git-annex/clip-n-ship/grc
+png,Papua New Guinea,papua_new_guinea,17,Papua New Guinea,PNG,/Volumes/data_edit/git-annex/clip-n-ship/png
+gnq,Equatorial Guinea,equatorial_guinea,104,Equatorial Guinea,GNQ,/Volumes/data_edit/git-annex/clip-n-ship/gnq
+gnb,Guinea Bissau,guinea_bissau,193,Guinea Bissau,GNB,/Volumes/data_edit/git-annex/clip-n-ship/gnb
+gmb,Gambia,gambia,65,Gambia,GMB,/Volumes/data_edit/git-annex/clip-n-ship/gmb
+gin,Guinea,guinea,194,Guinea,GIN,/Volumes/data_edit/git-annex/clip-n-ship/gin
+gib,Gibraltar,gibraltar,60,Gibraltar,GIB,/Volumes/data_edit/git-annex/clip-n-ship/gib
+tza,Tanzania,tanzania,202,Tanzania,TZA,/Volumes/data_edit/git-annex/clip-n-ship/tza
+gha,Ghana,ghana,106,Ghana,GHA,/Volumes/data_edit/git-annex/clip-n-ship/gha
+ggy,Guernsey,guernsey,228,Guernsey,GGY,/Volumes/data_edit/git-annex/clip-n-ship/ggy
+geo,Georgia,georgia,74,Georgia,GEO,/Volumes/data_edit/git-annex/clip-n-ship/geo
+gbr,United Kingdom,united_kingdom,180,United Kingdom,GBR,/Volumes/data_edit/git-annex/clip-n-ship/gbr
+gab,Gabon,gabon,198,Gabon,GAB,/Volumes/data_edit/git-annex/clip-n-ship/gab
+fsm,Micronesia,micronesia,9,Micronesia,FSM,/Volumes/data_edit/git-annex/clip-n-ship/fsm
+fro,Faeroe Islands,faeroe_islands,141,Faeroe Islands,FRO,/Volumes/data_edit/git-annex/clip-n-ship/fro
+fra,France,france,179,France,FRA,/Volumes/data_edit/git-annex/clip-n-ship/fra
+flk,Falkland Islands,falkland_islands,95,Falkland Islands,FLK,/Volumes/data_edit/git-annex/clip-n-ship/flk
+fji,Fiji,fiji,18,Fiji,FJI,/Volumes/data_edit/git-annex/clip-n-ship/fji
+esh,Western Sahara,western_sahara,63,Western Sahara,ESH,/Volumes/data_edit/git-annex/clip-n-ship/esh
+eri,Eritrea,eritrea,45,Eritrea,ERI,/Volumes/data_edit/git-annex/clip-n-ship/eri
+egy,Egypt,egypt,214,Egypt,EGY,/Volumes/data_edit/git-annex/clip-n-ship/egy
+dza,Algeria,algeria,84,Algeria,DZA,/Volumes/data_edit/git-annex/clip-n-ship/dza
+dom,Dominican Republic,dominican_republic,115,Dominican Republic,DOM,/Volumes/data_edit/git-annex/clip-n-ship/dom
+gtm,Guatemala,guatemala,136,Guatemala,GTM,/Volumes/data_edit/git-annex/clip-n-ship/gtm
+dma,Dominica,dominica,123,Dominica,DMA,/Volumes/data_edit/git-annex/clip-n-ship/dma
+cyp,Cyprus,cyprus,81,Cyprus,CYP,/Volumes/data_edit/git-annex/clip-n-ship/cyp
+cym,Cayman Islands,cayman_islands,113,Cayman Islands,CYM,/Volumes/data_edit/git-annex/clip-n-ship/cym
+cxr,Christmas Island,christmas_island,2,Christmas Island,CXR,/Volumes/data_edit/git-annex/clip-n-ship/cxr
+cuw,Curacao,curacao,244,Curacao,CUW,/Volumes/data_edit/git-annex/clip-n-ship/cuw
+cub,Cuba,cuba,112,Cuba,CUB,/Volumes/data_edit/git-annex/clip-n-ship/cub
+cri,Costa Rica,costa_rica,130,Costa Rica,CRI,/Volumes/data_edit/git-annex/clip-n-ship/cri
+cpv,Cape Verde,cape_verde,56,Cape Verde,CPV,/Volumes/data_edit/git-annex/clip-n-ship/cpv
+nga,Nigeria,nigeria,196,Nigeria,NGA,/Volumes/data_edit/git-annex/clip-n-ship/nga
+cpt,Clipperton Island,clipperton_island,107,Clipperton Island,CPT,/Volumes/data_edit/git-annex/clip-n-ship/cpt
+cok,Cook Islands,cook_islands,153,Cook Islands,COK,/Volumes/data_edit/git-annex/clip-n-ship/cok
+cog,Republique du Congo,republique_du_congo,100,Republique du Congo,COG,/Volumes/data_edit/git-annex/clip-n-ship/cog
+cod,Democratic Republic of the Congo,democratic_republic_of_the_congo,199,Democratic Republic of the Congo,COD,/Volumes/data_edit/git-annex/clip-n-ship/cod
+dji,Djibouti,djibouti,46,Djibouti,DJI,/Volumes/data_edit/git-annex/clip-n-ship/dji
+cmr,Cameroon,cameroon,197,Cameroon,CMR,/Volumes/data_edit/git-annex/clip-n-ship/cmr
+civ,Ivory Coast,ivory_coast,195,Ivory Coast,CIV,/Volumes/data_edit/git-annex/clip-n-ship/civ
+com,Comoro Islands,comoro_islands,28,Comoro Islands,COM,/Volumes/data_edit/git-annex/clip-n-ship/com
+cck,Cocos Islands,cocos_islands,1,Cocos Islands,CCK,/Volumes/data_edit/git-annex/clip-n-ship/cck
+bvt,Bouvet Island,bouvet_island,105,Bouvet Island,BVT,/Volumes/data_edit/git-annex/clip-n-ship/bvt
+brn,Brunei,brunei,247,Brunei,BRN,/Volumes/data_edit/git-annex/clip-n-ship/brn
+brb,Barbados,barbados,124,Barbados,BRB,/Volumes/data_edit/git-annex/clip-n-ship/brb
+bra,Brazil,brazil,171,Brazil,BRA,/Volumes/data_edit/git-annex/clip-n-ship/bra
+bmu,Bermuda,bermuda,108,Bermuda,BMU,/Volumes/data_edit/git-annex/clip-n-ship/bmu
+bih,Bosnia and Herzegovina,bosnia_and_herzegovina,232,Bosnia and Herzegovina,BIH,/Volumes/data_edit/git-annex/clip-n-ship/bih
+bhs,Bahamas,bahamas,110,Bahamas,BHS,/Volumes/data_edit/git-annex/clip-n-ship/bhs
+bhr,Bahrain,bahrain,52,Bahrain,BHR,/Volumes/data_edit/git-annex/clip-n-ship/bhr
+bgr,Bulgaria,bulgaria,71,Bulgaria,BGR,/Volumes/data_edit/git-annex/clip-n-ship/bgr
+bgd,Bangladesh,bangladesh,204,Bangladesh,BGD,/Volumes/data_edit/git-annex/clip-n-ship/bgd
+bes,Saba,saba,248,Saba,BES,NA
+ben,Benin,benin,99,Benin,BEN,/Volumes/data_edit/git-annex/clip-n-ship/ben
+bel,Belgium,belgium,59,Belgium,BEL,/Volumes/data_edit/git-annex/clip-n-ship/bel
+aus,Australia,australia,16,Australia,AUS,/Volumes/data_edit/git-annex/clip-n-ship/aus
+atg,Antigua and Barbuda,antigua_and_barbuda,120,Antigua and Barbuda,ATG,/Volumes/data_edit/git-annex/clip-n-ship/atg
+ata,Antarctica,antarctica,213,Antarctica,ATA,NA
+asm,American Samoa,american_samoa,151,American Samoa,ASM,/Volumes/data_edit/git-annex/clip-n-ship/asm
+asc,Ascension,ascension,85,Ascension,ASC,NA
+arg,Argentina,argentina,172,Argentina,ARG,/Volumes/data_edit/git-annex/clip-n-ship/arg
+kwt,Kuwait,kuwait,51,Kuwait,KWT,/Volumes/data_edit/git-annex/clip-n-ship/kwt
+are,United Arab Emirates,united_arab_emirates,54,United Arab Emirates,ARE,/Volumes/data_edit/git-annex/clip-n-ship/are
+ven,Venezuela,venezuela,139,Venezuela,VEN,/Volumes/data_edit/git-annex/clip-n-ship/ven
+ant,Sint Eustatius,sint_eustatius,249,Sint Eustatius,ANT,NA
+alb,Albania,albania,82,Albania,ALB,/Volumes/data_edit/git-annex/clip-n-ship/alb
+aia,Anguilla,anguilla,118,Anguilla,AIA,/Volumes/data_edit/git-annex/clip-n-ship/aia
+ago,Angola,angola,200,Angola,AGO,/Volumes/data_edit/git-annex/clip-n-ship/ago
+abw,Aruba,aruba,250,Aruba,ABW,/Volumes/data_edit/git-annex/clip-n-ship/abw

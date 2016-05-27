@@ -51,35 +51,84 @@ while (!end){
   # iterate to next page
   p = p + 1
 }
+## save full list of repos prior to delete
+write.csv(repo_info, 'ohi-science_repos_pre_delete_2016_05_27.csv', row.names=FALSE) 
 
-write.csv(repo_info, 'ohi-science_repos_2016_May.csv', row.names=FALSE) # didn't push bc so big; see ohi-science_repos_2016_May_subsetfromTextWranglerSearch.csv
-  tail(repo_info, 50)
   
-r_explore <- repo_info %>%
-  str_extract_all('\""html_url\"": \""https://github.com/OHI-Science/')
-head(r_explore, 70)
-
-
-## repos to keep
+## delete repos ----  
+  
+## ohi+ repos to keep
 to_keep <- c('chn', 'gye', 'ohi-israel', 'ohi-canada', 'ohi-fiji', 'ohi-uswest', # completed
              'bhi', 'col', 'cdz', 'ohibc', 'ohi-northeast', 'ohi-global',        # in progress
-             'arc', 'chl', 'can', 'esp', 'ecu')                                  # keep as examples for now
+             'arc', 'chl', 'can', 'esp', 'ecu', 'rus', 'blz',                    # keep as examples for now
+             'swe', 'fin', 'dnk', 'deu', 'est', 'pol', 'lva', 'ltu', 'rus')      # bhi regions keep for now
 
 ## repos to delete
-repos_delete <- sc_studies %>%
-  filter(sc_key %in% c('bes', 'ben'))  ## really will be   filter(!sc_key %in% to_keep)
+sc_studies_to_delete <- sc_studies %>%
+  filter(!sc_key %in% to_keep)
+write_csv(sc_studies_to_delete, 'sc_studies_to_delete.csv')
 
-## loop through and delete repos -----
-for (r in repos_delete) { # r <- "test_delete"
+repos_to_delete = sc_studies_to_delete %>%
+  left_join(repo_info %>%
+              dplyr::rename(sc_key = name), 
+            by = 'sc_key') 
+# repos_to_delete.csv written below
+
+## double-check urls for these; see if indications of use (any forks or commits) 
+repos_to_delete$sc_key
+
+## DANGER::loop through and delete repos_to_delete. uncomment cmd lines to execute.  -----
+for (r in repos_to_delete$sc_key) { # r <- "atg"
   
   ## delete using Github API: https://developer.github.com/v3/repos/#create # DELETE /repos/:owner/:repo
-  cmd = sprintf('curl -X DELETE -H "Authorization: token %s" https://api.github.com/repos/ohi-science/%s', gh_token, r)
-  system(cmd, intern=T)
+  # cmd = sprintf('curl -X DELETE -H "Authorization: token %s" https://api.github.com/repos/ohi-science/%s', gh_token, r)
+  # system(cmd, intern=T)
+} 
+
+repos_to_delete2 <- c('ohi-baltic', 'ohi-china', 
+                      'bhi-swe', 'bhi-fin', 'bhi-dnk', 'bhi-deu', 'bhi-est', 'bhi-pol', 'bhi-lva', 'bhi-ltu', 'bhi-rus', 
+                      'Example-Repo')
+write.csv(c(repos_to_delete$sc_key, repos_to_delete2), 'repos_to_delete.csv', row.names=FALSE)
+
+## DANGER: loop through other repos to delete
+for (r in repos_to_delete2) { 
+  
+  ## delete using Github API: https://developer.github.com/v3/repos/#create # DELETE /repos/:owner/:repo
+  # cmd = sprintf('curl -X DELETE -H "Authorization: token %s" https://api.github.com/repos/ohi-science/%s', gh_token, r)
+  # system(cmd, intern=T)
 } 
 
 
-## list current ohi-science repos now
-#TODO
+## list current ohi-science repos now. from above. 
+suppressWarnings(rm('repo_info'))
+end = F; p = 1
+while (!end){
+  
+  # construct curl command; must paginate https://developer.github.com/v3/#pagination
+  cmd = sprintf('curl -X GET -H "Authorization: token %s" https://api.github.com/orgs/ohi-science/repos?page=%d', gh_token, p)
+  
+  # read JSON response
+  v = fromJSON(system(cmd, intern=T))
+  
+  if (length(v) > 0){
+    v = tbl_df(v[,1:3])
+    
+    if (exists('repo_info')){
+      repo_info = repo_info %>%
+        bind_rows(v)
+    } else {
+      repo_info = v
+    }
+  } else {
+    end = T
+  }
+  
+  # iterate to next page
+  p = p + 1
+}
+## save full list of repos post delete
+write.csv(repo_info, 'ohi-science_repos_post_delete_2016_05_27.csv', row.names=FALSE) 
+
 
 
 
@@ -108,3 +157,33 @@ system('cd ~/tmp/subcountry; git push https://${GH_TOKEN}@github.com/OHI-Science
 
 ## also delete by hand ---
 # 'ohi-china',
+
+
+suppressWarnings(rm('repo_info'))
+end = F; p = 1
+while (!end){
+  
+  # construct curl command; must paginate https://developer.github.com/v3/#pagination
+  cmd = sprintf('curl -X GET -H "Authorization: token %s" https://api.github.com/orgs/ohi-science/repos?page=%d', gh_token, p)
+  
+  # read JSON response
+  v = fromJSON(system(cmd, intern=T))
+  
+  if (length(v) > 0){
+    # since field owner is class of data.frame, get just first 3 columns
+    #   more: [dplyr - R-Error: data_frames can only contain 1d atomic vectors and lists - Stack Overflow](http://stackoverflow.com/questions/34443410/r-error-data-frames-can-only-contain-1d-atomic-vectors-and-lists)
+    v = tbl_df(v[,1:3])
+    
+    if (exists('repo_info')){
+      repo_info = repo_info %>%
+        bind_rows(v)
+    } else {
+      repo_info = v
+    }
+  } else {
+    end = T
+  }
+  
+  # iterate to next page
+  p = p + 1
+}
