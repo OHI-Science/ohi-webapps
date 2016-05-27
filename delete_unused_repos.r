@@ -12,6 +12,7 @@
 source('create_init.r')
 library(dplyr)
 library(readr)
+library(jsonlite)
 
 ## set gh_token for privileges (bbest, jules32)
 gh_token <- scan('~/.github-token', 'character', quiet = T)
@@ -23,7 +24,41 @@ gh_token <- scan('~/.github-token', 'character', quiet = T)
 ## get full list of current, existing ohi-science repos 
 ## using Github API: https://developer.github.com/v3/repos/#list-organization-repositories: # GET /orgs/:org/repos
 cmd = sprintf('curl -X GET -H "Authorization: token %s" https://api.github.com/orgs/ohi-science/repos', gh_token)
-repo_info <- capture.output(system(cmd, intern=T))
+repo_info = fromJSON(system(cmd, intern=T))
+
+suppressWarnings(rm('repo_info'))
+end = F; p = 1
+while (!end){
+  
+  # construct curl command
+  cmd = sprintf('curl -X GET -H "Authorization: token %s" https://api.github.com/orgs/ohi-science/repos?page=%d', gh_token, p)
+
+  # read JSON response
+  v = fromJSON(system(cmd, intern=T))
+  
+  if (length(v) > 0){
+    # since field owner is class of data.frame, get just first 3 columns
+    #   more: [dplyr - R-Error: data_frames can only contain 1d atomic vectors and lists - Stack Overflow](http://stackoverflow.com/questions/34443410/r-error-data-frames-can-only-contain-1d-atomic-vectors-and-lists)
+    v = tbl_df(v[,1:3])
+    
+    if (exists('repo_info')){
+      repo_info = repo_info %>%
+        bind_rows(v)
+    } else {
+      repo_info = v
+    }
+  } else {
+    end = T
+  }
+  
+  # iterate to next page
+  p = p + 1
+}
+
+cmd = sprintf('curl -X GET -H "Authorization: token %s" https://api.github.com/orgs/ohi-science/repos?page=200', gh_token)
+repo_info = fromJSON(system(cmd, intern=T))
+
+
 
 write.csv(repo_info, 'ohi-science_repos_2016_May.csv', row.names=FALSE) # didn't push bc so big; see ohi-science_repos_2016_May_subsetfromTextWranglerSearch.csv
   tail(repo_info, 50)
