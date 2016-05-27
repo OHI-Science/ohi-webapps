@@ -23,14 +23,11 @@ gh_token <- scan('~/.github-token', 'character', quiet = T)
 ## TODO:
 ## get full list of current, existing ohi-science repos 
 ## using Github API: https://developer.github.com/v3/repos/#list-organization-repositories: # GET /orgs/:org/repos
-cmd = sprintf('curl -X GET -H "Authorization: token %s" https://api.github.com/orgs/ohi-science/repos', gh_token)
-repo_info = fromJSON(system(cmd, intern=T))
-
 suppressWarnings(rm('repo_info'))
 end = F; p = 1
 while (!end){
   
-  # construct curl command
+  # construct curl command; must paginate https://developer.github.com/v3/#pagination
   cmd = sprintf('curl -X GET -H "Authorization: token %s" https://api.github.com/orgs/ohi-science/repos?page=%d', gh_token, p)
 
   # read JSON response
@@ -54,11 +51,6 @@ while (!end){
   # iterate to next page
   p = p + 1
 }
-
-cmd = sprintf('curl -X GET -H "Authorization: token %s" https://api.github.com/orgs/ohi-science/repos?page=200', gh_token)
-repo_info = fromJSON(system(cmd, intern=T))
-
-
 
 write.csv(repo_info, 'ohi-science_repos_2016_May.csv', row.names=FALSE) # didn't push bc so big; see ohi-science_repos_2016_May_subsetfromTextWranglerSearch.csv
   tail(repo_info, 50)
