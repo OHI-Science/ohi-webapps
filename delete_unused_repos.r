@@ -25,7 +25,7 @@ gh_token <- scan('~/.github-token', 'character', quiet = T)
 cmd = sprintf('curl -X GET -H "Authorization: token %s" https://api.github.com/orgs/ohi-science/repos', gh_token)
 repo_info <- capture.output(system(cmd, intern=T))
 
-write.csv(repo_info, 'ohi-science_repos_2016_May.csv', row.names=FALSE)
+write.csv(repo_info, 'ohi-science_repos_2016_May.csv', row.names=FALSE) # didn't push bc so big; see ohi-science_repos_2016_May_subsetfromTextWranglerSearch.csv
   tail(repo_info, 50)
   
 r_explore <- repo_info %>%
