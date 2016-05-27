@@ -8,28 +8,41 @@
 #   - pressures/resilience out of sync
 #   - people turned off b/c already looks "done"
 
+## setup ----
+source('create_init.r')
+library(dplyr)
+library(readr)
 
 ## set gh_token for privileges (bbest, jules32)
 gh_token <- scan('~/.github-token', 'character', quiet = T)
 
 
-## list of repos to delete
-to_keep <- c('ohi-israel', 'ohi-canada', 'ohi-global', 'ohi-fiji', 'ohi-northeast', 'ohi-uswest', 'ohi-china',
-             'chn', 'gye', 
-             'bhi', 'col', 'ohibc', 'cdz',  'arc', 'chl',
-             'can', 'esp')
+## lists of repos ----
 
-## repos_delete
-r_delete <- sc_studies %>%
-  filter(!sc_key %in% to_keep)
+## TODO:
+## get full list of current, existing ohi-science repos 
+## using Github API: https://developer.github.com/v3/repos/#list-organization-repositories: # GET /orgs/:org/repos
+cmd = sprintf('curl -X GET -H "Authorization: token %s" https://api.github.com/orgs/ohi-science/repos', gh_token)
+repo_info <- capture.output(system(cmd, intern=T))
 
+write.csv(repo_info, 'ohi-science_repos_2016_May.csv', row.names=FALSE)
+  tail(repo_info, 50)
+  
+r_explore <- repo_info %>%
+  str_extract_all('\""html_url\"": \""https://github.com/OHI-Science/')
+head(r_explore, 70)
+
+
+## repos to keep
+to_keep <- c('chn', 'gye', 'ohi-israel', 'ohi-canada', 'ohi-fiji', 'ohi-uswest', # completed
+             'bhi', 'col', 'cdz', 'ohibc', 'ohi-northeast', 'ohi-global',        # in progress
+             'arc', 'chl', 'can', 'esp', 'ecu')                                  # keep as examples for now
+
+## repos to delete
 repos_delete <- sc_studies %>%
-  filter(sc_key %in% c('bes', 'ben'))
+  filter(sc_key %in% c('bes', 'ben'))  ## really will be   filter(!sc_key %in% to_keep)
 
-
-# repos_delete <- c('alb', 'aia')
-
-## loop through and delete repos
+## loop through and delete repos -----
 for (r in repos_delete) { # r <- "test_delete"
   
   ## delete using Github API: https://developer.github.com/v3/repos/#create
@@ -37,39 +50,34 @@ for (r in repos_delete) { # r <- "test_delete"
   system(cmd, intern=T)
 } 
 
-## update status.csv that displays on ohi-science.org/subcountry
+
+## list current ohi-science repos now
+#TODO
+
+
+
+## one-time update status.csv that displays on ohi-science.org/subcountry; will need to make workflow to update as move on. 
 ## modified from https://github.com/OHI-Science/ohi-webapps/blob/b9e12ffd304018680f5dd693b9cd328a523a440c/ohi-functions.r#L370-L399
 
-# update status log: documentation ----
-
-# get status repo  depth of 1 only
+## get status repo depth of 1 only
 if (file.exists('~/tmp/subcountry')){
   system('cd ~/tmp/subcountry; git pull')
 } else {
   dir.create(dirname('tmp'), showWarnings=F, recursive=T)
   system('git clone --depth=1 https://github.com/OHI-Science/subcountry ~/tmp/subcountry')
 }
-csv_status = '~/tmp/subcountry/_data/status.csv'
-d = read.csv(csv_status, stringsAsFactors=F)
 
-# # get this repo's info
-# n_rgns = file.path(dir_archive, default_branch_scenario, 'reports/tables/region_titles.csv') %>% read.csv() %>% nrow() - 1
-# k = branch_commits[['draft']][[1]]
-# 
-# # update status log
-# i = which(d$repo == git_repo)
-# d$status[i]    = sprintf('[![](https://api.travis-ci.org/OHI-Science/%s.svg?branch=draft)](https://travis-ci.org/OHI-Science/%s/branches)', 
-#                          git_repo, git_repo)
-# d$last_mod[i]  = sprintf('%0.10s', as(k@author@when, 'character'))
-# d$last_sha[i]  = sprintf('%0.7s', k@sha)
-# d$last_msg[i]  = k@summary
-# d$map_url[i]   = sprintf('http://ohi-science.org/%s/images/regions_30x20.png', git_repo)
-# d$n_regions[i] = n_rgns
+## update status.csv with to_keep only
+d <- '~/tmp/subcountry/_data/status.csv'
+read_csv(d) %>%
+  select(repo, study_area, map_url, n_regions) %>%
+  filter(repo %in% to_keep) %>%
+  write_csv(d, na='')
 
-# update status repo
-write.csv(d, csv_status, row.names=F, na='')
-system(sprintf('cd ~/tmp/subcountry; git commit -a -m "updated status from %s commit %0.7s"', git_repo, k@sha))
+## push; GH_TOKEN set in create_init.r. Note: the GH_TOKEN caused the rpostback askpass error on El Capitan
+system('cd ~/tmp/subcountry; git commit -a -m "updated status.csv from ohi-webapps/delete_unused_repos"')
 system('cd ~/tmp/subcountry; git push https://${GH_TOKEN}@github.com/OHI-Science/subcountry.git HEAD:gh-pages')
 
-# return to original directory
-setwd(wd)
+
+## also delete by hand ---
+# 'ohi-china',
