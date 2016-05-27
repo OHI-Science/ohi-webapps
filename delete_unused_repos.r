@@ -45,7 +45,7 @@ repos_delete <- sc_studies %>%
 ## loop through and delete repos -----
 for (r in repos_delete) { # r <- "test_delete"
   
-  ## delete using Github API: https://developer.github.com/v3/repos/#create
+  ## delete using Github API: https://developer.github.com/v3/repos/#create # DELETE /repos/:owner/:repo
   cmd = sprintf('curl -X DELETE -H "Authorization: token %s" https://api.github.com/repos/ohi-science/%s', gh_token, r)
   system(cmd, intern=T)
 } 
