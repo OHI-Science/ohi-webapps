@@ -694,13 +694,6 @@ populate_draft_branch <- function(){
     ## swap out custom functions
     if (f=='functions.R'){
       
-      ## deal with intermediary output files from ohi-global
-      # TODO:: these ohi-global temp files are for debugging and communication. Would be great to
-      # figure out a way to integrate them in OHI+. But for now, deleting them.
-      s = s %>%
-        str_replace("write.csv\\(tmp, 'temp/.*", '') %>%
-        str_replace('^.*sprintf\\(\'temp\\/.*', "")
-
       ## iterate over goals with functions to swap
       for (g in names(fxn_swap)){ # g = names(fxn_swap)[1]
         
@@ -719,6 +712,19 @@ populate_draft_branch <- function(){
         # inject new goal function
         s = c(s[1:ln_beg], s_g, '\n', s[ln_end:length(s)])
       }
+      
+      ## TODO: remove temp output from ohi-global
+      # original below, but won't find things like this: 
+      # # reference point data
+      # rp <- read.csv('temp/referencePoints.csv', stringsAsFactors=FALSE) %>%
+      #   rbind(data.frame(goal = "FIS", method = "b/bmsy: modeled", reference_point = NA))
+      # write.csv(rp, 'temp/referencePoints.csv', row.names=FALSE)
+      # 
+      # rethink because ref points stuff might be useful. will find this: write.csv(d_check, sprintf('temp/cs_data_%s.csv', scenario), row.names=FALSE)    
+      s = s %>%
+        str_replace("write.csv\\(tmp, 'temp/.*", '') %>%
+        str_replace('^.*sprintf\\(\'temp\\/.*', '')
+
     }
     
     ## substitute old layer names with new
