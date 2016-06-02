@@ -1,2 +1,0 @@
-Error in subset.default(SelectLayersData(layers, layers = lyrs), id_num ==  : 
-  object 'id_num' not found
