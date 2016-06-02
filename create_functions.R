@@ -695,6 +695,7 @@ populate_draft_branch <- function(){
     if (f=='functions.R'){
       
       ## iterate over goals with functions to swap
+      ## TODO: when update LIV_ECO approach, can delete csv_gl_rgn var from create_init.r
       for (g in names(fxn_swap)){ # g = names(fxn_swap)[1]
         
         ## get goal=line# index for functions.R

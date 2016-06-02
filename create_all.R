@@ -1,6 +1,8 @@
-# create_all.R. 
-# by @bbest, cleaned up by @jules32. See original notes at the bottom or @bbest's last commit, 9c7a3f152. 
-# edit_webapps.rmd is now a companion script for updating existing repos.
+## create_all.R. 
+## by @bbest on @master branch. See original notes at the bottom or @bbest's last commit, 9c7a3f152. 
+## updated by @jules32 a lot here on @dev branch. 
+
+## edit_webapps.rmd is now a companion script for updating existing repos.
 
 ## summary ----
 # This script will create repos and webapps for each 'key', which is the 
