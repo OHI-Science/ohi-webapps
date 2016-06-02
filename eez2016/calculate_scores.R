@@ -25,3 +25,12 @@ write.csv(scores, 'scores.csv', na='', row.names=F)
 #   object 'scenario' not found 
 
 ## 2. add library(stringr) -- LIV
+
+## 3. swapping out LIV_ECO functions and testing. 
+# Calculating Status and Trend for each region for LIV...
+#  Error in LIV_ECO(layers, subgoal = "LIV", liv_workforcesize_year = 2012,  : 
+#   unused arguments (liv_workforcesize_year = 2012, eco_rev_adj_min_year = 2000) 
+# --->>>so deleted these lines from goals.csv for LIV, ECO. 
+# then,
+# Calculating Status and Trend for each region for LIV...
+#  Error in eval(expr, envir, enclos) : object 'id_num' not found --> can't continue testing because need to swap out cntry_key: create_functions.r#L508. 
