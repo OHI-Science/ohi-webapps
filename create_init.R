@@ -8,8 +8,6 @@ library(dplyr)
 library(tidyr)
 library(readr)
 library(rgdal)
-# library(shiny)
-# library(shinyapps) # devtools::install_github('rstudio/shinyapps')
 library(stringr)
 library(jsonlite)
 library(brew)
@@ -23,10 +21,9 @@ setwd('~/github/ohi-webapps') # setwd('~/github/clip-n-ship/alb')
 
 # vars
 # get paths based on host machine
-dir_neptune <- c(
-  'Windows' = '//neptune.nceas.ucsb.edu/data_edit',
-  'Darwin'  = '/Volumes/data_edit',
-  'Linux'   = '/var/data/ohi')[[ Sys.info()[['sysname']] ]]
+dir_M <- c('Windows' = '//mazu.nceas.ucsb.edu/ohi',
+           'Darwin'  = '/Volumes/ohi',    ### connect (cmd-K) to smb://mazu/ohi
+           'Linux'   = '/home/shares/ohi')[[ Sys.info()[['sysname']] ]]
 
 # set username for copying app files onto fitz.nceas
 nceas_user = c('bbest'='bbest','julialowndes'='jstewart','jstewart'='jstewart')[Sys.info()["user"]]
@@ -34,7 +31,7 @@ nceas_user = c('bbest'='bbest','julialowndes'='jstewart','jstewart'='jstewart')[
 
 dir_github  <- '~/github'
 
-dir_annex   <- sprintf('%s/git-annex/clip-n-ship', dir_neptune) # 'N:/git-annex/clip-n-ship/data'
+dir_annex   <- sprintf('%s/git-annex/clip-n-ship', dir_M) # 'N:/git-annex/clip-n-ship/data'
 dir_repos   <- sprintf('%s/clip-n-ship', dir_github)
 dir_errors  <- sprintf('%s/ohi-webapps/errors', dir_github)
 dir_ohicore <- sprintf('%s/ohicore', dir_github)

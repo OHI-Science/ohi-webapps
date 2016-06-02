@@ -40,7 +40,7 @@ default_branch_scenario = sprintf('%s/%s', default_branch, default_scenario)
 #  dir_ap_old    = file.path(dir_annex, cntries[i], 'shinyapps.io')
 dir_annex_sc  = file.path(dir_annex, key)
 app_name      = key # sprintf('%s_app', key)
-csv_pop_inland25km = file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'layers/mar_coastalpopn_inland25km_lyr.csv')
+csv_pop_inland25km = file.path(dir_M, 'git-annex/clip-n-ship', key, 'layers/mar_coastalpopn_inland25km_lyr.csv')
 # dir_annex_old  = str_replace_all(Country, ' ', '_')
 study_area = subset(sc_studies, sc_key==key, sc_name, drop=T)
 

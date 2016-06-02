@@ -83,8 +83,8 @@ rename_gh_repo <- function(key, verbosity=1){ # key='are'
 #repo_todo <- filter(results, !repo_new_exists)$sc_key
 
 zip_shapefiles <- function(key){ # key='ecu'
-  dir_sp = file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'spatial')
-  zip_sp = sprintf('%s/www_subcountry2014/%s_shapefiles.zip', dir_neptune, key)
+  dir_sp = file.path(dir_M, 'git-annex/clip-n-ship', key, 'spatial')
+  zip_sp = sprintf('%s/www_subcountry2014/%s_shapefiles.zip', dir_M, key)
   message(basename(zip_sp), ': ', Sys.time())
   unlink(zip_sp)
   zip(zip_sp, dir_sp, flags='-r9Xq')
@@ -760,7 +760,7 @@ populate_draft_branch <- function(){
   # TODO: strongly recommend moving this to a dedicated map section. However, can't be with create_maps() because these folders don't exist yet. Rethink a bit more. 
   dir.create(sprintf('%s/reports/figures', default_scenario), showWarnings=F, recursive=T)
   file.copy(
-    file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'gh-pages/images/regions_600x400.png'),
+    file.path(dir_M, 'git-annex/clip-n-ship', key, 'gh-pages/images/regions_600x400.png'),
     sprintf('%s/reports/figures/regions_600x400.png', default_scenario), overwrite=T)
   
   
@@ -930,7 +930,7 @@ populate_website <- function(key, delete_first=T, copy_images=T, copy_flag=T, ms
   ## copy images
   if (copy_images){
     for (f in c('app_400x250.png','regions_1600x800.png',	'regions_30x20.png', 'regions_400x250.png')){
-      f_from = file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'gh-pages/images', f)
+      f_from = file.path(dir_M, 'git-annex/clip-n-ship', key, 'gh-pages/images', f)
       message('copying ', f_from)
       stopifnot(file.copy(f_from, file.path('images', f), overwrite=T))
     }
@@ -1054,7 +1054,7 @@ deploy_app <- function(key){ # key='ecu'
   source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
   
   # delete old
-  dir_app_old <- sprintf('%s/git-annex/clip-n-ship/%s/shinyapps.io', dir_neptune, git_repo)
+  dir_app_old <- sprintf('%s/git-annex/clip-n-ship/%s/shinyapps.io', dir_M, git_repo)
   unlink(dir_app_old, recursive=T)
   
   # cd into repo, checkout app
@@ -1129,7 +1129,7 @@ deploy_app_nceas <- function(key, nceas_user = 'jstewart'){ # key='ecu' # eventu
   source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
   
   # delete old
-  dir_app_old <- sprintf('%s/git-annex/clip-n-ship/%s/shinyapps.io', dir_neptune, git_repo)
+  dir_app_old <- sprintf('%s/git-annex/clip-n-ship/%s/shinyapps.io', dir_M, git_repo)
   unlink(dir_app_old, recursive=T)
   
   # cd into repo, checkout app
@@ -1218,10 +1218,10 @@ create_maps = function(key='ecu'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
     buffers = c('offshore'=0.2, 'inland25km'=0.2, 'inland25km'=0.4) # and transparency
   }
   
-  # paths (dir_neptune, dir_github already set by source('~/github/ohi-webapps/create_init.R')
+  # paths (dir_M, dir_github already set by source('~/github/ohi-webapps/create_init.R')
   key <<- key
   source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
-  dir_data    = file.path(dir_neptune, 'git-annex/clip-n-ship')
+  dir_data    = file.path(dir_M, 'git-annex/clip-n-ship')
   dir_spatial = file.path(dir_data, key, 'spatial')
   dir_pages   = file.path(dir_data, key, 'gh-pages')
   
@@ -1392,7 +1392,7 @@ custom_maps = function(key){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
   key <<- key
   source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
   
-  dir_data    = file.path(dir_neptune, 'git-annex/clip-n-ship')
+  dir_data    = file.path(dir_M, 'git-annex/clip-n-ship')
   dir_spatial = file.path(dir_data, key, 'spatial') # baltic: dir_spatial = file.path(dir_data, 'bhi', 'spatial') 
   dir_custom  = file.path(dir_spatial, 'custom')
   dir_pages   = file.path(dir_data, key, 'gh-pages')
@@ -1824,7 +1824,7 @@ additions_draft <- function(key, msg='ohi-webapps/create_functions.R - additions
   
   ## 7. save map in figures folder: will be displayed on the gh-pages Regions page. 
   file.copy(
-    file.path(dir_neptune, 'git-annex/clip-n-ship', key, 'gh-pages/images/regions_600x400.png'),
+    file.path(dir_M, 'git-annex/clip-n-ship', key, 'gh-pages/images/regions_600x400.png'),
     file.path(dir_repo, default_scenario,'reports/figures/regions_600x400.png'), overwrite=T)
   
   
