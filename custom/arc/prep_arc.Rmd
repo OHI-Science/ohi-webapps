@@ -1,134 +1,43 @@
 # this is prep_arc.Rmd
-create arctic repo. See Issue #516: https://github.com/OHI-Science/issues/issues/516
+create arctic repo. 
 
-Note: approach has changed. No longer clipping existing maps to Arctic Circle. See previous commits for that approach.
-
-# Overview
-I've got the evals off of all of these at the moment (ie, `{r, eval=F}) so it doesn't run now when I don't want it to. 
-
-- called from `ohi-webapps/edit_webapps.rmd`
+@jafflerbach created the shapefile from chats with M. Burgass. See Issue #516: https://github.com/OHI-Science/issues/issues/516 and @master branch for older attempts. 
 
 ## 1. setup
+Just need to rename a few regions
 
 ```{r setup, eval=F}
-
-# libraries
-library(dplyr)
-library(readr)
-library(stringr)
-library(rgdal)
-library(raster)
-library(rgeos)
-library(maptools)
-
-# directories and source files
-dir_neptune = c('Windows' = '//neptune.nceas.ucsb.edu/data_edit',
-                'Darwin'  = '/Volumes/data_edit',
-                'Linux'   = '/var/data/ohi')[[ Sys.info()[['sysname']] ]]
-
 setwd('~/github/ohi-webapps')
-source('create_init.R')
-source('create_functions.R')
 
+source('create_init.R')            # load all libraries, set directories relevant to all keys
+source('create_functions.R')       # all functions for creating and updating repos and webapps
 
-# arctic-specific variables 
-arc_cntrys = c('usa', 'can', 'nor', 'rus', 'grl')
-dir_cns = file.path(sprintf('%s/git-annex/clip-n-ship/%s/spatial', dir_neptune, arc_cntrys)) %>% setNames(arc_cntrys)
-dir_neptune_arc = file.path(dir_neptune, 'git-annex/clip-n-ship/arc/spatial/custom/raw')
-dir_webapps_arc = '~/github/ohi-webapps/custom/arc'
+key <- 'arc'
+
+dir_spatial    = file.path(dir_M, 'git-annex/clip-n-ship', key, 'spatial') 
+dir_custom_tmp = file.path(dir_spatial, 'custom/final_jamie') 
+dir_custom     = file.path(dir_spatial, 'custom') 
 
 ```
 
-## Explore Mike's Shapefiles
+## Read shapefile, update name, resave
 
 ```{r explore shapefiles, eval=F}
-# read in shp files and save with desired headers in data frame.
 
-shps = c('Canada/Beaufort Loma'                          = 'LOMA_CDA_DFO_2007', 
-         'Canada/Fwd__Arctic_Ocean_Health_Index'         = 'Priority Sub-regions',
-         'Greenland/FAO_AREAS'                           = 'FAO_AREAS', 
-         'USA/planarea'                                  = 'AK_PLAN', 
-         'Norway/Norw_Manageplans/PSA_BarentsSea_utm33'  = 'svo_barentshavetf',
-         'Norway/Norw_Manageplans/PSA_NorwSe_utm33'      = 'svo_norskehavetf',
-         'Norway/Norw_Manageplans/management_plan_areas' = 'fp_barentshavet_grenser',
-         'Norway/Norw_Manageplans/management_plan_areas' = 'fp_barentshavet',
-         'Norway/Norw_Manageplans/management_plan_areas' = 'fp_nordsjoen_grenser',
-         'Norway/Norw_Manageplans/management_plan_areas' = 'fp_nordsjoen',
-         'Norway/Norw_Manageplans/management_plan_areas' = 'fp_norskehavet_grenser',
-         'Norway/Norw_Manageplans/management_plan_areas' = 'fp_norskehavet')
+## inspect
+shp = readOGR(dsn = dir_custom_tmp, layer = 'arctic_eezs')
+shp@data
+  
+## rename a few rgn_names
+shp@data$rgn_name = as.character(shp@data$rgn_name)
+shp@data$rgn_name[shp@data$rgn_name == 'norway']   = 'Norway'
+shp@data$rgn_name[shp@data$rgn_name == 'svalbard'] = 'Svalbard'
+shp@data$rgn_name[shp@data$rgn_name == 'west']     = 'West Greenland'
+shp@data$rgn_name[shp@data$rgn_name == 'east']     = 'East Greenland'
 
+shp@data <- shp@data %>%
+  select(rgn_id, rgn_name, country, area_km2)
 
-for (l in 1:length(shps)) {
-  
-  s = shps[l]
-  dir_relative = names(s)
-  layername = s[[1]][1]
-  filesave = str_replace_all(dir_relative, '/', '_')
-  if (filesave == 'Norway_Norw_Manageplans_management_plan_areas') {
-    filesave = str_replace(filesave, 'management_plan_areas', layername)
-  }
-  
-  shp = readOGR(dsn = file.path(dir_neptune_arc, dir_relative),
-                layer = s[[1]][1])
-  shp@data
-  
-  png(file.path(dir_webapps_arc, 'maps', paste(filesave, '.png')))
-  plot(shp) 
-  dev.off()
-}
+writeOGR(shp, dsn = dir_custom, layer = 'arctic_eezs_final', driver = 'ESRI Shapefile', overwrite=TRUE) 
 
 ```
-
-
-
-## READMEs from Mike
-
-### Canada
-
-Based on these shape files and supporting information. I think best to have
-
-1. Beaufort LOMA
-2. Canadian Archipelago (minus bit included in Beaufort LOMA and including top bit of Hudson Bay)
-3. Bafin Bay / Davis Strait
-
-### Greenland
-
-1. FAO Area 27 Sub-Areas clipped appropriately - can talk about this maybe?
-2. FAO Area 21 Sub-Areas clipped Appropriately - 1A, 1B, 1C, 1D, 1E, 1F
-3. FAO Area 18 clipped appropriately
-
-### Norway
-
-1. Norweigan Sea
-2. Barents Sea
-
-Is it possible to divide up between Svalbard Barents and Norewigan mainland Barents so we have 3 regions?
-I think that is perhaps the best option.
-
-
-### Russia
-
-OHI Admin Boundaries:
-
-```{r, eval=F}
-# sp_rus_crop@data
-#   rgn_id     rgn_name  area_km2 Shape_Leng Shape_Area	New Name			Fisheries Region
-# 0     18 Arkhangel'sk 1054640.0   25481810 452.167880 	Arkhangel'sk			Dvina-Pechora
-# 1     13       Chukot  661515.0   27108098 147.769066	Chukotka Autonomous Okrug	Northeastern
-# 2     12      Karelia   13142.2    3508675   2.527018	Republic of Karelia		Barents and White Sea
-# 3     16     Murmansk  214718.0    6337033  51.776979	Murmansk Oblast			North-West	
-# 4     15       Nenets  222881.0    8272890  51.238354	N/A				N/A
-# 5     17        Sakha 1195680.0   34297026 372.929268	Republic of Sakha (Yakutia)	Lena
-# 6     19       Taymyr  998142.0   33455400 423.222425	Krasnoyarsk Krai		Yenisey
-# 7     14 Yamal-Nenets  200965.0   13055544  52.359965	Yamal-Nenets Auto. Okrug	Nizhneobskoe
-```
-
-I've matched OHI region names up with regions from my research. 
-Nenets region is now part of Arkhangel'sk so should be included within that
-The rest seem to match up pretty perfectly? Is it possible to give it a quick check first and see if there are
-any discrepancies?
-
-### USA
-
-1. Chukchi Sea
-2. Beaufort Sea
