@@ -83,15 +83,19 @@ Combine them all together
 
 ```{r combine}
 
-#install.packages('taRifx.geo')
+#devtools::install_github("gsk3/taRifx.geo")
 library(taRifx.geo) #helps with the fix.duplicated.IDs=TRUE
 
 
-all = rbind(alaska, canada, russia, svalbard, norway, janmayen, greenland, fix.duplicated.IDs=TRUE)
+all = rbind.SpatialPolygonsDataFrame(alaska, canada, russia, svalbard, norway, janmayen, greenland)
 
-writeOGR(all,dsn='spatial',layer='arctic_eezs',driver="ESRI Shapefile")
+areas <- gArea(all, byid=TRUE)  
 
+all@data <- all@data%>%
+              mutate(rgn_id = 1:9,
+                     area_km2 = areas*1e-6)
 
+writeOGR(all,dsn='spatial',layer='arctic_eezs',driver="ESRI Shapefile",overwrite_layer = TRUE)
 
 
 ```
