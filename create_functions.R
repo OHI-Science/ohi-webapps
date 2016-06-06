@@ -314,30 +314,24 @@ populate_draft_branch <- function(){
   del_except = ''
   for (f in setdiff(list.files(dir_repo, all.files=F), del_except)) unlink(file.path(dir_repo, f), recursive=T, force=T)
   
-  ## README
+  ## README # TODO redo readme
   brew(sprintf('%s/ohi-webapps/README.brew.md', dir_github), 'README.md')
   
   ## add Rstudio project files. cannabalized devtools::add_rstudio_project() which only works for full R packages.
   file.copy(system.file('templates/template.Rproj', package='devtools'), sprintf('%s.Rproj', key))
   writeLines(c('.Rproj.user', '.Rhistory', '.RData'), '.gitignore')
   
-  if (key != 'bhi') { #hack: BHI stop here and paste baltic2015 folder back over
-    # create and cd to scenario
-    dir_scenario = file.path(dir_repo, basename(default_branch_scenario))
-    dir.create(dir_scenario, showWarnings=F)
-    setwd(dir_scenario)
-    
-    # create dirs
-    for (dir in c('tmp','layers','conf','spatial','prep')) dir.create(dir, showWarnings=F)
-    
-    # copy layers.csv from global
-    write.csv(lyrs_gl, sprintf('tmp/layers_%s.csv', sfx_global), na='', row.names=F)
-  } # end (key != 'bhi')
+  # create and cd to scenario
+  dir_scenario = file.path(dir_repo, basename(default_branch_scenario))
+  dir.create(dir_scenario, showWarnings=F)
+  setwd(dir_scenario)
   
+  # create dirs
+  for (dir in c('tmp','layers','conf','spatial','prep')) dir.create(dir, showWarnings=F)
   
   ## spatial: create regions_gcs.geojson and regions_gcs.js
   # TODO: JSL: strongly consider moving this into create_maps() so that if region boundaries are updated, this will too
-  f_js_old      = file.path(dir_annex_sc, 'regions_gcs.js')
+  f_js_old      = file.path(dir_annex_sc, 'regions_gcs.js') ## TODO Julie rerun here for ARC
   f_geojson_old = file.path(dir_annex_sc, 'regions_gcs.geojson')
   f_js          = file.path(dir_annex_sc, 'spatial', 'regions_gcs.js')
   f_geojson     = file.path(dir_annex_sc, 'spatial', 'regions_gcs.geojson')
@@ -360,302 +354,302 @@ populate_draft_branch <- function(){
     cat(sprintf('\n copying from %s', f))
   }
   
+  # copy layers.csv from global
+  write.csv(lyrs_gl, sprintf('tmp/layers_%s.csv', sfx_global), na='', row.names=F)
   
-  if (key != 'bhi') { ## hack: BHI stop here; loop ends ~line 633
-    # modify layers
-    lyrs_sc = lyrs_gl %>%
-      select(
-        targets, layer, name, description,
-        fld_value, units, filename,
-        starts_with('clip_n_ship')) %>%
-      mutate(
-        layer_gl = layer,
-        path_in  = file.path(dir_global, 'layers', filename),
-        rgns_in  = 'global',
-        filename = sprintf('%s_%s.csv', layer, sfx_global)) %>%
-      arrange(targets, layer)
+  # modify layers
+  lyrs_sc = lyrs_gl %>%
+    select(
+      targets, layer, filename, fld_value, units,
+      name, description,
+      starts_with('clip_n_ship')) %>%
+    mutate(
+      layer_gl = layer,
+      path_in  = file.path(dir_global, 'layers', filename),
+      rgns_in  = 'global',
+      filename = sprintf('%s_%s.csv', layer, sfx_global)) %>%
+    arrange(targets, layer)
+  
+  ## csvs for regions and countries # TODO Julie come back here for ARC
+  sc_rgns_csv = file.path(dir_annex_sc, 'spatial', 'rgn_offshore_data.csv')
+  
+  ## old global to new subcountry regions
+  # rgn_id_sc->sc_rgn_id, rgn_name_sc->sc_rgn_name, rgn_id_gl-> gl_rgn_id, rgn_name_gl-> gl_rgn_name
+  sc_rgns = read.csv(sc_rgns_csv) %>%
+    select(sc_rgn_id=rgn_id, sc_rgn_name=rgn_name) %>%
+    mutate(gl_rgn_name = name) %>%
+    merge(
+      gl_rgns %>%
+        select(gl_rgn_name, gl_rgn_id),
+      by='gl_rgn_name', all.x=T) %>%
+    select(sc_rgn_id, sc_rgn_name, gl_rgn_id, gl_rgn_name) %>%
+    arrange(sc_rgn_name)
+  
+  ## old global to new custom regions by JSL
+  if (all(is.na(sc_rgns$gl_rgn_id))){
     
-    ## csvs for regions and countries
-    sc_rgns_csv = file.path(dir_annex_sc, 'spatial', 'rgn_offshore_data.csv')
+    ## hack for BHI #1/2
+    if ( str_detect(key, 'bhi-') ) sc_rgns$gl_rgn_name = bhi_sc$gl_rgn_name[bhi_sc$sc_key == key] # this is a hack for bhi-swe
+    if (key == 'bhi') sc_rgns$gl_rgn_name = sc_studies$gl_rgn_name[sc_studies$sc_key == key] 
     
-    ## old global to new subcountry regions
-    # rgn_id_sc->sc_rgn_id, rgn_name_sc->sc_rgn_name, rgn_id_gl-> gl_rgn_id, rgn_name_gl-> gl_rgn_name
-    sc_rgns = read.csv(sc_rgns_csv) %>%
-      select(sc_rgn_id=rgn_id, sc_rgn_name=rgn_name) %>%
-      mutate(gl_rgn_name = name) %>%
-      merge(
-        gl_rgns %>%
-          select(gl_rgn_name, gl_rgn_id),
-        by='gl_rgn_name', all.x=T) %>%
-      select(sc_rgn_id, sc_rgn_name, gl_rgn_id, gl_rgn_name) %>%
-      arrange(sc_rgn_name)
+    ## for all custom repos
+    sc_rgns = sc_rgns %>%
+      select(-gl_rgn_id) %>%
+      left_join(sc_studies %>%
+                  select(gl_rgn_name = sc_name, 
+                         gl_rgn_id), 
+                by= 'gl_rgn_name')
     
-    ## old global to new custom regions by JSL
-    if (all(is.na(sc_rgns$gl_rgn_id))){
-      
-      ## hack for BHI #1/2
-      if ( str_detect(key, 'bhi-') ) sc_rgns$gl_rgn_name = bhi_sc$gl_rgn_name[bhi_sc$sc_key == key] # this is a hack for bhi-swe
-      if (key == 'bhi') sc_rgns$gl_rgn_name = sc_studies$gl_rgn_name[sc_studies$sc_key == key] 
-      
-      ## for all custom repos
-      sc_rgns = sc_rgns %>%
-        select(-gl_rgn_id) %>%
-        left_join(sc_studies %>%
-                    select(gl_rgn_name = sc_name, 
-                           gl_rgn_id), 
-                  by= 'gl_rgn_name')
-      
-      ## hack for BHI #2/2
-      if (key == 'bhi') sc_rgns = distinct(sc_rgns)
-      
-    }
+    ## hack for BHI #2/2
+    if (key == 'bhi') sc_rgns = distinct(sc_rgns)
     
-    ## old global to new subcountry countries
-    sc_cntry = gl_cntries %>%
-      select(gl_cntry_key, gl_rgn_id) %>%
-      merge(
-        sc_rgns,
-        by='gl_rgn_id') %>%
-      group_by(gl_cntry_key, sc_rgn_id) %>%
-      summarise(n=n()) %>%
-      select(cntry_key = gl_cntry_key, sc_rgn_id) %>%
-      as.data.frame()
-    
-    ## old global to new custom countries
-    if (dim(sc_cntry)[1] != dim(sc_rgns)[1]) { # make sure Guayaquil doesn't match to both ECU and Galapagos
-      #dots = list(subset(sc_studies$gl_rgn_key, sc_studies$sc_key == key))
-      sc_cntries = subset(sc_studies, sc_key == key, gl_rgn_key, drop=T)
-      sc_cntry = sc_cntry %>%
-        #filter(cntry_key == (.dots = dots))
-        filter(cntry_key %in% sc_cntries)
-    }
-    
-    ## swap out custom mar_coastalpopn_inland25mi for mar_coastalpopn_inland25km (NOTE: mi -> km)
-    ix = which(lyrs_sc$layer=='mar_coastalpopn_inland25mi')
-    lyrs_sc$layer[ix]       = 'mar_coastalpopn_inland25km'
-    lyrs_sc$path_in[ix]     = file.path(dir_annex, key, 'layers', 'mar_coastalpopn_inland25km_lyr.csv')
-    lyrs_sc$name[ix]        = str_replace(lyrs_sc$name[ix]       , fixed('miles'), 'kilometers')
-    lyrs_sc$description[ix] = str_replace(lyrs_sc$description[ix], fixed('miles'), 'kilometers')
-    lyrs_sc$filename[ix]    = 'mar_coastalpopn_inland25km_sc2014-raster.csv'
+  }
+  
+  ## old global to new subcountry countries
+  sc_cntry = gl_cntries %>%
+    select(gl_cntry_key, gl_rgn_id) %>%
+    merge(
+      sc_rgns,
+      by='gl_rgn_id') %>%
+    group_by(gl_cntry_key, sc_rgn_id) %>%
+    summarise(n=n()) %>%
+    select(cntry_key = gl_cntry_key, sc_rgn_id) %>%
+    as.data.frame()
+  
+  ## old global to new custom countries
+  if (dim(sc_cntry)[1] != dim(sc_rgns)[1]) { # make sure Guayaquil doesn't match to both ECU and Galapagos
+    #dots = list(subset(sc_studies$gl_rgn_key, sc_studies$sc_key == key))
+    sc_cntries = subset(sc_studies, sc_key == key, gl_rgn_key, drop=T)
+    sc_cntry = sc_cntry %>%
+      #filter(cntry_key == (.dots = dots))
+      filter(cntry_key %in% sc_cntries)
+  }
+  
+  ## swap out custom mar_coastalpopn_inland25mi for mar_coastalpopn_inland25km (NOTE: mi -> km)
+  ix = which(lyrs_sc$layer=='mar_coastalpopn_inland25mi')
+  lyrs_sc$layer[ix]       = 'mar_coastalpopn_inland25km'
+  lyrs_sc$path_in[ix]     = file.path(dir_annex, key, 'layers', 'mar_coastalpopn_inland25km_lyr.csv')
+  lyrs_sc$name[ix]        = str_replace(lyrs_sc$name[ix]       , fixed('miles'), 'kilometers')
+  lyrs_sc$description[ix] = str_replace(lyrs_sc$description[ix], fixed('miles'), 'kilometers')
+  lyrs_sc$filename[ix]    = 'mar_coastalpopn_inland25km_sc2014-raster.csv'
+  lyrs_sc$rgns_in[ix]     = 'subcountry'
+  
+  ## get layers used to downweight from global: area_offshore, area_offshore_3nm, equal, equal , population_inland25km,
+  population_inland25km = read.csv(file.path(dir_annex_sc, 'layers' , 'mar_coastalpopn_inland25km_lyr.csv')) %>%     
+    filter(year == dw_year) %>%
+    mutate(
+      dw = popsum / sum(popsum)) %>%
+    select(rgn_id, dw)
+  # fix Canada (can) with Nunavet [10] repeats b/c of spatial funk, presume just need to add
+  #   read.csv(file.path(dir_annex_sc, 'layers' , 'mar_coastalpopn_inland25km_lyr.csv')) %>%
+  #     group_by(rgn_id, year) %>%
+  #     summarize(popsum = sum(popsum)) %>%
+  #     write.csv(file.path(dir_annex_sc, 'layers' , 'mar_coastalpopn_inland25km_lyr.csv'), na='', row.names=F)
+  area_offshore         = read.csv(file.path(dir_annex_sc, 'spatial', 'rgn_offshore_data.csv')) %>%
+    mutate(
+      dw = area_km2 / sum(area_km2)) %>%
+    select(rgn_id, dw)
+  #   area_offshore_3nm     = read.csv(file.path(dir_annex_sc, 'spatial', 'rgn_offshore3nm_data.csv')) %>%     # error, no file March 16
+  #     mutate(
+  #       dw = area_km2 / sum(area_km2)) %>%
+  #     select(rgn_id, dw)
+  #
+  # swap out spatial area layers
+  area_layers = c(
+    'rgn_area'             = 'rgn_offshore_data.csv')
+  #     'rgn_area_inland1km'   = 'rgn_inland1km_data.csv',
+  #     'rgn_area_offshore3nm' = 'rgn_offshore3nm_data.csv')
+  for (lyr in names(area_layers)){
+    csv = area_layers[lyr]
+    ix = which(lyrs_sc$layer==lyr)
     lyrs_sc$rgns_in[ix]     = 'subcountry'
+    lyrs_sc$path_in[ix]     = file.path(dir_annex_sc, 'spatial', csv)
+    lyrs_sc$filename[ix]    = str_replace(lyrs_sc$filename[ix], fixed('_gl2014.csv'), '_sc2014-area.csv')
+  }
+  
+  ## drop cntry_* layers
+  lyrs_sc = filter(lyrs_sc, !grepl('^cntry_', layer))
+  
+  ## drop LE layers no longer being used
+  lyrs_le_rm = c(
+    'le_gdp_pc_ppp','le_jobs_cur_adj_value','le_jobs_cur_base_value','le_jobs_ref_adj_value','le_jobs_ref_base_value',
+    'le_rev_cur_adj_value','le_rev_cur_base_value','le_rev_cur_base_value','le_rev_ref_adj_value','le_rev_ref_base_value',
+    'le_rev_sector_year','le_revenue_adj','le_wage_cur_adj_value','le_wage_cur_base_value','le_wage_ref_adj_value',
+    'le_wage_ref_base_value','liveco_status','liveco_trend')
+  lyrs_sc = filter(lyrs_sc, !layer %in% lyrs_le_rm)
+  
+  ## write layers data files
+  for (j in 1:nrow(lyrs_sc)){ # j=93
     
-    ## get layers used to downweight from global: area_offshore, area_offshore_3nm, equal, equal , population_inland25km,
-    population_inland25km = read.csv(file.path(dir_annex_sc, 'layers' , 'mar_coastalpopn_inland25km_lyr.csv')) %>%     
-      filter(year == dw_year) %>%
-      mutate(
-        dw = popsum / sum(popsum)) %>%
-      select(rgn_id, dw)
-    # fix Canada (can) with Nunavet [10] repeats b/c of spatial funk, presume just need to add
-    #   read.csv(file.path(dir_annex_sc, 'layers' , 'mar_coastalpopn_inland25km_lyr.csv')) %>%
-    #     group_by(rgn_id, year) %>%
-    #     summarize(popsum = sum(popsum)) %>%
-    #     write.csv(file.path(dir_annex_sc, 'layers' , 'mar_coastalpopn_inland25km_lyr.csv'), na='', row.names=F)
-    area_offshore         = read.csv(file.path(dir_annex_sc, 'spatial', 'rgn_offshore_data.csv')) %>%
-      mutate(
-        dw = area_km2 / sum(area_km2)) %>%
-      select(rgn_id, dw)
-    #   area_offshore_3nm     = read.csv(file.path(dir_annex_sc, 'spatial', 'rgn_offshore3nm_data.csv')) %>%     # error, no file March 16
-    #     mutate(
-    #       dw = area_km2 / sum(area_km2)) %>%
-    #     select(rgn_id, dw)
-    #
-    # swap out spatial area layers
-    area_layers = c(
-      'rgn_area'             = 'rgn_offshore_data.csv')
-    #     'rgn_area_inland1km'   = 'rgn_inland1km_data.csv',
-    #     'rgn_area_offshore3nm' = 'rgn_offshore3nm_data.csv')
-    for (lyr in names(area_layers)){
-      csv = area_layers[lyr]
-      ix = which(lyrs_sc$layer==lyr)
-      lyrs_sc$rgns_in[ix]     = 'subcountry'
-      lyrs_sc$path_in[ix]     = file.path(dir_annex_sc, 'spatial', csv)
-      lyrs_sc$filename[ix]    = str_replace(lyrs_sc$filename[ix], fixed('_gl2014.csv'), '_sc2014-area.csv')
-    }
+    lyr     = lyrs_sc$layer[j]
+    rgns_in = lyrs_sc$rgns_in[j]
+    csv_in  = lyrs_sc$path_in[j]
+    csv_out = sprintf('layers/%s', lyrs_sc$filename[j])
     
-    ## drop cntry_* layers
-    lyrs_sc = filter(lyrs_sc, !grepl('^cntry_', layer))
+    d = read.csv(csv_in) # , na.strings='')
+    flds = names(d)
     
-    ## drop LE layers no longer being used
-    lyrs_le_rm = c(
-      'le_gdp_pc_ppp','le_jobs_cur_adj_value','le_jobs_cur_base_value','le_jobs_ref_adj_value','le_jobs_ref_base_value',
-      'le_rev_cur_adj_value','le_rev_cur_base_value','le_rev_cur_base_value','le_rev_ref_adj_value','le_rev_ref_base_value',
-      'le_rev_sector_year','le_revenue_adj','le_wage_cur_adj_value','le_wage_cur_base_value','le_wage_ref_adj_value',
-      'le_wage_ref_base_value','liveco_status','liveco_trend')
-    lyrs_sc = filter(lyrs_sc, !layer %in% lyrs_le_rm)
-    
-    ## write layers data files
-    for (j in 1:nrow(lyrs_sc)){ # j=93
+    if (rgns_in == 'global'){
       
-      lyr     = lyrs_sc$layer[j]
-      rgns_in = lyrs_sc$rgns_in[j]
-      csv_in  = lyrs_sc$path_in[j]
-      csv_out = sprintf('layers/%s', lyrs_sc$filename[j])
-      
-      d = read.csv(csv_in) # , na.strings='')
-      flds = names(d)
-      
-      if (rgns_in == 'global'){
-        
-        if ('rgn_id' %in% names(d)){
-          d = d %>%
-            filter(rgn_id %in% sc_rgns$gl_rgn_id) %>%
-            merge(sc_rgns, by.x='rgn_id', by.y='gl_rgn_id') %>%
-            mutate(rgn_id=sc_rgn_id) %>%
-            subset(select=flds) %>%
-            arrange(rgn_id)
-        }
-        
-        if ('cntry_key' %in% names(d)){
-          # convert cntry_key to rgn_id, drop cntry_key
-          d = d %>%
-            inner_join(
-              sc_cntry,
-              by='cntry_key') %>%
-            dplyr::rename(rgn_id=sc_rgn_id) %>%
-            select_(.dots = as.list(c('rgn_id', setdiff(names(d), 'cntry_key')))) %>%
-            arrange(rgn_id)
-        }
-        
-        if (lyrs_sc$layer[j]=='rgn_labels'){
-          csv_out = 'layers/rgn_labels.csv'
-          lyrs_sc$filename[j] = basename(csv_out)
-          d = d %>%
-            merge(sc_rgns, by.x='rgn_id', by.y='sc_rgn_id') %>%
-            select(rgn_id, type, label=sc_rgn_name) %>%
-            arrange(rgn_id)
-        }
-        
-        ## downweight: area_offshore, equal, equal , population_inland25km,
-        # shp = '/Volumes/data_edit/git-annex/clip-n-ship/data/Albania/rgn_inland25km_mol.shp'
-        downweight = str_trim(lyrs_sc$clip_n_ship_disag[j])
-        downweightings = c('area_offshore'='area-offshore', 'population_inland25km'='popn-inland25km')
-        if (downweight %in% names(downweightings) & nrow(d) > 0){
-          
-          ## update data frame with downweighting
-          i.v  = ncol(d) # assume value in right most column
-          #if (downweight=='population_inland25km') browser()
-          d = inner_join(d, get(downweight), by='rgn_id')
-          i.dw = ncol(d) # assume downweight in right most column after join
-          d[i.v] = d[i.v] * d[i.dw]
-          d = d[,-i.dw]
-          
-          ## update layer filename to reflect downweighting
-          csv_out = file.path(
-            'layers',
-            str_replace(
-              lyrs_sc$filename[j],
-              fixed('_gl2014.csv'),
-              sprintf('_sc2014-%s.csv', downweightings[downweight])))
-          lyrs_sc$filename[j] = basename(csv_out)
-        }
-      }
-      write.csv(d, csv_out, row.names=F, na='')
-   
-     }  # end for (j in 1:nrow(lyrs_sc))
-    
-    ## create layers.csv registry
-    lyrs_reg = lyrs_sc %>%
-      select(
-        targets,
-        layer,
-        filename,
-        fld_value,
-        units,
-        name,
-        description,
-        clip_n_ship_disag,
-        clip_n_ship_disag_description,
-        layer_gl, 
-        path_in)  
-    write.csv(lyrs_reg, 'layers.csv', row.names=F, na='')
-    
-    ## check for empty layers
-    CheckLayers('layers.csv', 'layers',
-                flds_id=c('rgn_id','country_id','saup_id','fao_id','fao_saup_id'))
-    lyrs = read.csv('layers.csv', na='')
-    lyrs_empty = filter(lyrs, data_na==T)
-    if (nrow(lyrs_empty) > 0){
-      dir.create('tmp/layers-empty_global-values', showWarnings=F)
-      write.csv(lyrs_empty, 'layers-empty_swapping-global-mean.csv', row.names=F, na='')
-    }
-    
-    ## populate empty layers with global averages.
-    for (lyr in subset(lyrs, data_na, layer, drop=T)){ # lyr = subset(lyrs, data_na, layer, drop=T)[1]
-      
-      message(' for empty layer ', lyr, ', getting global avg')
-      
-      ## get all global data for layer
-      l = subset(lyrs, layer==lyr)
-      csv_gl  = as.character(l$path_in)
-      csv_tmp = sprintf('tmp/layers-empty_global-values/%s', l$filename)
-      csv_out = sprintf('layers/%s', l$filename)
-      file.copy(csv_gl, csv_tmp, overwrite=T)
-      a = read.csv(csv_tmp)
-      
-      ## calculate global categorical means using non-standard evaluation, ie dplyr::*_()
-      fld_key         = names(a)[1]
-      fld_value       = names(a)[ncol(a)]
-      flds_other = setdiff(names(a), c(fld_key, fld_value))
-      
-      if (class(a[[fld_value]]) %in% c('factor','character') & l$fld_val_num == fld_value){
-        cat(sprintf('  DOH! For empty layer "%s" field "%s" is factor/character but registered as [fld_val_num] not [fld_val_chr].\n', lyr, fld_value))
-      }
-      
-      ## exceptions
-      if (lyr == 'mar_trend_years'){
-        sc_rgns %>%
-          mutate(trend_yrs = '5_yr') %>%
-          select(rgn_id = sc_rgn_id, trend_yrs) %>%
-          arrange(rgn_id) %>%
-          write.csv(csv_out, row.names=F, na='')
-        
-        next
-      }
-      
-      if (class(a[[fld_value]]) %in% c('factor','character')){
-        cat(sprintf('  DOH! For empty layer "%s" field "%s" is factor/character but continuing with presumption of numeric.\n', lyr, fld_value))
-      }
-      
-      ## presuming numeric...
-      ## get mean
-      #if (lyr == 'mar_coastalpopn_inland25km') browser()
-      if (length(flds_other) > 0){
-        b = a %>%
-          group_by_(.dots=flds_other) %>%
-          summarize_(
-            .dots = setNames(
-              sprintf('mean(%s, na.rm=T)', fld_value),
-              fld_value))
-      } else {
-        b = a %>%
-          summarize_(
-            .dots = setNames(
-              sprintf('mean(%s, na.rm=T)', fld_value),
-              fld_value))
-      }
-      
-      ## bind many rgn_ids
-      if ('rgn_id' %in% names(a) | 'cntry_key' %in% names(a)){
-        # get outer join, aka Cartesian product
-        b = b %>%
-          merge(
-            sc_rgns %>%  ## Poland Trouble Found it Eureka!
-              select(rgn_id = sc_rgn_id),
-            all=T) %>%
-          select(one_of('rgn_id', flds_other, fld_value)) %>%
+      if ('rgn_id' %in% names(d)){
+        d = d %>%
+          filter(rgn_id %in% sc_rgns$gl_rgn_id) %>%
+          merge(sc_rgns, by.x='rgn_id', by.y='gl_rgn_id') %>%
+          mutate(rgn_id=sc_rgn_id) %>%
+          subset(select=flds) %>%
           arrange(rgn_id)
       }
       
-      #if (lyr == 'mar_harvest_tonnes') browser()
-      write.csv(b, csv_out, row.names=F, na='')
+      if ('cntry_key' %in% names(d)){
+        # convert cntry_key to rgn_id, drop cntry_key
+        d = d %>%
+          inner_join(
+            sc_cntry,
+            by='cntry_key') %>%
+          dplyr::rename(rgn_id=sc_rgn_id) %>%
+          select_(.dots = as.list(c('rgn_id', setdiff(names(d), 'cntry_key')))) %>%
+          arrange(rgn_id)
+      }
+      
+      if (lyrs_sc$layer[j]=='rgn_labels'){
+        csv_out = 'layers/rgn_labels.csv'
+        lyrs_sc$filename[j] = basename(csv_out)
+        d = d %>%
+          merge(sc_rgns, by.x='rgn_id', by.y='sc_rgn_id') %>%
+          select(rgn_id, type, label=sc_rgn_name) %>%
+          arrange(rgn_id)
+      }
+      
+      ## downweight: area_offshore, equal, equal , population_inland25km,
+      # shp = '/Volumes/data_edit/git-annex/clip-n-ship/data/Albania/rgn_inland25km_mol.shp'
+      downweight = str_trim(lyrs_sc$clip_n_ship_disag[j])
+      downweightings = c('area_offshore'='area-offshore', 'population_inland25km'='popn-inland25km')
+      if (downweight %in% names(downweightings) & nrow(d) > 0){
+        
+        ## update data frame with downweighting
+        i.v  = ncol(d) # assume value in right most column
+        #if (downweight=='population_inland25km') browser()
+        d = inner_join(d, get(downweight), by='rgn_id')
+        i.dw = ncol(d) # assume downweight in right most column after join
+        d[i.v] = d[i.v] * d[i.dw]
+        d = d[,-i.dw]
+        
+        ## update layer filename to reflect downweighting
+        csv_out = file.path(
+          'layers',
+          str_replace(
+            lyrs_sc$filename[j],
+            fixed('_gl2014.csv'),
+            sprintf('_sc2014-%s.csv', downweightings[downweight])))
+        lyrs_sc$filename[j] = basename(csv_out)
+      }
+    }
+    write.csv(d, csv_out, row.names=F, na='')
     
-    } # end for (lyr in subset(lyrs, data_na, layer, drop=T))
-     
-    ## update layers.csv with empty layers now populated by global averages
-    CheckLayers('layers.csv', 'layers',
-                flds_id=c('rgn_id','country_id','saup_id','fao_id','fao_saup_id'))
+  }  # end for (j in 1:nrow(lyrs_sc))
+  
+  ## create layers.csv registry
+  lyrs_reg = lyrs_sc %>%
+    select(
+      targets,
+      layer,
+      filename,
+      fld_value,
+      units,
+      name,
+      description,
+      clip_n_ship_disag,
+      clip_n_ship_disag_description,
+      layer_gl, 
+      path_in)  
+  write.csv(lyrs_reg, 'layers.csv', row.names=F, na='')
+  
+  ## check for empty layers
+  CheckLayers('layers.csv', 'layers',
+              flds_id=c('rgn_id','country_id','saup_id','fao_id','fao_saup_id'))
+  lyrs = read.csv('layers.csv', na='')
+  lyrs_empty = filter(lyrs, data_na==T)
+  if (nrow(lyrs_empty) > 0){
+    dir.create('tmp/layers-empty_global-values', showWarnings=F)
+    write.csv(lyrs_empty, 'layers-empty_swapping-global-mean.csv', row.names=F, na='')
+  }
+  
+  ## populate empty layers with global averages.
+  for (lyr in subset(lyrs, data_na, layer, drop=T)){ # lyr = subset(lyrs, data_na, layer, drop=T)[1]
     
-  } # end (key != 'bhi')  line ~357
+    message(' for empty layer ', lyr, ', getting global avg')
+    
+    ## get all global data for layer
+    l = subset(lyrs, layer==lyr)
+    csv_gl  = as.character(l$path_in)
+    csv_tmp = sprintf('tmp/layers-empty_global-values/%s', l$filename)
+    csv_out = sprintf('layers/%s', l$filename)
+    file.copy(csv_gl, csv_tmp, overwrite=T)
+    a = read.csv(csv_tmp)
+    
+    ## calculate global categorical means using non-standard evaluation, ie dplyr::*_()
+    fld_key         = names(a)[1]
+    fld_value       = names(a)[ncol(a)]
+    flds_other = setdiff(names(a), c(fld_key, fld_value))
+    
+    if (class(a[[fld_value]]) %in% c('factor','character') & l$fld_val_num == fld_value){
+      cat(sprintf('  DOH! For empty layer "%s" field "%s" is factor/character but registered as [fld_val_num] not [fld_val_chr].\n', lyr, fld_value))
+    }
+    
+    ## exceptions
+    if (lyr == 'mar_trend_years'){
+      sc_rgns %>%
+        mutate(trend_yrs = '5_yr') %>%
+        select(rgn_id = sc_rgn_id, trend_yrs) %>%
+        arrange(rgn_id) %>%
+        write.csv(csv_out, row.names=F, na='')
+      
+      next
+    }
+    
+    if (class(a[[fld_value]]) %in% c('factor','character')){
+      cat(sprintf('  DOH! For empty layer "%s" field "%s" is factor/character but continuing with presumption of numeric.\n', lyr, fld_value))
+    }
+    
+    ## presuming numeric...
+    ## get mean
+    #if (lyr == 'mar_coastalpopn_inland25km') browser()
+    if (length(flds_other) > 0){
+      b = a %>%
+        group_by_(.dots=flds_other) %>%
+        summarize_(
+          .dots = setNames(
+            sprintf('mean(%s, na.rm=T)', fld_value),
+            fld_value))
+    } else {
+      b = a %>%
+        summarize_(
+          .dots = setNames(
+            sprintf('mean(%s, na.rm=T)', fld_value),
+            fld_value))
+    }
+    
+    ## bind many rgn_ids
+    if ('rgn_id' %in% names(a) | 'cntry_key' %in% names(a)){
+      # get outer join, aka Cartesian product
+      b = b %>%
+        merge(
+          sc_rgns %>%  ## Poland Trouble Found it Eureka!
+            select(rgn_id = sc_rgn_id),
+          all=T) %>%
+        select(one_of('rgn_id', flds_other, fld_value)) %>%
+        arrange(rgn_id)
+    }
+    
+    #if (lyr == 'mar_harvest_tonnes') browser()
+    write.csv(b, csv_out, row.names=F, na='')
+    
+  } # end for (lyr in subset(lyrs, data_na, layer, drop=T))
+  
+  ## update layers.csv with empty layers now populated by global averages
+  CheckLayers('layers.csv', 'layers',
+              flds_id=c('rgn_id','country_id','saup_id','fao_id','fao_saup_id'))
+  
   
   
   ## copy configuration files
@@ -1395,7 +1389,7 @@ custom_maps = function(key){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
   
   dir_data    = file.path(dir_M, 'git-annex/clip-n-ship')
   dir_spatial = file.path(dir_data, key, 'spatial') # baltic: dir_spatial = file.path(dir_data, 'bhi', 'spatial') 
-  dir_custom  = file.path(dir_spatial, 'custom')
+  dir_custom  = file.path(dir_spatial, 'custom') ## /final_jamie for ARC
   dir_pages   = file.path(dir_data, key, 'gh-pages')
   
   ## process shapefiles:
@@ -1425,7 +1419,7 @@ custom_maps = function(key){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
   }
   plys = plys[bufs_valid]
   
-  ## fortify and set rgn_names as factor of all inland rgns. ***This is where invalid geometries/orphan hole errors may occur***
+  ## fortify and set rgn_names as factor of all inland rgns. ***This is where invalid geometries/orphan hole errors may occur***  ## TODO JSL 6/6 come back here after Jamie 
   rgn_names = factor(plys[[1]][['rgn_name']])  # orig: rgn_name, gye:Zona, bhi:rgn_name # need to generalize this
   plys.df = lapply(plys, function(x){
     x = fortify(x, region='rgn_name')              # orig: rgn_name, gye:Zona, bhi:rgn_name # need to generalize this

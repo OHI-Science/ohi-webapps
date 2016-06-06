@@ -24,6 +24,8 @@ source('create_functions.R')       # all functions for creating and updating rep
 create_new_repo = F
 redo_maps = F
 
+key = 'arc'
+
 # set vars by subcountry key
 setwd(dir_repos)
 source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))    
@@ -35,10 +37,10 @@ if (create_new_repo) repo = create_gh_repo(key)
 setwd(dir_repo)
 
 # create custom_maps() by @jules32
-if (!all(file.exists(
+if (!all(file.exists(  ## TODO: error 6/6/16: Error in ogrInfo(dsn = dsn, layer = layer, encoding = encoding, use_iconv = use_iconv,  : Cannot open file
   file.path(dir_annex, key,
-            'gh-pages/images', 
-            c('regions_1600x800.png', 'regions_600x400.png', 'regions_400x250.png', 
+            'gh-pages/images',
+            c('regions_1600x800.png', 'regions_600x400.png', 'regions_400x250.png',
               'app_400x250.png', 'regions_30x20.png'))))
   | redo_maps){
   res = try(custom_maps(key))

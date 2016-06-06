@@ -27,20 +27,20 @@ dir_repo      = file.path(dir_repos, repo_name)
 if (key %in% sc_custom$sc_key){
   default_scenario = subset(sc_custom, sc_key==key, default_scenario, drop=T)
 } else {
-  default_scenario = 'subcountry2014'
+  message('Please enter a scenario name in `custom/sc_studies_custom.csv') # no longer default to 'subcountry2014'
 }
 
 # set custom default_scenario
 if (key == 'chn') default_scenario = 'province2015'
 
-# set default branch
+# set default branch # TODO sort out branches
 default_branch          = 'published'
 default_branch_scenario = sprintf('%s/%s', default_branch, default_scenario)
 
 #  dir_ap_old    = file.path(dir_annex, cntries[i], 'shinyapps.io')
 dir_annex_sc  = file.path(dir_annex, key)
 app_name      = key # sprintf('%s_app', key)
-csv_pop_inland25km = file.path(dir_M, 'git-annex/clip-n-ship', key, 'layers/mar_coastalpopn_inland25km_lyr.csv')
+csv_pop_inland25km = file.path(dir_M, 'git-annex/clip-n-ship', key, 'layers/mar_coastalpopn_inland25km_lyr.csv') # TODO: sort out mar_pop_inland stuff
 # dir_annex_old  = str_replace_all(Country, ' ', '_')
 study_area = subset(sc_studies, sc_key==key, sc_name, drop=T)
 
