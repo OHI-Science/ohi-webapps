@@ -22,7 +22,7 @@ source('create_functions.R')       # all functions for creating and updating rep
 # this is in order of steps from start to finish, but these functions can also be run individually
 
 create_new_repo = F
-redo_maps = F
+redo_maps = T
 
 key = 'arc'
 
@@ -37,19 +37,19 @@ if (create_new_repo) repo = create_gh_repo(key)
 setwd(dir_repo)
 
 # create custom_maps() by @jules32
-if (!all(file.exists(  ## TODO: error 6/6/16: Error in ogrInfo(dsn = dsn, layer = layer, encoding = encoding, use_iconv = use_iconv,  : Cannot open file
+if (!all(file.exists(  
   file.path(dir_annex, key,
             'gh-pages/images',
             c('regions_1600x800.png', 'regions_600x400.png', 'regions_400x250.png',
               'app_400x250.png', 'regions_30x20.png'))))
   | redo_maps){
-  res = try(custom_maps(key))
+  res = try(custom_maps(key)) ## TODO: inspect more closely; erroring out 6/6/16 with fortify line
 }
 
 
 # populate draft branch of repo
-populate_draft_branch()    # turn buffers back on if making buffers
-additions_draft(key) 
+populate_draft_branch()    # TODO jun 2016: see if buffers necessary, etc. 
+additions_draft(key)   ## TODO june 2016: necessary anymore?
 
 source('~/github/ohi-webapps/ohi-functions.R')          # all functions to update the webapp without Travis
 
@@ -61,6 +61,8 @@ system('git pull')
 # calculate scores ~~ adapted from create.all
 setwd(dir_repo)
 calculate_scores_notravis() # consider just calling CalculateAll() here instead of this function. Will need to add git2r info
+
+## created ARC up to here. 
 
 # create flower plot and table
 setwd(dir_repo)

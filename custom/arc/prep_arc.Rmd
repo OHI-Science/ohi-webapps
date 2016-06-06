@@ -15,6 +15,7 @@ source('create_functions.R')       # all functions for creating and updating rep
 key <- 'arc'
 
 dir_spatial    = file.path(dir_M, 'git-annex/clip-n-ship', key, 'spatial') 
+dir_layers     = file.path(dir_M, 'git-annex/clip-n-ship', key, 'layers') 
 dir_custom_tmp = file.path(dir_spatial, 'custom/final_jamie') 
 dir_custom     = file.path(dir_spatial, 'custom') 
 
@@ -39,5 +40,23 @@ shp@data <- shp@data %>%
   select(rgn_id, rgn_name, country, area_km2)
 
 writeOGR(shp, dsn = dir_custom, layer = 'arctic_eezs_final', driver = 'ESRI Shapefile', overwrite=TRUE) 
+```
+
+## Create required .csv files
+
+```{r csv files, eval=F}
+
+## rgn_offshore_data.csv
+data_arc <- shp@data %>%
+  select(-country)
+write.csv(data_arc, file.path(dir_spatial, 'rgn_offshore_data.csv'), row.names = FALSE)
+
+## dummy mar_coastalpopn_inland25km_lyr.csv
+dir.create(dir_layers)
+
+data_frame(rgn_id = rep(1:max(data_arc$rgn_id), 5), year = rep(2005:2013, 5)) %>%
+  mutate(popsum = 100) %>%
+  arrange(rgn_id) %>%
+  write.csv(file.path(dir_layers, 'mar_coastalpopn_inland25km_lyr.csv'), row.names = FALSE)
 
 ```

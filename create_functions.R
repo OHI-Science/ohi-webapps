@@ -331,7 +331,7 @@ populate_draft_branch <- function(){
   
   ## spatial: create regions_gcs.geojson and regions_gcs.js
   # TODO: JSL: strongly consider moving this into create_maps() so that if region boundaries are updated, this will too
-  f_js_old      = file.path(dir_annex_sc, 'regions_gcs.js') ## TODO Julie rerun here for ARC
+  f_js_old      = file.path(dir_annex_sc, 'regions_gcs.js') 
   f_geojson_old = file.path(dir_annex_sc, 'regions_gcs.geojson')
   f_js          = file.path(dir_annex_sc, 'spatial', 'regions_gcs.js')
   f_geojson     = file.path(dir_annex_sc, 'spatial', 'regions_gcs.geojson')
@@ -342,19 +342,18 @@ populate_draft_branch <- function(){
   if (!file.exists(f_js)){                                              
     f_shp = file.path(dir_annex, key, 'spatial', 'rgn_offshore_gcs.shp')
     cat(sprintf('  shp_to_geojson -- %s\n', format(Sys.time(), '%X')))
-    v = try(shp_to_geojson(f_shp, f_js, f_geojson))
+    v = try(shp_to_geojson(f_shp, f_js, f_geojson)) ## TODO: move this function to ohi-webapps package
     if (class(v)=='try-error'){
       cat(as.character(traceback(v)), file=txt_shp_error)
       next
     }
   }
   for (f in c(f_js, f_geojson)){ # f = f_spatial[1]
-    if (key != 'bhi')  file.copy(f, sprintf('spatial/%s', basename(f)), overwrite=T) # original
-    if (key == 'bhi') file.copy(f, sprintf('baltic2015/spatial/%s', basename(f)), overwrite=T) # BHI hack
+    file.copy(f, sprintf('spatial/%s', basename(f)), overwrite=T)
     cat(sprintf('\n copying from %s', f))
   }
   
-  # copy layers.csv from global
+  ## copy layers.csv from global ----
   write.csv(lyrs_gl, sprintf('tmp/layers_%s.csv', sfx_global), na='', row.names=F)
   
   # modify layers
@@ -370,7 +369,7 @@ populate_draft_branch <- function(){
       filename = sprintf('%s_%s.csv', layer, sfx_global)) %>%
     arrange(targets, layer)
   
-  ## csvs for regions and countries # TODO Julie come back here for ARC
+  ## csvs for regions and countries 
   sc_rgns_csv = file.path(dir_annex_sc, 'spatial', 'rgn_offshore_data.csv')
   
   ## old global to new subcountry regions
@@ -388,10 +387,6 @@ populate_draft_branch <- function(){
   ## old global to new custom regions by JSL
   if (all(is.na(sc_rgns$gl_rgn_id))){
     
-    ## hack for BHI #1/2
-    if ( str_detect(key, 'bhi-') ) sc_rgns$gl_rgn_name = bhi_sc$gl_rgn_name[bhi_sc$sc_key == key] # this is a hack for bhi-swe
-    if (key == 'bhi') sc_rgns$gl_rgn_name = sc_studies$gl_rgn_name[sc_studies$sc_key == key] 
-    
     ## for all custom repos
     sc_rgns = sc_rgns %>%
       select(-gl_rgn_id) %>%
@@ -399,10 +394,6 @@ populate_draft_branch <- function(){
                   select(gl_rgn_name = sc_name, 
                          gl_rgn_id), 
                 by= 'gl_rgn_name')
-    
-    ## hack for BHI #2/2
-    if (key == 'bhi') sc_rgns = distinct(sc_rgns)
-    
   }
   
   ## old global to new subcountry countries
@@ -539,7 +530,7 @@ populate_draft_branch <- function(){
           'layers',
           str_replace(
             lyrs_sc$filename[j],
-            fixed('_gl2014.csv'),
+            fixed('_gl2016.csv'), ## TODO: no hardcoding here
             sprintf('_sc2014-%s.csv', downweightings[downweight])))
         lyrs_sc$filename[j] = basename(csv_out)
       }
@@ -566,7 +557,7 @@ populate_draft_branch <- function(){
   
   ## check for empty layers
   CheckLayers('layers.csv', 'layers',
-              flds_id=c('rgn_id','country_id','saup_id','fao_id','fao_saup_id'))
+              flds_id=c('rgn_id','country_id','saup_id','fao_id','fao_saup_id')) ##TODO: check if necessary
   lyrs = read.csv('layers.csv', na='')
   lyrs_empty = filter(lyrs, data_na==T)
   if (nrow(lyrs_empty) > 0){
@@ -574,7 +565,7 @@ populate_draft_branch <- function(){
     write.csv(lyrs_empty, 'layers-empty_swapping-global-mean.csv', row.names=F, na='')
   }
   
-  ## populate empty layers with global averages.
+  ## populate empty layers with global averages. ## TODO see if a better way...
   for (lyr in subset(lyrs, data_na, layer, drop=T)){ # lyr = subset(lyrs, data_na, layer, drop=T)[1]
     
     message(' for empty layer ', lyr, ', getting global avg')
@@ -653,7 +644,8 @@ populate_draft_branch <- function(){
   
   
   ## copy configuration files
-  conf_files = c('config.R','functions.R','goals.csv','pressures_matrix.csv','resilience_matrix.csv','resilience_weights.csv')
+  conf_files = c('config.R','functions.R','goals.csv','pressures_matrix.csv','resilience_matrix.csv',
+                 'pressures_categories.csv', 'resilience_categories.csv')
   for (f in conf_files){ # f = conf_files[1]
     
     f_in  = sprintf('%s/conf/%s', dir_global, f)
@@ -745,18 +737,19 @@ populate_draft_branch <- function(){
   file.copy(file.path(dir_github, 'ohi-webapps/subcountry2014/conf/goals.Rmd'), 'conf/goals.Rmd', overwrite=T)
   
   ## save shortcut files not specific to operating system
-  write_shortcuts('.', os_files=0)
+ # write_shortcuts('.', os_files=0) ## TODO: double-check if necessary; removed from ohicore and not run for ARC 6/6/16
   
   ## add travis.yml file
   setwd(dir_repo)
-  brew(travis_draft_yaml_brew, '.travis.yml')
+  # brew(travis_draft_yaml_brew, '.travis.yml') ## TODO: delete this
   
   ## copy regions map image
   # TODO: strongly recommend moving this to a dedicated map section. However, can't be with create_maps() because these folders don't exist yet. Rethink a bit more. 
-  dir.create(sprintf('%s/reports/figures', default_scenario), showWarnings=F, recursive=T)
-  file.copy(
-    file.path(dir_M, 'git-annex/clip-n-ship', key, 'gh-pages/images/regions_600x400.png'),
-    sprintf('%s/reports/figures/regions_600x400.png', default_scenario), overwrite=T)
+  # TODO: not run for ARC since not created
+  # dir.create(sprintf('%s/reports/figures', default_scenario), showWarnings=F, recursive=T)
+  # file.copy(
+  #   file.path(dir_M, 'git-annex/clip-n-ship', key, 'gh-pages/images/regions_600x400.png'),
+  #   sprintf('%s/reports/figures/regions_600x400.png', default_scenario), overwrite=T)
   
   
   ## create subfolders in prep folder
@@ -769,6 +762,9 @@ populate_draft_branch <- function(){
   file.copy(file.path(dir_github, 'ohi-webapps/tmp/README_template_prep.md'), 
             file.path(default_scenario, 'prep/README.md'), overwrite=T)
   
+  ## copy calculate_scores.r ## TODO: make this a template, incorporate pre_scores.r
+  file.copy(file.path(dir_global, 'calculate_scores.r'), 
+            file.path(default_scenario, 'calculate_scores.r'), overwrite=T)
   
   ### The following are also in additions_draft() below. Consider making funcions. 
   ## update setwd() in assessment/scenario/calculate_scores.r
@@ -777,9 +773,9 @@ populate_draft_branch <- function(){
     writeLines(file.path(default_scenario, 'calculate_scores.r'))
   
   ## update launch_app() call in assessment/scenario/launch_app_code.r TODO - delete once ohi-shiny2
-  readLines(file.path(dir_repo, default_scenario, 'launch_app_code.r')) %>%
-    str_replace(".*launch_app.*", paste0("ohicore::launch_app('", file.path(dir_github, key, default_scenario), "')")) %>%
-    writeLines(file.path(default_scenario, 'launch_app_code.r'))
+  # readLines(file.path(dir_repo, default_scenario, 'launch_app_code.r')) %>%
+  #   str_replace(".*launch_app.*", paste0("ohicore::launch_app('", file.path(dir_github, key, default_scenario), "')")) %>%
+  #   writeLines(file.path(default_scenario, 'launch_app_code.r'))
   
   ## save ohi-webapps/install_ohicore.r
   fn = 'install_ohicore.r'
@@ -1388,19 +1384,19 @@ custom_maps = function(key){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
   source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
   
   dir_data    = file.path(dir_M, 'git-annex/clip-n-ship')
-  dir_spatial = file.path(dir_data, key, 'spatial') # baltic: dir_spatial = file.path(dir_data, 'bhi', 'spatial') 
-  dir_custom  = file.path(dir_spatial, 'custom') ## /final_jamie for ARC
+  dir_spatial = file.path(dir_data, key, 'spatial') 
+  dir_custom  = file.path(dir_spatial, 'custom')
   dir_pages   = file.path(dir_data, key, 'gh-pages')
   
   ## process shapefiles:
   
   ## read shapefiles, rename headers and save in dir_spatial
   shp_name = file_path_sans_ext(list.files(dir_custom))[1]
-  shp_orig = readOGR(dir_custom, shp_name) # inspect: shp_orig
+  shp_orig = readOGR(dir_custom, shp_name) 
   #names(shp_orig@data) = c('rgn_id', 'rgn_name', 'area_km2', 'hectares')  # for GYE     ## generalize!
   crs = CRS("+proj=longlat +datum=WGS84")
-  shp = spTransform(shp_orig,crs) # inspect as data.frame: shp@data // inspect a column: shp@data$rgn_name
-  writeOGR(shp, dsn=dir_spatial, 'rgn_offshore_gcs', driver='ESRI Shapefile', overwrite=T)
+  shp = spTransform(shp_orig,crs) 
+  writeOGR(shp, dsn=dir_spatial, 'rgn_offshore_gcs', driver='ESRI Shapefile', overwrite=TRUE)
   
   ## read shapefiles, store as list
   plys = lapply(shp_name, function(x){
@@ -1419,7 +1415,7 @@ custom_maps = function(key){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
   }
   plys = plys[bufs_valid]
   
-  ## fortify and set rgn_names as factor of all inland rgns. ***This is where invalid geometries/orphan hole errors may occur***  ## TODO JSL 6/6 come back here after Jamie 
+  ## fortify and set rgn_names as factor of all inland rgns. ***This is where invalid geometries/orphan hole errors may occur*** ## TODO: is this needed?  Error in get("rgeos", envir = .MAPTOOLS_CACHE) : object 'rgeos' not found 
   rgn_names = factor(plys[[1]][['rgn_name']])  # orig: rgn_name, gye:Zona, bhi:rgn_name # need to generalize this
   plys.df = lapply(plys, function(x){
     x = fortify(x, region='rgn_name')              # orig: rgn_name, gye:Zona, bhi:rgn_name # need to generalize this
