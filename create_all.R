@@ -63,6 +63,9 @@ setwd(dir_repo)
 calculate_scores_notravis() # consider just calling CalculateAll() here instead of this function. Will need to add git2r info
 
 ## created ARC up to here. 
+## TODO: 
+# - update calculate_scores.r
+# - copy 'temp/referencePoints.csv' --> change tmp/ to temp/
 
 # create flower plot and table
 setwd(dir_repo)
