@@ -3,6 +3,14 @@ create arctic repo.
 
 @jafflerbach created the shapefile from chats with M. Burgass. See Issue #516: https://github.com/OHI-Science/issues/issues/516 and @master branch for older attempts. 
 
+Arctic Regions: 
+
+- Russia rgn_id: 73
+- Greenlan rgn_id: 145
+- USA rgn_id: 163
+- Norway rgn_id: 223
+- Canada rgn_id: 218
+
 ## 1. setup
 Just need to rename a few regions
 

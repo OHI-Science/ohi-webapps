@@ -470,7 +470,7 @@ populate_draft_branch <- function(){
   lyrs_sc = filter(lyrs_sc, !layer %in% lyrs_le_rm)
   
   ## write layers data files
-  for (j in 1:nrow(lyrs_sc)){ # j=93
+  for (j in 1:nrow(lyrs_sc)){ # j=93 j=9
     
     lyr     = lyrs_sc$layer[j]
     rgns_in = lyrs_sc$rgns_in[j]
@@ -479,6 +479,16 @@ populate_draft_branch <- function(){
     
     d = read.csv(csv_in) # , na.strings='')
     flds = names(d)
+    
+    ## TODO: if (sc_rgns$gl_rgn_id is all NAs) -- need to use placeholder information
+    # head(sc_rgns)
+    # sc_rgn_id    sc_rgn_name gl_rgn_name gl_rgn_id
+    # 1         1         Alaska      Arctic        NA
+    # 2         3   Beaufort Sea      Arctic        NA
+    # 3         9 East Greenland      Arctic        NA
+    # 4         7      Jan Mayen      Arctic        NA
+    # 5         6         Norway      Arctic        NA
+    # 6         2        Nunavut      Arctic        NA
     
     if (rgns_in == 'global'){
       
