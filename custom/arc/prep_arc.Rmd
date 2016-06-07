@@ -6,7 +6,7 @@ create arctic repo.
 Arctic Regions: 
 
 - Russia rgn_id: 73
-- Greenlan rgn_id: 145
+- Greenland rgn_id: 145
 - USA rgn_id: 163
 - Norway rgn_id: 223
 - Canada rgn_id: 218
