@@ -66,6 +66,28 @@ calculate_scores_notravis() # consider just calling CalculateAll() here instead 
 ## TODO: 
 # - update calculate_scores.r
 # - copy 'temp/referencePoints.csv' --> change tmp/ to temp/
+# - update # setwd('~/github/arc/circle2016') --> update eez2016's calculate_scores.r directly
+# - conf/pressure_categories.csv
+# - pre_scores.r from arc
+# - use tidyr::expand() to create dummy variables: 
+      # df <- data_frame(
+      #   year   = c(2010, 2010, 2010, 2010, 2012, 2012, 2012),
+      #   qtr    = c(   1,    2,    3,    4,    1,    2,    3),
+      #   return = rnorm(7)
+      # )
+      # df %>% expand(year, qtr)
+      # df %>% expand(year = 2010:2012, qtr)
+      # df %>% expand(year = full_seq(year, 1), qtr)
+      # df %>% complete(year = full_seq(year, 1), qtr)
+# - consider deleting the Thailand MAR message
+
+# functions.r errors: 
+# MAR: https://github.com/OHI-Science/arc/commit/8ee59d0e14b998490e00be81ef0236ebd37ffdba
+# ICO: Error in eval(expr, envir, enclos) : object 'val_chr' not found 
+
+## layers to fix: 
+# ICO: 'ico_spp_extinction_status' 
+
 
 # create flower plot and table
 setwd(dir_repo)
