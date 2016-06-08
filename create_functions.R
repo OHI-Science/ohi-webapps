@@ -432,18 +432,18 @@ populate_draft_branch <- function(){
                 by= 'gl_rgn_name')
   }
   
+  ## old global to new subcountry countries -- proper setup for all cases
+  sc_cntry = gl_cntries %>%
+    select(gl_cntry_key, gl_rgn_id) %>%
+    merge(
+      sc_rgns,
+      by='gl_rgn_id') %>%
+    group_by(gl_cntry_key, sc_rgn_id) %>%
+    summarise(n=n()) %>%
+    select(cntry_key = gl_cntry_key, sc_rgn_id) %>%
+    as.data.frame()
+  
   if (!multi_nation) {
-    
-    ## old global to new subcountry countries
-    sc_cntry = gl_cntries %>%
-      select(gl_cntry_key, gl_rgn_id) %>%
-      merge(
-        sc_rgns,
-        by='gl_rgn_id') %>%
-      group_by(gl_cntry_key, sc_rgn_id) %>%
-      summarise(n=n()) %>%
-      select(cntry_key = gl_cntry_key, sc_rgn_id) %>%
-      as.data.frame()
     
     ## old global to new custom countries
     if (dim(sc_cntry)[1] != dim(sc_rgns)[1]) { # make sure Guayaquil doesn't match to both ECU and Galapagos
@@ -458,11 +458,11 @@ populate_draft_branch <- function(){
       copy_layer(lyr) # source('R/copy_layer.r')
     }
     
-  } else { # multi_nation = TRUE 
+  } else { # multi_nation == TRUE 
     
     ## overwrite sc_rgns if multi_nation
-    sc_rgns_lookup_csv <- sprintf('~/github/ohi-webapps/custom/%s/sc_rgns_lookup.csv', key)
-    sc_rgns = read.csv(sc_rgns_lookup_csv) %>%
+    sc_rgns_lookup <- read.csv(sprintf('~/github/ohi-webapps/custom/%s/sc_rgns_lookup.csv', key))
+    sc_rgns = sc_rgns_lookup %>%
       merge(
         gl_rgns %>%
           select(gl_rgn_name, gl_rgn_id),
@@ -470,36 +470,29 @@ populate_draft_branch <- function(){
       select(sc_rgn_id, sc_rgn_name, gl_rgn_id, gl_rgn_name) %>%
       arrange(sc_rgn_name)
     
+    ## old global to multi_nation
+    sc_cntry = sc_cntry %>% 
+      group_by(cntry_key) %>% 
+      filter(row_number() == 1) %>%
+      ungroup()
+    if (dim(sc_cntry)[1] != dim(sc_rgns)[1]) { # so GYE doesn't match both ECU+Galapagos
+      sc_cntry = sc_cntry %>%
+        filter(cntry_key %in% unique(sc_rgns_lookup$gl_rgn_key))
+    }
+    
+    
     ## for each layer...
     for (lyr in lyrs_sc$layer){ # lyr = "ao_access" lyr = 'le_gdp'
       
-      # layer_grow <-  data_frame()
-      
-      ## for each unique global country...
-      # for (m in ) {# m = 163
-        
         ## copy layer data for m  
         d <- copy_layer(lyr, sc_cntry,
                         global_rgn_id = unique(sc_rgns$gl_rgn_id), 
                         write_to_csv  = FALSE) 
+        if ('rgn_id' %in% names(d)) d = d %>% arrange(rgn_id)
         
-        # rbind data frame
-        # layer_grow <- layer_grow %>%
-        #   bind_rows(d)
-        if ('rgn_id' %in% names(layer_grow)) layer_grow = layer_grow %>% arrange(rgn_id)
-        
-            ## quick check
-            # read_csv(sprintf('~/github/ohi-global/eez2016/layers/%s.csv', lyr)) %>%
-            #   filter(rgn_id %in% unique(sc_rgns$gl_rgn_id))  %>%
-            #   left_join(gl_rgns %>% select(gl_rgn_name, rgn_id = gl_rgn_id), by='rgn_id') 
-            # layer_grow %>% arrange(rgn_id) %>%
-            #   dplyr::rename(sc_rgn_id = rgn_id) %>%
-            #   left_join(sc_rgns, by = 'sc_rgn_id')
-      # }
-      
-      ## save
-      csv_out = sprintf('layers/%s', lyrs_sc$filename[lyrs_sc$layer == lyr])
-      write_csv(d, csv_out)
+        ## save
+        csv_out = sprintf('layers/%s', lyrs_sc$filename[lyrs_sc$layer == lyr])
+        write_csv(d, csv_out)
       
       ## TODO: don't downweight for multi_nation yet, don't think that's happening..
       # ## downweight: area_offshore, equal, equal, population_inland25km. TODO: now redundant to copy_layer.r
@@ -524,10 +517,7 @@ populate_draft_branch <- function(){
       #   lyrs_sc$filename[lyrs_sc$layer == lyr] = basename(csv_out)
       # }
       
-      
-      
     }
-    
   }
   
   ## get layers used to downweight from global: area_offshore, area_offshore_3nm, equal, equal , population_inland25km,
@@ -543,91 +533,6 @@ populate_draft_branch <- function(){
   #     dw = area_km2 / sum(area_km2)) %>%
   #   select(rgn_id, dw)
   
-  
-  
-  ## write layers data files 
-  for (lyr in lyrs_sc$layer){ # j=93 j=9 j=14 # lyr = "ao_access"
-    
-    ## creating new function for inside this for loop; R/copy_layer
-    source('~/github/ohi-webapps/R/copy_layer.r')
-    
-    copy_layer(lyr)
-    # lyr     = lyrs_sc$layer[j]
-    # rgns_in = lyrs_sc$rgns_in[j]
-    # csv_in  = lyrs_sc$path_in[j]
-    # csv_out = sprintf('layers/%s', lyrs_sc$filename[j])
-    # 
-    # d = read.csv(csv_in) # , na.strings='')
-    # flds = names(d)
-    # 
-    # ## TODO: if (sc_rgns$gl_rgn_id is all NAs) -- need to use placeholder information
-    # # head(sc_rgns)
-    # # sc_rgn_id    sc_rgn_name gl_rgn_name gl_rgn_id
-    # # 1         1         Alaska      Arctic        NA
-    # # 2         3   Beaufort Sea      Arctic        NA
-    # # 3         9 East Greenland      Arctic        NA
-    # # 4         7      Jan Mayen      Arctic        NA
-    # # 5         6         Norway      Arctic        NA
-    # # 6         2        Nunavut      Arctic        NA
-    # 
-    # if (rgns_in == 'global'){
-    #   
-    #   if ('rgn_id' %in% names(d)){
-    #     d = d %>%
-    #       filter(rgn_id %in% sc_rgns$gl_rgn_id) %>%
-    #       merge(sc_rgns, by.x='rgn_id', by.y='gl_rgn_id') %>%
-    #       mutate(rgn_id=sc_rgn_id) %>%
-    #       subset(select=flds) %>%
-    #       arrange(rgn_id)
-    #   }
-    #   
-    #   if ('cntry_key' %in% names(d)){
-    #     # convert cntry_key to rgn_id, drop cntry_key
-    #     d = d %>%
-    #       inner_join(
-    #         sc_cntry,
-    #         by='cntry_key') %>%
-    #       dplyr::rename(rgn_id=sc_rgn_id) %>%
-    #       select_(.dots = as.list(c('rgn_id', setdiff(names(d), 'cntry_key')))) %>%
-    #       arrange(rgn_id)
-    #   }
-    #   
-    #   if (lyrs_sc$layer[j]=='rgn_labels'){
-    #     csv_out = 'layers/rgn_labels.csv'
-    #     lyrs_sc$filename[j] = basename(csv_out)
-    #     d = d %>%
-    #       merge(sc_rgns, by.x='rgn_id', by.y='sc_rgn_id') %>%
-    #       select(rgn_id, type, label=sc_rgn_name) %>%
-    #       arrange(rgn_id)
-    #   }
-    #   
-    #   ## downweight: area_offshore, equal, equal , population_inland25km,
-    #   # shp = '/Volumes/data_edit/git-annex/clip-n-ship/data/Albania/rgn_inland25km_mol.shp'
-    #   downweight = str_trim(lyrs_sc$clip_n_ship_disag[j])
-    #   downweightings = c('area_offshore'='area-offshore', 'population_inland25km'='popn-inland25km')
-    #   if (downweight %in% names(downweightings) & nrow(d) > 0){
-    #     
-    #     ## update data frame with downweighting
-    #     i.v  = ncol(d) # assume value in right most column
-    #     #if (downweight=='population_inland25km') browser()
-    #     d = inner_join(d, get(downweight), by='rgn_id')
-    #     i.dw = ncol(d) # assume downweight in right most column after join
-    #     d[i.v] = d[i.v] * d[i.dw]
-    #     d = d[,-i.dw]
-    #     
-    #     ## update layer filename to reflect downweighting
-    #     csv_out = file.path(
-    #       'layers',
-    #       str_replace(
-    #         lyrs_sc$filename[j],
-    #         fixed('_gl2016.csv'), ## TODO: no hardcoding here
-    #         sprintf('_sc2014-%s.csv', downweightings[downweight])))
-    #     lyrs_sc$filename[j] = basename(csv_out)
-    #   }
-    # }
-    # write.csv(d, csv_out, row.names=F, na='')
-    
-  }  # end for (j in 1:nrow(lyrs_sc))
   
   ## create layers.csv registry
   lyrs_reg = lyrs_sc %>%
@@ -735,7 +640,7 @@ populate_draft_branch <- function(){
   
   ## copy configuration files
   conf_files = c('config.R','functions.R','goals.csv','pressures_matrix.csv','resilience_matrix.csv',
-                 'pressures_categories.csv', 'resilience_categories.csv')
+                 'pressure_categories.csv', 'resilience_categories.csv')
   for (f in conf_files){ # f = conf_files[1]
     
     f_in  = sprintf('%s/conf/%s', dir_global, f)
@@ -790,12 +695,6 @@ populate_draft_branch <- function(){
         s = c(s[1:ln_beg], s_g, '\n', s[ln_end:length(s)])
       }
       
-      ## TODO: remove temp output from ohi-global
-      # original below, but won't find things like this: 
-      # # reference point data
-      # rp <- read.csv('temp/referencePoints.csv', stringsAsFactors=FALSE) %>%
-      #   rbind(data.frame(goal = "FIS", method = "b/bmsy: modeled", reference_point = NA))
-      # write.csv(rp, 'temp/referencePoints.csv', row.names=FALSE)
       # 
       # rethink because ref points stuff might be useful. will find this: write.csv(d_check, sprintf('temp/cs_data_%s.csv', scenario), row.names=FALSE)    
       s = s %>%
@@ -887,7 +786,6 @@ populate_draft_branch <- function(){
   ## brew copy_webapps_templates.r a la github.com/OHI-Science/issues/issues/506
   brew(sprintf('%s/ohi-webapps/copy_webapps_templates.brew.r', dir_github), 
        'copy_webapps_templates.r')
-  
   
   setwd(wd)
 }

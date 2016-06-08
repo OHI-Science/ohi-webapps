@@ -1,6 +1,6 @@
 ## copy_layer.r
 ## extracted from create_functions.r - populate_draft_branch(); make its own function.
-# for (j in 1:nrow(lyrs_sc)){ .... ~L473
+# https://github.com/OHI-Science/ohi-webapps/blob/26054a43d118a50c275ed75da41430147ab35d0e/create_functions.R#L487-L554
 
 copy_layer <- function(lyr, 
                        sc_cntry,
