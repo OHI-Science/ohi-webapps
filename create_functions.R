@@ -393,12 +393,13 @@ populate_draft_branch <- function(){
   ## drop cntry_* layers
   lyrs_sc = filter(lyrs_sc, !grepl('^cntry_', layer))
   
-  ## drop LE layers no longer being used
+  ## drop all layers no longer being used (especially LE)
   lyrs_le_rm = c(
     'le_gdp_pc_ppp','le_jobs_cur_adj_value','le_jobs_cur_base_value','le_jobs_ref_adj_value','le_jobs_ref_base_value',
     'le_rev_cur_adj_value','le_rev_cur_base_value','le_rev_cur_base_value','le_rev_ref_adj_value','le_rev_ref_base_value',
     'le_rev_sector_year','le_revenue_adj','le_wage_cur_adj_value','le_wage_cur_base_value','le_wage_ref_adj_value',
-    'le_wage_ref_base_value','liveco_status','liveco_trend')
+    'le_wage_ref_base_value','liveco_status','liveco_trend', 
+    'cntry_rgn', 'cntry_georegions')
   lyrs_sc = filter(lyrs_sc, !layer %in% lyrs_le_rm)
   
   ## ---- end layers.csv prep ---- ##
@@ -451,44 +452,82 @@ populate_draft_branch <- function(){
         filter(cntry_key %in% sc_cntries)
     }
     
+    ## for each layers...
     for (lyr in lyrs_sc$layer){ # lyr = "ao_access"
+      
       copy_layer(lyr) # source('R/copy_layer.r')
     }
+    
   } else { # multi_nation = TRUE 
     
     ## overwrite sc_rgns if multi_nation
-      sc_rgns_lookup_csv <- sprintf('~/github/ohi-webapps/custom/%s/sc_rgns_lookup.csv', key)
-      sc_rgns = read.csv(sc_rgns_lookup_csv) %>%
-        merge(
-          gl_rgns %>%
-            select(gl_rgn_name, gl_rgn_id),
-          by='gl_rgn_name', all.x=T) %>%
-        select(sc_rgn_id, sc_rgn_name, gl_rgn_id, gl_rgn_name) %>%
-        arrange(sc_rgn_name)
-    }
-  
-  
-    
+    sc_rgns_lookup_csv <- sprintf('~/github/ohi-webapps/custom/%s/sc_rgns_lookup.csv', key)
+    sc_rgns = read.csv(sc_rgns_lookup_csv) %>%
+      merge(
+        gl_rgns %>%
+          select(gl_rgn_name, gl_rgn_id),
+        by='gl_rgn_name', all.x=T) %>%
+      select(sc_rgn_id, sc_rgn_name, gl_rgn_id, gl_rgn_name) %>%
+      arrange(sc_rgn_name)
     
     ## for each layer...
-  for (lyr in lyrs_sc$layer){ # lyr = "ao_access"
-    
-    layer_grow <-  data_frame()
-    
-    ## for each unique global country...
-    for (m in unique(sc_rgns$gl_rgn_id)) {# m = 163
+    for (lyr in lyrs_sc$layer){ # lyr = "ao_access" lyr = 'le_gdp'
       
-      # for how many times m appears (eg Norway) # may not be necessary, seems to be doing it...
+      # layer_grow <-  data_frame()
       
-      ## copy layer data for m  
-      d <- copy_layer(lyr, 
-                      global_rgn_id = m, 
-                      write_to_csv  = FALSE) 
+      ## for each unique global country...
+      # for (m in ) {# m = 163
+        
+        ## copy layer data for m  
+        d <- copy_layer(lyr, sc_cntry,
+                        global_rgn_id = unique(sc_rgns$gl_rgn_id), 
+                        write_to_csv  = FALSE) 
+        
+        # rbind data frame
+        # layer_grow <- layer_grow %>%
+        #   bind_rows(d)
+        if ('rgn_id' %in% names(layer_grow)) layer_grow = layer_grow %>% arrange(rgn_id)
+        
+            ## quick check
+            # read_csv(sprintf('~/github/ohi-global/eez2016/layers/%s.csv', lyr)) %>%
+            #   filter(rgn_id %in% unique(sc_rgns$gl_rgn_id))  %>%
+            #   left_join(gl_rgns %>% select(gl_rgn_name, rgn_id = gl_rgn_id), by='rgn_id') 
+            # layer_grow %>% arrange(rgn_id) %>%
+            #   dplyr::rename(sc_rgn_id = rgn_id) %>%
+            #   left_join(sc_rgns, by = 'sc_rgn_id')
+      # }
       
-      layer_grow <- layer_grow %>%
-        bind_rows(d)
+      ## save
+      csv_out = sprintf('layers/%s', lyrs_sc$filename[lyrs_sc$layer == lyr])
+      write_csv(d, csv_out)
+      
+      ## TODO: don't downweight for multi_nation yet, don't think that's happening..
+      # ## downweight: area_offshore, equal, equal, population_inland25km. TODO: now redundant to copy_layer.r
+      # downweight = str_trim(lyrs_sc$clip_n_ship_disag[lyrs_sc$layer == lyr])
+      # downweightings = c('area_offshore'='area-offshore', 'population_inland25km'='popn-inland25km')
+      # if (downweight %in% names(downweightings) & nrow(d) > 0){
+      #   
+      #   ## update data frame with downweighting
+      #   i.v  = ncol(d) # assume value in right most column
+      #   d = inner_join(d, get(downweight), by='rgn_id')
+      #   i.dw = ncol(d) # assume downweight in right most column after join
+      #   d[i.v] = d[i.v] * d[i.dw]
+      #   d = d[,-i.dw]
+      #   
+      #   ## update layer filename to reflect downweighting
+      #   csv_out = file.path(
+      #     'layers',
+      #     str_replace(
+      #       lyrs_sc$filename[lyrs_sc$layer == lyr],
+      #       fixed('_gl2016.csv'), 
+      #       sprintf('_sc2016-%s.csv', downweightings[downweight])))
+      #   lyrs_sc$filename[lyrs_sc$layer == lyr] = basename(csv_out)
+      # }
+      
+      
+      
     }
-  
+    
   }
   
   ## get layers used to downweight from global: area_offshore, area_offshore_3nm, equal, equal , population_inland25km,
