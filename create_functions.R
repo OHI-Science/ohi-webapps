@@ -455,7 +455,9 @@ populate_draft_branch <- function(){
     ## for each layers...
     for (lyr in lyrs_sc$layer){ # lyr = "ao_access"
       
-      copy_layer(lyr) # source('R/copy_layer.r')
+      d <- copy_layer(lyr, sc_cntry,
+                        global_rgn_id = unique(sc_rgns$gl_rgn_id), 
+                        write_to_csv  = TRUE) 
     }
     
   } else { # multi_nation == TRUE 
