@@ -17,14 +17,15 @@ setwd('~/github/ohi-webapps')
 
 source('create_init.R')            # load all libraries, set directories relevant to all keys
 source('create_functions.R')       # all functions for creating and updating repos and webapps
+source('R/copy_layer.r')
 
 ## make a custom repo for a specific  ----
 # this is in order of steps from start to finish, but these functions can also be run individually
 
 create_new_repo = F
-redo_maps = T
+redo_maps = F
 
-key = 'arc'
+key = 'arc'; multi_nation = T # figure out somewhere else to put this
 
 # set vars by subcountry key
 setwd(dir_repos)

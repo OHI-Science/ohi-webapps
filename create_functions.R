@@ -353,10 +353,11 @@ populate_draft_branch <- function(){
     cat(sprintf('\n copying from %s', f))
   }
   
+  ## ---- begin layers.csv prep ---- ##
   ## copy layers.csv from global ----
   write.csv(lyrs_gl, sprintf('tmp/layers_%s.csv', sfx_global), na='', row.names=F)
   
-  # modify layers
+  ## modify layers.csv
   lyrs_sc = lyrs_gl %>%
     select(
       targets, layer, filename, fld_value, units,
@@ -369,13 +370,47 @@ populate_draft_branch <- function(){
       filename = sprintf('%s_%s.csv', layer, sfx_global)) %>%
     arrange(targets, layer)
   
+  ## swap out custom mar_coastalpopn_inland25mi for mar_coastalpopn_inland25km (NOTE: mi -> km)
+  ix = which(lyrs_sc$layer=='mar_coastalpopn_inland25mi')
+  lyrs_sc$layer[ix]       = 'mar_coastalpopn_inland25km'
+  lyrs_sc$path_in[ix]     = file.path(dir_annex, key, 'layers', 'mar_coastalpopn_inland25km_lyr.csv')
+  lyrs_sc$name[ix]        = str_replace(lyrs_sc$name[ix]       , fixed('miles'), 'kilometers')
+  lyrs_sc$description[ix] = str_replace(lyrs_sc$description[ix], fixed('miles'), 'kilometers')
+  lyrs_sc$filename[ix]    = 'mar_coastalpopn_inland25km_sc2014-raster.csv'
+  lyrs_sc$rgns_in[ix]     = 'subcountry'
+  
+  # swap out spatial area layers
+  area_layers = c('rgn_area'= 'rgn_offshore_data.csv')
+  
+  for (lyr in names(area_layers)){
+    csv = area_layers[lyr]
+    ix = which(lyrs_sc$layer==lyr)
+    lyrs_sc$rgns_in[ix]     = 'subcountry'
+    lyrs_sc$path_in[ix]     = file.path(dir_annex_sc, 'spatial', csv)
+    lyrs_sc$filename[ix]    = str_replace(lyrs_sc$filename[ix], fixed('_gl2014.csv'), '_sc2014-area.csv')
+  }
+  
+  ## drop cntry_* layers
+  lyrs_sc = filter(lyrs_sc, !grepl('^cntry_', layer))
+  
+  ## drop LE layers no longer being used
+  lyrs_le_rm = c(
+    'le_gdp_pc_ppp','le_jobs_cur_adj_value','le_jobs_cur_base_value','le_jobs_ref_adj_value','le_jobs_ref_base_value',
+    'le_rev_cur_adj_value','le_rev_cur_base_value','le_rev_cur_base_value','le_rev_ref_adj_value','le_rev_ref_base_value',
+    'le_rev_sector_year','le_revenue_adj','le_wage_cur_adj_value','le_wage_cur_base_value','le_wage_ref_adj_value',
+    'le_wage_ref_base_value','liveco_status','liveco_trend')
+  lyrs_sc = filter(lyrs_sc, !layer %in% lyrs_le_rm)
+  
+  ## ---- end layers.csv prep ---- ##
+  
   ## csvs for regions and countries 
   sc_rgns_csv = file.path(dir_annex_sc, 'spatial', 'rgn_offshore_data.csv')
   
   ## old global to new subcountry regions
   # rgn_id_sc->sc_rgn_id, rgn_name_sc->sc_rgn_name, rgn_id_gl-> gl_rgn_id, rgn_name_gl-> gl_rgn_name
   sc_rgns = read.csv(sc_rgns_csv) %>%
-    select(sc_rgn_id=rgn_id, sc_rgn_name=rgn_name) %>%
+    select(sc_rgn_id=rgn_id, 
+           sc_rgn_name=rgn_name) %>%
     mutate(gl_rgn_name = name) %>%
     merge(
       gl_rgns %>%
@@ -396,156 +431,162 @@ populate_draft_branch <- function(){
                 by= 'gl_rgn_name')
   }
   
-  ## old global to new subcountry countries
-  sc_cntry = gl_cntries %>%
-    select(gl_cntry_key, gl_rgn_id) %>%
-    merge(
-      sc_rgns,
-      by='gl_rgn_id') %>%
-    group_by(gl_cntry_key, sc_rgn_id) %>%
-    summarise(n=n()) %>%
-    select(cntry_key = gl_cntry_key, sc_rgn_id) %>%
-    as.data.frame()
+  if (!multi_nation) {
+    
+    ## old global to new subcountry countries
+    sc_cntry = gl_cntries %>%
+      select(gl_cntry_key, gl_rgn_id) %>%
+      merge(
+        sc_rgns,
+        by='gl_rgn_id') %>%
+      group_by(gl_cntry_key, sc_rgn_id) %>%
+      summarise(n=n()) %>%
+      select(cntry_key = gl_cntry_key, sc_rgn_id) %>%
+      as.data.frame()
+    
+    ## old global to new custom countries
+    if (dim(sc_cntry)[1] != dim(sc_rgns)[1]) { # make sure Guayaquil doesn't match to both ECU and Galapagos
+      sc_cntries = subset(sc_studies, sc_key == key, gl_rgn_key, drop=T)
+      sc_cntry = sc_cntry %>%
+        filter(cntry_key %in% sc_cntries)
+    }
+    
+    for (lyr in lyrs_sc$layer){ # lyr = "ao_access"
+      copy_layer(lyr) # source('R/copy_layer.r')
+    }
+  } else { # multi_nation = TRUE 
+    
+    ## overwrite sc_rgns if multi_nation
+      sc_rgns_lookup_csv <- sprintf('~/github/ohi-webapps/custom/%s/sc_rgns_lookup.csv', key)
+      sc_rgns = read.csv(sc_rgns_lookup_csv) %>%
+        merge(
+          gl_rgns %>%
+            select(gl_rgn_name, gl_rgn_id),
+          by='gl_rgn_name', all.x=T) %>%
+        select(sc_rgn_id, sc_rgn_name, gl_rgn_id, gl_rgn_name) %>%
+        arrange(sc_rgn_name)
+    }
   
-  ## old global to new custom countries
-  if (dim(sc_cntry)[1] != dim(sc_rgns)[1]) { # make sure Guayaquil doesn't match to both ECU and Galapagos
-    #dots = list(subset(sc_studies$gl_rgn_key, sc_studies$sc_key == key))
-    sc_cntries = subset(sc_studies, sc_key == key, gl_rgn_key, drop=T)
-    sc_cntry = sc_cntry %>%
-      #filter(cntry_key == (.dots = dots))
-      filter(cntry_key %in% sc_cntries)
+  
+    
+    
+    ## for each layer...
+  for (lyr in lyrs_sc$layer){ # lyr = "ao_access"
+    
+    layer_grow <-  data_frame()
+    
+    ## for each unique global country...
+    for (m in unique(sc_rgns$gl_rgn_id)) {# m = 163
+      
+      # for how many times m appears (eg Norway) # may not be necessary, seems to be doing it...
+      
+      ## copy layer data for m  
+      d <- copy_layer(lyr, 
+                      global_rgn_id = m, 
+                      write_to_csv  = FALSE) 
+      
+      layer_grow <- layer_grow %>%
+        bind_rows(d)
+    }
+  
   }
-  
-  ## swap out custom mar_coastalpopn_inland25mi for mar_coastalpopn_inland25km (NOTE: mi -> km)
-  ix = which(lyrs_sc$layer=='mar_coastalpopn_inland25mi')
-  lyrs_sc$layer[ix]       = 'mar_coastalpopn_inland25km'
-  lyrs_sc$path_in[ix]     = file.path(dir_annex, key, 'layers', 'mar_coastalpopn_inland25km_lyr.csv')
-  lyrs_sc$name[ix]        = str_replace(lyrs_sc$name[ix]       , fixed('miles'), 'kilometers')
-  lyrs_sc$description[ix] = str_replace(lyrs_sc$description[ix], fixed('miles'), 'kilometers')
-  lyrs_sc$filename[ix]    = 'mar_coastalpopn_inland25km_sc2014-raster.csv'
-  lyrs_sc$rgns_in[ix]     = 'subcountry'
   
   ## get layers used to downweight from global: area_offshore, area_offshore_3nm, equal, equal , population_inland25km,
-  population_inland25km = read.csv(file.path(dir_annex_sc, 'layers' , 'mar_coastalpopn_inland25km_lyr.csv')) %>%     
-    filter(year == dw_year) %>%
-    mutate(
-      dw = popsum / sum(popsum)) %>%
-    select(rgn_id, dw)
-  # fix Canada (can) with Nunavet [10] repeats b/c of spatial funk, presume just need to add
-  #   read.csv(file.path(dir_annex_sc, 'layers' , 'mar_coastalpopn_inland25km_lyr.csv')) %>%
-  #     group_by(rgn_id, year) %>%
-  #     summarize(popsum = sum(popsum)) %>%
-  #     write.csv(file.path(dir_annex_sc, 'layers' , 'mar_coastalpopn_inland25km_lyr.csv'), na='', row.names=F)
-  area_offshore         = read.csv(file.path(dir_annex_sc, 'spatial', 'rgn_offshore_data.csv')) %>%
-    mutate(
-      dw = area_km2 / sum(area_km2)) %>%
-    select(rgn_id, dw)
-  #   area_offshore_3nm     = read.csv(file.path(dir_annex_sc, 'spatial', 'rgn_offshore3nm_data.csv')) %>%     # error, no file March 16
-  #     mutate(
-  #       dw = area_km2 / sum(area_km2)) %>%
-  #     select(rgn_id, dw)
-  #
-  # swap out spatial area layers
-  area_layers = c(
-    'rgn_area'             = 'rgn_offshore_data.csv')
-  #     'rgn_area_inland1km'   = 'rgn_inland1km_data.csv',
-  #     'rgn_area_offshore3nm' = 'rgn_offshore3nm_data.csv')
-  for (lyr in names(area_layers)){
-    csv = area_layers[lyr]
-    ix = which(lyrs_sc$layer==lyr)
-    lyrs_sc$rgns_in[ix]     = 'subcountry'
-    lyrs_sc$path_in[ix]     = file.path(dir_annex_sc, 'spatial', csv)
-    lyrs_sc$filename[ix]    = str_replace(lyrs_sc$filename[ix], fixed('_gl2014.csv'), '_sc2014-area.csv')
-  }
+  ## TODO: currently unused for downweighting, maybe build in for later?
+  # population_inland25km = read.csv(file.path(dir_annex_sc, 'layers' , 'mar_coastalpopn_inland25km_lyr.csv')) %>%     
+  #   filter(year == dw_year) %>%
+  #   mutate(
+  #     dw = popsum / sum(popsum)) %>%
+  #   select(rgn_id, dw)
+  # 
+  # area_offshore= read.csv(file.path(dir_annex_sc, 'spatial', 'rgn_offshore_data.csv')) %>%
+  #   mutate(
+  #     dw = area_km2 / sum(area_km2)) %>%
+  #   select(rgn_id, dw)
   
-  ## drop cntry_* layers
-  lyrs_sc = filter(lyrs_sc, !grepl('^cntry_', layer))
   
-  ## drop LE layers no longer being used
-  lyrs_le_rm = c(
-    'le_gdp_pc_ppp','le_jobs_cur_adj_value','le_jobs_cur_base_value','le_jobs_ref_adj_value','le_jobs_ref_base_value',
-    'le_rev_cur_adj_value','le_rev_cur_base_value','le_rev_cur_base_value','le_rev_ref_adj_value','le_rev_ref_base_value',
-    'le_rev_sector_year','le_revenue_adj','le_wage_cur_adj_value','le_wage_cur_base_value','le_wage_ref_adj_value',
-    'le_wage_ref_base_value','liveco_status','liveco_trend')
-  lyrs_sc = filter(lyrs_sc, !layer %in% lyrs_le_rm)
   
-  ## write layers data files
-  for (j in 1:nrow(lyrs_sc)){ # j=93 j=9
+  ## write layers data files 
+  for (lyr in lyrs_sc$layer){ # j=93 j=9 j=14 # lyr = "ao_access"
     
-    lyr     = lyrs_sc$layer[j]
-    rgns_in = lyrs_sc$rgns_in[j]
-    csv_in  = lyrs_sc$path_in[j]
-    csv_out = sprintf('layers/%s', lyrs_sc$filename[j])
+    ## creating new function for inside this for loop; R/copy_layer
+    source('~/github/ohi-webapps/R/copy_layer.r')
     
-    d = read.csv(csv_in) # , na.strings='')
-    flds = names(d)
-    
-    ## TODO: if (sc_rgns$gl_rgn_id is all NAs) -- need to use placeholder information
-    # head(sc_rgns)
-    # sc_rgn_id    sc_rgn_name gl_rgn_name gl_rgn_id
-    # 1         1         Alaska      Arctic        NA
-    # 2         3   Beaufort Sea      Arctic        NA
-    # 3         9 East Greenland      Arctic        NA
-    # 4         7      Jan Mayen      Arctic        NA
-    # 5         6         Norway      Arctic        NA
-    # 6         2        Nunavut      Arctic        NA
-    
-    if (rgns_in == 'global'){
-      
-      if ('rgn_id' %in% names(d)){
-        d = d %>%
-          filter(rgn_id %in% sc_rgns$gl_rgn_id) %>%
-          merge(sc_rgns, by.x='rgn_id', by.y='gl_rgn_id') %>%
-          mutate(rgn_id=sc_rgn_id) %>%
-          subset(select=flds) %>%
-          arrange(rgn_id)
-      }
-      
-      if ('cntry_key' %in% names(d)){
-        # convert cntry_key to rgn_id, drop cntry_key
-        d = d %>%
-          inner_join(
-            sc_cntry,
-            by='cntry_key') %>%
-          dplyr::rename(rgn_id=sc_rgn_id) %>%
-          select_(.dots = as.list(c('rgn_id', setdiff(names(d), 'cntry_key')))) %>%
-          arrange(rgn_id)
-      }
-      
-      if (lyrs_sc$layer[j]=='rgn_labels'){
-        csv_out = 'layers/rgn_labels.csv'
-        lyrs_sc$filename[j] = basename(csv_out)
-        d = d %>%
-          merge(sc_rgns, by.x='rgn_id', by.y='sc_rgn_id') %>%
-          select(rgn_id, type, label=sc_rgn_name) %>%
-          arrange(rgn_id)
-      }
-      
-      ## downweight: area_offshore, equal, equal , population_inland25km,
-      # shp = '/Volumes/data_edit/git-annex/clip-n-ship/data/Albania/rgn_inland25km_mol.shp'
-      downweight = str_trim(lyrs_sc$clip_n_ship_disag[j])
-      downweightings = c('area_offshore'='area-offshore', 'population_inland25km'='popn-inland25km')
-      if (downweight %in% names(downweightings) & nrow(d) > 0){
-        
-        ## update data frame with downweighting
-        i.v  = ncol(d) # assume value in right most column
-        #if (downweight=='population_inland25km') browser()
-        d = inner_join(d, get(downweight), by='rgn_id')
-        i.dw = ncol(d) # assume downweight in right most column after join
-        d[i.v] = d[i.v] * d[i.dw]
-        d = d[,-i.dw]
-        
-        ## update layer filename to reflect downweighting
-        csv_out = file.path(
-          'layers',
-          str_replace(
-            lyrs_sc$filename[j],
-            fixed('_gl2016.csv'), ## TODO: no hardcoding here
-            sprintf('_sc2014-%s.csv', downweightings[downweight])))
-        lyrs_sc$filename[j] = basename(csv_out)
-      }
-    }
-    write.csv(d, csv_out, row.names=F, na='')
+    copy_layer(lyr)
+    # lyr     = lyrs_sc$layer[j]
+    # rgns_in = lyrs_sc$rgns_in[j]
+    # csv_in  = lyrs_sc$path_in[j]
+    # csv_out = sprintf('layers/%s', lyrs_sc$filename[j])
+    # 
+    # d = read.csv(csv_in) # , na.strings='')
+    # flds = names(d)
+    # 
+    # ## TODO: if (sc_rgns$gl_rgn_id is all NAs) -- need to use placeholder information
+    # # head(sc_rgns)
+    # # sc_rgn_id    sc_rgn_name gl_rgn_name gl_rgn_id
+    # # 1         1         Alaska      Arctic        NA
+    # # 2         3   Beaufort Sea      Arctic        NA
+    # # 3         9 East Greenland      Arctic        NA
+    # # 4         7      Jan Mayen      Arctic        NA
+    # # 5         6         Norway      Arctic        NA
+    # # 6         2        Nunavut      Arctic        NA
+    # 
+    # if (rgns_in == 'global'){
+    #   
+    #   if ('rgn_id' %in% names(d)){
+    #     d = d %>%
+    #       filter(rgn_id %in% sc_rgns$gl_rgn_id) %>%
+    #       merge(sc_rgns, by.x='rgn_id', by.y='gl_rgn_id') %>%
+    #       mutate(rgn_id=sc_rgn_id) %>%
+    #       subset(select=flds) %>%
+    #       arrange(rgn_id)
+    #   }
+    #   
+    #   if ('cntry_key' %in% names(d)){
+    #     # convert cntry_key to rgn_id, drop cntry_key
+    #     d = d %>%
+    #       inner_join(
+    #         sc_cntry,
+    #         by='cntry_key') %>%
+    #       dplyr::rename(rgn_id=sc_rgn_id) %>%
+    #       select_(.dots = as.list(c('rgn_id', setdiff(names(d), 'cntry_key')))) %>%
+    #       arrange(rgn_id)
+    #   }
+    #   
+    #   if (lyrs_sc$layer[j]=='rgn_labels'){
+    #     csv_out = 'layers/rgn_labels.csv'
+    #     lyrs_sc$filename[j] = basename(csv_out)
+    #     d = d %>%
+    #       merge(sc_rgns, by.x='rgn_id', by.y='sc_rgn_id') %>%
+    #       select(rgn_id, type, label=sc_rgn_name) %>%
+    #       arrange(rgn_id)
+    #   }
+    #   
+    #   ## downweight: area_offshore, equal, equal , population_inland25km,
+    #   # shp = '/Volumes/data_edit/git-annex/clip-n-ship/data/Albania/rgn_inland25km_mol.shp'
+    #   downweight = str_trim(lyrs_sc$clip_n_ship_disag[j])
+    #   downweightings = c('area_offshore'='area-offshore', 'population_inland25km'='popn-inland25km')
+    #   if (downweight %in% names(downweightings) & nrow(d) > 0){
+    #     
+    #     ## update data frame with downweighting
+    #     i.v  = ncol(d) # assume value in right most column
+    #     #if (downweight=='population_inland25km') browser()
+    #     d = inner_join(d, get(downweight), by='rgn_id')
+    #     i.dw = ncol(d) # assume downweight in right most column after join
+    #     d[i.v] = d[i.v] * d[i.dw]
+    #     d = d[,-i.dw]
+    #     
+    #     ## update layer filename to reflect downweighting
+    #     csv_out = file.path(
+    #       'layers',
+    #       str_replace(
+    #         lyrs_sc$filename[j],
+    #         fixed('_gl2016.csv'), ## TODO: no hardcoding here
+    #         sprintf('_sc2014-%s.csv', downweightings[downweight])))
+    #     lyrs_sc$filename[j] = basename(csv_out)
+    #   }
+    # }
+    # write.csv(d, csv_out, row.names=F, na='')
     
   }  # end for (j in 1:nrow(lyrs_sc))
   
