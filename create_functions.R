@@ -675,6 +675,8 @@ populate_draft_branch <- function(){
     ## swap out custom functions
     if (f=='functions.R'){
       
+      ## TODO: delete PreGlobalScores(): https://github.com/OHI-Science/ohicore/blob/master/R/CalculateAll.R#L217-L221
+      
       ## iterate over goals with functions to swap
       ## TODO: when update LIV_ECO approach, can delete csv_gl_rgn var from create_init.r
       for (g in names(fxn_swap)){ # g = names(fxn_swap)[1]
