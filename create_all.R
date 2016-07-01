@@ -18,6 +18,9 @@ setwd('~/github/ohi-webapps')
 source('create_init.R')            # load all libraries, set directories relevant to all keys
 source('create_functions.R')       # all functions for creating and updating repos and webapps
 source('R/copy_layer.r')
+source('R/create_gh_repo.r')
+source('R/populate_init.r')
+source('R/populate_prep.r')
 
 ## make a custom repo for a specific  ----
 # this is in order of steps from start to finish, but these functions can also be run individually
@@ -25,17 +28,30 @@ source('R/copy_layer.r')
 create_new_repo = F
 redo_maps = F
 
-key = 'arc'; multi_nation = T # figure out somewhere else to put this
+key = 'cnc'
+multi_nation = FALSE # figure out somewhere else to put this
 
 # set vars by subcountry key
 setwd(dir_repos)
 source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))    
 
-# create github repo on github.com
-if (create_new_repo) repo = create_gh_repo(key)
+## to create repo with prep folders ----
 
-# set working dir
+## create github repo on github.com
+create_gh_repo(key)
+
+## set working dir
+dir.create(dir_repo)
 setwd(dir_repo)
+repo = repository(dir_repo)
+
+## add readme and prep folder
+populate_init()
+populate_prep()
+
+# ...have gotten to here for CNC (new caledonia)
+
+## populate repo further ---- (TODO JSL)
 
 # create custom_maps() by @jules32
 if (!all(file.exists(  

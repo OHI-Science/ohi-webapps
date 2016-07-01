@@ -20,33 +20,34 @@ rename_sc_annex <- function(name){
 }
 #lapply(sc_studies$sc_name, rename_sc_annex) # done 2014-11-02 by bbest
 
-create_gh_repo <- function(key, gh_token=gh_token, verbosity=1){ # gh_token=gh_token; verbosity=1
-  
-  repo_name = key
-  #cmd = sprintf('git ls-remote https://github.com/OHI-Science/%s.git', repo_name)
-  cmd = sprintf('git ls-remote git@github.com:ohi-science/%s.git', repo_name)
-  res = system(cmd, ignore.stderr=T, intern=T)
-  repo_exists = ifelse(length(res)!=0, T, F) # JSL 2015-08 switched this to !=0 from ==0; logic didn't make sense to me. # set to F for bhi-rgns?
-  if (!repo_exists){
-    if (verbosity > 0){
-      message(sprintf('%s: creating github repo -- %s', repo_name, format(Sys.time(), '%X')))
-    }
-    # create using Github API: https://developer.github.com/v3/repos/#create
-    cmd = sprintf('curl --silent -u "jules32:%s" https://api.github.com/orgs/ohi-science/repos -d \'{"name":"%s"}\'', 
-                  gh_token, repo_name)
-    cmd_res = paste(capture.output(fromJSON(system(cmd, intern=T))), collapse='\n')
-  } else{
-    cmd_res = NA
-  }
-  
-  # return data.frame
-  data.frame(
-    sc_key      = key,
-    repo_exists = repo_exists,
-    cmd         = ifelse(repo_exists, cmd),
-    cmd_res     = ifelse(repo_exists, cmd_res))
-  # Error in ifelse(repo_exists, cmd) : argument "no" is missing, with no default
-}
+# create_gh_repo <- function(key, gh_token=gh_token, verbosity=1){ # gh_token=gh_token; verbosity=1
+# ## JSL: moved to R/create_gh_repo Jul 1 2016  
+#
+#   repo_name = key
+#   #cmd = sprintf('git ls-remote https://github.com/OHI-Science/%s.git', repo_name)
+#   cmd = sprintf('git ls-remote git@github.com:ohi-science/%s.git', repo_name)
+#   res = system(cmd, ignore.stderr=T, intern=T)
+#   repo_exists = ifelse(length(res)!=0, T, F) # JSL 2015-08 switched this to !=0 from ==0; logic didn't make sense to me. # set to F for bhi-rgns?
+#   if (!repo_exists){
+#     if (verbosity > 0){
+#       message(sprintf('%s: creating github repo -- %s', repo_name, format(Sys.time(), '%X')))
+#     }
+#     # create using Github API: https://developer.github.com/v3/repos/#create
+#     cmd = sprintf('curl --silent -u "jules32:%s" https://api.github.com/orgs/ohi-science/repos -d \'{"name":"%s"}\'', 
+#                   gh_token, repo_name)
+#     cmd_res = paste(capture.output(fromJSON(system(cmd, intern=T))), collapse='\n')
+#   } else{
+#     cmd_res = NA
+#   }
+#   
+#   # return data.frame
+#   data.frame(
+#     sc_key      = key,
+#     repo_exists = repo_exists,
+#     cmd         = ifelse(repo_exists, cmd),
+#     cmd_res     = ifelse(repo_exists, cmd_res))
+#   # Error in ifelse(repo_exists, cmd) : argument "no" is missing, with no default
+# }
 #lapply(sc_studies$sc_key, create_gh_repo, verbosity=1)
 
 
@@ -286,41 +287,38 @@ populate_draft_branch <- function(){
   ## get remote branches
   remote_branches = sapply(branches(repo, 'remote'), function(x) str_split(x@name, '/')[[1]][2])
   
-  ## initialize
-  if (length(remote_branches)==0){
-    system('touch README.md')
-    system('git add -A; git commit -m "first commit"')
-    try(system('git remote rm origin')) # added by JSL Mar 13 2015; http://stackoverflow.com/questions/1221840/remote-origin-already-exists-on-git-push-to-new-repository
-    system(sprintf('git remote add origin https://github.com/OHI-Science/%s.git', key))
-    system('git push -u origin master')
-    system('git pull')
-    remote_branches = sapply(branches(repo, 'remote'), function(x) str_split(x@name, '/')[[1]][2])
-  }
+  # ## initialize ## moved to R/populate_init.r ------
+  # if (length(remote_branches)==0){
+  #   system('touch README.md')
+  #   system('git add -A; git commit -m "first commit"')
+  #   try(system('git remote rm origin')) # added by JSL Mar 13 2015; http://stackoverflow.com/questions/1221840/remote-origin-already-exists-on-git-push-to-new-repository
+  #   system(sprintf('git remote add origin https://github.com/OHI-Science/%s.git', key))
+  #   system('git push -u origin master')
+  #   system('git pull')
+  #   remote_branches = sapply(branches(repo, 'remote'), function(x) str_split(x@name, '/')[[1]][2])
+  # }
   
-  ## rename if draft & published don't already exist
-  if (length(setdiff(c('draft','published'), remote_branches)) > 0 & length(remote_branches) > 0){
-    rename_branches(key)
-    remote_branches = sapply(branches(repo, 'remote'), function(x) str_split(x@name, '/')[[1]][2])
-  }
+  # ## rename if draft & published don't already exist
+  # if (length(setdiff(c('draft','published'), remote_branches)) > 0 & length(remote_branches) > 0){
+  #   rename_branches(key)
+  #   remote_branches = sapply(branches(repo, 'remote'), function(x) str_split(x@name, '/')[[1]][2])
+  # }
+  # 
+  # ## ensure on draft branch ----
+  # checkout(repo, 'draft')
+  # 
   
-  ## ensure on draft branch ----
-  checkout(repo, 'draft')
-  
-  #   dir_errors = file.path(dir_repos, '_errors')
-  #   dir.create(dir_errors, showWarnings=F)
-  #
-  
-  ## recreate empty dir, except hidden .git
-  del_except = ''
-  for (f in setdiff(list.files(dir_repo, all.files=F), del_except)) unlink(file.path(dir_repo, f), recursive=T, force=T)
-  
-  ## README # TODO redo readme
-  brew(sprintf('%s/ohi-webapps/README.brew.md', dir_github), 'README.md')
-  
-  ## add Rstudio project files. cannabalized devtools::add_rstudio_project() which only works for full R packages.
-  file.copy(system.file('templates/template.Rproj', package='devtools'), sprintf('%s.Rproj', key))
-  writeLines(c('.Rproj.user', '.Rhistory', '.RData'), '.gitignore')
-  
+  # ## recreate empty dir, except hidden .git
+  # del_except = ''
+  # for (f in setdiff(list.files(dir_repo, all.files=F), del_except)) unlink(file.path(dir_repo, f), recursive=T, force=T)
+  # 
+  # ## README # TODO redo readme
+  # brew(sprintf('%s/ohi-webapps/README.brew.md', dir_github), 'README.md')
+  # 
+  # ## add Rstudio project files. cannabalized devtools::add_rstudio_project() which only works for full R packages.
+  # file.copy(system.file('templates/template.Rproj', package='devtools'), sprintf('%s.Rproj', key))
+  # writeLines(c('.Rproj.user', '.Rhistory', '.RData'), '.gitignore')
+  # 
   # create and cd to scenario
   dir_scenario = file.path(dir_repo, basename(default_branch_scenario))
   dir.create(dir_scenario, showWarnings=F)
@@ -745,15 +743,15 @@ populate_draft_branch <- function(){
   #   sprintf('%s/reports/figures/regions_600x400.png', default_scenario), overwrite=T)
   
   
-  ## create subfolders in prep folder
-  prep_subfolders = c('FIS', 'MAR', 'AO', 'NP', 'CS', 'CP', 'LIV', 'ECO', 'TR', 'CW',
-                      'ICO', 'LSP', 'SPP', 'HAB', 'pressures', 'resilience')
-  sapply(file.path(default_scenario, sprintf('prep/%s', prep_subfolders)), dir.create)
-  
-  ## populate prep folder's supfolders
-  file.create(file.path(default_scenario, sprintf('prep/%s', prep_subfolders), 'README.md'))
-  file.copy(file.path(dir_github, 'ohi-webapps/tmp/README_template_prep.md'), 
-            file.path(default_scenario, 'prep/README.md'), overwrite=T)
+  # ## create subfolders in prep folder # moved to populate_prep.r
+  # prep_subfolders = c('FIS', 'MAR', 'AO', 'NP', 'CS', 'CP', 'LIV', 'ECO', 'TR', 'CW',
+  #                     'ICO', 'LSP', 'SPP', 'HAB', 'pressures', 'resilience')
+  # sapply(file.path(default_scenario, sprintf('prep/%s', prep_subfolders)), dir.create)
+  # 
+  # ## populate prep folder's supfolders
+  # file.create(file.path(default_scenario, sprintf('prep/%s', prep_subfolders), 'README.md'))
+  # file.copy(file.path(dir_github, 'ohi-webapps/tmp/README_template_prep.md'), 
+  #           file.path(default_scenario, 'prep/README.md'), overwrite=T)
   
   ## copy calculate_scores.r ## TODO: make this a template, incorporate pre_scores.r
   file.copy(file.path(dir_global, 'calculate_scores.r'), 

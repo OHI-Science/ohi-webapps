@@ -26,8 +26,8 @@ dir_M <- c('Windows' = '//mazu.nceas.ucsb.edu/ohi',
            'Linux'   = '/home/shares/ohi')[[ Sys.info()[['sysname']] ]]
 
 # set username for copying app files onto fitz.nceas
-nceas_user = c('bbest'='bbest','julialowndes'='jstewart','jstewart'='jstewart')[Sys.info()["user"]]
-
+nceas_user  <- c('bbest'='bbest','julialowndes'='jstewart','jstewart'='jstewart')[Sys.info()["user"]]
+github_user <- c('bbest'='bbest','julialowndes'='jules32')[Sys.info()["user"]]
 
 dir_github  <- '~/github'
 
@@ -81,7 +81,7 @@ gl_cntries <- read.csv(sprintf('%s/layers/cntry_rgn.csv', dir_global)) %>%
   arrange(gl_cntry_key)
 
 gl_rgns <- read.csv(csv_gl_rgn, stringsAsFactors=F) %>%
-  distinct(rgn_id, rgn_name, rgn_key) %>%
+  dplyr::distinct(rgn_id, rgn_name, rgn_key, .keep_all = TRUE) %>%
   filter(rgn_type == 'eez') %>%
   select(
     gl_rgn_id   = rgn_id,
