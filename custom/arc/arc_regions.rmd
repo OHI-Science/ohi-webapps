@@ -39,7 +39,8 @@ greenland = readOGR(dsn='spatial/greenland',layer='greenland_eez_east_west')%>%s
 janmayen = readOGR(dsn='spatial/janmayen',layer='Jan Mayen')%>%spTransform(laeaCRS)
 russia   = readOGR(dsn='spatial/russia',layer='russia_in_arctic')%>%spTransform(laeaCRS)
 svalbard = readOGR(dsn='spatial/svalbard',layer='svalbard')%>%spTransform(laeaCRS)
-norway   = readOGR(dsn='spatial/norway',layer='norway_no_svalbard')%>%spTransform(laeaCRS)
+norway   = readOGR(dsn='spatial/norway',layer='norway_no_svalbard_crop')%>%spTransform(laeaCRS)
+banana   = readOGR(dsn='spatial', layer = 'banana')%>%spTransform(laeaCRS)
 
 ```
 
@@ -72,8 +73,14 @@ svalbard@data = svalbard@data%>%
                   select(rgn_name,country = Country)
 
 norway@data = norway@data%>%
-                  mutate(rgn_name = 'norway')%>%
-                  select(rgn_name,country = Country)
+                  mutate(rgn_name = 'norway',
+                         country = 'Norway')%>%
+                  select(rgn_name,country)
+
+banana@data = banana@data%>%
+                mutate(rgn_name = 'banana',
+                       country = ' NA')%>%
+                select(rgn_name,country)
 
 
 ```
@@ -87,12 +94,12 @@ Combine them all together
 library(taRifx.geo) #helps with the fix.duplicated.IDs=TRUE
 
 
-all = rbind.SpatialPolygonsDataFrame(alaska, canada, russia, svalbard, norway, janmayen, greenland)
+all = rbind.SpatialPolygonsDataFrame(alaska, canada, russia, svalbard, norway, janmayen, greenland,banana)
 
 areas <- gArea(all, byid=TRUE)  
 
 all@data <- all@data%>%
-              mutate(rgn_id = 1:9,
+              mutate(rgn_id = 1:10,
                      area_km2 = areas*1e-6)
 
 writeOGR(all,dsn='spatial',layer='arctic_eezs',driver="ESRI Shapefile",overwrite_layer = TRUE)
