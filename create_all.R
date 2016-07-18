@@ -25,10 +25,10 @@ source('R/populate_prep.r')
 ## make a custom repo for a specific  ----
 # this is in order of steps from start to finish, but these functions can also be run individually
 
-create_new_repo = F
+# create_new_repo = F
 redo_maps = F
 
-key = 'cnc'
+key = 'rdv'
 multi_nation = FALSE # figure out somewhere else to put this
 
 # set vars by subcountry key
@@ -42,8 +42,7 @@ create_gh_repo(key)
 
 ## set working dir
 dir.create(dir_repo)
-setwd(dir_repo)
-repo = repository(dir_repo)
+# repo = repository(dir_repo) ## unneeded??
 
 ## add readme and prep folder
 populate_init()
