@@ -10,16 +10,12 @@ Add by hand to `ohi-webapps/custom/sc_studies_custom.csv`
 
 # libraries
 library(dplyr)
-library(tidyr)
-library(readr)
-library(stringr)
 library(rgdal)
-library(raster)
 
 # directories
-dir_neptune = c('Windows' = '//neptune.nceas.ucsb.edu/data_edit',
-                'Darwin'  = '/Volumes/data_edit',
-                'Linux'   = '/var/data/ohi')[[ Sys.info()[['sysname']] ]]
+dir_M <- c('Windows' = '//mazu.nceas.ucsb.edu/ohi',
+           'Darwin'  = '/Volumes/ohi',
+           'Linux'   = '/home/shares/ohi')[[ Sys.info()[['sysname']] ]]
 dir_custom_col = '~/github/ohi-webapps/custom/col'
 
 # setwd
@@ -31,23 +27,28 @@ setwd('~/github/ohi-webapps')
 ```{r setup, eval=F}
 
 # read in shp files and save with desired headers in data frame.
-col = readOGR(dsn = file.path(dir_annex, 'col/spatial/custom/raw'),
+col = readOGR::readOGR(dsn = file.path(dir_annex, 'col/spatial/custom/raw'),
               layer = 'Limites_marinos_planas')
 
 # view dataframe and map
 col@data
 plot(col)
 
+## change to km2 
+col@data <- col@data %>%
+  dplyr::mutate(area_km2 = area_hecta * 0.01) %>%
+  dplyr::select(rgn_id, rgn_name, area_km2)
 
 # save as shapefiles. will create 4 files: .dbf, .prj, .shp, .shx
 writeOGR(col, dsn = file.path(dir_annex, 'col/spatial/custom'), 
          layer = 'col_shp', driver = 'ESRI Shapefile', overwrite=T) 
 
+## ave/rgn_offshore_data.csv on git-annex
+write.csv(col@data, file.path(dir_annex, 'col/spatial', 'rgn_offshore_data.csv'))
+
 # create lookup table with unique rgn_ids
 col_rgns = col@data
 write_csv(col_rgns, '~/github/ohi-webapps/custom/col/col_rgns_custom.csv')
-
-
 
 ```
 

@@ -1,0 +1,41 @@
+# This is edit_repos.Rmd
+
+Note: This is a companion file to `edit_webapps.rmd` in the ohi-webapps@master branch. 
+
+## Update existing repos with new ohicore resilience structure
+July, 2016
+
+Written while also updating create_all.r and trying to move towards a package. 
+
+- col
+- ohibc
+- arc
+- chl
+- cdz
+
+
+```{r}
+
+## run setup from create_all
+
+## set key
+key <- 'col'
+
+# set vars by subcountry key
+setwd(dir_repos)
+source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))    
+
+## unpopulate layers, conf, etc. Doesn't push. 
+unpopulate_layers_conf() # source('R/unpopulate_layers_conf.r')
+
+## set wd to scenario folder
+dir_scenario = file.path(dir_repo, basename(default_branch_scenario))
+setwd(dir_scenario)
+
+## populate layers folder and layers.csv, and conf. Doesn't push. 
+populate_layers()
+
+
+
+```
+

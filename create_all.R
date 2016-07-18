@@ -21,6 +21,8 @@ source('R/copy_layer.r')
 source('R/create_gh_repo.r')
 source('R/populate_init.r')
 source('R/populate_prep.r')
+source('R/populate_layers.r')
+source('R/populate_conf.r')
 
 ## make a custom repo for a specific  ----
 # this is in order of steps from start to finish, but these functions can also be run individually
@@ -51,6 +53,10 @@ populate_prep()
 # ...have gotten to here for CNC (new caledonia)
 
 ## populate repo further ---- (TODO JSL)
+
+## populate draft branch...broken up. 
+## haven't tested yet for new repo but created populate_layers()
+
 
 # create custom_maps() by @jules32
 if (!all(file.exists(  
