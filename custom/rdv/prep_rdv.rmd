@@ -1,0 +1,49 @@
+# This is prep_rdv.Rmd
+# Prep for Ria de Vigo, Spain (Galicia)
+
+## 0. add RDV to `sc_studies_custom.csv` 
+
+Add by hand to `ohi-webapps/custom/sc_studies_custom.csv`
+
+## 1. setup
+```{r setup, eval=F}
+
+# libraries
+library(rgdal) # install.packages('rgdal')
+
+# key <- 'rdv'
+
+# directories
+# dir_M <- c('Windows' = '//mazu.nceas.ucsb.edu/ohi',
+#            'Darwin'  = '/Volumes/ohi',  
+#            'Linux'   = '/home/shares/ohi')[[ Sys.info()[['sysname']] ]]
+# dir_custom_rdv = '~/github/ohi-webapps/custom/rdv'
+# dir_annex_sc   = file.path(dir_neptune, 'git-annex/clip-n-ship', key)
+
+# setwd
+setwd('~/github/ohi-webapps')
+
+```
+
+## 2. maps
+```{r setup, eval=F}
+
+## read in shp files and save with desired headers in data frame.
+shp_orig <- rgdal::readOGR(dsn = path.expand('~/Downloads/reshapefilesforradevigoohi'),
+              layer = 'FinalLayerOHI')
+shp_orig@data
+plot(shp_orig)
+
+## filter for only Mncip_name == 'Ria de Vigo' (but can't do it with that command)
+shp_rdv <- shp_orig[!is.na(shp_orig$Mncip_name) & !is.na(shp_orig$id), ]
+
+shp_rdv@data
+
+plot(shp_rdv)
+
+## investigate removing Mncip_name == 'Ria de Vigo'     
+shp_y <- shp_orig[!is.na(shp_orig$Mncip_name) & shp_orig$Area.Km2 < 500, ]          
+plot(shp_y)
+
+```
+
