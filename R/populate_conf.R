@@ -46,6 +46,7 @@ populate_conf <- function(key=key) {
     if (f=='functions.R'){
       
       ## TODO: delete PreGlobalScores(): https://github.com/OHI-Science/ohicore/blob/master/R/CalculateAll.R#L217-L221
+      ## TODO: delete eez2013 from functions. r --Setup()
       
       ## iterate over goals with functions to swap
       ## TODO: when update LIV_ECO approach, can delete csv_gl_rgn var from create_init.r
@@ -97,7 +98,4 @@ populate_conf <- function(key=key) {
   ## copy goals documentation ## JSL revisit: necessary?
   file.copy(file.path(dir_github, 'ohi-webapps/subcountry2014/conf/goals.Rmd'), 'conf/goals.Rmd', overwrite=T)
   
-  
 }
-
-# calculate_scores.r, install_ohicore

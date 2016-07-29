@@ -1,17 +1,18 @@
 ## calculate_scores.R 
 
 ## calculate_scores.R ensures all files are properly configured and calculates OHI scores.
-  ## pre_scores.r is in your repository and ensures proper configuration
-  ## CalculateAll() is from the `ohicore` R package and calculates OHI scores.  
+  ## - configure_toolbox.r ensures your files are properly configured. It is a script in your repository.
+  ## - CalculateAll() calculates OHI scores. It is a function in the `ohicore` R package 
+  ##   (this can be written in R as `ohicore::CalculateAll()`).  
 
-## When you begin, pre_scores.r and CalculateAll() will calculate scores using
+## When you begin, configure_toolbox.r and CalculateAll() will calculate scores using
 ## the 'templated' data and goal models provided. We suggest you work
 ## goal-by-goal as you prepare data in the prep folder and develop goal models
-## in functions.r. Running pre_scores.R and a specific goal model in functions.R
-## is a good workflow.
+## in functions.r. Running configure_toolbox.r and a specific goal model line-by-line 
+## in functions.R is a good workflow.
 
-## run the pre_scores.r script to check configuration
-source('~/github/ohi-global/eez2016/pre_scores.R')
+## run the configure_toolbox.r script to check configuration
+source('~/github/ohi-global/eez2016/configure_toolbox.r')
 
 ## calculate scenario scores
 scores = ohicore::CalculateAll(conf, layers)

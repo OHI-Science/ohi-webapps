@@ -30,4 +30,17 @@ populate_prep <- function(){
   system(sprintf('git add -A; git commit -a -m "%s repo populated with prep folders"', key))
   system('git push origin draft')
   
+  ## TO ADD 
+  # ## create and populate prep/tutorials folder 
+  # dir_tutes = file.path(dir_github, 'ohimanual/tutorials/R_tutes')
+  # 
+  # dir.create(file.path(dir_repo, default_scenario, 'prep/tutorials'))
+  # file.copy(file.path(dir_tutes, 'R_tutes_all.md'), 
+  #           file.path(default_scenario, 'prep/tutorials', 'R_intro.md'), overwrite=T)
+  # readLines(file.path(dir_tutes, 'R_tutes.r')) %>%
+  #   str_replace("setwd.*", 
+  #               paste0("setwd('", file.path(dir_github, key, default_scenario, 'prep/tutorials'), "')")) %>%
+  #   writeLines(file.path(default_scenario, 'prep/tutorials', 'R_tutorial.r'))    
+  # 
+  
 }

@@ -34,7 +34,14 @@ setwd(dir_scenario)
 
 ## populate layers folder and layers.csv, and conf. Doesn't push. 
 populate_layers()
+populate_conf()
+populate_etc()
 
+## push draft branch
+source('~/github/ohi-webapps/ohi-functions.R')          # TODO: move these to R folder as separate .r functions
+setwd(dir_repo)
+push_branch('draft') # source('ohi-functions.r')
+system('git pull')
 
 
 ```

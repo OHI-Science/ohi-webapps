@@ -756,42 +756,45 @@ populate_draft_branch <- function(){
   # file.copy(file.path(dir_github, 'ohi-webapps/tmp/README_template_prep.md'), 
   #           file.path(default_scenario, 'prep/README.md'), overwrite=T)
   
-  ## copy calculate_scores.r ## TODO: make this a template, incorporate pre_scores.r
-  file.copy(file.path(dir_global, 'calculate_scores.r'), 
-            file.path(default_scenario, 'calculate_scores.r'), overwrite=T)
-  
-  ### The following are also in additions_draft() below. Consider making funcions. 
-  ## update setwd() in assessment/scenario/calculate_scores.r
-  readLines(file.path(dir_repo, default_scenario, 'calculate_scores.r')) %>%
-    str_replace("setwd.*", paste0("setwd('", file.path(dir_github, key, default_scenario), "')")) %>%
-    writeLines(file.path(default_scenario, 'calculate_scores.r'))
-  
-  ## update launch_app() call in assessment/scenario/launch_app_code.r TODO - delete once ohi-shiny2
+  ## moved to R/populate_etc by JSL July 25 2016
+  # ## copy calculate_scores.r ## TODO: make this a template, incorporate pre_scores.r
+  # file.copy(file.path(dir_global, 'calculate_scores.r'),
+  #           file.path(default_scenario, 'calculate_scores.r'), overwrite=T)
+  # 
+  # ### The following are also in additions_draft() below. Consider making funcions.
+  # ## update setwd() in assessment/scenario/calculate_scores.r
+  # readLines(file.path(dir_repo, default_scenario, 'calculate_scores.r')) %>%
+  #   str_replace("setwd.*", paste0("setwd('", file.path(dir_github, key, default_scenario), "')")) %>%
+  #   writeLines(file.path(default_scenario, 'calculate_scores.r'))
+
+  ## update launch_app() call in assessment/scenario/launch_app_code.r TODO NOT in R/populate-etc: delete once ohi-shiny2
   # readLines(file.path(dir_repo, default_scenario, 'launch_app_code.r')) %>%
   #   str_replace(".*launch_app.*", paste0("ohicore::launch_app('", file.path(dir_github, key, default_scenario), "')")) %>%
   #   writeLines(file.path(default_scenario, 'launch_app_code.r'))
   
+  ## moved to R/populate_etc by JSL July 25 2016
   ## save ohi-webapps/install_ohicore.r
-  fn = 'install_ohicore.r'
-  file.copy(file.path('~/github/ohi-webapps', fn), 
-            file.path(dir_repo, default_scenario, fn), overwrite=T)
-  
-  ## create and populate prep/tutorials folder 
-  dir_tutes = file.path(dir_github, 'ohimanual/tutorials/R_tutes')
-  
-  dir.create(file.path(dir_repo, default_scenario, 'prep/tutorials'))
-  file.copy(file.path(dir_tutes, 'R_tutes_all.md'), 
-            file.path(default_scenario, 'prep/tutorials', 'R_intro.md'), overwrite=T)
-  readLines(file.path(dir_tutes, 'R_tutes.r')) %>%
-    str_replace("setwd.*", 
-                paste0("setwd('", file.path(dir_github, key, default_scenario, 'prep/tutorials'), "')")) %>%
-    writeLines(file.path(default_scenario, 'prep/tutorials', 'R_tutorial.r'))    
-  
-  
+  # fn = 'install_ohicore.r'
+  # file.copy(file.path('~/github/ohi-webapps', fn), 
+  #           file.path(dir_repo, default_scenario, fn), overwrite=T)
+  # 
+  # ## create and populate prep/tutorials folder 
+  # dir_tutes = file.path(dir_github, 'ohimanual/tutorials/R_tutes')
+  # 
+  # dir.create(file.path(dir_repo, default_scenario, 'prep/tutorials'))
+  # file.copy(file.path(dir_tutes, 'R_tutes_all.md'), 
+  #           file.path(default_scenario, 'prep/tutorials', 'R_intro.md'), overwrite=T)
+  # readLines(file.path(dir_tutes, 'R_tutes.r')) %>%
+  #   str_replace("setwd.*", 
+  #               paste0("setwd('", file.path(dir_github, key, default_scenario, 'prep/tutorials'), "')")) %>%
+  #   writeLines(file.path(default_scenario, 'prep/tutorials', 'R_tutorial.r'))    
+  # 
+  # 
+  ## TODO: delete because this will become obsolete with new website stuff. 
   ## brew copy_webapps_templates.r a la github.com/OHI-Science/issues/issues/506
-  brew(sprintf('%s/ohi-webapps/copy_webapps_templates.brew.r', dir_github), 
+  brew(sprintf('%s/ohi-webapps/copy_webapps_templates.brew.r', dir_github),
        'copy_webapps_templates.r')
-  
+
   setwd(wd)
 }
 
