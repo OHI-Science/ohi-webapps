@@ -48,6 +48,9 @@ populate_layers <- function(key=key, lyrs_gl=lyrs_gl, default_scenario=default_s
   }
   
   TODO: check why rgn_area had rownames--need readr::write_csv()
+  - PASTE rgn_labels somewhere more useful
+  - change subcountry2014!
+    - copy_webapps_templates.r
   
   ## drop cntry_* layers
   lyrs_sc = filter(lyrs_sc, !grepl('^cntry_', layer))

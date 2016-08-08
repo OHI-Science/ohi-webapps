@@ -1,12 +1,14 @@
-# This is prep_col.Rmd
+# This is prep_chl.Rmd
 
 
-## 0. add col to `sc_studies_custom.csv` 
+## 0. add shp to `sc_studies_custom.csv` 
 
 Add by hand to `ohi-webapps/custom/sc_studies_custom.csv`
 
 ## 1. setup
 ```{r setup, eval=F}
+
+key <- 'chl'
 
 # libraries
 library(dplyr)
@@ -16,7 +18,8 @@ library(rgdal)
 dir_M <- c('Windows' = '//mazu.nceas.ucsb.edu/ohi',
            'Darwin'  = '/Volumes/ohi',
            'Linux'   = '/home/shares/ohi')[[ Sys.info()[['sysname']] ]]
-dir_custom_col = '~/github/ohi-webapps/custom/col'
+dir_custom = '~/github/ohi-webapps/custom/shp'
+dir_spatial = file.path(dir_M, 'git-annex/clip-n-ship', key, 'spatial')
 
 # setwd
 setwd('~/github/ohi-webapps')
@@ -27,38 +30,34 @@ setwd('~/github/ohi-webapps')
 ```{r setup, eval=F}
 
 # read in shp files and save with desired headers in data frame.
-col = rgdal::readOGR(dsn = file.path(dir_annex, 'col/spatial/custom/raw'),
-              layer = 'Limites_marinos_planas')
+shp = rgdal::readOGR(dsn = file.path(dir_spatial, 'custom'),
+              layer = 'Chile_Ocean_Regions')
 
 # view dataframe and map
-col@data
-plot(col)
-
-## change to km2 
-col@data <- col@data %>%
-  dplyr::mutate(area_km2 = area_hecta * 0.01) %>%
-  dplyr::select(rgn_id, rgn_name, area_km2)
+shp@data
+shp
+plot(shp)
 
 # save as shapefiles. will create 4 files: .dbf, .prj, .shp, .shx
-writeOGR(col, dsn = file.path(dir_annex, 'col/spatial/custom'), 
+writeOGR(shp, dsn = dir_spatial, 
          layer = 'col_shp', driver = 'ESRI Shapefile', overwrite=T) 
 
 ## ave/rgn_offshore_data.csv on git-annex
-write.csv(col@data, file.path(dir_annex, 'col/spatial', 'rgn_offshore_data.csv'))
+write.csv(shp@data, file.path(dir_annex, 'shp/spatial', 'rgn_offshore_data.csv'))
 
 # create lookup table with unique rgn_ids
-col_rgns = col@data
-write_csv(col_rgns, '~/github/ohi-webapps/custom/col/col_rgns_custom.csv')
+col_rgns = shp@data
+write_csv(col_rgns, '~/github/ohi-webapps/custom/shp/col_rgns_custom.csv')
 
 ```
 
 
-## 3. prep col map with custom_maps()
+## 3. prep shp map with custom_maps()
 Proceed as in `create_all.r` and run `custom_maps()`
 
-```{r prep col map custom_maps, eval=FALSE}
+```{r prep shp map custom_maps, eval=FALSE}
 
-keys_redo = 'col'
+keys_redo = 'shp'
 key = keys_redo[1]
 
 setwd(dir_repos)
@@ -71,13 +70,13 @@ custom_maps(key)
 ```
 
 
-## 4. col layers: bind possible layers for col
+## 4. shp layers: bind possible layers for shp
 
 
-```{r col layers: bind from col-xxx repos, eval=F}
+```{r shp layers: bind from shp-xxx repos, eval=F}
 
-# clone existing col repo
-key = 'col'
+# clone existing shp repo
+key = 'shp'
 setwd(dir_repos)
 source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
 
@@ -85,7 +84,7 @@ setwd(dir_repos)
 unlink(dir_repo, recursive=T, force=T)
 repo = clone(git_url, normalizePath(dir_repo, mustWork=F))
 
-lkp = read.csv('~/github/ohi-webapps/custom/col/col_rgns_custom.csv')
+lkp = read.csv('~/github/ohi-webapps/custom/shp/col_rgns_custom.csv')
 
 
 ## delete/unlink problem layers, dealt with separately in next step
@@ -95,16 +94,16 @@ tounlink = c('lsp_prot_area_inland1km_gl2014.csv',      # lsp layers
              'rgn_area_offshore3nm_sc2014-area.csv',
              'rgn_area_sc2014-area.csv')
 for (f in tounlink) {
-  unlink(file.path(dir_repos, 'col/subcountry2014/layers', f), 
+  unlink(file.path(dir_repos, 'shp/subcountry2014/layers', f), 
          recursive=T, force=T)
 }
 
-# list all layers to copy to col repo
-lyrs_list = list.files(file.path(dir_repos, 'col/subcountry2014/layers'), # was orignally subcountry2014
+# list all layers to copy to shp repo
+lyrs_list = list.files(file.path(dir_repos, 'shp/subcountry2014/layers'), # was orignally subcountry2014
                        glob2rx('*.csv'), full.names=T) 
 
 
-# loop through all layers, all col repos to create correct # of regions per col layer
+# loop through all layers, all shp repos to create correct # of regions per shp layer
 for (f in lyrs_list){ # f = lyrs_list[1]
   
   cat(sprintf('processing %s ... \n', basename(f)))
@@ -151,14 +150,14 @@ for (f in lyrs_list){ # f = lyrs_list[1]
 
 ```
 
-## 5. col layers: handle problem layers 
+## 5. shp layers: handle problem layers 
 
 Handle several problem layers individually 
 
 ```{r col_layers: handle individuals, eval=FALSE}
 
-dir_col_lyrs = file.path(dir_repos, 'col/subcountry2014/layers')
-l_csv = file.path(dir_repos, 'col/subcountry2014/layers.csv')
+dir_col_lyrs = file.path(dir_repos, 'shp/subcountry2014/layers')
+l_csv = file.path(dir_repos, 'shp/subcountry2014/layers.csv')
 
 # recreate rgn_global_gl2014.csv
 lkp %>% select(rgn_id, label = rgn_name) %>%
@@ -252,7 +251,7 @@ data.frame(rgn_id = rep(1:dim(lkp)[1], length(tmp_prod))) %>%
          weight  = 0.2) %>%
   write_csv(file.path(dir_col_lyrs, 'np_harvest_product_weight_placeholder.csv'))
 
-l_csv = file.path(dir_repos, 'col/subcountry2014/layers.csv')
+l_csv = file.path(dir_repos, 'shp/subcountry2014/layers.csv')
 readLines(l_csv, warn=F, encoding='UTF-8') %>%
   str_replace("np_harvest_product_weight_gl2014.csv", 
               "np_harvest_product_weight_placeholder.csv") %>%
@@ -268,7 +267,7 @@ overwrite existing json and geojson files with new maps from `populate_draft_bra
 
 ```{r populate_draft_branch spatial, eval=F}
 
-key = 'col'
+key = 'shp'
 setwd(dir_repos)
 source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
 setwd(dir_repo)
@@ -292,8 +291,8 @@ if (!file.exists(f_js)){
   }
 }
 for (f in c(f_js, f_geojson)){ # f = f_spatial[1]
-  if (key != 'col')  file.copy(f, sprintf('spatial/%s', basename(f)), overwrite=T) # original
-  if (key == 'col') file.copy(f, sprintf('subcountry2014/spatial/%s', basename(f)), overwrite=T) # col
+  if (key != 'shp')  file.copy(f, sprintf('spatial/%s', basename(f)), overwrite=T) # original
+  if (key == 'shp') file.copy(f, sprintf('subcountry2014/spatial/%s', basename(f)), overwrite=T) # shp
   cat(sprintf('copying from %s', f))
 }
  
@@ -302,17 +301,17 @@ for (f in c(f_js, f_geojson)){ # f = f_spatial[1]
 ## 7. populate_draft_branch() config.r
 
 Reset map's zoom center in `config.r`
-(Note: no need to also overwrite `.travis.yml` since based on existing `col` repo)
+(Note: no need to also overwrite `.travis.yml` since based on existing `shp` repo)
 
 ```{r populate_draft_branch config.r, eval=F}
     
-key = 'col'
+key = 'shp'
 setwd(dir_repos)
 source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
 setwd(dir_repo)
 
 # from populate_draft_branch ~ L647
-f_in  = file.path(dir_repos, 'col', 'subcountry2014/conf/config.r')
+f_in  = file.path(dir_repos, 'shp', 'subcountry2014/conf/config.r')
 f_out = f_in 
 
 s = readLines(f_in, warn=F, encoding='UTF-8') 
@@ -338,13 +337,13 @@ writeLines(s, f_out)
 ```
 
 
-## 8. Test col's calculate_scores.r
+## 8. Test shp's calculate_scores.r
 
 Make sure no errors in calculating goal scores. 
 
-```{r test col calculate_scores, eval=F}
+```{r test shp calculate_scores, eval=F}
 
-setwd(file.path(dir_repos, 'col', 'subcountry2014'))
+setwd(file.path(dir_repos, 'shp', 'subcountry2014'))
 
 # load scenario configuration
 conf = Conf('conf')
@@ -367,7 +366,7 @@ Run these with `ohi-functions.r`, not `ohi-travis-functions.r`. The function ord
 
 ```{r final create_all fxns, eval=F}
 
-key = 'col'
+key = 'shp'
 setwd(dir_repos)
 source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
 source(sprintf('%s/ohi-webapps/ohi-functions.r', dir_github)) 
