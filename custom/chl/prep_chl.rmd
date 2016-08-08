@@ -13,12 +13,13 @@ key <- 'chl'
 # libraries
 library(dplyr)
 library(rgdal)
+library(readr)
 
 # directories
 dir_M <- c('Windows' = '//mazu.nceas.ucsb.edu/ohi',
            'Darwin'  = '/Volumes/ohi',
            'Linux'   = '/home/shares/ohi')[[ Sys.info()[['sysname']] ]]
-dir_custom = '~/github/ohi-webapps/custom/shp'
+# dir_custom = '~/github/ohi-webapps/custom/shp'
 dir_spatial = file.path(dir_M, 'git-annex/clip-n-ship', key, 'spatial')
 
 # setwd
@@ -30,7 +31,7 @@ setwd('~/github/ohi-webapps')
 ```{r setup, eval=F}
 
 # read in shp files and save with desired headers in data frame.
-shp = rgdal::readOGR(dsn = file.path(dir_spatial, 'custom'),
+shp = rgdal::readOGR(dsn = file.path(dir_spatial, 'custom/raw'),
               layer = 'Chile_Ocean_Regions')
 
 # view dataframe and map
@@ -39,15 +40,14 @@ shp
 plot(shp)
 
 # save as shapefiles. will create 4 files: .dbf, .prj, .shp, .shx
-writeOGR(shp, dsn = dir_spatial, 
-         layer = 'col_shp', driver = 'ESRI Shapefile', overwrite=T) 
+writeOGR(shp, dsn = file.path(dir_spatial, 'custom'), 
+         layer = 'chl_shp', driver = 'ESRI Shapefile', overwrite=T) 
 
-## ave/rgn_offshore_data.csv on git-annex
-write.csv(shp@data, file.path(dir_annex, 'shp/spatial', 'rgn_offshore_data.csv'))
+## save rgn_offshore_data.csv on git-annex
+write.csv(shp@data, file.path(dir_spatial, 'rgn_offshore_data.csv'), row.names=FALSE)
 
-# create lookup table with unique rgn_ids
-col_rgns = shp@data
-write_csv(col_rgns, '~/github/ohi-webapps/custom/shp/col_rgns_custom.csv')
+# save lookup table with unique rgn_ids on github
+write.csv(shp@data, sprintf('~/github/ohi-webapps/custom/%s/rgns_custom.csv', key), row.names=FALSE)
 
 ```
 
@@ -57,11 +57,9 @@ Proceed as in `create_all.r` and run `custom_maps()`
 
 ```{r prep shp map custom_maps, eval=FALSE}
 
-keys_redo = 'shp'
-key = keys_redo[1]
-
+source('create_init.R')
 setwd(dir_repos)
-source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
+source('create_init_sc.R')
 setwd(dir_repo)
 
 # fun custom_maps

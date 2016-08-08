@@ -47,7 +47,7 @@ populate_layers <- function(key=key, lyrs_gl=lyrs_gl, default_scenario=default_s
     lyrs_sc$filename[ix]    = str_replace(lyrs_sc$filename[ix], fixed('_gl2014.csv'), '_sc2014-area.csv')
   }
   
-  TODO: check why rgn_area had rownames--need readr::write_csv()
+  TODO: 
   - PASTE rgn_labels somewhere more useful
   - change subcountry2014!
     - copy_webapps_templates.r

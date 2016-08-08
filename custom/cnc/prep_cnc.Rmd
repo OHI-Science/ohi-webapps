@@ -25,6 +25,7 @@ dir_in      = file.path(dir_custom, 'ShapeFile_Region_CoralSeaMarinePark_EEZ_Lim
 ## inspect
 shp = readOGR(dsn = dir_in, layer = 'zee_officielle')
 shp@data
+shp
   
 plot(shp)
 
