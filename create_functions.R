@@ -1255,10 +1255,10 @@ create_maps = function(key='ecu'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
     
     # plot
     cat('bb:',bb,'\n')
-    m = try(get_map(location=bb, source='stamen', maptype='toner-lite', crop=T))
+    m = try(ggmap::get_map(location=bb, source='stamen', maptype='toner-lite', crop=T))
     if (class(m) == 'try-error'){
       # fallback to ggmap default map
-      m = get_map(location=bb, crop=T)
+      m = ggmap::get_map(location=bb, crop=T)
     }
     p = ggmap(m, extent='device')
     
@@ -1351,49 +1351,51 @@ create_maps = function(key='ecu'){ # key='abw' # setwd('~/github/clip-n-ship/ecu
 #sc_maps_todo = setdiff(str_replace(list.files('~/github/ohi-webapps/errors/map'), '_map.txt', ''), 'aus')
 #lapply(as.list(sc_maps_todo[which(sc_maps_todo=='cok'):length(sc_maps_todo)]), create_maps)
 
+## JSL moved some to R/create_repo_map.r; remaining is all about making the png images
 custom_maps = function(key){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
-  
-  ## load libraries quietly
-  suppressWarnings(suppressPackageStartupMessages({
-    library(sp)
-    library(rgdal)
-    library(raster)
-    library(rgeos)
-    #library(dismo)
-    library(ggplot2)
-    library(ggmap) # devtools::install_github('dkahle/ggmap') # want 2.4 for stamen toner-lite
-    library(dplyr)
-    library(grid) # for unit
-    library(tools)
-    merge = base::merge # override git2r
-    diff  = base::diff
-  }))
-  
+#   
+#   ## load libraries quietly
+#   suppressWarnings(suppressPackageStartupMessages({
+#     library(sp)
+#     library(rgdal)
+#     library(raster)
+#     library(rgeos)
+#     #library(dismo)
+#     library(ggplot2)
+#     library(ggmap) # devtools::install_github('dkahle/ggmap') # want 2.4 for stamen toner-lite
+#     library(dplyr)
+#     library(grid) # for unit
+#     library(tools)
+#     merge = base::merge # override git2r
+#     diff  = base::diff
+#   }))
+#   
+## TODO, buffers not included in R/create_repo_map.r
   ## variables
   buffers = c('offshore'=0.2, 'inland'=0.2, 'inland1km'=0.8, 'inland25km'=0.4, 'offshore3nm'=0.4, 'offshore1km'=0.8) # and transparency
   if (key=='usa'){ # extra buffers making R crash presumably at fortify step b/c so big for USA
     buffers = c('offshore'=0.2, 'inland25km'=0.2, 'inland25km'=0.4) # and transparency
   }
-  
-  ## paths; see also ohi-webapps/create_init.R
-  key <<- key
-  source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
-  
-  dir_data    = file.path(dir_M, 'git-annex/clip-n-ship')
-  dir_spatial = file.path(dir_data, key, 'spatial') 
-  dir_custom  = file.path(dir_spatial, 'custom')
-  dir_pages   = file.path(dir_data, key, 'gh-pages')
-  
-  ## process shapefiles:
-  
-  ## read shapefiles, rename headers and save in dir_spatial
-  shp_name = file_path_sans_ext(list.files(dir_custom))[1]
-  shp_orig = readOGR(dir_custom, shp_name) 
-  #names(shp_orig@data) = c('rgn_id', 'rgn_name', 'area_km2', 'hectares')  # for GYE     ## generalize!
-  crs = CRS("+proj=longlat +datum=WGS84")
-  shp = spTransform(shp_orig,crs) 
-  writeOGR(shp, dsn=dir_spatial, 'rgn_offshore_gcs', driver='ESRI Shapefile', overwrite=TRUE)
-  
+#   
+#   ## paths; see also ohi-webapps/create_init.R
+#   key <<- key
+#   source(file.path(dir_github, 'ohi-webapps/create_init_sc.R'))
+#   
+#   dir_data    = file.path(dir_M, 'git-annex/clip-n-ship')
+#   dir_spatial = file.path(dir_data, key, 'spatial') 
+#   dir_custom  = file.path(dir_spatial, 'custom')
+#   dir_pages   = file.path(dir_data, key, 'gh-pages')
+#   
+#   ## process shapefiles:
+#   
+#   ## read shapefiles, rename headers and save in dir_spatial
+#   shp_name = file_path_sans_ext(list.files(dir_custom))[1]
+#   shp_orig = readOGR(dir_custom, shp_name) 
+#   #names(shp_orig@data) = c('rgn_id', 'rgn_name', 'area_km2', 'hectares')  # for GYE     ## generalize!
+#   crs = CRS("+proj=longlat +datum=WGS84")
+#   shp = spTransform(shp_orig,crs) 
+#   writeOGR(shp, dsn=dir_spatial, 'rgn_offshore_gcs', driver='ESRI Shapefile', overwrite=TRUE)
+#   
   ## read shapefiles, store as list
   plys = lapply(shp_name, function(x){
     shp_orig = readOGR(dir_custom, shp_name)
@@ -1401,7 +1403,7 @@ custom_maps = function(key){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
     shp = spTransform(shp_orig,crs) # shp
     return(shp)
   })
-  
+
   ## drop failed buffers
   bufs_valid = sapply(plys, function(x) !'try-error' %in% class(x))
   txt_shp_error = sprintf('%s/%s_readOGR_fails.txt', dir_errors, key)
@@ -1410,27 +1412,27 @@ custom_maps = function(key){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
     cat(sprintf('%s:%s\n', key, paste(names(bufs_valid)[!bufs_valid], collapse=',')), file=txt_shp_error)
   }
   plys = plys[bufs_valid]
-  
-  ## fortify and set rgn_names as factor of all inland rgns. ***This is where invalid geometries/orphan hole errors may occur*** ## TODO: is this needed?  Error in get("rgeos", envir = .MAPTOOLS_CACHE) : object 'rgeos' not found 
+
+  ## fortify and set rgn_names as factor of all inland rgns. ***This is where invalid geometries/orphan hole errors may occur*** ## TODO: is this needed?  Error in get("rgeos", envir = .MAPTOOLS_CACHE) : object 'rgeos' not found
   rgn_names = factor(plys[[1]][['rgn_name']])  # orig: rgn_name, gye:Zona, bhi:rgn_name # need to generalize this
   plys.df = lapply(plys, function(x){
     x = fortify(x, region='rgn_name')              # orig: rgn_name, gye:Zona, bhi:rgn_name # need to generalize this
     x$id = factor(as.character(x$id), rgn_names)
     return(x)
   })         # head(as.data.frame(plys.df))
-  
+
   ## keep only coastal subcountry regions
   #   ids_offshore = unique(plys.df[['offshore']][['id']])
-  
+
   ## get extent from inland and offshore, expanded 10%
   #   bb_inland25km = bbox(plys[['inland25km']])
   bb_offshore   = bbox(plys[[1]])
   #
   custom_map = function(f_png, width=400, height=250, res=72, effect='toycamera'){
-    
+
     x  = extendrange(c(bb_offshore['x',], bb_offshore['x',]), f=0.1)
     y  = extendrange(c(bb_offshore['y',], bb_offshore['y',]), f=0.1)
-    
+
     ## make bbox proportional to desired output image dimensions
     if (diff(x) < width / height * diff(y)){
       x = c(-1, 1) * diff(y)/2 * width/height + mean(x)
@@ -1438,7 +1440,7 @@ custom_maps = function(key){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
       y = c(-1, 1) * diff(x)/2 * height/width + mean(y)
     }
     bb = c(x[1], y[1], x[2], y[2])
-    
+
     ## plot basemap
     cat('bb:',bb,'\n')
     m = try(get_map(location=bb, source='stamen', maptype='toner-lite', crop=T))
@@ -1447,22 +1449,22 @@ custom_maps = function(key){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
       m = get_map(location=bb, crop=T)
     }
     p = ggmap(m, extent='device')
-    
+
     ## overlay region buffers as colors; see create_map above for each individual buffer (offshore, offshore3nm etc)
     p = p + geom_polygon(
       aes(x=long, y=lat, group=group, fill=id), alpha=buffers[['offshore']],
       data=plys.df[[1]])
-    
+
     ## tweaks
     p = p +
       labs(fill='', xlab='', ylab='') +
       theme(
         legend.position='none')
-    
+
     tmp_png = tempfile(tmpdir=dirname(f_png), fileext='.png')
     ggsave(tmp_png, plot=p, width=width/res, height=height/res, dpi=res, units='in', type='cairo-png')
     #system(sprintf('open %s', tmp_png))
-    
+
     unlink(f_png)
     if (effect == 'toycamera'){
       toycamera_options = '-i 5 -o 150 -d 5 -h -3 -t yellow -a 10 -I 0.75 -O 5'
@@ -1476,11 +1478,11 @@ custom_maps = function(key){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
     unlink(tmp_png)
     #system(sprintf('open %s', f_png))
   }
-  
+
   ## create gh-pages/images directory
   dir_pfx = file.path(dir_annex, key, 'gh-pages/images')
   dir.create(dir_pfx, showWarnings=F, recursive=T)
-  
+
   ## create maps
   custom_map( # for home page banner
     f_png = file.path(dir_pfx, 'regions_1600x800.png'),
@@ -1497,7 +1499,7 @@ custom_maps = function(key){ # key='abw' # setwd('~/github/clip-n-ship/ecu')
   custom_map( # for status thumbnail
     f_png = file.path(dir_pfx, 'regions_30x20.png'),
     res=72, width=30, height=20, effect='')
-  
+
 }
 
 status_travis = function(key, clone=F, enable=T, 
