@@ -1,5 +1,6 @@
 # This is prep_chl.Rmd
 
+This is for modifying the existing chl repo with new regions (16 total, up from original 12).
 
 ## 0. add shp to `sc_studies_custom.csv` 
 
@@ -16,11 +17,16 @@ library(rgdal)
 library(readr)
 
 # directories
+dir_spatial = file.path(dir_M, 'git-annex/clip-n-ship', key, 'spatial')
+dir_shp_in  = file.path(dir_spatial, 'custom')
+
 dir_M <- c('Windows' = '//mazu.nceas.ucsb.edu/ohi',
            'Darwin'  = '/Volumes/ohi',
            'Linux'   = '/home/shares/ohi')[[ Sys.info()[['sysname']] ]]
-dir_spatial = file.path(dir_M, 'git-annex/clip-n-ship', key, 'spatial')
-dir_shp_in  = file.path(dir_spatial, 'custom')
+
+if (Sys.info()[['sysname']] != 'Linux' & !file.exists(dir_M)){
+  warning(sprintf("The Mazu directory dir_M set in src/R/common.R does not exist. Do you need to mount Mazu: %s?", dir_M))
+}
 
 # setwd
 dir_webapps <- '~/github/ohi-webapps'
@@ -54,19 +60,29 @@ readr::write_csv(shp@data, sprintf('~/github/ohi-webapps/custom/%s/rgns_custom.c
 
 
 ## 3. prep shp map with custom_maps()
-Proceed as in `create_all.r` and run `custom_maps()`
 
 ```{r prep shp map custom_maps, eval=FALSE}
 
 source(file.path(dir_webapps, 'create_init.R'))
-setwd(dir_repos)
 source(file.path(dir_webapps, 'create_init_sc.R'))
+
+## clone chl repo
+unlink(dir_repo, recursive=T, force=T)
+repo <- clone(git_url, normalizePath(dir_repo, mustWork=F))
 setwd(dir_repo)
 
 # create_repo_map
 create_repo_map(key, dir_shp_in, dir_spatial) 
 
 ```
+
+## Unpopulate existing layers
+
+```{r}
+unpopulate_layers_conf()
+
+```
+
 
 
 ## 4. shp layers: bind possible layers for shp

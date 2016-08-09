@@ -23,6 +23,9 @@ source('R/populate_init.r')
 source('R/populate_prep.r')
 source('R/populate_layers.r')
 source('R/populate_conf.r')
+source('R/unpopulate_layers_conf.r')
+source('R/create_repo_map.r')
+source('R/shp_to_geojson.r')
 
 ## make a custom repo for a specific  ----
 # this is in order of steps from start to finish, but these functions can also be run individually

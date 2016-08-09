@@ -327,30 +327,31 @@ populate_draft_branch <- function(){
   # create dirs
   for (dir in c('tmp','layers','conf','spatial','prep')) dir.create(dir, showWarnings=F)
   
-  ## spatial: create regions_gcs.geojson and regions_gcs.js
-  # TODO: JSL: strongly consider moving this into create_maps() so that if region boundaries are updated, this will too
-  f_js_old      = file.path(dir_annex_sc, 'regions_gcs.js') 
-  f_geojson_old = file.path(dir_annex_sc, 'regions_gcs.geojson')
-  f_js          = file.path(dir_annex_sc, 'spatial', 'regions_gcs.js')
-  f_geojson     = file.path(dir_annex_sc, 'spatial', 'regions_gcs.geojson')
-  if (file.exists(f_js_old)) file.rename(f_js_old, f_js)
-  if (file.exists(f_geojson_old)) file.rename(f_geojson_old, f_geojson)
-  txt_shp_error = sprintf('%s/%s_shp_to_geojson.txt', dir_errors, key)
-  unlink(txt_shp_error)
-  if (!file.exists(f_js)){                                              
-    f_shp = file.path(dir_annex, key, 'spatial', 'rgn_offshore_gcs.shp')
-    cat(sprintf('  shp_to_geojson -- %s\n', format(Sys.time(), '%X')))
-    v = try(shp_to_geojson(f_shp, f_js, f_geojson)) ## TODO: move this function to ohi-webapps package
-    if (class(v)=='try-error'){
-      cat(as.character(traceback(v)), file=txt_shp_error)
-      next
-    }
-  }
-  for (f in c(f_js, f_geojson)){ # f = f_spatial[1]
-    file.copy(f, sprintf('spatial/%s', basename(f)), overwrite=T)
-    cat(sprintf('\n copying from %s', f))
-  }
-  
+  # ## JSL moved to R/create_repo_map.r Aug 9 2016
+  # ## spatial: create regions_gcs.geojson and regions_gcs.js
+  # # TODO: JSL: strongly consider moving this into create_maps() so that if region boundaries are updated, this will too
+  # f_js_old      = file.path(dir_annex_sc, 'regions_gcs.js') 
+  # f_geojson_old = file.path(dir_annex_sc, 'regions_gcs.geojson')
+  # f_js          = file.path(dir_annex_sc, 'spatial', 'regions_gcs.js')
+  # f_geojson     = file.path(dir_annex_sc, 'spatial', 'regions_gcs.geojson')
+  # if (file.exists(f_js_old)) file.rename(f_js_old, f_js)
+  # if (file.exists(f_geojson_old)) file.rename(f_geojson_old, f_geojson)
+  # txt_shp_error = sprintf('%s/%s_shp_to_geojson.txt', dir_errors, key)
+  # unlink(txt_shp_error)
+  # if (!file.exists(f_js)){                                              
+  #   f_shp = file.path(dir_annex, key, 'spatial', 'rgn_offshore_gcs.shp')
+  #   cat(sprintf('  shp_to_geojson -- %s\n', format(Sys.time(), '%X')))
+  #   v = try(shp_to_geojson(f_shp, f_js, f_geojson)) ## TODO: move this function to ohi-webapps package
+  #   if (class(v)=='try-error'){
+  #     cat(as.character(traceback(v)), file=txt_shp_error)
+  #     next
+  #   }
+  # }
+  # for (f in c(f_js, f_geojson)){ # f = f_spatial[1]
+  #   file.copy(f, sprintf('spatial/%s', basename(f)), overwrite=T)
+  #   cat(sprintf('\n copying from %s', f))
+  # }
+  # 
   ## ---- begin layers.csv prep ---- ##
   ## copied to R/populate_layers_csv.r by JSL July 18 2016
   
