@@ -18,29 +18,29 @@ populate_conf <- function(key=key) {
     # read in file
     s = readLines(f_in, warn=F, encoding='UTF-8')
     
-    ## update confugration
-    if (f=='config.R'){
-      
-      ## get map centroid and zoom level
-      # TODO: save this to separate map file...
-      # TODO: would be great to set this info when making maps so center is reset if map changes, not sure that's feasible...
-      # TODO: http://gis.stackexchange.com/questions/76113/dynamically-set-zoom-level-based-on-a-bounding-box
-      # var regions_group = new L.featureGroup(regions); map.fitBounds(regions_group.getBounds());
-      p_shp  = file.path(dir_annex_sc, 'spatial', 'rgn_offshore_gcs.shp')
-      p      = rgdal::readOGR(dirname(p_shp), tools::file_path_sans_ext(basename(p_shp)))
-      p_bb   = data.frame(p@bbox) # max of 2.25
-      p_ctr  = rowMeans(p_bb)
-      p_zoom = 12 - as.integer(cut(max(transmute(p_bb, range = max - min)), 
-                                   c(0, 0.25, 0.5, 1, 2.5, 5, 10, 20, 40, 80, 160, 320, 360)))
-      
-      ## set map center and zoom level
-      s = s %>%
-        str_replace("map_lat.*", sprintf('map_lat=%g; map_lon=%g; map_zoom=%d', 
-                                         p_ctr['y'], p_ctr['x'], p_zoom)) # updated JSL to overwrite any map info
-      
-      ## use just rgn_labels (not rgn_global)
-      s = gsub('rgn_global', 'rgn_labels', s)
-    } 
+    # ## update confugration
+    # if (f=='config.R'){
+    #   
+    #   ## get map centroid and zoom level
+    #   # TODO: save this to separate map file...
+    #   # TODO: would be great to set this info when making maps so center is reset if map changes, not sure that's feasible...
+    #   # TODO: http://gis.stackexchange.com/questions/76113/dynamically-set-zoom-level-based-on-a-bounding-box
+    #   # var regions_group = new L.featureGroup(regions); map.fitBounds(regions_group.getBounds());
+    #   p_shp  = file.path(dir_annex_sc, 'spatial', 'rgn_offshore_gcs.shp')
+    #   p      = rgdal::readOGR(dirname(p_shp), tools::file_path_sans_ext(basename(p_shp)))
+    #   p_bb   = data.frame(p@bbox) # max of 2.25
+    #   p_ctr  = rowMeans(p_bb)
+    #   p_zoom = 12 - as.integer(cut(max(transmute(p_bb, range = max - min)), 
+    #                                c(0, 0.25, 0.5, 1, 2.5, 5, 10, 20, 40, 80, 160, 320, 360)))
+    #   
+    #   ## set map center and zoom level
+    #   s = s %>%
+    #     str_replace("map_lat.*", sprintf('map_lat=%g; map_lon=%g; map_zoom=%d', 
+    #                                      p_ctr['y'], p_ctr['x'], p_zoom)) # updated JSL to overwrite any map info
+    #   
+    #   ## use just rgn_labels (not rgn_global)
+    #   s = gsub('rgn_global', 'rgn_labels', s)
+    # } 
     
     ## swap out custom functions
     if (f=='functions.R'){

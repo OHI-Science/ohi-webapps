@@ -4,6 +4,7 @@ create_repo_map <- function(key=key, dir_shp_in=dir_shp_in, dir_spatial=dir_spat
   
   ## load libraries quietly ----
   suppressWarnings(suppressPackageStartupMessages({
+    library(dplyr)
     library(sp)
     library(rgdal)
     library(tools)
@@ -34,6 +35,22 @@ create_repo_map <- function(key=key, dir_shp_in=dir_shp_in, dir_spatial=dir_spat
     cat(sprintf('\n copying from %s', f))
   }
   
-  # and save the info from config.r here 
+  ## get map centroid and zoom level and save to separate map file----
+  shp_bb    <- data.frame(shp@bbox) # max of 2.25
+  shp_range <- dplyr::transmute(shp_bb, range = max - min)
+  shp_ctr   <- rowMeans(shp_bb) 
+  shp_zoom  <- 12 - as.integer(cut(max(shp_range), 
+                                 breaks = c(0, 0.25, 0.5, 1, 2.5, 5, 10, 20, 40, 80, 160, 320, 360)))
+  
+  ## save as separate file...
+  
+  ## set map center and zoom level
+  s = s %>%
+    str_replace("map_lat.*", sprintf('map_lat=%g; map_lon=%g; map_zoom=%d', 
+                                     shp_ctr['y'], shp_ctr['x'], shp_zoom)) # updated JSL to overwrite any map info
+  
+  ## use just rgn_labels (not rgn_global)
+  s = gsub('rgn_global', 'rgn_labels', s)
+  
   
 }
