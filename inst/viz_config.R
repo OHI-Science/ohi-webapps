@@ -1,9 +1,7 @@
-## what about saving this in a new folder /website?
-
 ## map configuration
-map_lat=0; map_lon=0; map_zoom=3
+map_lat <- 0; map_lon <- 0; map_zoom <- 3
 
-# extra descriptions not covered by goals.description or layers.description, used in ohigui
+## dimension descriptions for communication
 index_description = 'The overall Index represents the weighted average of all goal scores.'
 dimension_descriptions = c('score' = 'This dimension is an average of the current status and likely future.',
                            'status' = 'This dimension represents the current value of a goal or sub-goal relative to its reference point.',

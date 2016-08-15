@@ -42,15 +42,15 @@ create_repo_map <- function(key=key, dir_shp_in=dir_shp_in, dir_spatial=dir_spat
   shp_zoom  <- 12 - as.integer(cut(max(shp_range), 
                                  breaks = c(0, 0.25, 0.5, 1, 2.5, 5, 10, 20, 40, 80, 160, 320, 360)))
   
-  ## save as separate file...
+  ## viz_config.r:: copy ## TODO: make this a template. ----
+  fn <- 'viz_config.r'
+  file.copy(file.path('~/github/ohi-webapps/inst', fn),
+            file.path(dir_repo, default_scenario, 'spatial', fn), overwrite=TRUE)
   
-  ## set map center and zoom level
-  s = s %>%
-    str_replace("map_lat.*", sprintf('map_lat=%g; map_lon=%g; map_zoom=%d', 
-                                     shp_ctr['y'], shp_ctr['x'], shp_zoom)) # updated JSL to overwrite any map info
-  
-  ## use just rgn_labels (not rgn_global)
-  s = gsub('rgn_global', 'rgn_labels', s)
-  
+  ## calculate_scores.r:: update source()
+  readLines(file.path(dir_repo, default_scenario, 'spatial', fn)) %>%
+    str_replace("map_lat.*", sprintf('map_lat <- %g; map_lon <- %g; map_zoom <- %d', 
+                                     shp_ctr['y'], shp_ctr['x'], shp_zoom)) %>%
+    writeLines(file.path(dir_repo, default_scenario, 'spatial', fn))
   
 }
