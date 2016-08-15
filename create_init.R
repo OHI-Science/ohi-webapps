@@ -38,7 +38,7 @@ dir_ohicore <- sprintf('%s/ohicore', dir_github)
 dir_global  <- sprintf('%s/ohi-global/eez2016', dir_github) # TODO: could isolate scenario
 csv_mcntry  <- sprintf('%s/ohi-webapps/tmp/gl-rgn_multiple-cntry_sc-rgn_manual.csv', dir_github) # TODO DELETE
 csv_gl_rgn  <- sprintf('%s/ohiprep/Global/NCEAS-Regions_v2014/manual_output/sp_rgn_manual.csv', dir_github) # for rgn_key 
-sfx_global  <- 'gl2016'
+# sfx_global  <- 'gl2016' move to populate_layers directly. 
 dw_year     <- 2014 # downweight year for mar_coastalpopn_inland25km_lyr on Mazu
 git_branch  <- 'master'
 tabs_hide   <- c('Calculate','Report') # , Compare'

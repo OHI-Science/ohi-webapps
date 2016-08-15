@@ -16,7 +16,8 @@
 setwd('~/github/ohi-webapps')
 
 source('create_init.R')            # load all libraries, set directories relevant to all keys
-source('create_functions.R')       # all functions for creating and updating repos and webapps
+#source('create_functions.R')       # all functions for creating and updating repos and webapps
+source('R/clone_repo.r')
 source('R/copy_layer.r')
 source('R/create_gh_repo.r')
 source('R/populate_init.r')
