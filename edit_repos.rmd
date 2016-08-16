@@ -7,9 +7,9 @@ July, 2016
 
 Written while also updating create_all.r and trying to move towards a package. 
 
-- col
+- col X
 - ohibc
-- arc
+- arc X
 - chl
 - cdz
 
@@ -19,21 +19,25 @@ Written while also updating create_all.r and trying to move towards a package.
 ## run setup from create_all
 
 ## set key
-key <- 'col'
+key <- 'chl'
 
 # set vars by subcountry key
+source('create_init.R')   
 setwd(dir_repos)
 source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))    
 
+## clone repo and remotes
+clone_repo(dir_repos, dir_repo, git_url)
+
 ## unpopulate layers, conf, etc. Doesn't push. 
-unpopulate_layers_conf() # source('R/unpopulate_layers_conf.r')
+unpopulate_layers_conf(key, dir_repos, dir_repo, git_url, default_scenario)
 
 ## set wd to scenario folder
 dir_scenario = file.path(dir_repo, basename(default_branch_scenario))
 setwd(dir_scenario)
 
 ## populate layers folder and layers.csv, and conf. Doesn't push. 
-populate_layers()
+populate_layers(key, dir_repo, lyrs_gl, default_scenario, sfx_global, multi_nation=FALSE)
 populate_conf()
 populate_etc()
 
