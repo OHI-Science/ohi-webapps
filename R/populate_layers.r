@@ -1,4 +1,4 @@
-# populate_layers.r
+## populate_layers.r
 
 populate_layers <- function(key, dir_repo, lyrs_gl, dir_global, dir_scenario, multi_nation = FALSE){
   
@@ -6,10 +6,10 @@ populate_layers <- function(key, dir_repo, lyrs_gl, dir_global, dir_scenario, mu
   sfx_global <- paste0('gl', stringr::str_extract(dir_global, "\\d{4}"))
   
   ## copy layers.csv from global to tmp/ ----
-  write.csv(lyrs_gl, sprintf('%s/tmp/layers_%s.csv', dir_scenario, sfx_global),   ### long term don't know if we need this tmp copy
-            na='', row.names=F)
+  # write.csv(lyrs_gl, sprintf('%s/tmp/layers_%s.csv', dir_scenario, sfx_global),   ### long term don't know if we need this 
+  #           na='', row.names=F)
   
-  ## modify tmp/layers.csv -- RETHINK THIS!! JSL July 2016
+  ## modify layers dataframe
   lyrs_sc = lyrs_gl %>%
     select(
       targets, layer, filename, fld_value, units,
@@ -22,7 +22,7 @@ populate_layers <- function(key, dir_repo, lyrs_gl, dir_global, dir_scenario, mu
       filename = sprintf('%s_%s.csv', layer, sfx_global)) %>%
     arrange(targets, layer)
   
-  ## swap out rgn_area layer; save a copy
+  ## swap out rgn_area in directory; save a copy of the file
   lyr_area <- 'rgn_area'
   csv      <- 'rgn_offshore_data.csv'
   ix       <- which(lyrs_sc$layer == lyr_area)
@@ -51,8 +51,7 @@ populate_layers <- function(key, dir_repo, lyrs_gl, dir_global, dir_scenario, mu
            sc_rgn_name = rgn_name) %>%
     mutate(gl_rgn_name = name) %>%
     merge(
-      gl_rgns, #  %>%
-        # select(gl_rgn_name, gl_rgn_id), ## have sc_rgns include sc_cntry stuff too
+      gl_rgns,
       by='gl_rgn_name', all.x=T) %>%
     select(sc_rgn_id, sc_rgn_name, gl_rgn_id, gl_rgn_name, cntry_key = gl_rgn_key) %>%
     arrange(sc_rgn_id)
@@ -66,19 +65,10 @@ populate_layers <- function(key, dir_repo, lyrs_gl, dir_global, dir_scenario, mu
                 by= 'gl_rgn_name')
   }
   
-  ## old global regions to new OHI+ regions -- proper setup for all cases ## JSL dont' need now; combine to sc_rgns
-  # sc_cntry = gl_cntries %>%
-  #   select(gl_cntry_key, gl_rgn_id) %>%
-  #   merge(
-  #     sc_rgns,
-  #     by='gl_rgn_id') %>%
-  #   group_by(gl_cntry_key, sc_rgn_id) %>%
-  #   summarise(n=n()) %>%
-  #   select(cntry_key = gl_cntry_key, sc_rgn_id) %>%
-  #   as.data.frame()
-  
+  ## setup for copying layers over
   dir.create(sprintf('%s/layers', dir_scenario), showWarnings=F)
   rlist <- readr::read_csv(rgns_list)
+  
   if (!multi_nation) {
     
     ## old global to new custom countries 
@@ -103,8 +93,7 @@ populate_layers <- function(key, dir_repo, lyrs_gl, dir_global, dir_scenario, mu
     sc_rgns_lookup <- read.csv(sprintf('~/github/ohi-webapps/custom/%s/sc_rgns_lookup.csv', key))
     sc_rgns = sc_rgns_lookup %>%
       merge(
-        gl_rgns, ## %>% combine from sc_cntry
-          # select(gl_rgn_name, gl_rgn_id),
+        gl_rgns,
         by='gl_rgn_name', all.x=T) %>%
       select(sc_rgn_id, sc_rgn_name, gl_rgn_id, gl_rgn_name) %>%
       arrange(sc_rgn_name)
@@ -167,16 +156,18 @@ populate_layers <- function(key, dir_repo, lyrs_gl, dir_global, dir_scenario, mu
     write.csv(lyrs_empty, 'layers-empty_swapping-global-mean.csv', row.names=F, na='')
   }
   
+  
   ## populate empty layers with global averages. ## TODO see if a better way...
-  for (lyr in subset(lyrs, data_na, layer, drop=T)){ # lyr = subset(lyrs, data_na, layer, drop=T)[1]
+  for (lyr in lyrs_empty$layer){ # lyr = lyrs_empty$layer[1]
     
-    message(' for empty layer ', lyr, ', getting global avg')
+    message(' for empty layer ', lyr, ', getting global mean with ', sfx_global, 'suffix')
     
     ## get all global data for layer
     l = subset(lyrs, layer==lyr)
+    l$filename <- paste0(str_split_fixed(l$filename, '\\.', 2)[1], 'mean.', str_split_fixed(l$filename, '\\.', 2)[2])
     csv_gl  = as.character(l$path_in)
-    csv_tmp = sprintf('tmp/layers-empty_global-values/%s', l$filename)
-    csv_out = sprintf('layers/%s', l$filename)
+    csv_tmp = sprintf('%s/tmp/layers-empty_global-values/%s', dir_scenario,l$filename)
+    csv_out = sprintf('%s/layers/%s', dir_scenario, l$filename)
     file.copy(csv_gl, csv_tmp, overwrite=T)
     a = read.csv(csv_tmp)
     
@@ -204,9 +195,7 @@ populate_layers <- function(key, dir_repo, lyrs_gl, dir_global, dir_scenario, mu
       cat(sprintf('  DOH! For empty layer "%s" field "%s" is factor/character but continuing with presumption of numeric.\n', lyr, fld_value))
     }
     
-    ## presuming numeric...
-    ## get mean
-    #if (lyr == 'mar_coastalpopn_inland25km') browser()
+    ## get mean, presuming numeric...
     if (length(flds_other) > 0){
       b = a %>%
         group_by_(.dots=flds_other) %>%
@@ -223,7 +212,7 @@ populate_layers <- function(key, dir_repo, lyrs_gl, dir_global, dir_scenario, mu
     }
     
     ## bind many rgn_ids
-    if ('rgn_id' %in% names(a) | 'gl_rgn_key' %in% names(a)){
+    if ('rgn_id' %in% names(a) | 'cntry_key' %in% names(a)){
       b = b %>%
         merge(
           sc_rgns %>%  
@@ -233,21 +222,13 @@ populate_layers <- function(key, dir_repo, lyrs_gl, dir_global, dir_scenario, mu
         arrange(rgn_id)
     }
     
-    #if (lyr == 'mar_harvest_tonnes') browser()
     write.csv(b, csv_out, row.names=F, na='')
     
   } # end for (lyr in subset(lyrs, data_na, layer, drop=T))
   
-  ## update layers.csv with empty layers now populated by global averages
-  CheckLayers('layers.csv', 'layers',
-              flds_id=c('rgn_id','country_id','saup_id')) ##,'fao_id','fao_saup_id'))
   
-  ## TODO: copy rgn_area layer into /spatial
-  
-  
-  # TODO: 
-  # - change subcountry2014!
+  ## check again now empty layers now populated by global averages
+  CheckLayers(layers_csv, file.path(dir_scenario, 'layers'),
+              flds_id=c('rgn_id','country_id','saup_id','fao_id','fao_saup_id'))
   
 }
-
-# calculate_scores.r, install_ohicore

@@ -11,7 +11,7 @@ copy_layer <- function(lyr,
   
   ## setup
   csv_in        <- sprintf('%s/layers/%s.csv', dir_global, lyr)
-  csv_out       <- sprintf('%s/layers/%s_%s.csv', dir_scenario, lyr, sfx_global)
+  csv_out       <- sprintf('%s/layers/%s', dir_scenario, lyrs_sc$filename[lyrs_sc$layer == lyr])
   global_rgn_id <-  unique(sc_rgns$gl_rgn_id)
   
   d = read.csv(csv_in) # use read.csv for now; readr has a bug: https://github.com/hadley/readr/issues/364: Error in filter_impl(.data, dots) : attempt to use zero-length variable name
