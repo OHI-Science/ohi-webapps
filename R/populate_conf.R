@@ -3,7 +3,7 @@
 populate_conf <- function(key, dir_scenario, dir_global) {
   
   ## create conf folder
-  dir.create(file.path(dir_scenario, 'conf'))
+  dir.create(sprintf('%s/conf', dir_scenario), showWarning=FALSE)
   
   ## list conf files to copy
   conf_files = c('config.R','functions.R','goals.csv',
@@ -19,7 +19,7 @@ populate_conf <- function(key, dir_scenario, dir_global) {
     s = readLines(f_in, warn=F, encoding='UTF-8')
     
     ## swap out custom functions
-    if (f=='functions.R'){
+    if (f == 'functions.R'){
       
       ## TODO: delete PreGlobalScores(): https://github.com/OHI-Science/ohicore/blob/master/R/CalculateAll.R#L217-L221
       ## TODO: delete eez2013 from functions. r --Setup()
@@ -45,18 +45,21 @@ populate_conf <- function(key, dir_scenario, dir_global) {
       }
       
       
-      ## rethink because ref points stuff might be useful. will find this: write.csv(d_check, sprintf('temp/cs_data_%s.csv', scenario), row.names=FALSE)    
+      ## rethink because ref points stuff might be useful. will find this: 
+      ## write.csv(d_check, sprintf('temp/cs_data_%s.csv', scenario), row.names=FALSE)    
       s <-  s %>%
         str_replace("write.csv\\(tmp, 'temp/.*", '') %>%
         str_replace('^.*sprintf\\(\'temp\\/.*', '')
-      
-    }
     
-    ## substitute old layer names with new
-    lyrs_dif = lyrs_sc %>% filter(!layer %in% layer_gl) # changed from layer != layer_gl JSL 08-24-2015
-    for (i in 1:nrow(lyrs_dif)){ # i=1
-      s = str_replace_all(s, fixed(lyrs_dif$layer_gl[i]), lyrs_dif$layer[i])
-    }
+    } ## end if(f == 'functions.R')
+    
+    
+    ## substitute old layer names with new ## JSL Aug 2016; don't think there are any global layers at this point that not needed. comment out bc not working the way we want...
+    # lyrs_sc <- read_csv(sprintf('%s/layers.csv', dir_scenario))
+    # lyrs_dif = lyrs_sc %>% filter(!layer %in% layer_gl)
+    # for (i in 1:nrow(lyrs_dif)){ # i=1
+    #   s = str_replace_all(s, fixed(lyrs_dif$layer_gl[i]), lyrs_dif$layer[i])
+    # }
     
     writeLines(s, f_out)
     
