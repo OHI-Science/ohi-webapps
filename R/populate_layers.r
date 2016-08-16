@@ -1,7 +1,9 @@
 # populate_layers.r
 
-populate_layers <- function(key, dir_repo, lyrs_gl, dir_scenario, 
-                            sfx_global = 'gl2016', multi_nation = FALSE){
+populate_layers <- function(key, dir_repo, lyrs_gl, dir_global, dir_scenario, multi_nation = FALSE){
+  
+  ## set sfx_global based on dir_global
+  sfx_global <- paste0('gl', stringr::str_extract(dir_global, "\\d{4}"))
   
   ## copy layers.csv from global to tmp/ ----
   write.csv(lyrs_gl, sprintf('%s/tmp/layers_%s.csv', dir_scenario, sfx_global),   ### long term don't know if we need this tmp copy
@@ -20,13 +22,15 @@ populate_layers <- function(key, dir_repo, lyrs_gl, dir_scenario,
       filename = sprintf('%s_%s.csv', layer, sfx_global)) %>%
     arrange(targets, layer)
   
-  ## swap out rgn_area layer
-  lyr <- 'rgn_area'
-  csv <- 'rgn_offshore_data.csv'
-  ix  <- which(lyrs_sc$layer == lyr)
+  ## swap out rgn_area layer; save a copy
+  lyr_area <- 'rgn_area'
+  csv      <- 'rgn_offshore_data.csv'
+  ix       <- which(lyrs_sc$layer == lyr_area)
   lyrs_sc$rgns_in[ix]  <-  'subcountry'
   lyrs_sc$path_in[ix]  <-  file.path(dir_annex_sc, 'spatial', csv)
-  lyrs_sc$filename[ix] <-  sprintf('%s.csv', lyr)
+  lyrs_sc$filename[ix] <-  sprintf('%s.csv', lyr_area)
+  rgns_list <- sprintf('%s/spatial/regions_list.csv', dir_scenario)  ## save a copy of rgn_area
+  file.copy(from =  lyrs_sc$path_in[ix], to = rgns_list, overwrite=TRUE)
   
   ## drop cntry_* layers
   lyrs_sc = filter(lyrs_sc, !grepl('^cntry_', layer))
@@ -47,11 +51,11 @@ populate_layers <- function(key, dir_repo, lyrs_gl, dir_scenario,
            sc_rgn_name = rgn_name) %>%
     mutate(gl_rgn_name = name) %>%
     merge(
-      gl_rgns %>%
-        select(gl_rgn_name, gl_rgn_id),
+      gl_rgns, #  %>%
+        # select(gl_rgn_name, gl_rgn_id), ## have sc_rgns include sc_cntry stuff too
       by='gl_rgn_name', all.x=T) %>%
-    select(sc_rgn_id, sc_rgn_name, gl_rgn_id, gl_rgn_name) %>%
-    arrange(sc_rgn_name)
+    select(sc_rgn_id, sc_rgn_name, gl_rgn_id, gl_rgn_name, cntry_key = gl_rgn_key) %>%
+    arrange(sc_rgn_id)
   
   ## if OHI+ match not possible...
   if (all(is.na(sc_rgns$gl_rgn_id))){
@@ -62,25 +66,25 @@ populate_layers <- function(key, dir_repo, lyrs_gl, dir_scenario,
                 by= 'gl_rgn_name')
   }
   
-  ## old global regions to new OHI+ regions -- proper setup for all cases
-  sc_cntry = gl_cntries %>%
-    select(gl_cntry_key, gl_rgn_id) %>%
-    merge(
-      sc_rgns,
-      by='gl_rgn_id') %>%
-    group_by(gl_cntry_key, sc_rgn_id) %>%
-    summarise(n=n()) %>%
-    select(cntry_key = gl_cntry_key, sc_rgn_id) %>%
-    as.data.frame()
+  ## old global regions to new OHI+ regions -- proper setup for all cases ## JSL dont' need now; combine to sc_rgns
+  # sc_cntry = gl_cntries %>%
+  #   select(gl_cntry_key, gl_rgn_id) %>%
+  #   merge(
+  #     sc_rgns,
+  #     by='gl_rgn_id') %>%
+  #   group_by(gl_cntry_key, sc_rgn_id) %>%
+  #   summarise(n=n()) %>%
+  #   select(cntry_key = gl_cntry_key, sc_rgn_id) %>%
+  #   as.data.frame()
   
   dir.create(sprintf('%s/layers', dir_scenario), showWarnings=F)
-  
+  rlist <- readr::read_csv(rgns_list)
   if (!multi_nation) {
     
-    ## old global to new custom countries
-    if (dim(sc_cntry)[1] != dim(sc_rgns)[1]) { # make sure Guayaquil doesn't match to both ECU and Galapagos
+    ## old global to new custom countries 
+    if (dim(rlist)[1] != dim(sc_rgns)[1]) { # make sure Guayaquil doesn't match to both ECU and Galapagos
       sc_cntries = subset(sc_studies, sc_key == key, gl_rgn_key, drop=T)
-      sc_cntry = sc_cntry %>%
+      sc_rgns <- sc_rgns %>%
         filter(cntry_key %in% sc_cntries)
     }
     
@@ -88,12 +92,9 @@ populate_layers <- function(key, dir_repo, lyrs_gl, dir_scenario,
     for (lyr in lyrs_sc$layer){ # lyr = "ao_access"
       
       ## call copy_layer and write to layer to csv
-      d <- copy_layer(lyr, sc_cntry,
-                      dir_global,
-                      sfx_global,
-                      lyrs_sc,
-                      global_rgn_id = unique(sc_rgns$gl_rgn_id),
-                      write_to_csv  = TRUE)
+      d <- copy_layer(lyr, sc_rgns,
+                      dir_global, sfx_global,
+                      lyrs_sc, write_to_csv = TRUE)
     }
     
   } else { # multi_nation == TRUE
@@ -102,19 +103,19 @@ populate_layers <- function(key, dir_repo, lyrs_gl, dir_scenario,
     sc_rgns_lookup <- read.csv(sprintf('~/github/ohi-webapps/custom/%s/sc_rgns_lookup.csv', key))
     sc_rgns = sc_rgns_lookup %>%
       merge(
-        gl_rgns %>%
-          select(gl_rgn_name, gl_rgn_id),
+        gl_rgns, ## %>% combine from sc_cntry
+          # select(gl_rgn_name, gl_rgn_id),
         by='gl_rgn_name', all.x=T) %>%
       select(sc_rgn_id, sc_rgn_name, gl_rgn_id, gl_rgn_name) %>%
       arrange(sc_rgn_name)
     
     ## old global to multi_nation
-    sc_cntry = sc_cntry %>%
+    sc_rgns = sc_rgns %>%
       group_by(cntry_key) %>%
       filter(row_number() == 1) %>%
       ungroup()
-    if (dim(sc_cntry)[1] != dim(sc_rgns)[1]) { # so GYE doesn't match both ECU+Galapagos
-      sc_cntry = sc_cntry %>%
+    if (dim(rlist)[1] != dim(sc_rgns)[1]) { # so GYE doesn't match both ECU+Galapagos
+      sc_rgns = sc_rgns %>%
         filter(cntry_key %in% unique(sc_rgns_lookup$gl_rgn_key))
     }
     
@@ -122,8 +123,11 @@ populate_layers <- function(key, dir_repo, lyrs_gl, dir_scenario,
     for (lyr in lyrs_sc$layer){ # lyr = "ao_access" 
       
       ## call copy_layer and then write to layer to csv as separate step
-      d <- copy_layer(lyr, sc_cntry,
-                      global_rgn_id = unique(sc_rgns$gl_rgn_id), 
+      d <- copy_layer(lyr, 
+                      sc_rgns,
+                      dir_global,
+                      sfx_global,
+                      lyrs_sc,
                       write_to_csv  = FALSE) 
       if ('rgn_id' %in% names(d)) d = d %>% arrange(rgn_id)
       
@@ -133,6 +137,8 @@ populate_layers <- function(key, dir_repo, lyrs_gl, dir_scenario,
       
     }
   } ## end if (!multi_nation)
+  
+  
   
   ## create layers.csv registry ----
   lyrs_reg = lyrs_sc %>%
@@ -148,12 +154,13 @@ populate_layers <- function(key, dir_repo, lyrs_gl, dir_scenario,
       clip_n_ship_disag_description,
       layer_gl,
       path_in)
-  write.csv(lyrs_reg, sprintf('%s/layers.csv', dir_scenario), row.names=F, na='')
+  layers_csv <- sprintf('%s/layers.csv', dir_scenario)
+  write.csv(lyrs_reg, layers_csv, row.names=F, na='')
   
   ## check for empty layers
-  CheckLayers('layers.csv', 'layers',
-              flds_id=c('rgn_id','country_id','saup_id','fao_id','fao_saup_id')) ##TODO: check if necessary
-  lyrs = read.csv('layers.csv', na='')
+  CheckLayers(layers_csv, file.path(dir_scenario, 'layers'),
+              flds_id=c('rgn_id','country_id','saup_id','fao_id','fao_saup_id'))
+  lyrs = read.csv(layers_csv, na='')
   lyrs_empty = filter(lyrs, data_na==T)
   if (nrow(lyrs_empty) > 0){
     dir.create('tmp/layers-empty_global-values', showWarnings=F)
@@ -216,7 +223,7 @@ populate_layers <- function(key, dir_repo, lyrs_gl, dir_scenario,
     }
     
     ## bind many rgn_ids
-    if ('rgn_id' %in% names(a) | 'cntry_key' %in% names(a)){
+    if ('rgn_id' %in% names(a) | 'gl_rgn_key' %in% names(a)){
       b = b %>%
         merge(
           sc_rgns %>%  
