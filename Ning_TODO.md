@@ -1,8 +1,73 @@
 ## Ning to Add
+JSL add this to Ning's TODO issue
 
 - [ ] `/spatial/regions_list.csv`; just so there's a quick reference
 - [ ] layers that were empty (could not be populated with template data) have placeholders as the global mean. Suffix=`_glXXXXmean.csv`. I haven't done the downweighting, so there are no _sc2014 layers anymore. 
 
+
+Julie TODO: 
+- [ ] run CHL's calculate_scores.r to see if without _sc2014 it works
+   - check for files all NA (warnings below), and fix other files too (see errors)
+- [ ] populate_conf()
+- [ ] rethink edit_repos.rmd (should just be scripts called 'repopulate_more_regions' ex)
+- [ ] check if can delete /tmp folder with mean swapping stuff in populate_layers()
+
+
+Warning messages:
+1: In min(d$year, na.rm = T) :
+  no non-missing arguments to min; returning Inf
+2: In max(d$year, na.rm = T) :
+  no non-missing arguments to max; returning -Inf
+3: In min(d$year, na.rm = T) :
+  no non-missing arguments to min; returning Inf
+4: In max(d$year, na.rm = T) :
+  no non-missing arguments to max; returning -Inf
+5: In ohicore::CheckLayers("layers.csv", "layers", flds_id = conf$config$layers_id_fields) :
+  Missing files...these files are not found in the layers folder
+    rgn_labels: rgn_labels_gl2016.csv
+6: In ohicore::CheckLayers("layers.csv", "layers", flds_id = conf$config$layers_id_fields) :
+  Unused fields...
+    ico_spp_iucn_status: iucn_sid
+7: In ohicore::CheckLayers("layers.csv", "layers", flds_id = conf$config$layers_id_fields) :
+  Rows duplicated...
+    ico_spp_iucn_status: 816
+8: In ohicore::CheckLayers("layers.csv", "layers", flds_id = conf$config$layers_id_fields) :
+  Layers missing data, ie all NA ...
+    le_wage_sector_year: le_wage_sector_year_gl2016.csv
+    np_blast: np_blast_gl2016.csv
+    np_cyanide: np_cyanide_gl2016.csv
+    fp_art_hb: fp_art_hb_gl2016.csv
+    hd_subtidal_hb: hd_subtidal_hb_gl2016.csv
+    element_wts_cp_km2_x_protection: element_wts_cp_km2_x_protection_gl2016.csv
+    element_wts_cs_km2_x_storage: element_wts_cs_km2_x_storage_gl2016.csv
+    tr_travelwarnings: tr_travelwarnings_gl2016.csv
+    
+Errors: layers = ohicore::Layers('layers.csv', 'layers')
+Layer element_wts_cp_km2_x_protection has no rows of data.
+Layer element_wts_cs_km2_x_storage has no rows of data.
+Layer fp_art_hb has no rows of data.
+Layer hd_subtidal_hb has no rows of data.
+Layer le_wage_sector_year has no rows of data.
+Layer np_blast has no rows of data.
+Layer np_cyanide has no rows of data.
+Error in file(file, "rt") : cannot open the connection
+In addition: Warning message:
+In file(file, "rt") :
+  cannot open file 'layers/rgn_labels_gl2016.csv': No such file or directory    
+    
+Error::scores = ohicore::CalculateAll(conf, layers)
+Running Setup()...
+Calculating Status and Trend for each region for FIS...
+Calculating Status and Trend for each region for MAR...
+95th percentile for MAR ref pt is: 0.0746978761490516
+
+95th percentile rgn_id for MAR ref pt is: 1
+
+Calculating Status and Trend for each region for AO...
+Calculating Status and Trend for each region for NP...
+Calculating Status and Trend for each region for CS...
+ Error in eval(expr, envir, enclos) : object 'status' not found     
+    
 sc_rgns
    sc_rgn_id                    sc_rgn_name gl_rgn_id gl_rgn_name
 1         11                          Aisén       224       Chile
