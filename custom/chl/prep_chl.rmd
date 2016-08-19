@@ -90,6 +90,8 @@ populate_layers(key, dir_repo, lyrs_gl, dir_global, dir_scenario, multi_nation =
 populate_conf(key, dir_scenario, dir_global) ## look at TODOs in functions.r
 populate_etc(key, dir_scenario)
 
+##TODO: check calculate_scores.r runs 
+
 ## TODO: now call map functions from below
 
 ```

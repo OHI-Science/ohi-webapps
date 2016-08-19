@@ -1,29 +1,21 @@
 LIV_ECO = function(layers, subgoal){
   
-  ## read in all data:
-  
-  # gdp, wages, jobs and workforce_size data 
+  ## read in all data: gdp, wages, jobs and workforce_size data 
   le_gdp   = SelectLayersData(layers, layers='le_gdp')  %>%
-    select(rgn_id = id_num, year, gdp_usd = val_num)
+    dplyr::select(rgn_id = id_num, year, gdp_usd = val_num)
   
   le_wages = SelectLayersData(layers, layers='le_wage_sector_year') %>%
-    select(rgn_id = id_num, year, sector = category, wage_usd = val_num)
+    dplyr::select(rgn_id = id_num, year, sector = category, wage_usd = val_num)
   
   le_jobs  = SelectLayersData(layers, layers='le_jobs_sector_year') %>%
-    select(rgn_id = id_num, year, sector = category, jobs = val_num)
+    dplyr::select(rgn_id = id_num, year, sector = category, jobs = val_num)
   
   le_workforce_size = SelectLayersData(layers, layers='le_workforcesize_adj') %>%
-    select(rgn_id = id_num, year, jobs_all = val_num)
+    dplyr::select(rgn_id = id_num, year, jobs_all = val_num)
   
   le_unemployment = SelectLayersData(layers, layers='le_unemployment') %>%
-    select(rgn_id = id_num, year, pct_unemployed = val_num)
+    dplyr::select(rgn_id = id_num, year, pct_unemployed = val_num)
   
-  # debug
-  #     le_gdp            = read.csv('eez2014/layers/le_gdp.csv')
-  #     le_wages          = read.csv('eez2014/layers/le_wage_sector_year.csv')
-  #     le_jobs           = read.csv('eez2014/layers/le_jobs_sector_year.csv')  
-  #     le_workforce_size = read.csv('eez2014/layers/le_workforcesize_adj.csv')
-  #     le_unemployment   = read.csv('eez2014/layers/le_unemployment.csv')
   
   # multipliers from Table S10 (Halpern et al 2012 SOM)
   multipliers_jobs = data.frame('sector' = c('tour','cf', 'mmw', 'wte','mar'), 
@@ -63,14 +55,14 @@ LIV_ECO = function(layers, subgoal){
   # aia/subcountry2014 crashing b/c no concurrent wage data, so adding this check
   if (nrow(liv_status)==0){
     liv_status = liv %>%
-      select(region_id=rgn_id) %>%
+      dplyr::select(region_id=rgn_id) %>%
       group_by(region_id) %>%
       summarize(
         goal      = 'LIV',
         dimension = 'status',
         score     = NA)
     liv_trend = liv %>%
-      select(region_id=rgn_id) %>%
+      dplyr::select(region_id=rgn_id) %>%
       group_by(region_id) %>%
       summarize(
         goal      = 'LIV',
@@ -104,7 +96,7 @@ LIV_ECO = function(layers, subgoal){
       # filter for most recent year
       filter(year == max(year, na.rm=T)) %>%
       # format
-      select(
+      dplyr::select(
         region_id = rgn_id,
         score) %>%
       mutate(
@@ -155,7 +147,7 @@ LIV_ECO = function(layers, subgoal){
       mutate(
         goal      = 'LIV',
         dimension = 'trend') %>%
-      select(
+      dplyr::select(
         goal, dimension,
         region_id = rgn_id,
         score)
@@ -168,7 +160,7 @@ LIV_ECO = function(layers, subgoal){
       rev_adj = gdp_usd,
       sector = 'gdp') %>% 
     # adjust rev with national GDP rates if available. Example: (rev_adj = gdp_usd / ntl_gdp) 
-    select(rgn_id, year, sector, rev_adj)
+    dplyr::select(rgn_id, year, sector, rev_adj)
   
   # ECO status
   eco_status = eco %>%
@@ -193,7 +185,7 @@ LIV_ECO = function(layers, subgoal){
     mutate(
       goal      = 'ECO',
       dimension = 'status') %>%
-    select(
+    dplyr::select(
       goal, dimension,
       region_id = rgn_id,
       score)
@@ -224,7 +216,7 @@ LIV_ECO = function(layers, subgoal){
     mutate(
       goal      = 'ECO',
       dimension = 'trend') %>%
-    select(
+    dplyr::select(
       goal, dimension,
       region_id = rgn_id,
       score)

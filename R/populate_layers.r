@@ -79,12 +79,15 @@ populate_layers <- function(key, dir_repo, lyrs_gl, dir_global, dir_scenario, mu
     }
     
     ## for each layer (not multi_nation)...
-    for (lyr in lyrs_sc$layer){ # lyr = "ao_access"
+    for (lyr in lyrs_sc$layer){ # lyr = "ao_access"   lyr = 'hd_subtidal_hb'
       
       ## call copy_layer and write to layer to csv
       d <- copy_layer(lyr, sc_rgns,
                       dir_global, sfx_global,
                       lyrs_sc, write_to_csv = TRUE)
+      
+      ## update filename (will change if placeholder)
+      lyrs_sc$filename[lyrs_sc$layer == lyr] <- basename(d)
     }
     
   } else { # multi_nation == TRUE
@@ -112,16 +115,17 @@ populate_layers <- function(key, dir_repo, lyrs_gl, dir_global, dir_scenario, mu
     for (lyr in lyrs_sc$layer){ # lyr = "ao_access" 
       
       ## call copy_layer and then write to layer to csv as separate step
-      d <- copy_layer(lyr, 
-                      sc_rgns,
-                      dir_global,
-                      sfx_global,
-                      lyrs_sc,
-                      write_to_csv  = FALSE) 
+      d <- copy_layer(lyr, sc_rgns,
+                      dir_global, sfx_global,
+                      lyrs_sc, write_to_csv = FALSE) 
       if ('rgn_id' %in% names(d)) d = d %>% arrange(rgn_id)
       
+      ## update filename (will change if placeholder)
+      lyrs_sc$filename[lyrs_sc$layer == lyr] <- basename(d)
+      
       ## write to csv as separate step
-      csv_out = sprintf('layers/%s', lyrs_sc$filename[lyrs_sc$layer == lyr])
+      csv_out = d
+      #TODO update this so data and filename are returned
       write_csv(d, csv_out)
       
     }
@@ -143,8 +147,10 @@ populate_layers <- function(key, dir_repo, lyrs_gl, dir_global, dir_scenario, mu
       clip_n_ship_disag_description,
       layer_gl,
       path_in)
+  
+  ## save layers.csv
   layers_csv <- sprintf('%s/layers.csv', dir_scenario)
-  write.csv(lyrs_reg, layers_csv, row.names=F, na='')
+  readr::write_csv(lyrs_reg, layers_csv, na='')
   
   ## check for empty layers
   CheckLayers(layers_csv, file.path(dir_scenario, 'layers'),
