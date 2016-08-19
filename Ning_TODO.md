@@ -12,7 +12,10 @@ Julie TODO:
 - [ ] rethink edit_repos.rmd (should just be scripts called 'repopulate_more_regions' ex)
 - [ ] check if can delete /tmp folder with mean swapping stuff in populate_layers()
 
+placeholder layers: 
 
+- le_wage_sector_year --->>>>le_wage_sector_year_gl2016mean.csv in layers.csv register
+ 
 Warning messages:
 1: In min(d$year, na.rm = T) :
   no non-missing arguments to min; returning Inf
