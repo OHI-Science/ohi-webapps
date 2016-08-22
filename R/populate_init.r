@@ -2,8 +2,6 @@
 
 populate_init <- function(key){
   
-  wd <- getwd()
-  
   ## clone repo
   setwd(dir_repos)
   unlink(dir_repo, recursive=T, force=T)
@@ -17,21 +15,21 @@ populate_init <- function(key){
   if (length(remote_branches)==0){
     system('touch README.md')
     system('git add -A; git commit -m "first commit"')
-    try(system('git remote rm origin')) # added by JSL Mar 13 2015; http://stackoverflow.com/questions/1221840/remote-origin-already-exists-on-git-push-to-new-repository
+    try(system('git remote rm origin')) # stackoverflow.com/questions/1221840/remote-origin-already-exists-on-git-push-to-new-repository
     system(sprintf('git remote add origin https://github.com/OHI-Science/%s.git', key))
     system('git push -u origin master')
     system('git pull')
     remote_branches = sapply(branches(repo, 'remote'), function(x) str_split(x@name, '/')[[1]][2])
   }
   
-  ## rename if draft & published don't already exist
-  if (length(setdiff(c('draft','published'), remote_branches)) > 0 & length(remote_branches) > 0){
-    rename_branches(key)
-    remote_branches = sapply(branches(repo, 'remote'), function(x) str_split(x@name, '/')[[1]][2])
-  }
+  ## rename if draft & published don't already exist JSL Aug 22 2016; don't rename anymore.
+  # if (length(setdiff(c('draft','published'), remote_branches)) > 0 & length(remote_branches) > 0){
+  #   rename_branches(key)
+  #   remote_branches = sapply(branches(repo, 'remote'), function(x) str_split(x@name, '/')[[1]][2])
+  # }
   
-  ## ensure on draft branch ----
-  checkout(repo, 'draft')
+  # ## ensure on master branch ---- ## JSL: was 'draft'; unnecessary now.
+  # checkout(repo, 'master')
   
   ## recreate empty dir, except hidden .git
   del_except <- ''
@@ -46,6 +44,6 @@ populate_init <- function(key){
   
   ## git add, commit and push
   system(sprintf('git add -A; git commit -a -m "%s repo populated with initial files"', key))
-  system('git push origin draft')
+  system('git push origin master')
   
 }

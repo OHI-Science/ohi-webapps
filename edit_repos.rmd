@@ -2,7 +2,7 @@
 
 Note: This is a companion file to `edit_webapps.rmd` in the ohi-webapps@master branch. 
 
-## Update existing repos with new ohicore resilience structure
+# Update existing repos with new ohicore resilience structure
 July, 2016
 
 Written while also updating create_all.r and trying to move towards a package. 
@@ -49,4 +49,41 @@ system('git pull')
 
 
 ```
+
+
+# Create prep repo
+
+## 0. add info to `sc_studies_custom.csv` 
+
+Add by hand to `ohi-webapps/custom/sc_studies_custom.csv`
+
+## 1. set key
+
+```{r key}
+## 1. set key
+key <- 'mhi'
+
+```
+
+## 2. Create prep repo
+
+```{r create prep repo}
+## setup ----
+source('~/github/ohi-webapps/_source_and_load.r')
+setwd(dir_webapps)
+source(file.path(dir_webapps, 'create_init.R'))
+source(file.path(dir_webapps, 'create_init_sc.R'))
+
+## create github repo on github.com
+create_gh_repo(key, gh_token, github_user)
+
+## set working dir
+dir.create(dir_repo)
+
+## add readme and prep folder
+populate_init(key)
+populate_prep(key)
+
+```
+
 

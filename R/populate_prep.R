@@ -1,15 +1,14 @@
 ## populate_prep.r
 
-populate_prep <- function(){
+populate_prep <- function(key){
   
   ## clone repo
-  wd = getwd()
   if (!file.exists(dir_repo)) system(sprintf('git clone %s %s', git_url, dir_repo))
   setwd(dir_repo)
   repo = repository(dir_repo)
   
-  # pull the latest from draft branch
-  system('git checkout draft; git pull')
+  # pull the latest from master branch
+  system('git checkout master; git pull')
   
   ## create prep dir
   dir.create('prep', showWarnings=F)
@@ -22,13 +21,12 @@ populate_prep <- function(){
   sapply(file.path(sprintf('prep/%s', prep_subfolders)), dir.create)
   
   ## populate prep folder's subfolders
-  # file.create(file.path(sprintf('prep/%s', prep_subfolders), 'README.md'))
   file.copy(file.path(dir_github, 'ohi-webapps/README_prep_subfolders.md'), 
             file.path(sprintf('prep/%s/README.md', prep_subfolders)), overwrite=T)
   
   ## git add, commit and push
   system(sprintf('git add -A; git commit -a -m "%s repo populated with prep folders"', key))
-  system('git push origin draft')
+  system('git push origin master')
   
   ## TO ADD 
   # ## create and populate prep/tutorials folder 

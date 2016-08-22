@@ -1,4 +1,4 @@
-create_gh_repo <- function(key, gh_token=gh_token, github_user=github_user){
+create_gh_repo <- function(key, gh_token, github_user){
   
   repo_name <- key
   cmd <- sprintf('git ls-remote git@github.com:ohi-science/%s.git', repo_name)
