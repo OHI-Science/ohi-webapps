@@ -4,13 +4,14 @@ JSL add this to Ning's TODO issue
 - [ ] `/spatial/regions_list.csv`; just so there's a quick reference
 - [ ] layers that were empty (could not be populated with template data) have placeholders as the global mean. Suffix=`_glXXXXmean.csv`. I haven't done the downweighting, so there are no _sc2014 layers anymore. 
 - [ ] `placeholder` suffixes
+- [ ] update mhi/README with updated link to tutorials
 
 
 Julie TODO: 
 - [x] run CHL's calculate_scores.r to see if without _sc2014 it works
    - [x]  fill NAs and save as placeholder layers (warnings below) 
    - [x]  fix other files too (see errors) (did this with some help from Mel and eez2016 layers
-   - [ ] look into pressures, resilience matrix stuff
+   - [ ] look into pressures, resilience matrix stuff  <<-- do this next
 - [ ] populate_conf()
 - [ ] rethink edit_repos.rmd (should just be scripts called 'repopulate_more_regions' ex)
 - [ ] check if can delete /tmp folder with mean swapping stuff in populate_layers()

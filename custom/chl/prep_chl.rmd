@@ -2,7 +2,7 @@
 
 This is for modifying the existing chl repo with new regions (16 total, up from original 12). Should have been able to run edit_repos.rmd but needed to make some additional tweaks to the shapefiles. 
 
-## 0. add shp to `sc_studies_custom.csv` 
+## 0. add info to `sc_studies_custom.csv` 
 
 Add by hand to `ohi-webapps/custom/sc_studies_custom.csv`
 
@@ -91,6 +91,7 @@ populate_conf(key, dir_scenario, dir_global) ## look at TODOs in functions.r
 populate_etc(key, dir_scenario)
 
 ##TODO: check calculate_scores.r runs 
+# - [ ] look into pressures, resilience matrix stuff  <<-- do this next
 
 ## TODO: now call map functions from below
 
