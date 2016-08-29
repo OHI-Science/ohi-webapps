@@ -86,6 +86,7 @@ copy_layer <- function(lyr,
     ## fill 0 as placeholder for pressures
     if ( 'pressures.score' %in% names(dtmp) | 'pressure_score' %in% names(dtmp) ) {
       dtmp[is.na(dtmp)] <- 0
+      # dtmp[dtmp == 2016] <- as.numeric(stringr::str_extract(dir_global, "\\d{4}")) TODO:: replace 2016!!
     }
     
     ## fill 'cf' as placeholder for LIV/ECO

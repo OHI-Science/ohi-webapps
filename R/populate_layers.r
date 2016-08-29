@@ -29,7 +29,10 @@ populate_layers <- function(key, dir_repo, lyrs_gl, dir_global, dir_scenario, mu
   lyrs_sc$rgns_in[ix]  <-  'subcountry'
   lyrs_sc$path_in[ix]  <-  file.path(dir_annex_sc, 'spatial', csv)
   lyrs_sc$filename[ix] <-  sprintf('%s.csv', lyr_area)
-  rgns_list <- sprintf('%s/spatial/regions_list.csv', dir_scenario)  ## save a copy of rgn_area
+  
+  ## save a copy of rgn_area TODO: maybe move this to create_repo_map.r?
+  dir.create(sprintf('%s/spatial', dir_scenario), showWarning=FALSE)
+  rgns_list <- sprintf('%s/spatial/regions_list.csv', dir_scenario)  
   file.copy(from =  lyrs_sc$path_in[ix], to = rgns_list, overwrite=TRUE)
   
   ## drop cntry_* layers

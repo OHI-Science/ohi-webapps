@@ -15,7 +15,21 @@ Julie TODO:
 - [ ] populate_conf()
 - [ ] rethink edit_repos.rmd (should just be scripts called 'repopulate_more_regions' ex)
 - [ ] check if can delete /tmp folder with mean swapping stuff in populate_layers()
+- [ ] hd_subtidal_hb 0-1 in copy_layerL89
+- [ ] change RDV to master branch
 
+
+RDV::
+## interesting...
+populate_layers(key, dir_repo, lyrs_gl, dir_global, dir_scenario, multi_nation = FALSE)
+Parsed with column specification:
+cols(
+  rgn_id = col_double(),
+  rgn_name = col_character(),
+  area_km2 = col_double()
+)
+
+CHL::
 Calculating Pressures for each region...
 There are 6 pressures subcategories: pollution, alien_species, habitat_destruction, fishing_pressure, climate_change, social 
 The following `from` values were not present in `x`: x

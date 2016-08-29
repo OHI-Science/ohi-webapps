@@ -1,6 +1,6 @@
 ## create_repo_map.r
 
-create_repo_map <- function(key=key, dir_shp_in=dir_shp_in, dir_spatial=dir_spatial){ 
+create_repo_map <- function(key, dir_shp_in, dir_spatial, dir_scenario){ 
   
   ## load libraries quietly ----
   suppressWarnings(suppressPackageStartupMessages({
@@ -26,12 +26,12 @@ create_repo_map <- function(key=key, dir_shp_in=dir_shp_in, dir_spatial=dir_spat
   f_shp     = file.path(dir_annex_sc, 'spatial', 'rgn_offshore_gcs.shp')
   
   cat(sprintf('  creating geojson file with ohirepos::shp_to_geojson -- %s\n', format(Sys.time(), '%X')))
-  shp_to_geojson(f_shp, f_js, f_geojson) # TODO: preappend ohirepos::
+  ohicore::shp_to_geojson(f_shp, f_js, f_geojson) # TODO: preappend ohirepos::
   
-  ## copy geojson files to repo
-  for (f in c(f_js, f_geojson)){ # f = f_js
+  ## copy geojson files to repo/spatial
+  for (f in c(f_js, f_geojson)){ # f = f_geojson
     file.copy(from = f, 
-              to   = sprintf('%s/%s/spatial/%s', dir_repo, default_scenario, basename(f)), overwrite=T)
+              to   = sprintf('%s/spatial/%s', dir_scenario, basename(f)), overwrite=T)
     cat(sprintf('\n copying from %s', f))
   }
   

@@ -8,20 +8,25 @@ Add by hand to `ohi-webapps/custom/sc_studies_custom.csv`
 ## 1. setup
 ```{r setup, eval=F}
 
+key <- 'rdv'
+
 # libraries
+library(dplyr)
 library(rgdal) # install.packages('rgdal')
 
-# key <- 'rdv'
 
 # directories
-# dir_M <- c('Windows' = '//mazu.nceas.ucsb.edu/ohi',
-#            'Darwin'  = '/Volumes/ohi',  
-#            'Linux'   = '/home/shares/ohi')[[ Sys.info()[['sysname']] ]]
-# dir_custom_rdv = '~/github/ohi-webapps/custom/rdv'
-# dir_annex_sc   = file.path(dir_neptune, 'git-annex/clip-n-ship', key)
+dir_M <- c('Windows' = '//mazu.nceas.ucsb.edu/ohi',
+           'Darwin'  = '/Volumes/ohi',
+           'Linux'   = '/home/shares/ohi')[[ Sys.info()[['sysname']] ]]
+dir_spatial = file.path(dir_M, 'git-annex/clip-n-ship', key, 'spatial')
+dir_shp_in  = file.path(dir_spatial, 'custom')
+
 
 # setwd
 setwd('~/github/ohi-webapps')
+
+path_tmp <- '~/github/ohi-webapps/custom/rdv/shp'
 
 ```
 
@@ -29,21 +34,27 @@ setwd('~/github/ohi-webapps')
 ```{r setup, eval=F}
 
 ## read in shp files and save with desired headers in data frame.
-shp_orig <- rgdal::readOGR(dsn = path.expand('~/Downloads/reshapefilesforradevigoohi'),
-              layer = 'FinalLayerOHI')
+shp_orig <- rgdal::readOGR(dsn = path.expand(path_tmp),
+              layer = 'ZM_Final')
 shp_orig@data
 plot(shp_orig)
 
-## filter for only Mncip_name == 'Ria de Vigo' (but can't do it with that command)
-shp_rdv <- shp_orig[!is.na(shp_orig$Mncip_name) & !is.na(shp_orig$id), ]
+shp_orig@data <- shp_orig@data %>%
+  mutate(rgn_id   = Color, 
+         rgn_name = Mncip_name,
+         area_km2 = Area_Km2) %>%
+  select(rgn_id, rgn_name, area_km2)
+  
 
-shp_rdv@data
+## save as shapefiles. will create 4 files: .dbf, .prj, .shp, .shx TODO: save in MAZU
+writeOGR(shp_orig, dsn = dir_shp_in,
+         layer = 'rdv_shp', driver = 'ESRI Shapefile', overwrite=T)
 
-plot(shp_rdv)
+## save rgn_offshore_data.csv on git-annex
+readr::write_csv(shp_orig@data, file.path(dir_spatial, 'rgn_offshore_data.csv'))
 
-## investigate removing Mncip_name == 'Ria de Vigo'     
-shp_y <- shp_orig[!is.na(shp_orig$Mncip_name) & shp_orig$Area.Km2 < 500, ]          
-plot(shp_y)
+# save lookup table with unique rgn_ids on github
+readr::write_csv(shp_orig@data, sprintf('~/github/ohi-webapps/custom/%s/rgns_custom.csv', key))
 
 ```
 

@@ -61,11 +61,11 @@ Add by hand to `ohi-webapps/custom/sc_studies_custom.csv`
 
 ```{r key}
 ## 1. set key
-key <- 'mhi'
+key <- 'rdv'
 
 ```
 
-## 2. Create prep repo
+## 2. Set directories etc
 
 ```{r create prep repo}
 ## setup ----
@@ -73,7 +73,11 @@ source('~/github/ohi-webapps/_source_and_load.r')
 setwd(dir_webapps)
 source(file.path(dir_webapps, 'create_init.R'))
 source(file.path(dir_webapps, 'create_init_sc.R'))
+```
 
+## 3. Create prep repo
+
+```{r}
 ## create github repo on github.com
 create_gh_repo(key, gh_token, github_user)
 
@@ -83,7 +87,42 @@ dir.create(dir_repo)
 ## add readme and prep folder
 populate_init(key)
 populate_prep(key)
+```
+
+
+## 4. Inspect Custom Shapefiles
+
+For now, in prep_rdv.rmd
+
+
+## 5. Populate all the things
+
+```{r}
+
+## create scenario folder
+dir.create(dir_scenario, showWarning=FALSE)
+
+## populate layers folder and layers.csv, and conf. Doesn't push. 
+populate_layers(key, dir_repo, lyrs_gl, dir_global, dir_scenario, multi_nation = FALSE)
+populate_conf(key, dir_scenario, dir_global) ## look at TODOs in functions.r
+populate_etc(key, dir_scenario)
+
+##TODO: check calculate_scores.r runs 
+# - [ ] look into pressures, resilience matrix stuff  <<-- do this next
+
+# create_repo_map
+create_repo_map(key, dir_shp_in, dir_spatial, dir_scenario) 
+
+## TODO: move prep folder
 
 ```
 
+## Push!
+
+```{r}
+## push draft branch
+source('~/github/ohi-webapps/ohi-functions.R')          # TODO: move these to R folder as separate .r functions
+setwd(dir_repo)
+push_branch('draft') # source('ohi-functions.r')
+system('git pull')
 
