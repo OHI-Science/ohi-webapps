@@ -14,7 +14,7 @@ key <- 'cnc'
 dir_spatial = file.path(dir_M, 'git-annex/clip-n-ship', key, 'spatial') 
 dir_layers  = file.path(dir_M, 'git-annex/clip-n-ship', key, 'layers') 
 dir_custom  = file.path(dir_spatial, 'custom') 
-dir_in      = file.path(dir_custom, 'ShapeFile_Region_CoralSeaMarinePark_EEZ_Limits') 
+dir_in      = file.path(dir_custom, 'Shape') 
 
 ```
 
@@ -23,7 +23,7 @@ dir_in      = file.path(dir_custom, 'ShapeFile_Region_CoralSeaMarinePark_EEZ_Lim
 ```{r explore shapefiles, eval=F}
 
 ## inspect
-shp = readOGR(dsn = dir_in, layer = 'zee_officielle')
+shp <-  rgdal::readOGR(dsn = path.expand(dir_in), layer = 'espace_maritime_NC')
 shp@data
 shp
   
