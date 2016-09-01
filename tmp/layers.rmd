@@ -38,7 +38,8 @@ The per capita purchasing power parity (PPP) adjusted gross domestic product (GD
 
 Change in current year's modeled aragonite saturation state (Feely et al. 2010) relative to historical mean (1880-1889).
 
-Data sources:
+#### citation 
+
 - Feely, R., Doney, S. & Cooley, S. (2009) **Ocean acidification: present conditions and future changes in a high-CO2 world**.
 _Oceanography_ 22:36-47. [doi:10.5670/oceanog.2009.95](http://www.tos.org/oceanography/archive/22-4_feely.html)
 - J. Afflerbach et al. (2015). [Methods](https://github.com/OHI-Science/ohiprep/tree/master/globalprep/Pressures_OceanAcidification/v2015)

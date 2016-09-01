@@ -14,10 +14,10 @@ ld <- l %>%
   arrange(layer)
 dim(ld)
 
-write_csv(ld, file.path(dir_tmp, 'ld.csv'))
+write_csv(ld, file.path(dir_tmp, 'layersd.csv'))
 
 
-## Then, save this as a .csv
+## Then, save this as layers.rmd
 
 ## In Text Wrangler, 2 search-replaces:
 
