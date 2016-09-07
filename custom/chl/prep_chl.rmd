@@ -67,7 +67,8 @@ setwd(dir_repo)
 
 ## Unpopulate existing layers; rename scenario
 delete contents so can start afresh
-```{r}
+
+```{r unpopulate, eval=F}
 ## rename subcountry2014 -> region2016. 
 file.rename(from = file.path(dir_repo, 'subcountry2014'),
             to   = file.path(dir_repo, 'region2016'))
@@ -76,42 +77,55 @@ file.rename(from = file.path(dir_repo, 'subcountry2014'),
 unpopulate_layers_conf(key, dir_repos, dir_repo, git_url, default_scenario)
 
 ## a few extra files to delete from CHL: 
-also_delete <- paste(dir_repo, c('copy_webapps_templates.r', 'ohi-travis-functions.R', 'travis-tool.sh'), sep = '/')
+also_delete <- paste(dir_repo, 
+                     c('copy_webapps_templates.r', 'ohi-travis-functions.R', 'travis-tool.sh'), sep = '/')
 unlink(also_delete, recursive = TRUE, force = TRUE)
-
 ```
 
 ## Repopulate all the things
 
-```{r}
-
+```{r populate, eval=F}
 ## populate layers folder and layers.csv, and conf. Doesn't push. 
 populate_layers(key, dir_repo, lyrs_gl, dir_global, dir_scenario, multi_nation = FALSE)
 populate_conf(key, dir_scenario, dir_global) ## look at TODOs in functions.r
 populate_etc(key, dir_scenario)
+```
 
-##TODO: check calculate_scores.r runs 
-# - [ ] look into pressures, resilience matrix stuff  <<-- do this next
+## Calculate scores and create scores.csv
 
-## TODO: now call map functions from below
+Can also test this from the repo itself (open the CHL .rproj)
+
+```{r calculate, eval=F}
+## calculate scores and create scores.csv
+calculate_scores_check()
 
 ```
 
 
 ## Push!
 
-```{r}
-## push draft branch
-source('~/github/ohi-webapps/ohi-functions.R')          # TODO: move these to R folder as separate .r functions
+```{r push, eval=F}
+# push repo
 setwd(dir_repo)
-push_branch('draft') # source('ohi-functions.r')
-system('git pull')
+push_branch(branch = 'draft', current_msg = 'updated CHL repo with new region boundaries') 
+
+```
+
+## Rename draft to master
+
+```{r, eval=F}
+
+system('git status')
+system('git branch -m draft master')
+system('git branch')
+
+## Then delete on GitHub and repush http://stackoverflow.com/questions/9524933/renaming-a-branch-in-github
+push_branch(branch = 'master', current_msg = 'renamed draft branch to master branch') 
 
 ```
 
 
-
-## Create Repo's Maps
+## Create Repo's Maps -- this is for the OHI+ Project Page/WebApp; keep it here for now...
 
 ```{r create_repo_map etc}
 # create_repo_map

@@ -10,9 +10,9 @@ Written while also updating create_all.r and trying to move towards a package.
 - col X
 - ohibc
 - arc X
-- chl
+- chl x
 - cdz
-
+- rdv x
 
 ```{r}
 
@@ -42,11 +42,10 @@ populate_conf()
 populate_etc()
 
 ## push draft branch
-source('~/github/ohi-webapps/ohi-functions.R')          # TODO: move these to R folder as separate .r functions
+source('~/github/ohi-webapps/ohi-functions.R')           functions
 setwd(dir_repo)
 push_branch('draft') # source('ohi-functions.r')
 system('git pull')
-
 
 ```
 
