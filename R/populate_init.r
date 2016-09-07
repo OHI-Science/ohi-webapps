@@ -22,15 +22,6 @@ populate_init <- function(key){
     remote_branches = sapply(branches(repo, 'remote'), function(x) str_split(x@name, '/')[[1]][2])
   }
   
-  ## rename if draft & published don't already exist JSL Aug 22 2016; don't rename anymore.
-  # if (length(setdiff(c('draft','published'), remote_branches)) > 0 & length(remote_branches) > 0){
-  #   rename_branches(key)
-  #   remote_branches = sapply(branches(repo, 'remote'), function(x) str_split(x@name, '/')[[1]][2])
-  # }
-  
-  # ## ensure on master branch ---- ## JSL: was 'draft'; unnecessary now.
-  # checkout(repo, 'master')
-  
   ## recreate empty dir, except hidden .git
   del_except <- ''
   for (f in setdiff(list.files(dir_repo, all.files=F), del_except)) unlink(file.path(dir_repo, f), recursive=T, force=T)
@@ -39,7 +30,7 @@ populate_init <- function(key){
   file.copy(system.file('templates/template.Rproj', package='devtools'), sprintf('%s.Rproj', key))
   writeLines(c('.Rproj.user', '.Rhistory', '.RData'), '.gitignore')
   
-  ## README # TODO redo readme
+  ## README 
   brew(sprintf('%s/ohi-webapps/README.brew.md', dir_github), 'README.md')
   
   ## git add, commit and push
