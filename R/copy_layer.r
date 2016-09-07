@@ -7,7 +7,7 @@ copy_layer <- function(lyr,
                        dir_global,
                        sfx_global,
                        lyrs_sc,
-                       write_to_csv = TRUE){ #  j=14; lyr = lyrs_sc$layer[j]
+                       write_to_csv = TRUE){ 
   
   ## setup
   csv_in        <- sprintf('%s/layers/%s.csv', dir_global, lyr)
@@ -84,9 +84,8 @@ copy_layer <- function(lyr,
       rename(rgn_id = sc_rgn_id)
     
     ## fill 0 as placeholder for pressures
-    if ( 'pressures.score' %in% names(dtmp) | 'pressure_score' %in% names(dtmp) ) {
-      dtmp[is.na(dtmp)] <- 0
-      # dtmp[dtmp == 2016] <- as.numeric(stringr::str_extract(dir_global, "\\d{4}")) TODO:: replace 2016!!
+    if (any(names(dtmp) %in% c('pressures.score', 'pressure_score'))) {
+      dtmp[is.na(dtmp)] <- as.integer(0)
     }
     
     ## fill 'cf' as placeholder for LIV/ECO
@@ -94,8 +93,18 @@ copy_layer <- function(lyr,
       dtmp$sector[is.na(dtmp$sector)] <- 'cf'
     }
     
+    ## fill 'seagrass' as placeholder for HAB
+    if ('habitat' %in% names(dtmp)) {
+      dtmp$habitat[is.na(dtmp$habitat)] <- 'seagrass'
+    }
+    
+    ## fill global year as placeholder for year
+    if ('year' %in% names(dtmp)) {
+      dtmp$year <- as.integer(stringr::str_extract(dir_global, "\\d{4}"))
+    }
+    
     ## fill global year as placeholder for any others
-    dtmp[is.na(dtmp)] <- as.numeric(stringr::str_extract(dir_global, "\\d{4}"))
+    dtmp[is.na(dtmp)] <- as.integer(stringr::str_extract(dir_global, "\\d{4}"))
     
     ## replace d with dtmp
     d <- dtmp
