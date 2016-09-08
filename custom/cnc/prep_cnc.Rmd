@@ -4,24 +4,15 @@ create new caledonia repo.
 ## 1. setup
 
 ```{r setup, eval=F}
-setwd('~/github/ohi-webapps')
-
-source('create_init.R')            # load all libraries, set directories relevant to all keys
-source('create_functions.R')       # all functions for creating and updating repos and webapps
-
-key <- 'cnc'
-
 dir_spatial = file.path(dir_M, 'git-annex/clip-n-ship', key, 'spatial') 
 dir_layers  = file.path(dir_M, 'git-annex/clip-n-ship', key, 'layers') 
 dir_custom  = file.path(dir_spatial, 'custom') 
 dir_in      = file.path(dir_custom, 'Shape') 
-
 ```
 
 ## Read shapefile, update name, resave
 
 ```{r explore shapefiles, eval=F}
-
 ## inspect
 shp <-  rgdal::readOGR(dsn = path.expand(dir_in), layer = 'espace_maritime_NC')
 shp@data
@@ -30,15 +21,20 @@ shp
 plot(shp)
 
 shp@data <- shp@data %>%
-  dplyr::mutate(rgn_name = 'Nouvelle-Calédonie') %>%
-  dplyr::select(rgn_id = ZEE_ID, 
+  dplyr::mutate(rgn_id = 1,
+                rgn_name = 'Nouvelle-Calédonie') %>%
+  dplyr::select(rgn_id, 
                 rgn_name, 
-                area_km2 = AREA)
+                area_km2 = `Surf_km.`)
 
 writeOGR(shp, dsn = dir_custom, layer = 'cnc_eez', driver = 'ESRI Shapefile', overwrite=TRUE) 
 
+## save rgn_offshore_data.csv on git-annex
+readr::write_csv(shp@data %>% 
+                   select(rgn_id, rgn_name, area_km2) %>%
+                   arrange(rgn_id), 
+                 file.path(dir_spatial, 'rgn_offshore_data.csv'))
+
+# save lookup table with unique rgn_ids on github
+readr::write_csv(shp@data, sprintf('~/github/ohi-webapps/custom/%s/rgns_custom.csv', key))
 ```
-
-## Create required .csv files
-
-have not done this 06/29/16; redo ohi-webapps@dev instead; otherwise borrow from Arctic...

@@ -9,7 +9,7 @@ Julie TODO:
    - [x]  fix other files too (see errors) (did this with some help from Mel and eez2016 layers
    - [x] look into pressures, resilience matrix stuff  
 - [ ] populate_conf()
-- [ ] rethink edit_repos.rmd (should just be scripts called 'repopulate_more_regions' ex)
+- [x] rethink edit_repos.rmd (now create_repos.rmd)
 - [ ] check if can delete /tmp folder with mean swapping stuff in populate_layers()
 - [x] hd_subtidal_hb 0-1 in copy_layerL89, le_wage_sector_year_gl2016placeholder.csv
 - [ ] change RDV to master branch
