@@ -2,4 +2,4 @@
 
 This is the Ocean Health Index repository for <%=study_area%>. 
 
-For more information, please see http://ohi-science.org
+For more information, please see http://ohi-science.org.

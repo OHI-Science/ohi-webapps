@@ -83,8 +83,8 @@ copy_layer <- function(lyr,
       select(-rgn_id) %>%
       rename(rgn_id = sc_rgn_id)
     
-    ## fill 0 as placeholder for pressures
-    if (any(names(dtmp) %in% c('pressures.score', 'pressure_score'))) {
+    ## fill 0 as placeholder for pressures and resilience
+    if (any(names(dtmp) %in% c('pressures.score', 'pressure_score', 'resilience.score'))) {
       dtmp[is.na(dtmp)] <- as.integer(0)
     }
     

@@ -30,7 +30,7 @@ if (key %in% sc_custom$sc_key){
   message('Please enter a scenario name in `custom/sc_studies_custom.csv') # no longer default to 'subcountry2014'
 }
 dir_scenario <- file.path(dir_repo, default_scenario)
-
+dir_spatial <- file.path(dir_annex, key, 'spatial')
 
 # set custom default_scenario
 if (key == 'chn') default_scenario = 'province2015'

@@ -63,6 +63,9 @@ populate_layers(key, dir_repo, lyrs_gl, dir_global, dir_scenario, multi_nation =
 populate_conf(key, dir_scenario, dir_global) ## look at TODOs in functions.r
 populate_etc(key, dir_scenario)
 
+## create repo's maps
+create_repo_map(key, dir_spatial, dir_scenario) 
+
 ## if there is a prep repo, move it within the scenario folder
 dir_prep  <- file.path(dir_repo,     'prep')
 dir_prep2 <- file.path(dir_scenario, 'prep')
@@ -82,7 +85,7 @@ calculate_scores_check()
 ```{r push, eval=F}
 # push repo
 setwd(dir_repo)
-push_branch(branch = 'draft', current_msg = 'Created Full Repo') 
+push_branch(branch = 'master', current_msg = 'created full repo') 
 ```
 
 ## Rename draft to master
@@ -99,14 +102,6 @@ push_branch(branch = 'master', current_msg = 'renamed draft branch to master bra
 ```
 
 # Other functionality
-
-## Create Repo's Maps -- this is for the OHI+ Project Page/WebApp; keep it here for now...
-
-```{r create_repo_map etc}
-# create_repo_map
-create_repo_map(key, dir_shp_in, dir_spatial) 
-
-```
 
 ## Unpopulate Existing Repo
 (Optional)

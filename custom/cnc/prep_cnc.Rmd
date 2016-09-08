@@ -27,7 +27,7 @@ shp@data <- shp@data %>%
                 rgn_name, 
                 area_km2 = `Surf_km.`)
 
-writeOGR(shp, dsn = dir_custom, layer = 'cnc_eez', driver = 'ESRI Shapefile', overwrite=TRUE) 
+writeOGR(shp, dsn = dir_spatial, layer = 'cnc_eez', driver = 'ESRI Shapefile', overwrite=TRUE) 
 
 ## save rgn_offshore_data.csv on git-annex
 readr::write_csv(shp@data %>% 
