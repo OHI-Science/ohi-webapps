@@ -74,7 +74,7 @@ populate_conf <- function(key, dir_scenario, dir_global) {
   }
   write.csv(goals, sprintf('%s/conf/goals.csv', dir_scenario), row.names=F, na='')
   
-  ## copy goals documentation ## JSL revisit: necessary?
+  ## copy goals documentation ## TODO JSL revisit: necessary?
   file.copy(sprintf('%s/ohi-webapps/inst/goals.Rmd', dir_github), 
             sprintf('%s/conf/goals.Rmd', dir_scenario), overwrite=T)
   
