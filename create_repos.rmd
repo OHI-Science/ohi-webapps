@@ -7,7 +7,8 @@ NOTE:: must add info by hand to `ohi-webapps/custom/sc_studies_custom.csv`
 
 ```{r setup}
 ## set key ----
-key <- 'cnc'
+key <- 'ohibc'
+
 
 ## setup ----
 source('~/github/ohi-webapps/_source_and_load.r')
@@ -35,11 +36,10 @@ populate_prep(key)
 
 This occurs in the /custom folder. A running list: 
 
-- chl/prep_chl.rmd
+- chl/prep_chl.Rmd
 - cnc/prep_cnc.Rmd
-- rdv/prep_rdv.rmd
+- rdv/prep_rdv.Rmd
 - arc/prep_arc.Rmd
-
 
 ## Clone existing repo
 
@@ -88,30 +88,28 @@ setwd(dir_repo)
 push_branch(branch = 'master', current_msg = 'created full repo') 
 ```
 
-## Rename draft to master
-
-```{r, eval=F}
-
-system('git status')
-system('git branch -m draft master')
-system('git branch')
-
-## Then delete on GitHub and repush http://stackoverflow.com/questions/9524933/renaming-a-branch-in-github
-push_branch(branch = 'master', current_msg = 'renamed draft branch to master branch') 
-
-```
 
 # Other functionality
 
-## Unpopulate Existing Repo
+## Rename scenario
 (Optional)
-Delete contents so can start afresh, for example if a full repo exists but needs to be recreated with more regions. After
 
-```{r unpopulate, eval=F}
+Examples: 
+
+- chl became region2016 instead of subcountry2014.
+
+```{r rename scenario, eval=F}
 ## rename subcountry2014 -> region2016. 
 file.rename(from = file.path(dir_repo, 'subcountry2014'),
             to   = file.path(dir_repo, 'region2016'))
+```
 
+## Unpopulate Existing Repo
+(Optional)
+
+Delete contents so can start afresh, for example if a full repo exists but needs to be recreated with more regions.
+
+```{r unpopulate, eval=F}
 ## unpopulate_layers_conf
 unpopulate_layers_conf(key, dir_repos, dir_repo, git_url, default_scenario)
 
@@ -121,5 +119,17 @@ also_delete <- paste(dir_repo,
 unlink(also_delete, recursive = TRUE, force = TRUE)
 ```
 
+## Rename draft to master Part 1
 
+```{r, eval=F}
+system('git status')
+system('git branch -m draft master')
+system('git branch')
+```
+
+##  Rename draft to master Part 2: Delete draft by hand on GitHub and repush 
+http://stackoverflow.com/questions/9524933/renaming-a-branch-in-github
+```{r, eval=FALSE}
+push_branch(branch = 'master', current_msg = 'renamed draft branch to master branch') 
+```
 
