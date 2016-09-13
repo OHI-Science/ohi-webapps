@@ -11,7 +11,7 @@ library(dplyr) # install.packages('dplyr')
 
 
 ## example call using OHI Global 2015 data
-source('PlotFlowerMulti.r') # filepath of PlotFlowerMulti.r; eg '~/github/PlotFlowerMulti.r'
+source('https://raw.githubusercontent.com/OHI-Science/ohi-webapps/dev/inst/PlotFlowerMulti.R') 
 scores       <- read.csv('https://raw.githubusercontent.com/OHI-Science/ohi-global/v2015.1/eez2015/scores.csv')
 rgns_to_plot <- c(10:15)    # this will make flower plots for regions 10 through 15
 rgn_names    <- read.csv('https://raw.githubusercontent.com/OHI-Science/ohi-global/v2015.1/eez2015/layers/rgn_global.csv')
