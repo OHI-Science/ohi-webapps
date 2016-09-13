@@ -3,14 +3,16 @@
 populate_conf <- function(key, dir_scenario, dir_global) {
   
   ## create conf folder
-  dir.create(sprintf('%s/conf', dir_scenario), showWarning=FALSE)
-  
+  if (!dir.exists(sprintf('%s/conf', dir_scenario))) {
+    dir.create(sprintf('%s/conf', dir_scenario), showWarning=FALSE)
+  }
+    
   ## list conf files to copy
   conf_files = c('config.R','functions.R','goals.csv',
                  'pressures_matrix.csv','resilience_matrix.csv',
                  'pressure_categories.csv', 'resilience_categories.csv')
   
-  for (f in conf_files){ # f = conf_files[1]
+  for (f in conf_files){ # f = conf_files[1] f = "functions.R" 
     
     f_in  = sprintf('%s/conf/%s', dir_global,   f)
     f_out = sprintf('%s/conf/%s', dir_scenario, f)
@@ -21,7 +23,6 @@ populate_conf <- function(key, dir_scenario, dir_global) {
     ## swap out custom functions
     if (f == 'functions.R'){
       
-      ## TODO: delete PreGlobalScores(): https://github.com/OHI-Science/ohicore/blob/master/R/CalculateAll.R#L217-L221
       ## TODO: delete eez2013 from functions. r --Setup()
       
       ## iterate over goals with functions to swap
@@ -51,6 +52,15 @@ populate_conf <- function(key, dir_scenario, dir_global) {
         str_replace("write.csv\\(tmp, 'temp/.*", '') %>%
         str_replace('^.*sprintf\\(\'temp\\/.*', '')
     
+      ## TODO: Delete PreGlobalScores(): https://github.com/OHI-Science/ohicore/blob/master/R/CalculateAll.R#L217-L221
+      
+      del_begin <- s %>% str_locate("PreGlobalScores.*")
+      del_begin <- which(!is.na(del_begin[,1]))
+      del_ends <- s %>% str_locate("\\}") 
+      del_ends <- which(!is.na(del_ends[,1]))
+      
+     # Finish this logic: need to extract the del_ends that follows del_begin, then delete those lines from s. 
+      
     } ## end if(f == 'functions.R')
     
     
