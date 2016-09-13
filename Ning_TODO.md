@@ -8,11 +8,12 @@ Julie TODO:
    - [x]  fill NAs and save as placeholder layers (warnings below) 
    - [x]  fix other files too (see errors) (did this with some help from Mel and eez2016 layers
    - [x] look into pressures, resilience matrix stuff  
-- [ ] populate_conf()
-- [x] rethink edit_repos.rmd (now create_repos.rmd)
+- [ ] populate_conf() -- PreGlobalScores etc.
 - [ ] check if can delete /tmp folder with mean swapping stuff in populate_layers()
-- [x] hd_subtidal_hb 0-1 in copy_layerL89, le_wage_sector_year_gl2016placeholder.csv
-- [ ] change RDV to master branch
+- [ ] revisit create_init and create_init_sc and make more lightweight
+- [ ] move to ohirepos
+- [ ] deal with /reports, which isn't created now (and not deleted by unpopulate_layers_conf.r
+- [ ] check why couldn't create ohibc map:  Error in ogrInfo(dsn = dsn, layer = layer, encoding = encoding, use_iconv = use_iconv,  : Cannot open layer 
 
 
 RDV::

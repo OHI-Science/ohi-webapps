@@ -2,27 +2,23 @@
 ## extracted from create_functions.r - populate_draft_branch(); make its own function.
 # https://github.com/OHI-Science/ohi-webapps/blob/26054a43d118a50c275ed75da41430147ab35d0e/create_functions.R#L487-L554
 
-copy_layer <- function(lyr, 
-                       sc_rgns,
-                       dir_global,
-                       sfx_global,
-                       lyrs_sc,
-                       write_to_csv = TRUE){ 
+copy_layer <- function(lyr, sc_rgns,
+                       dir_global, sfx_global,
+                       lyrs_sc, write_to_csv = TRUE){ 
   
   ## setup
   csv_in        <- sprintf('%s/layers/%s.csv', dir_global, lyr)
   global_rgn_id <-  unique(sc_rgns$gl_rgn_id)
   
-  d = read.csv(csv_in) # use read.csv for now; readr has a bug: https://github.com/hadley/readr/issues/364: Error in filter_impl(.data, dots) : attempt to use zero-length variable name
+  d = read.csv(csv_in) 
   flds = names(d)
-  
   
   if ('rgn_id' %in% names(d)){
     d = d %>%
       filter(rgn_id %in% global_rgn_id) %>%
-      merge(sc_rgns, by.x='rgn_id', by.y='gl_rgn_id') %>%
-      mutate(rgn_id=sc_rgn_id) %>%
-      subset(select=flds) %>%
+      merge(sc_rgns, by.x = 'rgn_id', by.y = 'gl_rgn_id') %>%
+      mutate(rgn_id = as.integer(sc_rgn_id)) %>%
+      subset(select = flds) %>%
       arrange(rgn_id)
   }
   
@@ -39,13 +35,20 @@ copy_layer <- function(lyr,
       arrange(rgn_id)
   }
   
+  ## update rgn_labels
   if (lyr =='rgn_labels'){
     csv_out = sprintf('%s/layers/rgn_labels.csv', dir_scenario)
     lyrs_sc$filename[lyrs_sc$layer == lyr] = basename(csv_out)
-    d = d %>%
+    d <- d %>%
       merge(sc_rgns, by.x='rgn_id', by.y='sc_rgn_id') %>%
       select(rgn_id, type, label=sc_rgn_name) %>%
       arrange(rgn_id)
+  }
+  
+  ## update rgn_global csv name
+  if (lyr =='rgn_global'){
+    csv_out = sprintf('%s/layers/rgn_global.csv', dir_scenario)
+    lyrs_sc$filename[lyrs_sc$layer == lyr] = basename(csv_out)
   }
   
   ## TODO: comment out for now; see if this is actually happening. 
@@ -114,9 +117,11 @@ copy_layer <- function(lyr,
     lyrs_sc$filename[lyrs_sc$layer == lyr] = placeholder_csv
     
   }
-  
+
   ## create csv_out (with or without placeholder added)
   csv_out <- sprintf('%s/layers/%s', dir_scenario, lyrs_sc$filename[lyrs_sc$layer == lyr])
+  
+  d$rgn_id <- as.integer(d$rgn_id)
   
   ## write to csv if TRUE
   if (write_to_csv) {

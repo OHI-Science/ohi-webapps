@@ -73,6 +73,7 @@ populate_layers <- function(key, dir_repo, lyrs_gl, dir_global, dir_scenario, mu
   dir.create(sprintf('%s/layers', dir_scenario), showWarnings=F)
   rlist <- readr::read_csv(rgns_list)
     
+  
   ## copy layers one by one, saving differently if multi_nation
   if (!multi_nation) {
     
@@ -84,7 +85,7 @@ populate_layers <- function(key, dir_repo, lyrs_gl, dir_global, dir_scenario, mu
     }
     
     ## for each layer (not multi_nation)...
-    for (lyr in lyrs_sc$layer){ # lyr = "ao_access"   lyr = 'hd_subtidal_hb'  lyr = 'element_wts_cp_km2_x_protection'
+    for (lyr in lyrs_sc$layer){ # lyr = "ao_access"   lyr = 'hd_subtidal_hb'  lyr = 'rgn_global'
       
       ## call copy_layer and write to layer to csv
       d <- copy_layer(lyr, sc_rgns,
