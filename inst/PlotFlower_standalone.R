@@ -3,7 +3,7 @@
 # a data frame object with four columns: goal, dimension, region_id, scores (e.g. 'scores.csv')
 
 
-## install packages adn load libraries
+## install packages and load libraries
 library(devtools) # install.packages('devtools')
 devtools::install_github('ohi-science/ohicore')
 library(ohicore)
