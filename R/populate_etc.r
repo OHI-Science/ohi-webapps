@@ -9,7 +9,7 @@ populate_etc <- function(key, dir_scenario) {
   
   ## calculate_scores.r:: update source()
   readLines(file.path(dir_scenario, fn)) %>%
-    str_replace("source.*", paste0("source('", file.path(dir_github, key, default_scenario, fn), "')")) %>% 
+     str_replace("ohi-global/eez[0-9]{4}", file.path(key, default_scenario)) %>%
     writeLines(file.path(dir_scenario, fn))
 
   ## configure_toolbox.r:: copy ## TODO: make this a template. ----
@@ -19,7 +19,7 @@ populate_etc <- function(key, dir_scenario) {
   
   ## configure_toolbox.r:: update setwd()
   readLines(file.path(dir_scenario, fn)) %>%
-    str_replace("setwd.*", paste0("setwd('", file.path(dir_github, key, default_scenario), "')")) %>%
+    str_replace("ohi-global/eez[0-9]{4}", file.path(key, default_scenario)) %>%
     writeLines(file.path(dir_scenario, fn))
   
   
