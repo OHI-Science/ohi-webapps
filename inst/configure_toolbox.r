@@ -10,12 +10,10 @@
   ## 3. source configure_repo.r to ensure proper configuration
   ## 4. develop goal models in functions.r, running individual goal models line by line
 
-## load ohicore and libraries used in functions.r models
+## load ohicore and tidyverse (includes dplyr, tidyr, stringr, etc)
 if (!"ohicore" %in% (.packages())) {
   suppressWarnings(require(ohicore))
-  library(tidyr)    # install.packages('tidyr')
-  library(dplyr)    # install.packages('dplyr')
-  library(stringr)  # install.packages('stringr')
+  library(tidyverse)    # install.packages('tidyverse')
 }
 
 ## set working directory to the scenario that contains conf and layers directories
