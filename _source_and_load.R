@@ -16,7 +16,5 @@ if (Sys.info()[['sysname']] != 'Linux' & !file.exists(dir_M)){
 }
 
 # libraries
-library(dplyr)
+library(tidyverse)
 library(rgdal)
-library(readr)
-library(stringr)

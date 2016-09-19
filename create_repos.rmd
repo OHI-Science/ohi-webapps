@@ -7,7 +7,7 @@ NOTE:: must add info by hand to `ohi-webapps/custom/sc_studies_custom.csv`
 
 ```{r setup}
 ## set key ----
-key <- 'ohibc'
+key <- 'arc'
 
 
 ## setup ----
@@ -120,11 +120,9 @@ unlink(also_delete, recursive = TRUE, force = TRUE)
 system('git status')
 system('git branch -m draft master')
 system('git branch')
-```
 
-##  Rename draft to master Part 2: Delete draft by hand on GitHub and repush 
-http://stackoverflow.com/questions/9524933/renaming-a-branch-in-github
-```{r, eval=FALSE}
 push_branch(branch = 'master', current_msg = 'renamed draft branch to master branch') 
 ```
+
+##  Rename draft to master Part 2: Delete draft by hand on GitHub
 
