@@ -1,6 +1,6 @@
 ## calculate_scores_check
 
-calculate_scores_check <- function(){ 
+calculate_scores_check <- function(dir_scenario){ 
   
   ## libraries
   suppressWarnings(require(ohicore))
@@ -9,12 +9,12 @@ calculate_scores_check <- function(){
   #git2r::checkout(repo, 'master')
   
   # iterate through all scenarios (by finding layers.csv)
-  dirs_scenario = normalizePath(dirname(list.files('.', '^layers.csv$', recursive=T, full.names=T)))
-  for (dir_scenario in dirs_scenario){ # dir_scenario=dirs_scenario[1]
+  dirs_scenario = normalizePath(dirname(list.files(dir_scenario, '^layers.csv$', recursive=T, full.names=T)))
+  for (dir_scen in dirs_scenario){ # dir_scen=dirs_scenario[1]
     
     # set working directory to scenario
-    setwd(dir_scenario)
-    cat('\n\nCALCULATE SCORES for SCENARIO', basename(dir_scenario), '\n')
+    setwd(dir_scen)
+    cat('\n\nCALCULATE SCORES for SCENARIO', basename(dir_scen), '\n')
     
     # load scenario configuration
     conf <<- Conf('conf')

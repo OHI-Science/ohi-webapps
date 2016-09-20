@@ -1,10 +1,8 @@
 # this is prep_arc.Rmd
-create arctic repo. 
 
-@jafflerbach created the shapefile from chats with M. Burgass. See Issue #516: https://github.com/OHI-Science/issues/issues/516 and @master branch for older attempts. 
+Final arctic_eezs prepared by @jafflerbach in arc_regions.rmd @master branch!
 
 Arctic Regions: 
-
 - Russia rgn_id: 73
 - Greenland rgn_id: 145
 - USA rgn_id: 163
@@ -13,10 +11,9 @@ Arctic Regions:
 
 ## 1. setup
 Just need to rename a few regions
-
 ```{r setup, eval=F}
 setwd('~/github/ohi-webapps')
-
+source('~/github/ohi-webapps/_source_and_load.r')
 source('create_init.R')            # load all libraries, set directories relevant to all keys
 source('create_functions.R')       # all functions for creating and updating repos and webapps
 
@@ -24,18 +21,18 @@ key <- 'arc'
 
 dir_spatial    = file.path(dir_M, 'git-annex/clip-n-ship', key, 'spatial') 
 dir_layers     = file.path(dir_M, 'git-annex/clip-n-ship', key, 'layers') 
-dir_custom_tmp = file.path(dir_spatial, 'custom/final_jamie') 
+dir_custom_in = file.path(dir_spatial, 'custom/final_jamie') 
 dir_custom     = file.path(dir_spatial, 'custom') 
-
 ```
 
 ## Read shapefile, update name, resave
 
 ```{r explore shapefiles, eval=F}
-
 ## inspect
-shp = readOGR(dsn = dir_custom_tmp, layer = 'arctic_eezs')
+shp = readOGR(dsn = dir_custom_in, layer = 'arctic_eezs')
 shp@data
+str(shp@data)
+#plot(shp)
   
 ## rename a few rgn_names
 shp@data$rgn_name = as.character(shp@data$rgn_name)
@@ -47,13 +44,11 @@ shp@data$rgn_name[shp@data$rgn_name == 'east']     = 'East Greenland'
 shp@data <- shp@data %>%
   select(rgn_id, rgn_name, country, area_km2)
 
-writeOGR(shp, dsn = dir_custom, layer = 'arctic_eezs_final', driver = 'ESRI Shapefile', overwrite=TRUE) 
+writeOGR(shp, dsn = dir_spatial, layer = 'arctic_eezs', driver = 'ESRI Shapefile', overwrite=TRUE) 
 ```
 
 ## Create required .csv files
-
 ```{r csv files, eval=F}
-
 ## rgn_offshore_data.csv
 data_arc <- shp@data %>%
   select(-country)
@@ -66,5 +61,4 @@ data_frame(rgn_id = rep(1:max(data_arc$rgn_id), 5), year = rep(2005:2013, 5)) %>
   mutate(popsum = 100) %>%
   arrange(rgn_id) %>%
   write.csv(file.path(dir_layers, 'mar_coastalpopn_inland25km_lyr.csv'), row.names = FALSE)
-
 ```

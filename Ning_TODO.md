@@ -12,5 +12,5 @@ Julie TODO:
 - [ ] check if can delete /tmp folder with mean swapping stuff in populate_layers()
 - [ ] revisit create_init and create_init_sc and make more lightweight
 - [ ] move to ohirepos
-- [ ] deal with /reports, which isn't created now (and not deleted by unpopulate_layers_conf.r
+- [ ] deal with /reports, which isn't created now (and not deleted by unpopulate_layers_conf.r)
 - [ ] check why couldn't create ohibc map:  Error in ogrInfo(dsn = dsn, layer = layer, encoding = encoding, use_iconv = use_iconv,  : Cannot open layer 

@@ -1,4 +1,4 @@
-# This is edit_repos.Rmd
+# This is create_repos.Rmd
 Note: This is a updated file to `edit_webapps.rmd` in the ohi-webapps@dev branch. 
 
 
@@ -6,7 +6,7 @@ Note: This is a updated file to `edit_webapps.rmd` in the ohi-webapps@dev branch
 NOTE:: must add info by hand to `ohi-webapps/custom/sc_studies_custom.csv`
 ```{r setup}
 ## set key ----
-key <- 'col'
+key <- 'arc' 
 
 
 ## setup ----
@@ -68,7 +68,7 @@ create_repo_map(key, dir_spatial, dir_scenario)
 Can also test this from the repo itself (open the the clip-n-ship/key/.rproj)
 ```{r calculate, eval=F}
 ## calculate scores and create scores.csv
-calculate_scores_check()
+calculate_scores_check(dir_scenario)
 ```
 
 
