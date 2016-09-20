@@ -1,13 +1,12 @@
 # This is edit_repos.Rmd
 Note: This is a updated file to `edit_webapps.rmd` in the ohi-webapps@dev branch. 
 
+
 ## Initial Setup
-
 NOTE:: must add info by hand to `ohi-webapps/custom/sc_studies_custom.csv`
-
 ```{r setup}
 ## set key ----
-key <- 'arc'
+key <- 'col'
 
 
 ## setup ----
@@ -19,7 +18,6 @@ source(file.path(dir_webapps, 'create_init_sc.R'))
 
 
 ## Create Starter Repo
-
 ```{r}
 ## create github repo on github.com
 create_gh_repo(key, gh_token, github_user)
@@ -33,7 +31,6 @@ populate_prep(key)
 ```
 
 ## Inspect user's shapefiles and save as OHI shapefiles
-
 This occurs in the /custom folder. A running list: 
 
 - chl/prep_chl.Rmd
@@ -41,8 +38,8 @@ This occurs in the /custom folder. A running list:
 - rdv/prep_rdv.Rmd
 - arc/prep_arc.Rmd
 
-## Clone existing repo
 
+## Clone existing repo
 ```{r clone existing repo, eval=FALSE}
 ## clone chl repo
 unlink(dir_repo, recursive=T, force=T)
@@ -51,12 +48,11 @@ setwd(dir_repo)
 ```
 
 ## Potential Step(s) Here
-
 - Unpopulate Existing Repo (see chunk below)
+
 
 ## Populate Full Repo
 This doesn't push, just populates.
-
 ```{r populate, eval=F}
 ## populate layers folder and layers.csv, and conf
 populate_layers(key, dir_repo, lyrs_gl, dir_global, dir_scenario, multi_nation = FALSE)
@@ -67,21 +63,22 @@ populate_etc(key, dir_scenario)
 create_repo_map(key, dir_spatial, dir_scenario) 
 ```
 
+
 ## Calculate scores and create scores.csv
 Can also test this from the repo itself (open the the clip-n-ship/key/.rproj)
-
 ```{r calculate, eval=F}
 ## calculate scores and create scores.csv
 calculate_scores_check()
 ```
 
-## Push!
 
+## Push!
 ```{r push, eval=F}
 # push repo
 setwd(dir_repo)
 push_branch(branch = 'master', current_msg = 'created full repo') 
 ```
+
 
 
 # Other functionality
@@ -114,8 +111,8 @@ also_delete <- paste(dir_repo,
 unlink(also_delete, recursive = TRUE, force = TRUE)
 ```
 
-## Rename draft to master Part 1
 
+## Rename draft to master Part 1
 ```{r, eval=F}
 system('git status')
 system('git branch -m draft master')
@@ -124,5 +121,5 @@ system('git branch')
 push_branch(branch = 'master', current_msg = 'renamed draft branch to master branch') 
 ```
 
-##  Rename draft to master Part 2: Delete draft by hand on GitHub
+## Rename draft to master Part 2: Delete draft by hand on GitHub
 
