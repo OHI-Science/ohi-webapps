@@ -21,7 +21,6 @@ key <- 'arc'
 
 dir_spatial    = file.path(dir_M, 'git-annex/clip-n-ship', key, 'spatial') 
 dir_layers     = file.path(dir_M, 'git-annex/clip-n-ship', key, 'layers') 
-dir_custom_in = file.path(dir_spatial, 'custom/final_jamie') 
 dir_custom     = file.path(dir_spatial, 'custom') 
 ```
 
@@ -29,10 +28,10 @@ dir_custom     = file.path(dir_spatial, 'custom')
 
 ```{r explore shapefiles, eval=F}
 ## inspect
-shp = readOGR(dsn = dir_custom_in, layer = 'arctic_eezs')
+shp = readOGR(dsn = dir_spatial, layer = 'arctic_eezs')
 shp@data
 str(shp@data)
-#plot(shp)
+# plot(shp)
   
 ## rename a few rgn_names
 shp@data$rgn_name = as.character(shp@data$rgn_name)
@@ -40,6 +39,9 @@ shp@data$rgn_name[shp@data$rgn_name == 'norway']   = 'Norway'
 shp@data$rgn_name[shp@data$rgn_name == 'svalbard'] = 'Svalbard'
 shp@data$rgn_name[shp@data$rgn_name == 'west']     = 'West Greenland'
 shp@data$rgn_name[shp@data$rgn_name == 'east']     = 'East Greenland'
+shp@data$rgn_name[shp@data$rgn_name == 'banana']   = 'High Seas'
+shp@data$country <- as.character(shp@data$country)
+shp@data$country[shp@data$country   == 'NA']       = 'High Seas'
 
 shp@data <- shp@data %>%
   select(rgn_id, rgn_name, country, area_km2)
