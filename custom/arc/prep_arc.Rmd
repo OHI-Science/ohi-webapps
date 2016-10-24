@@ -39,7 +39,6 @@ shp@data$rgn_name[shp@data$rgn_name == 'norway']   = 'Norway'
 shp@data$rgn_name[shp@data$rgn_name == 'svalbard'] = 'Svalbard'
 shp@data$rgn_name[shp@data$rgn_name == 'west']     = 'West Greenland'
 shp@data$rgn_name[shp@data$rgn_name == 'east']     = 'East Greenland'
-shp@data$rgn_name[shp@data$rgn_name == 'banana']   = 'High Seas'
 shp@data$country <- as.character(shp@data$country)
 shp@data$country[shp@data$country   == 'NA']       = 'High Seas'
 
