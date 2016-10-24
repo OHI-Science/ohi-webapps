@@ -1,7 +1,7 @@
 ---
 title: "arctic shapefile"
 author: "Jamie Afflerbach"
-date: "4/29/2016"
+date: "10/24/2016"
 output: html_document
 ---
 
@@ -52,28 +52,28 @@ alaska@data = alaska@data%>%
 
 canada@data <- canada@data%>%
                 mutate(rgn_name = c('Nunavut','Beaufort Sea'))%>%
-                select(rgn_name, country=Country)
+                dplyr::select(rgn_name, country=Country)
 
 greenland@data <- greenland@data%>%
                 mutate(rgn_name = c('west','east'))%>%
-                select(rgn_name, country=Country)
+                dplyr::select(rgn_name, country=Country)
                     
 janmayen@data = janmayen@data%>%
                   mutate(country = 'Norway')%>%
-                select(rgn_name=rgn_nam, country)
+                dplyr::select(rgn_name=rgn_nam, country)
 
 russia@data = russia@data%>%
               mutate(rgn_name = 'Russia')%>%
-              select(rgn_name,country = Country)
+              dplyr::select(rgn_name,country = Country)
           
 svalbard@data = svalbard@data%>%
                   mutate(rgn_name = 'svalbard',
                          Country = 'Norway')%>%
-                  select(rgn_name,country = Country)
+                  dplyr::select(rgn_name,country = Country)
 
 norway@data = norway@data%>%
                   mutate(rgn_name = 'norway')%>%
-                  select(rgn_name,country = Country)
+                  dplyr::select(rgn_name,country = Country)
 
 
 ```
@@ -83,16 +83,24 @@ Combine them all together
 
 ```{r combine}
 
-#install.packages('taRifx.geo')
-library(taRifx.geo) #helps with the fix.duplicated.IDs=TRUE
+library(devtools)
+#install_git("git://github.com/gsk3/taRifx.geo.git")
+library(taRifx.geo)
+
+all = rbind.SpatialPolygonsDataFrame(alaska, canada, russia, svalbard, norway, janmayen, greenland)
+
+areas <- gArea(all, byid=TRUE)  
+
+all@data <- all@data%>%
+              mutate(rgn_id = 1:9,
+                     area_km2 = areas*1e-6)
 
 
-all = rbind(alaska, canada, russia, svalbard, norway, janmayen, greenland, fix.duplicated.IDs=TRUE)
+#save to github and git-annex (this is prob redundant)
+writeOGR(all,dsn='spatial',layer='arctic_eezs',driver="ESRI Shapefile", overwrite=T)
+writeOGR(all,dsn=file.path(dir_M, 'git-annex/clip-n-ship/arc/spatial'),layer='arctic_eezs',driver="ESRI Shapefile", overwrite=T)
 
-writeOGR(all,dsn='spatial',layer='arctic_eezs',driver="ESRI Shapefile")
-
-
-
+plot(all)
 
 ```
 
