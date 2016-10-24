@@ -21,4 +21,4 @@ arctic_land_laea <- spTransform(arctic_land, laeaCRS)
 
 plot(arctic_land_laea)
 
-writeOGR(arctic_land_laea,dsn = "globalprep/spatial",layer = "arctic_layer", driver = "ESRI Shapefile")
+writeOGR(arctic_land_laea,dsn = "custom/arc/spatial",layer = "arctic_land", driver = "ESRI Shapefile")
