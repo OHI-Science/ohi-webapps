@@ -6,7 +6,7 @@ Note: This is a updated file to `edit_webapps.rmd` in the ohi-webapps@dev branch
 NOTE:: must add info by hand to `ohi-webapps/custom/sc_studies_custom.csv`
 ```{r setup}
 ## set key ----
-key <- 'arc' 
+key <- 'clme' 
 
 
 ## setup ----
