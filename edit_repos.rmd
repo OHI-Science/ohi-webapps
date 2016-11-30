@@ -19,11 +19,11 @@ Written while also updating create_all.r and trying to move towards a package.
 ## run setup from create_all
 
 ## set key
-key <- 'chl'
+key <- 'ohi-northeast'
 
 # set vars by subcountry key
 source('create_init.R')   
-setwd(dir_repos)
+knitr::opts_knit$set(root.dir = dir_repos)
 source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))    
 
 ## clone repo and remotes
