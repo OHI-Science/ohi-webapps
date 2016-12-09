@@ -27,22 +27,23 @@ knitr::opts_knit$set(root.dir = dir_repos)
 source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))    
 
 ## clone repo and remotes
-clone_repo(dir_repos, dir_repo, git_url)
+ohirepos::clone_repo(dir_repos, dir_repo, git_url)
 
 ## unpopulate layers, conf, etc. Doesn't push. 
-unpopulate_layers_conf(key, dir_repos, dir_repo, git_url, default_scenario)
+ohirepos::unpopulate_layers_conf(key, dir_repos, dir_repo, git_url, default_scenario)
 
 ## set wd to scenario folder
 dir_scenario = file.path(dir_repo, basename(default_branch_scenario))
-setwd(dir_scenario)
+if (!exists(dir_scenario)) dir.create(dir_scenario)
+knitr::opts_knit$set(root.dir = dir_scenario)
 
 ## populate layers folder and layers.csv, and conf. Doesn't push. 
-populate_layers(key, dir_repo, lyrs_gl, default_scenario, sfx_global, multi_nation=FALSE)
+ohirepos::populate_layers(key, dir_repo, lyrs_gl, dir_global, default_scenario, multi_nation=FALSE)
 populate_conf()
 populate_etc()
 
 ## push draft branch
-source('~/github/ohi-webapps/ohi-functions.R')           functions
+source('~/github/ohi-webapps/ohi-functions.R')          
 setwd(dir_repo)
 push_branch('draft') # source('ohi-functions.r')
 system('git pull')
@@ -102,7 +103,7 @@ For now, in prep_rdv.rmd
 dir.create(dir_scenario, showWarning=FALSE)
 
 ## populate layers folder and layers.csv, and conf. Doesn't push. 
-populate_layers(key, dir_repo, lyrs_gl, dir_global, dir_scenario, multi_nation = FALSE)
+ohirepos::populate_layers(key, dir_repo, lyrs_gl, dir_global, dir_scenario, multi_nation = FALSE)
 populate_conf(key, dir_scenario, dir_global) ## look at TODOs in functions.r
 populate_etc(key, dir_scenario)
 

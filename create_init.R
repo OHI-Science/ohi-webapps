@@ -1,6 +1,8 @@
 # create_init.R
 # by @bbest and @jules32. load all libraries, set directories relevant to all keys
 
+## NOTE: eventually add these to ohirepos and replace w/ ohirepos
+library(ohirepos) # devtools::install_github('ohi-science/ohirepos')
 library(tidyverse)
 library(stringr) ## should be in tidyverse
 library(git2r)     # install.packages('git2r')
@@ -42,12 +44,11 @@ goal_swap   <- list(
 
 # read global layers, add clip_n_ship columns from Master layers doc (originally layers_global on Google docs)
 lyrs_gl     <- read.csv(file.path(dir_global, 'layers.csv'), stringsAsFactors = F)
-lyrs_google <- read.csv(file.path('~/github/ohi-global', 'layers_eez.csv'), stringsAsFactors = F)
-lyrs_gl <- lyrs_gl %>%
-  left_join(
-    lyrs_google %>%
-      select(layer, starts_with('clip_n_ship')),
-    by='layer')
+# lyrs_google <- read.csv(file.path('~/github/ohi-global', 'layers_eez.csv'), stringsAsFactors = F)
+# lyrs_gl <- lyrs_gl %>%
+#   left_join(
+#     lyrs_google # %>% select(layer, starts_with('clip_n_ship'))
+#     , by='layer')
 
 # read in github token outside of repo, generated via https://help.github.com/articles/creating-an-access-token-for-command-line-use
 gh_token <- scan('~/.github-token', 'character', quiet = T)
