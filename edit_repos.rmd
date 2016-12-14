@@ -110,9 +110,12 @@ populate_etc(key, dir_scenario)
 ##TODO: check calculate_scores.r runs 
 # - [ ] look into pressures, resilience matrix stuff  <<-- do this next
 
+##TODO: save scores.csv!!
+
 # create_repo_map
 source('~/github/ohirepos/R/create_repo_map') ## build package and delete
 create_repo_map(key, dir_spatial, dir_scenario) 
+
 
 ```
 
