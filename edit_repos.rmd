@@ -111,18 +111,20 @@ populate_etc(key, dir_scenario)
 # - [ ] look into pressures, resilience matrix stuff  <<-- do this next
 
 # create_repo_map
-create_repo_map(key, dir_shp_in, dir_spatial, dir_scenario) 
-
-## TODO: move prep folder
+create_repo_map(key, dir_spatial, dir_scenario) 
 
 ```
 
 ## Push!
 
 ```{r}
-## push draft branch
-source('~/github/ohi-webapps/ohi-functions.R')          # TODO: move these to R folder as separate .r functions
+## push draft branch   # TODO: move ohi-functions.R fxns to R folder as separate .r functions
 setwd(dir_repo)
-push_branch('draft') # source('ohi-functions.r')
+push_branch('draft', sprintf('populate full %s repo', key)) # ohirepos::
 system('git pull')
+
+```
+
+
+
 

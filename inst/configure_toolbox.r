@@ -14,6 +14,7 @@
 if (!"ohicore" %in% (.packages())) {
   suppressWarnings(require(ohicore))
   library(tidyverse)    # install.packages('tidyverse')
+  library(stringr)
 }
 
 ## set working directory to the scenario that contains conf and layers directories
