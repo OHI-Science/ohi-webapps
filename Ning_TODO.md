@@ -5,6 +5,7 @@ JSL add this to Ning's TODO issue
 
 
 Julie TODO: 
+- [ ] update ohirepos::deploy_website to also work without a scenario folder
 - [ ] chec config.r post Shiny https://github.com/OHI-Science/bhi/blob/draft/baltic2015/conf/config.R#L25-L27
 - [ ] populate_conf() -- PreGlobalScores etc.
 - [ ] check if can delete /tmp folder with mean swapping stuff in populate_layers()
