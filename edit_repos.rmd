@@ -104,25 +104,31 @@ dir.create(dir_scenario, showWarning=FALSE)
 
 ## populate layers folder and layers.csv, and conf. Doesn't push. 
 ohirepos::populate_layers(key, dir_repo, lyrs_gl, dir_global, dir_scenario, multi_nation = FALSE)
-populate_conf(key, dir_scenario, dir_global) ## look at TODOs in functions.r
+populate_conf(key, dir_scenario, dir_global) ## look at TODOs in functions.r, eg had to remove ICO gapfilling for NE
 populate_etc(key, dir_scenario)
 
 ##TODO: check calculate_scores.r runs 
 # - [ ] look into pressures, resilience matrix stuff  <<-- do this next
 
-# create_repo_map
-create_repo_map(key, dir_shp_in, dir_spatial, dir_scenario) 
+##TODO: save scores.csv!!
 
-## TODO: move prep folder
+# create_repo_map
+source('~/github/ohirepos/R/create_repo_map') ## build package and delete
+create_repo_map(key, dir_spatial, dir_scenario) 
+
 
 ```
 
 ## Push!
 
 ```{r}
-## push draft branch
-source('~/github/ohi-webapps/ohi-functions.R')          # TODO: move these to R folder as separate .r functions
+## push master branch   # TODO: move ohi-functions.R fxns to R folder as separate .r functions
 setwd(dir_repo)
-push_branch('draft') # source('ohi-functions.r')
+push_branch('master', sprintf('populate full %s repo', key)) # ohirepos::
 system('git pull')
+
+```
+
+
+
 
