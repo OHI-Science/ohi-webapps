@@ -6,8 +6,8 @@ JSL add this to Ning's TODO issue
 
 Julie TODO: 
 - [ ] update ohirepos::deploy_website to also work without a scenario folder
-- [ ] update edit_repos.rmd with pace of ohirepos (get rid of _source_and_load.r)
-- [ ] delete R/ scripts that are in ohirepos
+- [x] update edit_repos.rmd with pace of ohirepos (get rid of _source_and_load.r)
+- [x] delete R/ scripts that are in ohirepos
 - [ ] transfer from ohi-functions.r to ohirepos
 - [ ] check config.r post Shiny https://github.com/OHI-Science/bhi/blob/draft/baltic2015/conf/config.R#L25-L27
 - [ ] populate_conf() -- PreGlobalScores etc.

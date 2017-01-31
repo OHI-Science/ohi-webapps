@@ -14,7 +14,7 @@ Written while also updating create_all.r and trying to move towards a package.
 - cdz
 - rdv x
 
-```{r}
+```{r i think this chunk can be deleted now}
 
 ## run setup from create_all
 
@@ -60,19 +60,26 @@ Add by hand to `ohi-webapps/custom/sc_studies_custom.csv`
 ## 1. set key
 
 ```{r key}
-## 1. set key
-key <- 'rdv'
-
+key <- 'toolbox-demo'
 ```
+
 
 ## 2. Set directories etc
 
-```{r create prep repo}
-## setup ----
-source('~/github/ohi-webapps/_source_and_load.r')
-setwd(dir_webapps)
+```{r setup}
+# directories
+dir_webapps <- '~/github/ohi-webapps'
+
+dir_M <- c('Windows' = '//mazu.nceas.ucsb.edu/ohi',
+           'Darwin'  = '/Volumes/ohi',
+           'Linux'   = '/home/shares/ohi')[[ Sys.info()[['sysname']] ]]
+if (Sys.info()[['sysname']] != 'Linux' & !file.exists(dir_M)){
+  warning(sprintf("The Mazu directory dir_M set in src/R/common.R does not exist. Do you need to mount Mazu: %s?", dir_M))
+}
+
 source(file.path(dir_webapps, 'create_init.R'))
 source(file.path(dir_webapps, 'create_init_sc.R'))
+
 ```
 
 ## 3. Create prep repo
