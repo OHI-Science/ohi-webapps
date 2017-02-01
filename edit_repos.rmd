@@ -115,7 +115,6 @@ calculate_scores_check(dir_scenario)
 source('~/github/ohirepos/R/create_repo_map') ## build package and delete
 create_repo_map(key, dir_spatial, dir_scenario) 
 
-
 ```
 
 ## Push!
@@ -123,7 +122,7 @@ create_repo_map(key, dir_spatial, dir_scenario)
 ```{r}
 ## push master branch   # TODO: move ohi-functions.R fxns to R folder as separate .r functions
 setwd(dir_repo)
-push_branch('master', sprintf('populate full %s repo', key)) # ohirepos::
+ohirepos::push_branch('master', sprintf('populate full %s repo', key))
 system('git pull')
 
 ```
