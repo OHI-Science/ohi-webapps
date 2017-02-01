@@ -36,7 +36,8 @@ git_branch  <- 'master'
 
 fxn_swap    <- c(
   'LIV_ECO' = file.path(dir_github, 'ohi-webapps/functions/functions_LIV_ECO.R'),
-  'LE'      = file.path(dir_github, 'ohi-webapps/functions/functions_LE.R'))
+  'LE'      = file.path(dir_github, 'ohi-webapps/functions/functions_LE.R'), 
+  'ICO'     = file.path(dir_github, 'ohi-webapps/functions/functions_ICO.R'))
 goal_swap   <- list(
   'LIV' = list(preindex_function="LIV_ECO(layers, subgoal='LIV')"),
   'ECO' = list(preindex_function="LIV_ECO(layers, subgoal='ECO')"))

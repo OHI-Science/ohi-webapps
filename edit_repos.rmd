@@ -82,7 +82,7 @@ create_gh_repo(key, gh_token, github_user)
 ## create working dir
 dir.create(dir_repo)
 
-## add readme and prep folder
+## add readme, .rproj, prep folder; commit and push
 populate_init(key)
 populate_prep(key)
 ```
@@ -105,12 +105,10 @@ ohirepos::populate_layers(key, dir_repo, lyrs_gl, dir_global, dir_scenario, mult
 ohirepos::populate_conf(key, dir_scenario, dir_global) ## look at TODOs in functions.r, eg had to remove ICO gapfilling for NE
 ohirepos::populate_etc(key, dir_scenario)
 
-## ensure calculate_scores.r runs 
+## ensure calculate_scores.r runs; save scores.csv 
 calculate_scores_check(dir_scenario)
 
 #TODO - [ ] look into pressures, resilience matrix stuff  <<-- do this next
-
-##TODO: save scores.csv!!
 
 
 # create_repo_map
