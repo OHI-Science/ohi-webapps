@@ -1,6 +1,6 @@
-## configure_repo.r
+## configure_toolbox.r
 
-## configure_repo.r ensures all files in your repo are properly configured. 
+## configure_toolbox.r ensures all files in your repo are properly configured. 
 ## It must be sourced before calculating OHI scores with ohicore::CalculateAll(); 
 ## it can be sourced here or is also sourced from calculate_scores.r.
 
