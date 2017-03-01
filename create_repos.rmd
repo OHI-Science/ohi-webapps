@@ -59,7 +59,7 @@ populate_layers(key, dir_repo, lyrs_gl, dir_global, dir_scenario, multi_nation =
 populate_conf(key, dir_scenario, dir_global) ## look at TODOs in functions.r
 populate_etc(key, dir_scenario)
 
-# TODO: delete preGlobalScores()
+# TODO: delete preGlobalScores(), substitute repo name in flower/map creation
 
 ## create repo's maps
 create_repo_map(key, dir_spatial, dir_scenario) 
