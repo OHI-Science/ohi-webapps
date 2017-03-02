@@ -60,7 +60,7 @@ Add by hand to `ohi-webapps/custom/sc_studies_custom.csv`
 ## 1. set key
 
 ```{r key}
-key <- 'toolbox-demo'
+key <- 'pemsea'
 ```
 
 
@@ -83,8 +83,8 @@ create_gh_repo(key, gh_token, github_user)
 dir.create(dir_repo)
 
 ## add readme, .rproj, prep folder; commit and push
-populate_init(key)
-populate_prep(key)
+ohirepos::populate_init(key, dir_repo)
+ohirepos::populate_prep(key)
 ```
 
 
