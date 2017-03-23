@@ -2,17 +2,6 @@
 
 Note: This is a companion file to `edit_webapps.rmd` in the ohi-webapps@master branch. 
 
-# Update existing repos with new ohicore resilience structure
-July, 2016
-
-Written while also updating create_all.r and trying to move towards a package. 
-
-- col X
-- ohibc
-- arc X
-- chl x
-- cdz
-- rdv x
 
 ```{r i think this chunk can be deleted now}
 
@@ -60,7 +49,7 @@ Add by hand to `ohi-webapps/custom/sc_studies_custom.csv`
 ## 1. set key
 
 ```{r key}
-key <- 'pemsea'
+key <- 'mhi'
 ```
 
 
@@ -90,14 +79,14 @@ ohirepos::populate_prep(key)
 
 ## 4. Inspect Custom Shapefiles
 
-For now, in prep_rdv.rmd
+For now, in prep_rdv.rmd, etc. 
 
 
 ## 5. Populate all the things
 
 ```{r}
 
-## create scenario folder
+## create scenario folder TODO: if doesn't exist
 dir.create(dir_scenario, showWarning=FALSE)
 
 ## populate layers folder and layers.csv, and conf. Doesn't push. 
@@ -110,10 +99,15 @@ calculate_scores_check(dir_scenario)
 
 #TODO - [ ] look into pressures, resilience matrix stuff  <<-- do this next
 
+## TODO: 
+# functions.r
+# search: 'temp/referencePoints.csv'
+# replace: file.path(wd, 'temp/referencePoints.csv')
+
 
 # create_repo_map
-source('~/github/ohirepos/R/create_repo_map') ## build package and delete
-create_repo_map(key, dir_spatial, dir_scenario) 
+source('~/github/ohirepos/R/create_repo_map.R') ## build package and delete
+ohirepos::create_repo_map(key, dir_spatial, dir_scenario) 
 
 ```
 

@@ -6,6 +6,8 @@ JSL add this to Ning's TODO issue
 
 Julie TODO: 
 - [ ] update ohirepos::deploy_website to also work without a scenario folder
+- [ ] update ohirepos::create_repo_map.R for brittleness .shp. Also see if so many copies are necessary..
+- [ ] update process for custom folder map checks. Revisit
 - [x] update edit_repos.rmd with pace of ohirepos (get rid of _source_and_load.r)
 - [x] delete R/ scripts that are in ohirepos
 - [ ] transfer from ohi-functions.r to ohirepos

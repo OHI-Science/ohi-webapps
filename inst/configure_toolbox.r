@@ -10,22 +10,17 @@
   ## 3. source configure_repo.r to ensure proper configuration
   ## 4. develop goal models in functions.r, running individual goal models line by line
 
-## load ohicore and tidyverse (includes dplyr, tidyr, stringr, etc)
-if (!"ohicore" %in% (.packages())) {
-  suppressWarnings(require(ohicore))
-  library(tidyverse)    # install.packages('tidyverse')
-  library(stringr)
-}
-
-## set working directory to the scenario that contains conf and layers directories
-setwd('~/github/ohi-global/eez2016')
+## load required packages after checking whether they are already installed
+pkgs_required <- c('ohicore', 'tidyverse', 'stringr', 'zoo')
+pkgs_check <- pkgs_required[!pkgs_required %in% (.packages())]
+pkgs_installed <- sapply(pkgs_check, FUN = function(x) library(x, character.only = TRUE))
 
 ## load scenario configuration
-conf = ohicore::Conf('conf')
+conf = ohicore::Conf(file.path(wd, 'conf'))
 
 ## check that scenario layers files in the \layers folder match layers.csv registration. Layers files are not modified.
-ohicore::CheckLayers('layers.csv', 'layers', flds_id=conf$config$layers_id_fields)
+ohicore::CheckLayers(file.path(wd, 'layers.csv'), 'layers', flds_id=conf$config$layers_id_fields)
 
 ## load scenario layers for ohicore to access. Layers files are not modified.
-layers = ohicore::Layers('layers.csv', 'layers')
+layers = ohicore::Layers(file.path(wd, 'layers.csv'), 'layers')
 
