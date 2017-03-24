@@ -1,0 +1,79 @@
+# This is prep_can-atl.Rmd
+
+## 0. add col to `sc_studies_custom.csv` 
+
+Add by hand to `ohi-webapps/custom/sc_studies_custom.csv`
+
+## 1. setup
+```{r setup, eval=F}
+
+## this is all (except shp_in, shp_out) unnecessary if called from edit_repos.rmd
+
+
+## libraries
+library(dplyr)
+library(rgdal)
+
+
+
+# directories
+dir_M <- c('Windows' = '//mazu.nceas.ucsb.edu/ohi',
+           'Darwin'  = '/Volumes/ohi',
+           'Linux'   = '/home/shares/ohi')[[ Sys.info()[['sysname']] ]]
+
+## key info
+key     <- 'mhi'
+shp_in  <- 'MHI_regions'
+dir_shp <-  sprintf('%s/%s/spatial',dir_annex, key)
+dir_custom = sprintf('~/github/ohi-webapps/custom/%s', key)
+
+
+
+# setwd
+setwd('~/github/ohi-webapps')
+
+```
+
+## 2. maps
+```{r setup, eval=F}
+
+# read in shp files and save with desired headers in data frame.
+shp = rgdal::readOGR(dsn = dir_shp, layer = shp_in)
+
+# view dataframe and map
+shp@data
+plot(shp)
+
+## clean up
+shp@data <- shp@data %>%
+  dplyr::select(rgn_id, rgn_name, area_km2)
+
+# save as shapefiles. will create 4 files: .dbf, .prj, .shp, .shx
+writeOGR(shp, dsn = dir_shp, layer = key, driver = 'ESRI Shapefile', overwrite=T) 
+
+## ave/rgn_offshore_data.csv on git-annex
+write.csv(shp@data, file.path(dir_shp, 'rgn_offshore_data.csv'))
+
+# create lookup table with unique rgn_ids
+write_csv(shp@data, sprintf('%s/%s_rgns_custom.csv', dir_custom, key))
+
+```
+
+
+## 3. prep shp map with custom_maps()
+Proceed as in `create_all.r` and run `custom_maps()`
+
+```{r prep col map custom_maps, eval=FALSE}
+
+keys_redo = 'col'
+key = keys_redo[1]
+
+setwd(dir_repos)
+source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
+setwd(dir_repo)
+
+# fun custom_maps
+custom_maps(key) 
+
+```
+

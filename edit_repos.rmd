@@ -49,7 +49,7 @@ Add by hand to `ohi-webapps/custom/sc_studies_custom.csv`
 ## 1. set key
 
 ```{r key}
-key <- 'mhi'
+key <- 'can-atl'
 ```
 
 
