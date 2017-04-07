@@ -35,57 +35,38 @@ shp = rgdal::readOGR(dsn = dir_shp, layer = shp_in)
 shp@data
 
 # shp@data
-#   ID   REGION  AREA_KM2   AREA_HA X_CENTROID Y_CENTROID Label                Name                             French_Nam
-#  12 Atlantic  248794.3  24879431    2308165    3152888    12                Gulf                                  Golfe
-#  12 Atlantic  248794.3  24879431    2308165    3152888    12                Gulf                                  Golfe
-#  12 Atlantic  248794.3  24879431    2308165    3152888    12                Gulf                                  Golfe
-#   8 Atlantic 1045484.0 104548403    2647640    3679289    10 NL-Labrador Shelves Plateaux de Terre-Neuve et du Labrador
-#   9 Atlantic  431126.3  43112633    2553012    2614163    11       Scotian Shelf                   Plateau néo-écossais
-#  12 Atlantic  248794.3  24879431    2308165    3152888    12                Gulf                                  Golfe
-#                                                              Legend stlaurent
-#                                                  12 - Gulf / Golfe         E
-#                                                  12 - Gulf / Golfe         D
-#                                                  12 - Gulf / Golfe         C
-#  10 - NL-Labrador Shelves / Plateaux de Terre-Neuve et du Labrador      <NA>
-#                          11 - Scotian Shelf / Plateau néo-écossais      <NA>
-#                                                  12 - Gulf / Golfe      <NA>
-
+# ID   REGION  AREA_KM2   AREA_HA X_CENTROID Y_CENTROID          Label                Name                             French_Nam
+# 0  12 Atlantic  102524.0  10252373    2308165    3152888   Gulf - Outer        Gulf - Outer                        Golfe - Externe
+# 1 12E Atlantic  132558.0  13255771    2308165    3152888   Gulf - Inner        Gulf - Inner                        Golfe - Interne
+# 2 12D Atlantic   10468.0   1046814    2308165    3152888 Gulf - Estuary      Gulf - Estuary                       Golfe - Estuaire
+# 3   8 Atlantic 1045484.0 104548403    2647640    3679289             10 NL-Labrador Shelves Plateaux de Terre-Neuve et du Labrador
+# 4   9 Atlantic  431126.3  43112633    2553012    2614163             11       Scotian Shelf                   Plateau néo-écossais
+#                                                              Legend
+# 0                                                 12 - Gulf / Golfe
+# 1                                                 12 - Gulf / Golfe
+# 2                                                 12 - Gulf / Golfe
+# 3 10 - NL-Labrador Shelves / Plateaux de Terre-Neuve et du Labrador
+# 4                         11 - Scotian Shelf / Plateau néo-écossais
 
 ## Plot
 # plot(shp) takes a long time!
 
-## COME BACK HERE
-# 
-# ## clean up
-# shp@data <- shp@data %>%
-#   dplyr::select(rgn_id, rgn_name, area_km2)
-# 
-# # save as shapefiles. will create 4 files: .dbf, .prj, .shp, .shx
-# writeOGR(shp, dsn = dir_shp, layer = key, driver = 'ESRI Shapefile', overwrite=T) 
-# 
-# ## ave/rgn_offshore_data.csv on git-annex
-# write.csv(shp@data, file.path(dir_shp, 'rgn_offshore_data.csv'))
-# 
-# # create lookup table with unique rgn_ids
-# write_csv(shp@data, sprintf('%s/%s_rgns_custom.csv', dir_webapps_custom, key))
 
-```
+## clean up
+shp@data <- shp@data %>%
+  dplyr::mutate(rgn_id = 1:5) %>%
+  dplyr::select(rgn_id, 
+                rgn_name = Name, 
+                area_km2 = AREA_KM2)
 
+# save as shapefiles. will create 4 files: .dbf, .prj, .shp, .shx
+writeOGR(shp, dsn = dir_shp, layer = key, driver = 'ESRI Shapefile', overwrite=T)
 
-## 3. prep shp map with custom_maps()
-Proceed as in `create_all.r` and run `custom_maps()`
+## save/rgn_offshore_data.csv on git-annex
+write.csv(shp@data, file.path(dir_shp, 'rgn_offshore_data.csv'))
 
-```{r prep col map custom_maps, eval=FALSE}
-# 
-# keys_redo = 'col'
-# key = keys_redo[1]
-# 
-# setwd(dir_repos)
-# source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))
-# setwd(dir_repo)
-# 
-# # fun custom_maps
-# custom_maps(key) 
+# create lookup table with unique rgn_ids
+write_csv(shp@data, sprintf('%s/%s_rgns_custom.csv', dir_webapps_custom, key))
 
 ```
 
