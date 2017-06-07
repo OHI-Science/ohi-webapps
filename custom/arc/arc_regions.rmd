@@ -39,7 +39,7 @@ greenland = readOGR(dsn='spatial/greenland',layer='greenland_eez_east_west')%>%s
 janmayen = readOGR(dsn='spatial/janmayen',layer='Jan Mayen')%>%spTransform(laeaCRS)
 russia   = readOGR(dsn='spatial/russia',layer='russia_in_arctic')%>%spTransform(laeaCRS)
 svalbard = readOGR(dsn='spatial/svalbard',layer='svalbard')%>%spTransform(laeaCRS)
-norway   = readOGR(dsn='spatial/norway',layer='norway_no_svalbard')%>%spTransform(laeaCRS)
+norway   = readOGR(dsn='spatial/norway',layer='norway_no_svalbard_crop')%>%spTransform(laeaCRS)
 
 ```
 
@@ -73,7 +73,7 @@ svalbard@data = svalbard@data%>%
 
 norway@data = norway@data%>%
                   mutate(rgn_name = 'norway')%>%
-                  dplyr::select(rgn_name,country = Country)
+                  dplyr::select(rgn_name,country)
 
 
 ```
