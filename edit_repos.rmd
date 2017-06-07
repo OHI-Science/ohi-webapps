@@ -2,50 +2,40 @@
 
 Note: This is a companion file to `edit_webapps.rmd` in the ohi-webapps@master branch. 
 
-# Update existing repos with new ohicore resilience structure
-July, 2016
 
-Written while also updating create_all.r and trying to move towards a package. 
+```{r i think this chunk can be deleted now}
 
-- col X
-- ohibc
-- arc X
-- chl x
-- cdz
-- rdv x
-
-```{r}
-
-## run setup from create_all
-
-## set key
-key <- 'chl'
-
-# set vars by subcountry key
-source('create_init.R')   
-setwd(dir_repos)
-source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))    
-
-## clone repo and remotes
-clone_repo(dir_repos, dir_repo, git_url)
-
-## unpopulate layers, conf, etc. Doesn't push. 
-unpopulate_layers_conf(key, dir_repos, dir_repo, git_url, default_scenario)
-
-## set wd to scenario folder
-dir_scenario = file.path(dir_repo, basename(default_branch_scenario))
-setwd(dir_scenario)
-
-## populate layers folder and layers.csv, and conf. Doesn't push. 
-populate_layers(key, dir_repo, lyrs_gl, default_scenario, sfx_global, multi_nation=FALSE)
-populate_conf()
-populate_etc()
-
-## push draft branch
-source('~/github/ohi-webapps/ohi-functions.R')           functions
-setwd(dir_repo)
-push_branch('draft') # source('ohi-functions.r')
-system('git pull')
+# ## run setup from create_all
+# 
+# ## set key
+# key <- 'ohi-northeast'
+# 
+# # set vars by subcountry key
+# source('create_init.R')   
+# knitr::opts_knit$set(root.dir = dir_repos)
+# source(sprintf('%s/ohi-webapps/create_init_sc.R', dir_github))    
+# 
+# ## clone repo and remotes
+# ohirepos::clone_repo(dir_repos, dir_repo, git_url)
+# 
+# ## unpopulate layers, conf, etc. Doesn't push. 
+# ohirepos::unpopulate_layers_conf(key, dir_repos, dir_repo, git_url, default_scenario)
+# 
+# ## set wd to scenario folder
+# dir_scenario = file.path(dir_repo, basename(default_branch_scenario))
+# if (!exists(dir_scenario)) dir.create(dir_scenario)
+# knitr::opts_knit$set(root.dir = dir_scenario)
+# 
+# ## populate layers folder and layers.csv, and conf. Doesn't push. 
+# ohirepos::populate_layers(key, dir_repo, lyrs_gl, dir_global, default_scenario, multi_nation=FALSE)
+# populate_conf()
+# populate_etc()
+# 
+# ## push draft branch
+# source('~/github/ohi-webapps/ohi-functions.R')          
+# setwd(dir_repo)
+# push_branch('draft') # source('ohi-functions.r')
+# system('git pull')
 
 ```
 
@@ -59,69 +49,78 @@ Add by hand to `ohi-webapps/custom/sc_studies_custom.csv`
 ## 1. set key
 
 ```{r key}
-## 1. set key
-key <- 'rdv'
-
+key <- 'arc'
 ```
+
 
 ## 2. Set directories etc
 
-```{r create prep repo}
-## setup ----
-source('~/github/ohi-webapps/_source_and_load.r')
-setwd(dir_webapps)
+```{r setup}
+dir_webapps <- '~/github/ohi-webapps'
+
 source(file.path(dir_webapps, 'create_init.R'))
 source(file.path(dir_webapps, 'create_init_sc.R'))
 ```
 
 ## 3. Create prep repo
 
-```{r}
+```{r, knitr::opts_knit$set(root.dir = dir_repo)}
 ## create github repo on github.com
 create_gh_repo(key, gh_token, github_user)
 
-## set working dir
+## create working dir
 dir.create(dir_repo)
 
-## add readme and prep folder
-populate_init(key)
-populate_prep(key)
+## add readme, .rproj, prep folder; commit and push
+ohirepos::populate_init(key, dir_repo)
+ohirepos::populate_prep(key)
 ```
 
 
 ## 4. Inspect Custom Shapefiles
 
-For now, in prep_rdv.rmd
+For now, in prep_rdv.rmd, etc. 
 
 
 ## 5. Populate all the things
 
 ```{r}
 
-## create scenario folder
+## create scenario folder TODO: if doesn't exist
 dir.create(dir_scenario, showWarning=FALSE)
 
 ## populate layers folder and layers.csv, and conf. Doesn't push. 
-populate_layers(key, dir_repo, lyrs_gl, dir_global, dir_scenario, multi_nation = FALSE)
-populate_conf(key, dir_scenario, dir_global) ## look at TODOs in functions.r
-populate_etc(key, dir_scenario)
+ohirepos::populate_layers(key, dir_repo, lyrs_gl, dir_global, dir_scenario, multi_nation = FALSE)
+ohirepos::populate_conf(key, dir_scenario, dir_global) ## look at TODOs in functions.r, eg had to remove ICO gapfilling for NE
+ohirepos::populate_etc(key, dir_scenario)
 
-##TODO: check calculate_scores.r runs 
-# - [ ] look into pressures, resilience matrix stuff  <<-- do this next
+## ensure calculate_scores.r runs; save scores.csv 
+calculate_scores_check(dir_scenario)
+
+#TODO - [ ] look into pressures, resilience matrix stuff  <<-- do this next
+
+## TODO: 
+# functions.r
+# search: 'temp/referencePoints.csv'
+# replace: file.path(wd, 'temp/referencePoints.csv')
+
 
 # create_repo_map
-create_repo_map(key, dir_shp_in, dir_spatial, dir_scenario) 
-
-## TODO: move prep folder
+ohirepos::clone_repo(dir_repo, git_url)
+ohirepos::create_repo_map(key, dir_spatial, dir_scenario) 
 
 ```
 
 ## Push!
 
 ```{r}
-## push draft branch
-source('~/github/ohi-webapps/ohi-functions.R')          # TODO: move these to R folder as separate .r functions
+## push master branch   # TODO: move ohi-functions.R fxns to R folder as separate .r functions
 setwd(dir_repo)
-push_branch('draft') # source('ohi-functions.r')
+ohirepos::push_branch('master', sprintf('populate full %s repo', key))
 system('git pull')
+
+```
+
+
+
 

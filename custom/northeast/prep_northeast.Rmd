@@ -1,0 +1,84 @@
+# This is prep_ohibc.Rmd
+
+This script creates the British Columbia webapp. 
+
+Each R chunk below will not be evaluated (ie, `{r, eval=F}`). 
+
+## 1. setup
+```{r setup, eval=F}
+
+# libraries
+library(tidyverse)
+library(stringr)
+library(rgdal)
+
+dir_custom = '~/github/ohi-webapps/custom/northeast'
+
+
+# create directories on git-annex
+dir.create(file.path(dir_annex, key))
+dir.create(file.path(dir_annex, key, 'spatial'))
+dir.create(file.path(dir_annex, key, 'layers'))
+
+```
+
+
+## 2. copy map from @jafflerbach's shape files  
+
+Read in BC shapefile and begin formatting for OHI.
+I also copied the Canada national flag for British Columbia.
+
+
+```{r copy bc map from shapefile, eval=F}
+
+# read in shp files and save with desired headers in data frame. ohibc_rgn_wgs84 is in the correct projection for webapps
+shp = readOGR(dsn = path.expand('~/github/ohi-northeast/spatial'),
+              layer = 'ne_ohi_rgns')
+
+## plot 
+# plot(shp)
+
+# view data
+shp_data = shp@data; shp_data
+
+# # clean orphan holes or invalid geometries 
+# source('~/github/ohi-webapps/custom/cleangeo_spatial_fxn.r')
+# bc_clean = cleangeo_spatial(ne)
+
+
+# save as shapefiles. will create 4 files: .dbf, .prj, .shp, .shx
+writeOGR(shp, dsn = file.path(dir_annex, 'northeast/spatial/custom'), 
+         layer = 'northeast_shp', driver = 'ESRI Shapefile', overwrite=T) 
+
+# save lookup table with unique rgn_ids
+shp_data %>%
+  select(rgn_name, rgn_id) %>%
+  arrange(rgn_id) %>%
+  write_csv(file.path(dir_custom, 'ohibc_rgns_lookup.csv'))
+
+# save rgn_offshore_data.csv
+shp_data %>%
+  select(rgn_id, rgn_name, area_km2) %>%
+  arrange(rgn_id) %>%
+  write_csv(file.path(dir_custom, 'rgn_offshore_data.csv'))
+
+```
+
+
+## 3. populate key directory in git-annex
+Copy files required for populate_draft_branch() into `git-annex/clip-n-ship`. These are storage directories.
+
+```{r}
+# copy rgn_offshore_data.csv
+file.copy(file.path(dir_custom, 
+                    'rgn_offshore_data.csv'),
+          file.path(dir_annex, key, 'spatial/rgn_offshore_data.csv'), overwrite=T)
+
+# make TEMPLATE mar_coastalpopn_inland25km_lyr.csv
+read.csv(file.path(dir_annex, 
+                   'can/layers/mar_coastalpopn_inland25km_lyr.csv')) %>%
+  filter(rgn_id <= length(unique(shp_data$rgn_id))) %>%
+  write.csv(file.path(dir_annex, key, 'layers/mar_coastalpopn_inland25km_lyr.csv'), row.names=F)
+    
+```
+

@@ -6,7 +6,7 @@ Note: This is a updated file to `edit_webapps.rmd` in the ohi-webapps@dev branch
 NOTE:: must add info by hand to `ohi-webapps/custom/sc_studies_custom.csv`
 ```{r setup}
 ## set key ----
-key <- 'arc' 
+key <- 'clme' 
 
 
 ## setup ----
@@ -58,6 +58,8 @@ This doesn't push, just populates.
 populate_layers(key, dir_repo, lyrs_gl, dir_global, dir_scenario, multi_nation = FALSE)
 populate_conf(key, dir_scenario, dir_global) ## look at TODOs in functions.r
 populate_etc(key, dir_scenario)
+
+# TODO: delete preGlobalScores(), substitute repo name in flower/map creation
 
 ## create repo's maps
 create_repo_map(key, dir_spatial, dir_scenario) 

@@ -1,6 +1,8 @@
 # create_init.R
 # by @bbest and @jules32. load all libraries, set directories relevant to all keys
 
+## NOTE: eventually add these to ohirepos and replace w/ ohirepos
+library(ohirepos) # devtools::install_github('ohi-science/ohirepos')
 library(tidyverse)
 library(stringr) ## should be in tidyverse
 library(git2r)     # install.packages('git2r')
@@ -34,7 +36,8 @@ git_branch  <- 'master'
 
 fxn_swap    <- c(
   'LIV_ECO' = file.path(dir_github, 'ohi-webapps/functions/functions_LIV_ECO.R'),
-  'LE'      = file.path(dir_github, 'ohi-webapps/functions/functions_LE.R'))
+  'LE'      = file.path(dir_github, 'ohi-webapps/functions/functions_LE.R'), 
+  'ICO'     = file.path(dir_github, 'ohi-webapps/functions/functions_ICO.R'))
 goal_swap   <- list(
   'LIV' = list(preindex_function="LIV_ECO(layers, subgoal='LIV')"),
   'ECO' = list(preindex_function="LIV_ECO(layers, subgoal='ECO')"))
@@ -42,12 +45,11 @@ goal_swap   <- list(
 
 # read global layers, add clip_n_ship columns from Master layers doc (originally layers_global on Google docs)
 lyrs_gl     <- read.csv(file.path(dir_global, 'layers.csv'), stringsAsFactors = F)
-lyrs_google <- read.csv(file.path('~/github/ohi-global', 'layers_eez.csv'), stringsAsFactors = F)
-lyrs_gl <- lyrs_gl %>%
-  left_join(
-    lyrs_google %>%
-      select(layer, starts_with('clip_n_ship')),
-    by='layer')
+# lyrs_google <- read.csv(file.path('~/github/ohi-global', 'layers_eez.csv'), stringsAsFactors = F)
+# lyrs_gl <- lyrs_gl %>%
+#   left_join(
+#     lyrs_google # %>% select(layer, starts_with('clip_n_ship'))
+#     , by='layer')
 
 # read in github token outside of repo, generated via https://help.github.com/articles/creating-an-access-token-for-command-line-use
 gh_token <- scan('~/.github-token', 'character', quiet = T)
@@ -59,7 +61,7 @@ gl_cntries <- read.csv(sprintf('%s/layers/cntry_rgn.csv', dir_global)) %>%
     gl_rgn_id    = rgn_id) %>%
   arrange(gl_cntry_key)
 
-csv_gl_rgn  <- sprintf('%s/ohiprep/Global/NCEAS-Regions_v2014/manual_output/sp_rgn_manual.csv', dir_github) # for rgn_key 
+csv_gl_rgn  <- 'sp_rgn_manual_v2014.csv' # for rgn_key # TODO JSL see if this is necessary Dec 2016
 gl_rgns <- read.csv(csv_gl_rgn, stringsAsFactors=F) %>%
   dplyr::distinct(rgn_id, rgn_name, rgn_key, .keep_all = TRUE) %>%
   filter(rgn_type == 'eez') %>%
