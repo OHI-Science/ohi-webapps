@@ -6,11 +6,12 @@ Note: This is a updated file to `edit_webapps.rmd` in the ohi-webapps@dev branch
 NOTE:: must add info by hand to `ohi-webapps/custom/sc_studies_custom.csv`
 ```{r setup}
 ## set key ----
-key <- 'clme' 
+key <- 'arc' 
 
 
 ## setup ----
-source('~/github/ohi-webapps/_source_and_load.r')
+library(ohirepos) # devtools::load_all('~/github/ohirepos') # source('~/github/ohi-webapps/_source_and_load.r')
+dir_webapps <- '~/github/ohi-webapps'
 setwd(dir_webapps)
 source(file.path(dir_webapps, 'create_init.R'))
 source(file.path(dir_webapps, 'create_init_sc.R'))
@@ -26,7 +27,7 @@ create_gh_repo(key, gh_token, github_user)
 dir.create(dir_repo)
 
 ## add readme and prep folder
-populate_init(key)
+populate_init(key, dir_repo)
 populate_prep(key)
 ```
 
@@ -46,6 +47,15 @@ unlink(dir_repo, recursive=T, force=T)
 repo <- clone(git_url, normalizePath(dir_repo, mustWork=F))
 setwd(dir_repo)
 ```
+
+## Create prep website
+
+```{r}
+
+ohirepos::deploy_website_prep(gh_repo=key, study_area=study_area)
+
+```
+
 
 ## Potential Step(s) Here
 - Unpopulate Existing Repo (see chunk below)
