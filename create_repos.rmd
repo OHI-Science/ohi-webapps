@@ -89,6 +89,12 @@ calculate_scores_check(dir_scenario)
 # push repo
 setwd(dir_repo)
 push_branch(branch = 'master', current_msg = 'created full repo') 
+## TODO: 
+# push_branch(branch = 'master', current_msg = 'created full repo') 
+# [dev 81be48d]  created full repo
+#  3 files changed, 16 insertions(+), 4 deletions(-)
+# error: cannot run rpostback-askpass: No such file or directory
+# fatal: could not read Password for 'https://d80e7cc2b2d65cd77347193263ecaf3ae06873a5@github.com': Device not configured
 ```
 
 
