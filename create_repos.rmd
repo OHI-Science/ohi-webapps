@@ -6,7 +6,7 @@ Note: This is a updated file to `edit_webapps.rmd` in the ohi-webapps@dev branch
 NOTE:: must add info by hand to `ohi-webapps/custom/sc_studies_custom.csv`
 ```{r setup}
 ## set key ----
-key <- 'arc' 
+key <- 'uki' 
 
 
 ## setup ----
@@ -26,7 +26,7 @@ create_gh_repo(key, gh_token, github_user)
 ## set working dir
 dir.create(dir_repo)
 
-## add readme and prep folder
+## add readme and prep folder and push 
 populate_init(key, dir_repo)
 populate_prep(key)
 ```
