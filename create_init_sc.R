@@ -15,7 +15,7 @@ git_repo      = repo_name
 git_slug      = sprintf('%s/%s', git_owner, git_repo)
 git_url       = sprintf('https://github.com/%s', git_slug)
 pages_url     = sprintf('http://ohi-science.org/%s', git_repo)
-dir_repo      = file.path(dir_repos, repo_name)
+dir_repo      = file.path(dir_sandbox, repo_name)
 if (key %in% repo_registry$key){
   default_scenario = subset(repo_registry, key==key, default_scenario, drop=T)
 } else {
