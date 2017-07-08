@@ -16,7 +16,7 @@ library(ohirepos) # devtools::load_all('~/github/ohirepos')
 
 source('common.r')
 
-source(file.path(dir_webapps, 'create_init.R'))
+source('common.r')
 source(file.path(dir_webapps, 'create_init_sc.R'))
 ```
 
@@ -69,7 +69,7 @@ ohirepos::deploy_website_prep(gh_repo=key, study_area=study_area)
 This doesn't push, just populates.
 ```{r populate, eval=F}
 ## populate layers folder and layers.csv, and conf
-populate_layers(key, dir_repo, lyrs_gl, dir_origin, dir_scenario, multi_nation = FALSE)
+populate_layers(key, dir_repo, dir_origin, dir_scenario, multi_nation = FALSE)
 populate_conf(key, dir_scenario, dir_origin) ## look at TODOs in functions.r
 populate_etc(key, dir_scenario)
 
