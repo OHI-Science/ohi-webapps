@@ -1,24 +1,18 @@
 # common.r; common information to use
 
 ## NOTE: moved all but these to ohirepos, do we need them? 
-library(rgdal)
-library(jsonlite)
-
-# merge <- base::merge # override git2r::merge
-# select <- dplyr::select
-
-# # set working dir
-# setwd('~/github/ohi-webapps') 
+# library(rgdal)
+# library(jsonlite)
 
 # vars
 # get paths based on host machine
-dir_M <- c('Windows' = '//mazu.nceas.ucsb.edu/ohi',
-           'Darwin'  = '/Volumes/ohi',    ### connect (cmd-K) to smb://mazu/ohi
-           'Linux'   = '/home/shares/ohi')[[ Sys.info()[['sysname']] ]]
+# dir_M <- c('Windows' = '//mazu.nceas.ucsb.edu/ohi',
+#            'Darwin'  = '/Volumes/ohi',    ### connect (cmd-K) to smb://mazu/ohi
+#            'Linux'   = '/home/shares/ohi')[[ Sys.info()[['sysname']] ]]
 
 # set username for copying app files onto fitz.nceas
-nceas_user  <- c('bbest'='bbest','julialowndes'='jstewart','jstewart'='jstewart')[Sys.info()["user"]]
-github_user <- c('bbest'='bbest','julialowndes'='jules32')[Sys.info()["user"]]
+# nceas_user  <- c('bbest'='bbest','julialowndes'='jstewart','jstewart'='jstewart')[Sys.info()["user"]]
+# github_user <- c('bbest'='bbest','julialowndes'='jules32')[Sys.info()["user"]]
 
 # dir_annex   <- sprintf('%s/git-annex/clip-n-ship', dir_M) 
 dir_sandbox <- '~/github/clip-n-ship'
@@ -33,10 +27,10 @@ dir_origin  <- '~/github/ohi-global/eez2016'
 #   'LIV' = list(preindex_function="LIV_ECO(layers, subgoal='LIV')"),
 #   'ECO' = list(preindex_function="LIV_ECO(layers, subgoal='ECO')"))
 
-
+## @jules32 commented out, delete this
 # read in github token outside of repo, generated via https://help.github.com/articles/creating-an-access-token-for-command-line-use
-gh_token <- scan('~/.github-token', 'character', quiet = T)
-Sys.setenv(GH_TOKEN=gh_token)
+# gh_token <- scan('~/.github-token', 'character', quiet = T)
+# Sys.setenv(GH_TOKEN=gh_token)
 
 ## TODO delete: may have something to do with LE fxn_swap
 # csv_gl_rgn  <- 'sp_rgn_manual_v2014.csv' # for rgn_key # TODO JSL see if this is necessary Dec 2016
