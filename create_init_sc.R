@@ -9,9 +9,9 @@ study_area    = name
 # name_gl_rgn       = sc$sc_key_old TO DELETE
 name_gl_rgn_cap   = sc$gl_rgn_name
 gl_rgn_id         = sc$gl_rgn_id
-repo_name     = key
+# repo_name     = key
 git_owner     = 'OHI-Science'
-git_repo      = repo_name
+git_repo      = key
 git_slug      = sprintf('%s/%s', git_owner, git_repo)
 git_url       = sprintf('https://github.com/%s', git_slug)
 pages_url     = sprintf('http://ohi-science.org/%s', git_repo)
@@ -19,7 +19,7 @@ dir_repo      = file.path(dir_sandbox, repo_name)
 if (key %in% repo_registry$key){
   default_scenario = subset(repo_registry, key==key, default_scenario, drop=T)
 } else {
-  message('Please enter a scenario name in `custom/sc_studies_custom.csv') # no longer default to 'subcountry2014'
+  message('Please enter a scenario name in `custom/sc_studies_custom.csv`/n') # no longer default to 'subcountry2014'
 }
 
 dir_scenario <- file.path(dir_repo, default_scenario)

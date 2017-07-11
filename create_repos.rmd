@@ -1,41 +1,78 @@
-# This is create_repos.Rmd
-Note: Run this from the ohi-webapps@dev2 branch. 
-This is a updated file to `edit_webapps.rmd` in the ohi-webapps@dev branch. 
+## ohirepos
 
+## Overview
 
-## Initial Setup
-NOTE:: must add info by hand to `ohi-webapps/repo_registry.csv`
-```{r setup}
-## set key ----
-key <- 'uki' 
+- TODO
+- You'll need to be part of the OHI team with admin privileges to the [ohi-science](github.com/ohi-science) organization to use this. To request a repository, please follow [these instructions](http://ohi-science.org/manual/#requesting-your-repositories).
 
-## setup ----
-library(ohirepos) # devtools::load_all('~/github/ohirepos') 
-# dir_webapps <- '~/github/ohi-webapps'
-# setwd(dir_webapps)
+## Installation
 
-source('common.r')
-
-source('common.r')
-source(file.path(dir_webapps, 'create_init_sc.R'))
+```{r, eval = FALSE}
+# install.packages("devtools")
+devtools::install_github("ohi-science/ohirepos")
 ```
 
 
-## Create Starter Repo
-```{r}
-## create github repo on github.com
-create_gh_repo(key, gh_token, github_user)
+## Usage 
 
+First, you'll need to do 2 things: 
+
+1. Add info by hand to `ohi-webapps/repo_registry.csv` ## TODO: turn this into a googlesheet
+2. Create new repo on github.com/OHI-Science called `key`.
+
+## Initial Setup
+
+```{r setup variables, eval=FALSE}
+
+## assign variables ----
+key <- 'test2' 
+study_area <- 'Testings' ## or pull this from repo_registry...or input it?
+dir_temp <- '~/github/clip-n-ship'
+
+
+## create variables ----
+dir_repo <- file.path(dir_temp, key)
+
+```
+
+```{r setup libraries, eval=FALSE}
+
+## setup ----
+library(ohirepos) # devtools::load_all('~/github/ohirepos') 
+
+# dir_work <- path.expand('~/github/ohi-webapps') # get rid of any reliance on ohi-webapps
+## load this stuff from ohirepos.
+# source(file.path(dir_work, 'common.r'))
+# source(file.path(dir_work, 'create_init_sc.R'))
+```
+
+
+## Clone and populate starter repo
+
+```{r, eval=FALSE}
 ## set working dir
 dir.create(dir_repo)
 
 ## add readme and prep folder and push 
-setwd(dir_sandbox)
-populate_init(key, dir_repo)
-populate_prep(key)
+ohirepos::populate_init(key, dir_repo, push = TRUE)
+ohirepos::populate_prep(key, dir_repo, push = TRUE)
 ```
 
+TODO: figure out when to mention the repo_registry and archive past work
+```{r, eval=FALSE}
+# read in repo_registry
+repo_registry = readr::read_csv('repo_registry.csv')
+```
+
+
 ## Inspect user's shapefiles and save as OHI shapefiles
+
+If you are storing shapefiles on the NCEAS server Mazu, here are some shortcuts: 
+
+# dir_M <- c('Windows' = '//mazu.nceas.ucsb.edu/ohi',
+#            'Darwin'  = '/Volumes/ohi',    ### connect (cmd-K) to smb://mazu/ohi
+#            'Linux'   = '/home/shares/ohi')[[ Sys.info()[['sysname']] ]]
+
 This occurs in the /custom folder. A running list: 
 
 - chl/prep_chl.Rmd
@@ -45,19 +82,18 @@ This occurs in the /custom folder. A running list:
 
 
 ## Clone existing repo
+TODO: let's not do this
 ```{r clone existing repo, eval=FALSE}
 ## clone chl repo
-unlink(dir_repo, recursive=T, force=T)
-repo <- clone(git_url, normalizePath(dir_repo, mustWork=F))
-setwd(dir_repo)
+# unlink(dir_repo, recursive=T, force=T)
+# repo <- clone(git_url, normalizePath(dir_repo, mustWork=F))
+# setwd(dir_repo)
 ```
 
 ## Create prep website
 
-```{r}
-
-ohirepos::deploy_website_prep(gh_repo=key, study_area=study_area)
-
+```{r, eval=FALSE}
+ohirepos::deploy_website_prep(key, study_area, dir_repo)
 ```
 
 
@@ -67,7 +103,7 @@ ohirepos::deploy_website_prep(gh_repo=key, study_area=study_area)
 
 ## Populate Full Repo
 This doesn't push, just populates.
-```{r populate, eval=F}
+```{r populate, eval=FALSE}
 ## populate layers folder and layers.csv, and conf
 populate_layers(key, dir_repo, dir_origin, dir_scenario, multi_nation = FALSE)
 populate_conf(key, dir_scenario, dir_origin) ## look at TODOs in functions.r
@@ -82,14 +118,14 @@ create_repo_map(key, dir_spatial, dir_scenario)
 
 ## Calculate scores and create scores.csv
 Can also test this from the repo itself (open the the clip-n-ship/key/.rproj)
-```{r calculate, eval=F}
+```{r calculate, eval=FALSE}
 ## calculate scores and create scores.csv
 calculate_scores_check(dir_scenario)
 ```
 
 
 ## Push!
-```{r push, eval=F}
+```{r push, eval=FALSE}
 # push repo
 setwd(dir_repo)
 push_branch(branch = 'master', current_msg = 'created full repo') 
@@ -112,7 +148,7 @@ Examples:
 
 - chl became region2016 instead of subcountry2014.
 
-```{r rename scenario, eval=F}
+```{r rename scenario, eval=FALSE}
 ## rename subcountry2014 -> region2016. 
 file.rename(from = file.path(dir_repo, 'subcountry2014'),
             to   = file.path(dir_repo, 'region2016'))
@@ -123,9 +159,9 @@ file.rename(from = file.path(dir_repo, 'subcountry2014'),
 
 Delete contents so can start afresh, for example if a full repo exists but needs to be recreated with more regions.
 
-```{r unpopulate, eval=F}
+```{r unpopulate, eval=FALSE}
 ## unpopulate_layers_conf
-unpopulate_layers_conf(key, dir_sandbox, dir_repo, git_url, default_scenario)
+unpopulate_layers_conf(key, dir_work, dir_repo, git_url, default_scenario)
 
 ## a few extra files to delete from CHL: 
 also_delete <- paste(dir_repo, 
@@ -135,7 +171,7 @@ unlink(also_delete, recursive = TRUE, force = TRUE)
 
 
 ## Rename draft to master Part 1
-```{r, eval=F}
+```{r, eval=FALSE}
 system('git status')
 system('git branch -m draft master')
 system('git branch')
