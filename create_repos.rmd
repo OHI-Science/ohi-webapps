@@ -30,10 +30,10 @@ You will need to assign the following variables based on the repository you want
 ```{r assign variables, eval=FALSE}
 
 ## set the repo key; this example is for the Baltic:
-key <- 'test2' 
+key <- 'ohi-northeast' 
 
 ## set the study_area; this example is for the Baltic: 
-study_area <- 'Testings' ## or pull this from repo_registry...or input it?
+study_area <- 'Northeast USA' ## or pull this from repo_registry...or input it?
 
 ## set the directory where you want to work locally on your computer: 
 dir_temp <- '~/github/clip-n-ship'
@@ -64,6 +64,7 @@ library(ohirepos) # devtools::load_all('~/github/ohirepos')
 
 ## build variables 
 dir_repo <- file.path(dir_temp, key)
+
 
 
 ## create working dir
@@ -110,6 +111,11 @@ This occurs in the /custom folder. A running list:
 
 ```{r, eval=FALSE}
 ohirepos::deploy_website_prep(key, dir_repo, push = TRUE)
+
+
+## Actually am supposed to have deploy_website work with prep or not
+
+
 ```
 
 
