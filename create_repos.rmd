@@ -1,11 +1,12 @@
-## ohirepos
+# ohirepos
 
-## Overview
+# Overview
 
-- TODO
-- You'll need to be part of the OHI team with admin privileges to the [ohi-science](github.com/ohi-science) organization to use this. To request a repository, please follow [these instructions](http://ohi-science.org/manual/#requesting-your-repositories).
+The `ohirepos` package is for creating OHI repos to be used for OHI assessments. These repos by default are created within the [OHI-Science](https://github.com/OHI-Science/) GitHub organization, and to do so you will need be part of the OHI team with administration privileges. To request a repository, please follow [these instructions](http://ohi-science.org/manual/#requesting-your-repositories).
 
-## Installation
+The `ohirepos` package will...
+
+# Installation
 
 ```{r, eval = FALSE}
 # install.packages("devtools")
@@ -13,32 +14,62 @@ devtools::install_github("ohi-science/ohirepos")
 ```
 
 
-## Usage 
+# Usage 
 
 First, you'll need to do 2 things: 
 
 1. Add info by hand to `ohi-webapps/repo_registry.csv` ## TODO: turn this into a googlesheet
 2. Create new repo on github.com/OHI-Science called `key`.
 
-## Initial Setup
+# Initial Setup
 
-```{r setup variables, eval=FALSE}
+## Assign variables
 
-## assign variables ----
-key <- 'test2' 
-study_area <- 'Testings' ## or pull this from repo_registry...or input it?
+You will need to assign the following variables based on the repository you want to created. 
+
+```{r assign variables, eval=FALSE}
+
+## set the repo key; this example is for the Baltic:
+key <- 'ohi-northeast' 
+
+## set the study_area; this example is for the Baltic: 
+study_area <- 'Northeast USA' ## or pull this from repo_registry...or input it?
+
+## set the directory where you want to work locally on your computer: 
 dir_temp <- '~/github/clip-n-ship'
-
-
-## create variables ----
-dir_repo <- file.path(dir_temp, key)
 
 ```
 
+# Create repo on GitHub.com and register repo
+
+**the first thing you'll do is go to [https://github.com/OHI-Science](github.com/OHI-Science) and create a new repo named `key`**. This key must match the key you set above (and is case-sensitive). 
+
+TODO: figure out when to mention the repo_registry and archive past work
+```{r, eval=FALSE}
+# read in repo_registry
+repo_registry = readr::read_csv('repo_registry.csv')
+```
+
+
+## Load libraries, build variables, create working directory
+
+These variables are built based on the variables you set above.
+
 ```{r setup libraries, eval=FALSE}
 
-## setup ----
+## load libraries
+# devtools::install_github("ohi-science/ohirepos")
 library(ohirepos) # devtools::load_all('~/github/ohirepos') 
+
+
+## build variables 
+dir_repo <- file.path(dir_temp, key)
+
+
+
+## create working dir
+dir.create(dir_repo)
+
 
 # dir_work <- path.expand('~/github/ohi-webapps') # get rid of any reliance on ohi-webapps
 ## load this stuff from ohirepos.
@@ -47,22 +78,16 @@ library(ohirepos) # devtools::load_all('~/github/ohirepos')
 ```
 
 
-## Clone and populate starter repo
+# Create and populate Starter Repo
+
+The Starter Repo has some initial files including a README, as well as a `prep` folder with sub-folders for every goal and sub-goal. The default for these functions is to push updates to github.com/ohi-science/`key`.
 
 ```{r, eval=FALSE}
-## set working dir
-dir.create(dir_repo)
-
-## add readme and prep folder and push 
 ohirepos::populate_init(key, dir_repo, push = TRUE)
 ohirepos::populate_prep(key, dir_repo, push = TRUE)
 ```
 
-TODO: figure out when to mention the repo_registry and archive past work
-```{r, eval=FALSE}
-# read in repo_registry
-repo_registry = readr::read_csv('repo_registry.csv')
-```
+See the OHI Manual section on [requesting your repositories](http://ohi-science.org/manual/#requesting-your-repositories) for more information between the Starter Repo and the Full Repo.
 
 
 ## Inspect user's shapefiles and save as OHI shapefiles
@@ -81,19 +106,16 @@ This occurs in the /custom folder. A running list:
 - arc/prep_arc.Rmd
 
 
-## Clone existing repo
-TODO: let's not do this
-```{r clone existing repo, eval=FALSE}
-## clone chl repo
-# unlink(dir_repo, recursive=T, force=T)
-# repo <- clone(git_url, normalizePath(dir_repo, mustWork=F))
-# setwd(dir_repo)
-```
 
 ## Create prep website
 
 ```{r, eval=FALSE}
-ohirepos::deploy_website_prep(key, study_area, dir_repo)
+ohirepos::deploy_website_prep(key, dir_repo, push = TRUE)
+
+
+## Actually am supposed to have deploy_website work with prep or not
+
+
 ```
 
 
@@ -180,4 +202,3 @@ push_branch(branch = 'master', current_msg = 'renamed draft branch to master bra
 ```
 
 ## Rename draft to master Part 2: Delete draft by hand on GitHub
-
