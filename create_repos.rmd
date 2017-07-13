@@ -1,17 +1,4 @@
-# ohirepos
 
-# Overview
-
-The `ohirepos` package is for creating OHI repos to be used for OHI assessments. These repos by default are created within the [OHI-Science](https://github.com/OHI-Science/) GitHub organization, and to do so you will need be part of the OHI team with administration privileges. To request a repository, please follow [these instructions](http://ohi-science.org/manual/#requesting-your-repositories).
-
-The `ohirepos` package will...
-
-# Installation
-
-```{r, eval = FALSE}
-# install.packages("devtools")
-devtools::install_github("ohi-science/ohirepos")
-```
 
 
 # Usage 
@@ -28,43 +15,34 @@ First, you'll need to do 2 things:
 You will need to assign the following variables based on the repository you want to created. 
 
 ```{r assign variables, eval=FALSE}
-
 ## set the repo key; this example is for the Baltic:
-key <- 'ohi-northeast' 
-
-## set the study_area; this example is for the Baltic: 
-study_area <- 'Northeast USA' ## or pull this from repo_registry...or input it?
+key <- 'test2' 
 
 ## set the directory where you want to work locally on your computer: 
 dir_temp <- '~/github/clip-n-ship'
-
 ```
 
 # Create repo on GitHub.com and register repo
 
-**the first thing you'll do is go to [https://github.com/OHI-Science](github.com/OHI-Science) and create a new repo named `key`**. This key must match the key you set above (and is case-sensitive). 
+1. first thing you'll do is go to [https://github.com/OHI-Science](github.com/OHI-Science) and create a new repo named `key`**. This key must match the key you set above (and is case-sensitive). 
 
-TODO: figure out when to mention the repo_registry and archive past work
-```{r, eval=FALSE}
-# read in repo_registry
-repo_registry = readr::read_csv('repo_registry.csv')
-```
-
+2. enter your study in repo_registry
+ 
 
 ## Load libraries, build variables, create working directory
 
 These variables are built based on the variables you set above.
 
 ```{r setup libraries, eval=FALSE}
-
 ## load libraries
 # devtools::install_github("ohi-science/ohirepos")
 library(ohirepos) # devtools::load_all('~/github/ohirepos') 
-
+library(tidyverse, quietly=TRUE)
 
 ## build variables 
-dir_repo <- file.path(dir_temp, key)
-
+dir_repo  <- file.path(dir_temp, key)
+repo_registry <- readr::read_csv('repo_registry.csv') %>%
+  dplyr::filter(study_key == key)
 
 
 ## create working dir
@@ -107,15 +85,12 @@ This occurs in the /custom folder. A running list:
 
 
 
-## Create prep website
+## Create website
+
+This will search for the scenario folder (defined in repo_registry$scenario_name); if it exists it will populate a full repo and if not it will populate a prep repo. 
 
 ```{r, eval=FALSE}
-ohirepos::deploy_website_prep(key, dir_repo, push = TRUE)
-
-
-## Actually am supposed to have deploy_website work with prep or not
-
-
+ohirepos::deploy_website(key, dir_repo, push = TRUE) 
 ```
 
 

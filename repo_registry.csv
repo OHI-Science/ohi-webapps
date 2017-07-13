@@ -1,24 +1,24 @@
-key,study_area,gl_rgn_id,gl_rgn_name,dir_shp_files,default_scenario,year
-ohi-israel,Israel,79,Israel,,med2014,2014
-gye,Golfo de Guayaquil,137,Ecuador,/Volumes/data_edit/git-annex/clip-n-ship/gye,region2015,2015
-chn,China,209,China,/Volumes/data_edit/git-annex/clip-n-ship/chn,province2015,2015
-bhi,Baltic,,Baltic,/Volumes/data_edit/git-annex/clip-n-ship/bhi,baltic2015,2015
-ohi-global,Global,,Global,/Volumes/data_edit/git-annex/clip-n-ship/ohi-global,eez2014,2014
-arc,Arctic,,Arctic,/Volumes/data_edit/git-annex/clip-n-ship/arc,circle2016,2016
-ohibc,British Columbia,218,British Columbia,/Volumes/data_edit/git-annex/clip-n-ship/ohibc,region2016,2016
-col,Colombia,132,Colombia,/Volumes/data_edit/git-annex/clip-n-ship/col,subcountry2014,2014
-cdz,Gulfo de Cadiz,182,Spain,/Volumes/data_edit/git-annex/clip-n-ship/cdz,gulfo2015,2015
-cnc,Nouvelle-Cal̩donie,5,New Caledonia,/Volumes/data_edit/git-annex/clip-n-ship/cnc,eez2016,2016
-rdv,Ria de Vigo,182,Spain,/Volumes/data_edit/git-annex/clip-n-ship/rdv,municipal2016,2016
-chl,Chile,224,Chile,/Volumes/data_edit/git-annex/clip-n-ship/chl,region2016,2016
-mhi,Main Hawaiian Islands,163,United States,/Volumes/data_edit/git-annex/clip-n-ship/mhi,region2017,2017
-clme,Caribbean Large Marine Ecosystem,,Caribbean Large Marine Ecosystem,,clme2017,2017
-ohi-northeast,US Northeast,163,United States,~github/ohi-northeast/spatial,region2016,2016
-toolbox-demo,Toolbox Demo,224,Chile,/Volumes/data_edit/git-annex/clip-n-ship/chl,region2016,2016
-bali,Bali,216,Indonesia,,,
-pemsea,PEMSEA,216,Indonesia,,,
-can-atl,Canada Atlantic,218,Canada Atlantic,/Volumes/data_edit/git-annex/clip-n-ship/can-atl,region2017,2017
-mex,Mexico,135,Mexico,,,
-sur,Suriname,168,Suriname,,,
-uki,United Kingdom,180,United Kingdom,/Volumes/data_edit/git-annex/clip-n-ship/gbr,uk2017,2017
-test2,Test2,135,Mexico,,,
+study_key,study_area,scenario_name,scenario_year,gl_rgn_id,gl_rgn_name,dir_shp_files
+ohi-israel,Israel,med2014,2014,79,Israel,
+gye,Golfo de Guayaquil,region2015,2015,137,Ecuador,/Volumes/data_edit/git-annex/clip-n-ship/gye
+chn,China,province2015,2015,209,China,/Volumes/data_edit/git-annex/clip-n-ship/chn
+bhi,Baltic,baltic2015,2015,,Baltic,/Volumes/data_edit/git-annex/clip-n-ship/bhi
+ohi-global,Global,eez2014,2014,,Global,/Volumes/data_edit/git-annex/clip-n-ship/ohi-global
+arc,Arctic,circle2016,2016,,Arctic,/Volumes/data_edit/git-annex/clip-n-ship/arc
+ohibc,British Columbia,region2016,2016,218,British Columbia,/Volumes/data_edit/git-annex/clip-n-ship/ohibc
+col,Colombia,subcountry2014,2014,132,Colombia,/Volumes/data_edit/git-annex/clip-n-ship/col
+cdz,Gulfo de Cadiz,gulfo2015,2015,182,Spain,/Volumes/data_edit/git-annex/clip-n-ship/cdz
+cnc,Nouvelle-Cal??donie,eez2016,2016,5,New Caledonia,/Volumes/data_edit/git-annex/clip-n-ship/cnc
+rdv,Ria de Vigo,municipal2016,2016,182,Spain,/Volumes/data_edit/git-annex/clip-n-ship/rdv
+chl,Chile,region2016,2016,224,Chile,/Volumes/data_edit/git-annex/clip-n-ship/chl
+mhi,Main Hawaiian Islands,region2017,2017,163,United States,/Volumes/data_edit/git-annex/clip-n-ship/mhi
+clme,Caribbean Large Marine Ecosystem,clme2017,2017,,Caribbean Large Marine Ecosystem,
+ohi-northeast,US Northeast,region2016,2016,163,United States,~/github/ohi-northeast/spatial
+toolbox-demo,Toolbox Demo,region2016,2016,224,Chile,/Volumes/data_edit/git-annex/clip-n-ship/chl
+bali,Bali,,,216,Indonesia,
+pemsea,PEMSEA,,,216,Indonesia,
+can-atl,Canada Atlantic,region2017,2017,218,Canada Atlantic,/Volumes/data_edit/git-annex/clip-n-ship/can-atl
+mex,Mexico,,,135,Mexico,
+sur,Suriname,,,168,Suriname,
+uki,United Kingdom,uk2017,2017,180,United Kingdom,/Volumes/data_edit/git-annex/clip-n-ship/gbr
+test2,Test2,,,135,Mexico,
