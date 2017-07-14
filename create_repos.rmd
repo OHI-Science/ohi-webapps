@@ -1,12 +1,13 @@
+# Creating OHI repos
 
+This is to create OHI repos using the package `ohirepos`. There are several different things you may want to do
 
+# Create repo on GitHub.com and register repo
 
-# Usage 
+1. first thing you'll do is go to [https://github.com/OHI-Science](github.com/OHI-Science) and create a new repo named `key`**. This key must match the key you set above (and is case-sensitive). 
 
-First, you'll need to do 2 things: 
+2. Add info by hand to `ohi-webapps/repo_registry.csv` 
 
-1. Add info by hand to `ohi-webapps/repo_registry.csv` ## TODO: turn this into a googlesheet
-2. Create new repo on github.com/OHI-Science called `key`.
 
 # Initial Setup
 
@@ -21,13 +22,6 @@ key <- 'test2'
 ## set the directory where you want to work locally on your computer: 
 dir_temp <- '~/github/clip-n-ship'
 ```
-
-# Create repo on GitHub.com and register repo
-
-1. first thing you'll do is go to [https://github.com/OHI-Science](github.com/OHI-Science) and create a new repo named `key`**. This key must match the key you set above (and is case-sensitive). 
-
-2. enter your study in repo_registry
- 
 
 ## Load libraries, build variables, create working directory
 
@@ -44,9 +38,8 @@ dir_repo  <- file.path(dir_temp, key)
 repo_registry <- readr::read_csv('repo_registry.csv') %>%
   dplyr::filter(study_key == key)
 
-
-## create working dir
-dir.create(dir_repo)
+## create working dir if it doesn't already exist
+if(!file.exists(dir_repo)) dir.create(dir_repo)
 
 
 # dir_work <- path.expand('~/github/ohi-webapps') # get rid of any reliance on ohi-webapps
@@ -58,11 +51,14 @@ dir.create(dir_repo)
 
 # Create and populate Starter Repo
 
-The Starter Repo has some initial files including a README, as well as a `prep` folder with sub-folders for every goal and sub-goal. The default for these functions is to push updates to github.com/ohi-science/`key`.
+The Starter Repo has some initial files including a README, as well as a `prep` folder with sub-folders for every goal and sub-goal. Additionally, create and push the project website. The default for these functions is to push updates to github.com/ohi-science/`key`.
+
+If you need to unpopulate an existing repo, there are instructions below. 
 
 ```{r, eval=FALSE}
 ohirepos::populate_init(key, dir_repo, push = TRUE)
 ohirepos::populate_prep(key, dir_repo, push = TRUE)
+ohirepos::deploy_website(key, dir_repo, push = TRUE) 
 ```
 
 See the OHI Manual section on [requesting your repositories](http://ohi-science.org/manual/#requesting-your-repositories) for more information between the Starter Repo and the Full Repo.
@@ -71,27 +67,6 @@ See the OHI Manual section on [requesting your repositories](http://ohi-science.
 ## Inspect user's shapefiles and save as OHI shapefiles
 
 If you are storing shapefiles on the NCEAS server Mazu, here are some shortcuts: 
-
-# dir_M <- c('Windows' = '//mazu.nceas.ucsb.edu/ohi',
-#            'Darwin'  = '/Volumes/ohi',    ### connect (cmd-K) to smb://mazu/ohi
-#            'Linux'   = '/home/shares/ohi')[[ Sys.info()[['sysname']] ]]
-
-This occurs in the /custom folder. A running list: 
-
-- chl/prep_chl.Rmd
-- cnc/prep_cnc.Rmd
-- rdv/prep_rdv.Rmd
-- arc/prep_arc.Rmd
-
-
-
-## Create website
-
-This will search for the scenario folder (defined in repo_registry$scenario_name); if it exists it will populate a full repo and if not it will populate a prep repo. 
-
-```{r, eval=FALSE}
-ohirepos::deploy_website(key, dir_repo, push = TRUE) 
-```
 
 
 ## Potential Step(s) Here
@@ -177,3 +152,10 @@ push_branch(branch = 'master', current_msg = 'renamed draft branch to master bra
 ```
 
 ## Rename draft to master Part 2: Delete draft by hand on GitHub
+
+
+
+# dir_M <- c('Windows' = '//mazu.nceas.ucsb.edu/ohi',
+#            'Darwin'  = '/Volumes/ohi',    ### connect (cmd-K) to smb://mazu/ohi
+#            'Linux'   = '/home/shares/ohi')[[ Sys.info()[['sysname']] ]]
+
