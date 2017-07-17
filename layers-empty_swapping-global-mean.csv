@@ -1,31 +1,12 @@
-"targets","layer","filename","fld_value","units","name","description","clip_n_ship_disag","clip_n_ship_disag_description","layer_gl","path_in","fld_id_num","fld_id_chr","fld_category","fld_year","fld_val_num","fld_val_chr","file_exists","year_min","year_max","val_min","val_max","val_0to1","flds_unused","flds_missing","rows_duplicated","num_ids_unique","data_na"
-"LE","le_wage_sector_year","le_wage_sector_year_gl2016.csv","value","2010 USD","Wages","gapfilled","equal","global wages were applied equally to each region. ","le_wage_sector_year","~/github/ohi-global/eez2016/layers/le_wage_sector_year.csv","rgn_id",,"sector","year","value",,TRUE,Inf,-Inf,,,FALSE,,,,0,TRUE
-"NP","np_blast","np_blast_gl2016.csv","score","pressure score","Areas of observed blast (dynamite) fishing","Destructive artisanal blast fishing (Reefs at Risk Revisited).
-
-Data sources:
-
-- [Reefs at Risk Revisited](http://www.wri.org/publication/reefs-at-risk-revisited) 
-","equal","global scores were applied equally to each region. ","np_blast","~/github/ohi-global/eez2016/layers/np_blast.csv","rgn_id",,,,"score",,TRUE,,,,,FALSE,,,,0,TRUE
-"NP","np_cyanide","np_cyanide_gl2016.csv","score","pressure score","Areas of observed poison fishing","Destructive artisanal poison (cyanide) fishing (Reefs at Risk Revisited).
-
-Data sources:
-
-- [Reefs at Risk Revisited](www.wri.org/publication/reefs-at-risk-revisited) 
-","equal","global scores were applied equally to each region. ","np_cyanide","~/github/ohi-global/eez2016/layers/np_cyanide.csv","rgn_id",,,,"score",,TRUE,,,,,FALSE,,,,0,TRUE
-"pressures","fp_art_hb","fp_art_hb_gl2016.csv","pressures.score","pressure score","High bycatch caused by artisanal fishing ","The presence of destructive artisanal blast and poison (cyanide) fishing (Reefs at Risk Revisited).
-
-Data sources:
-
-- [Reefs at Risk Revisited](http://www.wri.org/publication/reefs-at-risk-revisited) ","equal","global pressures data were applied equally to all regions.","fp_art_hb","~/github/ohi-global/eez2016/layers/fp_art_hb.csv","rgn_id",,,,"pressures.score",,TRUE,,,,,FALSE,,,,0,TRUE
-"pressures","hd_subtidal_hb","hd_subtidal_hb_gl2016.csv","value","pressure score","High bycatch artisanal fishing practices as a proxy for subtidal hard bottom habitat destruction","The presence of destructive artisanal blast fishing (Reefs at Risk Revisited).
-
-Data sources:
-
-- [Reefs at Risk Revisited](http://www.wri.org/publication/reefs-at-risk-revisited) ","equal","global pressures data were applied equally to all regions.","hd_subtidal_hb","~/github/ohi-global/eez2016/layers/hd_subtidal_hb.csv","rgn_id",,,,"value",,TRUE,,,,,FALSE,,,,0,TRUE
-"pressures resilience","element_wts_cp_km2_x_protection","element_wts_cp_km2_x_protection_gl2016.csv","extent_rank","extent*rank","Used to weight elements of coastal protection goal","Habitat extent multiplied by habitat protection rank for: coral, mangrove (offshore and inland 1km), saltmarsh, sea ice (shoreline), and seagrass","equal","global pressures data were applied equally to all regions.","element_wts_cp_km2_x_protection","~/github/ohi-global/eez2016/layers/element_wts_cp_km2_x_protection.csv","rgn_id",,"habitat",,"extent_rank",,TRUE,,,,,FALSE,,,,0,TRUE
-"pressures resilience","element_wts_cs_km2_x_storage","element_wts_cs_km2_x_storage_gl2016.csv","extent_rank","extent*CS capacity","Used to weight elements of carbon storage goal","Habitat extent mulitiplied by habitat carbon storage capacity for: mangrove, saltmarsh and seagrass","area_offshore_3nm","global habitat extent was applied to each region after weighting by each region's offshore area to 3nm. ","element_wts_cs_km2_x_storage","~/github/ohi-global/eez2016/layers/element_wts_cs_km2_x_storage.csv","rgn_id",,"habitat",,"extent_rank",,TRUE,,,,,FALSE,,,,0,TRUE
-"TR","tr_travelwarnings","tr_travelwarnings_gl2016.csv","multiplier","score","Travel warnings","Countries with US State Department travel warnings.
-
-Data sources:
-
-- [U.S. Department of State](http://travel.state.gov/content/passports/english/alertswarnings.html)",,,"tr_travelwarnings","~/github/ohi-global/eez2016/layers/tr_travelwarnings.csv","rgn_id",,,"year","multiplier",,TRUE,Inf,-Inf,,,FALSE,,,,0,TRUE
+"targets","layer","filename","fld_value","units","name","description","layer_gl","path_in","fld_id_num","fld_id_chr","fld_category","fld_year","fld_val_num","fld_val_chr","file_exists","year_min","year_max","val_min","val_max","val_0to1","flds_unused","flds_missing","rows_duplicated","num_ids_unique","data_na"
+"CP","hab_coral_extent","hab_coral_extent_gl2016placeholder.csv","km2","km2","Habitat extent of saltmarsh","Area of coral habitat","hab_coral_extent","~/github/ohi-global/eez/layers/hab_coral_extent.csv","rgn_id",,"habitat","year","km2",,TRUE,Inf,-Inf,,,FALSE,,,,9,TRUE
+"CPHAB","hab_coral_health","hab_coral_health_gl2016placeholder.csv","health","proportion","Habitat condition of seagrass","Current condition of coral habitat relative to historical condition","hab_coral_health","~/github/ohi-global/eez/layers/hab_coral_health.csv","rgn_id",,"habitat","year","health",,TRUE,Inf,-Inf,,,FALSE,,,,9,TRUE
+"CPHAB","hab_coral_trend","hab_coral_trend_gl2016placeholder.csv","trend","trend","Habitat condition trend of seagrass","Estimated change in coral condition","hab_coral_trend","~/github/ohi-global/eez/layers/hab_coral_trend.csv","rgn_id",,"habitat","year","trend",,TRUE,Inf,-Inf,,,FALSE,,,,9,TRUE
+"CSCP","hab_seagrass_extent","hab_seagrass_extent_gl2016placeholder.csv","km2","km2","Habitat extent of saltmarsh","Area of seagrass habitat","hab_seagrass_extent","~/github/ohi-global/eez/layers/hab_seagrass_extent.csv","rgn_id",,"habitat","year","km2",,TRUE,Inf,-Inf,,,FALSE,,,,9,TRUE
+"CSHABCP","hab_mangrove_health","hab_mangrove_health_gl2016placeholder.csv","health","proportion","Habitat condition of mangrove","Current condition of mangrove habitat relative to historical condition","hab_mangrove_health","~/github/ohi-global/eez/layers/hab_mangrove_health.csv","rgn_id",,"habitat","year","health",,TRUE,Inf,-Inf,,,FALSE,,,,9,TRUE
+"CSHABCP","hab_mangrove_trend","hab_mangrove_trend_gl2016placeholder.csv","trend","trend","Habitat condition trend of mangrove","Estimated change in mangrove condition","hab_mangrove_trend","~/github/ohi-global/eez/layers/hab_mangrove_trend.csv","rgn_id",,"habitat","year","trend",,TRUE,Inf,-Inf,,,FALSE,,,,9,TRUE
+"CSHABCP","hab_seagrass_health","hab_seagrass_health_gl2016placeholder.csv","health","proportion","Habitat condition of seagrass","Current condition of seagrass habitat relative to historical condition","hab_seagrass_health","~/github/ohi-global/eez/layers/hab_seagrass_health.csv","rgn_id",,"habitat","year","health",,TRUE,Inf,-Inf,,,FALSE,,,,9,TRUE
+"CSHABCP","hab_seagrass_trend","hab_seagrass_trend_gl2016placeholder.csv","trend","trend","Habitat condition trend of seagrass","Estimated change in seagrass condition","hab_seagrass_trend","~/github/ohi-global/eez/layers/hab_seagrass_trend.csv","rgn_id",,"habitat","year","trend",,TRUE,Inf,-Inf,,,FALSE,,,,9,TRUE
+"NP","np_blast","np_blast_gl2016placeholder.csv","score","score","Areas of blast fishing","Destructive artisanal blast fishing","np_blast","~/github/ohi-global/eez/layers/np_blast.csv","rgn_id",,,,"score",,TRUE,,,,,FALSE,,,,9,TRUE
+"NP","np_cyanide","np_cyanide_gl2016placeholder.csv","score","score","Areas of poison fishing","Destructive artisanal poison (cyanide) fishing","np_cyanide","~/github/ohi-global/eez/layers/np_cyanide.csv","rgn_id",,,,"score",,TRUE,,,,,FALSE,,,,9,TRUE
+"TR","tr_travelwarnings","tr_travelwarnings_gl2016placeholder.csv","multiplier","score","US State Department travel warnings","Countries with US State Department travel warnings","tr_travelwarnings","~/github/ohi-global/eez/layers/tr_travelwarnings.csv","rgn_id",,,"year","multiplier",,TRUE,Inf,-Inf,,,FALSE,,,,9,TRUE

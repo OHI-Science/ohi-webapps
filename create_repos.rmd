@@ -5,9 +5,9 @@ This is to create OHI repos using the package `ohirepos`. There are several diff
 # Create repo on GitHub.com and register repo
 
 1. first thing you'll do is go to [https://github.com/OHI-Science](github.com/OHI-Science) and create a new repo named `key`**. This key must match the key you set above (and is case-sensitive). 
+Check out rgn_global.csv to cross-check global name and rgn_id to populate the repo.
 
 2. Add info by hand to `ohi-webapps/repo_registry.csv` 
-
 
 # Initial Setup
 
@@ -15,11 +15,11 @@ This is to create OHI repos using the package `ohirepos`. There are several diff
 
 You will need to assign the following variables based on the repository you want to created. 
 
-```{r assign variables, eval=FALSE}
-## set the repo key; this example is for the Baltic:
-key <- 'test2' 
+1. Set the repo key (an example for the Baltic: `key <- 'bhi'`)
+2. Set the directory where you want to work locally on your computer
 
-## set the directory where you want to work locally on your computer: 
+```{r assign variables, eval=FALSE}
+key <- 'test2'
 dir_temp <- '~/github/clip-n-ship'
 ```
 
@@ -31,10 +31,12 @@ These variables are built based on the variables you set above.
 ## load libraries
 # devtools::install_github("ohi-science/ohirepos")
 library(ohirepos) # devtools::load_all('~/github/ohirepos') 
-library(tidyverse, quietly=TRUE)
+library(tidyverse)
 
-## build variables 
+## build working directory for repo 
 dir_repo  <- file.path(dir_temp, key)
+
+## read in repo registry information
 repo_registry <- readr::read_csv('repo_registry.csv') %>%
   dplyr::filter(study_key == key)
 
@@ -64,27 +66,32 @@ ohirepos::deploy_website(key, dir_repo, push = TRUE)
 See the OHI Manual section on [requesting your repositories](http://ohi-science.org/manual/#requesting-your-repositories) for more information between the Starter Repo and the Full Repo.
 
 
-## Inspect user's shapefiles and save as OHI shapefiles
+# Populate Full Repo
 
-If you are storing shapefiles on the NCEAS server Mazu, here are some shortcuts: 
+If you want to populate the full repo...You can choose the origin of the files you'll copy (it defaults to ohi-global). You have to make sure there a copy of the origin repo cloned locally. 
 
+populate layers folder and layers.csv, and conf
 
-## Potential Step(s) Here
-- Unpopulate Existing Repo (see chunk below)
+This doesn't push, just populates. --> keep this?
 
+You may want to unpopulate your repo first if you're starting over (i.e. redefining regions). 
 
-## Populate Full Repo
-This doesn't push, just populates.
 ```{r populate, eval=FALSE}
-## populate layers folder and layers.csv, and conf
-populate_layers(key, dir_repo, dir_origin, dir_scenario, multi_nation = FALSE)
-populate_conf(key, dir_scenario, dir_origin) ## look at TODOs in functions.r
+
+ohirepos::populate_layers(key, dir_repo, repo_registry, multi_nation = FALSE)
+  ## TODO come back here to make sure the empty layers don't cause a problem (removed swapping global mean stuff); still clean up.
+
+populate_conf(key, repo_registry) ## look at TODOs in functions.r --> come back here
+
 populate_etc(key, dir_scenario)
 
 # TODO: delete preGlobalScores(), substitute repo name in flower/map creation
 
 ## create repo's maps
 create_repo_map(key, dir_spatial, dir_scenario) 
+
+# -->> will need to ## Inspect user's shapefiles and save as OHI shapefiles
+
 ```
 
 

@@ -1,5 +1,14 @@
 # common.r; common information to use
 
+x <- readr::read_csv('rgn_global.csv') %>%
+  left_join(readr::read_csv('sp_rgn_manual_v2014.csv') %>%
+              select(rgn_id, rgn_key), 
+                     by = 'rgn_id') %>%
+  distinct() %>%
+  select(rgn_id, rgn_key, rgn_name = label)
+write_csv(x, 'global_rgn_lookup_v2014.csv')
+            
+
 ## NOTE: moved all but these to ohirepos, do we need them? 
 # library(rgdal)
 # library(jsonlite)
