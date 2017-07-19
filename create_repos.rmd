@@ -81,7 +81,7 @@ You may want to unpopulate your repo first if you're starting over (i.e. redefin
 
 ```{r populate, eval=FALSE}
 
-ohirepos::populate_layers(key, dir_repo, repo_registry, multi_nation = FALSE)
+repo <- ohirepos::populate_layers(key, dir_repo, repo_registry, multi_nation = FALSE)
   ## TODO come back here to make sure the empty layers don't cause a problem (removed swapping global mean stuff); still clean up.
 
 populate_conf(repo_registry)
@@ -99,6 +99,7 @@ create_repo_map(key, dir_spatial, dir_scenario)
 
 ## Calculate scores and create scores.csv
 Can also test this from the repo itself (open the the clip-n-ship/key/.rproj)
+
 ```{r calculate, eval=FALSE}
 ## calculate scores and create scores.csv
 calculate_scores_check(repo_registry)
@@ -108,15 +109,12 @@ calculate_scores_check(repo_registry)
 
 ## Push!
 ```{r push, eval=FALSE}
-# push repo
-setwd(dir_repo)
-push_branch(branch = 'master', current_msg = 'created full repo') 
-## TODO: 
-# push_branch(branch = 'master', current_msg = 'created full repo') 
-# [dev 81be48d]  created full repo
-#  3 files changed, 16 insertions(+), 4 deletions(-)
-# error: cannot run rpostback-askpass: No such file or directory
-# fatal: could not read Password for 'https://d80e7cc2b2d65cd77347193263ecaf3ae06873a5@github.com': Device not configured
+
+commit_and_push(key, 
+                dir_repo, 
+                commit_message = 'populating test2')
+
+
 ```
 
 
