@@ -1,40 +1,49 @@
 # Creating OHI repos
 
-This is to create OHI repos using the package `ohirepos`. There are several different things you may want to do...
+This is how you create OHI repos using the package `ohirepos`. 
 
 
 # Create repo on GitHub.com and register repo
 
-1. first thing you'll do is go to [https://github.com/OHI-Science](github.com/OHI-Science) and create a new repo named `key`**. This key must match the key you set above (and is case-sensitive). 
-Check out rgn_global.csv to cross-check global name and rgn_id to populate the repo.
+There are two things you need to do before executing the script below. 
 
-2. Add info by hand to `ohi-webapps/repo_registry.csv` 
+1. Make a repository on GitHub.com. You'll need a GitHub account and if you're making the repo within the [OHI-Science](https://github.com/OHI-Science) organization you'll need administration privileges. We typically make OHI repos with short, 3-letter keys, for example `bhi` and `gye`.  
 
+<center><img src="../ohirepos-log/images/create-new-gh-repo.png" width="450px"></center>
+
+
+2. Add info by hand to `ohirepos-log/repo_registry.csv`. To create a Starter Repo with only a prep folder, all you need to input are the first two columns (`study_key` and `study_area`). Make sure the `study_key` is what you named your GitHub repository. If you're making a Full Repo, you'll need to provide a filepath for shapefiles. Additionally, if you want to populate the repo with data from global assessments, check `ohirepos-log/rgn_global.csv` to cross-check global name and rgn_id to populate the repo. See the OHI Manual section on [requesting your repositories](http://ohi-science.org/manual/#requesting-your-repositories) for more information between the Starter Repo and the Full Repo.
+
+Now you're ready for R. 
 
 # Initial Setup
 
 ## Assign variables
 
-You will need to assign two variables based on the repository you want to created. 
+You will need to assign two variables based on the repository you want to created. Once you set these variables you'll be able to run this code chunk.
 
-1. repo key (an example for the Baltic: `key <- 'bhi'`)
-2. temporary directory where you want to work locally on your computer
+1. your repo's key — the same one that you set above and registered in `repo_registry`
+2. a temporary directory where you want to work locally on your computer
 
-```{r assign variables, eval=FALSE}
+```{r setup, eval=FALSE}
+
 ## you set these variables
 key <- 'test3'
 dir_temp <- '~/github/clip-n-ship'
 
-## libraries
+
+## load libraries
+devtools::install_github("ohi-science/ohicore@dev")
 devtools::load_all('~/github/ohirepos') # or devtools::install_github("ohi-science/ohirepos")
 library(ohirepos) 
 library(tidyverse)
-# library(git2r) # devtools::install_github("ropensci/git2r")
 
-## read in repo registry information, with working directory for repo 
+
+## read in repo registry information, add working directory 
 repo_registry <- readr::read_csv('repo_registry.csv') %>%
   dplyr::filter(study_key == key) %>%
-  mutate(dir_repo = file.path(dir_temp, key))
+  dplyr::mutate(dir_repo = file.path(dir_temp, key))
+
 
 ## create working dir if it doesn't already exist
 if(!file.exists(repo_registry$dir_repo)) dir.create(repo_registry$dir_repo)
@@ -50,32 +59,30 @@ if(!file.exists(repo_registry$dir_repo)) dir.create(repo_registry$dir_repo)
 
 # Populate the Starter Repo
 
-The Starter Repo has some initial files including a README, as well as a `prep` folder with sub-folders for every goal and sub-goal. Additionally, create and push the project website. The default for these functions is to push updates to github.com/ohi-science/`key`.
+The Starter Repo has some initial files including a README, as well as a `prep` folder with sub-folders for every goal and sub-goal. Additionally, create and push the project website. The default for these functions is to push updates to github.com/ohi-science/[key].
 
 If you need to unpopulate an existing repo, there are instructions below. 
 
 ```{r, eval=FALSE}
-## populate the prep repo. create a master branch repo object
+
+## populate the prep repo — create a repo object for the master branch 
 repo <- ohirepos::populate_init(repo_registry, push = TRUE)
 repo <- ohirepos::populate_prep(repo_registry, push = TRUE)
 
-## deploy the website. don't create a repo object because gh-pages branch.
+## deploy the website — don't create a repo object because it's a gh-pages branch
 ohirepos::deploy_website(repo_registry, push = TRUE) 
 
 ```
 
-See the OHI Manual section on [requesting your repositories](http://ohi-science.org/manual/#requesting-your-repositories) for more information between the Starter Repo and the Full Repo.
-
-
 # Populate Full Repo
 
-If you want to populate the full repo...You can choose the origin of the files you'll copy (it defaults to ohi-global). You have to make sure there a copy of the origin repo cloned locally. 
+You'll need to fill out all fields in `repo_registry.csv` to populate the Full Repo. You can choose the origin of the files you'll copy (it defaults to ohi-global). You have to make sure there a copy of the origin repo cloned locally. 
 
 populate layers folder and layers.csv, this will also create the scenario folder. And then create conf.  Run these in order.
 
 This doesn't push, just populates. --> keep this?
 
-You may want to unpopulate your repo first if you're starting over (i.e. redefining regions). 
+If you need to unpopulate your repo's scenario folder if you've redefined regions or something, clone it locally and pull, delete the senario folder, and then continue here. 
 
 You'll run these as a suite of things, so just clone during populate_layers and push as the final move after the check.
 
@@ -111,49 +118,6 @@ commit_and_push(repo_registry,
                 commit_message = 'populating test3 yo!')
 ```
 
-
-
-# Other functionality
-
-## Rename scenario
-(Optional)
-
-Examples: 
-
-- chl became region2016 instead of subcountry2014.
-
-```{r rename scenario, eval=FALSE}
-## rename subcountry2014 -> region2016. 
-file.rename(from = file.path(dir_repo, 'subcountry2014'),
-            to   = file.path(dir_repo, 'region2016'))
-```
-
-## Unpopulate Existing Repo
-(Optional)
-
-Delete contents so can start afresh, for example if a full repo exists but needs to be recreated with more regions.
-
-```{r unpopulate, eval=FALSE}
-## unpopulate_layers_conf
-unpopulate_layers_conf(key, dir_work, dir_repo, git_url, default_scenario)
-
-## a few extra files to delete from CHL: 
-also_delete <- paste(dir_repo, 
-                     c('copy_webapps_templates.r', 'ohi-travis-functions.R', 'travis-tool.sh'), sep = '/')
-unlink(also_delete, recursive = TRUE, force = TRUE)
-```
-
-
-## Rename draft to master Part 1
-```{r, eval=FALSE}
-system('git status')
-system('git branch -m draft master')
-system('git branch')
-
-push_branch(branch = 'master', current_msg = 'renamed draft branch to master branch') 
-```
-
-## Rename draft to master Part 2: Delete draft by hand on GitHub
 
 
 
